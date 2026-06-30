@@ -16,7 +16,17 @@
       "createdAt": "2026-06-30T23:33:49.364Z"
     }
   ],
-  "participants": [],
+  "participants": [
+    {
+      "id": "participant_6c037362fc",
+      "participantName": "Jérémy Rbs",
+      "votes": {
+        "option_641b724ef2": "yes"
+      },
+      "createdAt": "2026-06-30T23:36:39.036Z",
+      "updatedAt": "2026-06-30T23:36:39.036Z"
+    }
+  ],
   "createdAt": "2026-06-30T23:33:49.364Z",
-  "updatedAt": "2026-06-30T23:33:49.364Z"
+  "updatedAt": "2026-06-30T23:36:39.122Z"
 }
