@@ -62,7 +62,7 @@ export function BrandMenu() {
             to="/agenda"
             onClick={() => setIsOpen(false)}
           >
-            Les apéros à venir
+            Agenda
           </Link>
           <Link
             className="brand-menu__item"
@@ -70,7 +70,7 @@ export function BrandMenu() {
             to="/palmares"
             onClick={() => setIsOpen(false)}
           >
-            Le palmarès de la Confrérie
+            Palmarès
           </Link>
           <button
             type="button"
@@ -81,7 +81,7 @@ export function BrandMenu() {
               requestGentlemanNameEdit();
             }}
           >
-            Modifier mon nom de gentleman
+            Changer de blaze
           </button>
         </div>
       )}
