@@ -1,20 +1,12 @@
 import { useNavigate } from "react-router-dom";
 
 type MobileHeaderProps = {
-  eyebrow?: string;
+  eyebrow: string;
   title?: string;
-  subtitle?: string;
-  compact?: boolean;
-  backLabel?: string;
+  meta?: string;
 };
 
-export function MobileHeader({
-  eyebrow,
-  title,
-  subtitle,
-  compact = false,
-  backLabel = "Retour",
-}: MobileHeaderProps) {
+export function MobileHeader({ eyebrow, title, meta }: MobileHeaderProps) {
   const navigate = useNavigate();
 
   function handleBack() {
@@ -27,10 +19,10 @@ export function MobileHeader({
   }
 
   return (
-    <header className={compact ? "mobile-header mobile-header--compact" : "mobile-header"}>
-      <button type="button" className="back-button" onClick={handleBack}>
-        <span className="back-button__arrow" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+    <header className="screen-head">
+      <div className="backrow">
+        <button type="button" className="bk" onClick={handleBack} aria-label="Retour">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
             <path
               d="M15 5l-7 7 7 7"
               stroke="currentColor"
@@ -39,16 +31,11 @@ export function MobileHeader({
               strokeLinejoin="round"
             />
           </svg>
-        </span>
-        <span>{backLabel}</span>
-      </button>
-      {(eyebrow || title || subtitle) && (
-        <div className="mobile-header__copy">
-          {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-          {title && <h1>{title}</h1>}
-          {subtitle && <p className="mobile-header__subtitle">{subtitle}</p>}
-        </div>
-      )}
+        </button>
+        <p className="eyebrow">{eyebrow}</p>
+      </div>
+      {title && <h1 className="h1 h1--sm screen-head__title">{title}</h1>}
+      {meta && <p className="meta">{meta}</p>}
     </header>
   );
 }

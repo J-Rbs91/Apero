@@ -31,17 +31,16 @@ export function MobileShareBox({ url }: MobileShareBoxProps) {
   }
 
   return (
-    <div className="mobile-share-box mobile-share-box--receipt">
-      <div>
-        <p className="eyebrow">Ticket de rameutage</p>
-        <h2>Partager la convocation</h2>
-        <p className="mobile-share-box__url">{url}</p>
+    <div className="share-box">
+      <p className="eyebrow">Partager la convocation</p>
+      <div className="share">
+        <code>{url}</code>
+        <button className="cp" type="button" onClick={handleShare}>
+          Copier
+        </button>
       </div>
-      <button className="button button--secondary button--block" type="button" onClick={handleShare}>
-        Partager le lien
-      </button>
       {feedback && (
-        <p className="feedback" role="status">
+        <p className="meta" role="status">
           {feedback}
         </p>
       )}

@@ -6,19 +6,21 @@ import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { MobileResultsPanel } from "../components/MobileResultsPanel";
 import { MobileShareBox } from "../components/MobileShareBox";
-import { TicketCard } from "../components/TicketCard";
 import { VoteForm } from "../components/VoteForm";
 import { eventStorage } from "../services";
-import type { AperitifEvent, AperitifOption, BeaufLevel, ParticipantResponse } from "../types/apero";
+import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
 import { calculateBestOptions } from "../utils/calculateResults";
 
-const beaufLabels: Record<BeaufLevel, string> = {
-  soft: "Petit jaune tranquille",
-  medium: "Tournée générale",
-  legendary: "PMU Champions League",
-};
-
 const MIN_LOADING_MS = 700;
+
+function getInitials(name: string): string {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("");
+}
 
 export function EventPage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -126,78 +128,52 @@ export function EventPage() {
 
   if (isLoading) {
     return (
-      <MobilePage className="event-mobile">
-        <LoadingScreen title="apéro ?" subtitle="La Confrérie prépare le registre…" />
+      <MobilePage className="event-mobile" overlay="scene">
+        <LoadingScreen />
       </MobilePage>
     );
   }
 
   if (!event && isPurged) {
     return (
-      <MobilePage className="event-mobile">
-        <TicketCard className="state-card state-card--error">
-          <p className="eyebrow">Registre nettoyé</p>
-          <h1>Cette assemblée a quitté le comptoir</h1>
-          <p>
-            L’apéro est passé. Le registre actif a été nettoyé, mais les hauts faits des membres ont été conservés pour les badges de la Confrérie.
+      <MobilePage className="event-mobile" overlay="deep">
+        <MobileHeader eyebrow="Registre nettoyé" />
+        <section className="sheet">
+          <h1 className="h1 h1--sm">Cette assemblée a quitté le comptoir</h1>
+          <p className="lede">
+            L’apéro est passé. Le registre actif a été nettoyé, mais les hauts faits des membres
+            restent gravés dans la Confrérie.
           </p>
-          <Link className="button button--primary" to="/">
+          <Link className="button button--primary button--block" to="/">
             Retourner à l’accueil
           </Link>
-        </TicketCard>
+        </section>
       </MobilePage>
     );
   }
 
   if (!event) {
     return (
-      <MobilePage className="event-mobile">
-        <TicketCard className="state-card state-card--error">
-          <p className="eyebrow">Assemblée introuvable</p>
-          <h1>Cette convocation n’existe pas</h1>
-          <p>Soit le lien est moisi, soit le patron a fermé le bar.</p>
+      <MobilePage className="event-mobile" overlay="deep">
+        <MobileHeader eyebrow="Assemblée introuvable" />
+        <section className="sheet">
+          <h1 className="h1 h1--sm">Cette convocation n’existe pas</h1>
+          <p className="lede">Soit le lien est moisi, soit le patron a fermé le bar.</p>
           {error && <p className="feedback">{error}</p>}
-          <Link className="button button--primary" to="/">
+          <Link className="button button--primary button--block" to="/">
             Retour à la Confrérie
           </Link>
-        </TicketCard>
+        </section>
       </MobilePage>
     );
   }
 
-  const locations = Array.from(new Set(event.options.map((option) => option.location)));
+  const metaText = `par ${event.organizerName} · ${event.options.length} créneaux · ${event.participants.length} votants`;
 
   return (
-    <MobilePage className="event-mobile">
-      <MobileHeader
-        eyebrow={beaufLabels[event.beaufLevel]}
-        title={event.ceremonialName}
-        subtitle="Ouvre, comprends, vote. L’assemblée est pensée pour le téléphone."
-      />
-
-      <section className="event-summary-card event-summary-card--counter">
-        {event.title && (
-          <p>
-            <strong>Objet :</strong> {event.title}
-          </p>
-        )}
-        <p>
-          <strong>Convoqué par :</strong> {event.organizerName}
-        </p>
-        <p>
-          <strong>Propositions :</strong> {event.options.length} | <strong>Participants :</strong>{" "}
-          {event.participants.length}
-        </p>
-        <p>
-          <strong>Lieux :</strong> {locations.join(" / ")}
-        </p>
-        {event.description && <p>{event.description}</p>}
-      </section>
-
-      <p className="security-note">
-        C’est une institution de comptoir, pas un coffre-fort. Ne mets rien que tu ne voudrais
-        pas voir traîner sur une nappe collante publique.
-      </p>
+    <MobilePage className="event-mobile" overlay="scene">
+      <MobileHeader eyebrow="Assemblée" title={event.ceremonialName} meta={metaText} />
+      {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
 
       {error && (
         <p className="page-message page-message--error" role="alert">
@@ -210,32 +186,32 @@ export function EventPage() {
         </p>
       )}
 
-      <div className="page-stack page-stack--mobile">
+      <div className="event-stack">
         {result && <MobileResultsPanel event={event} result={result} />}
         <VoteForm event={event} isSaving={isSaving} onSubmit={handleVoteSubmit} />
         <AlternativeOptionForm isSaving={isAddingOption} onSubmit={handleOptionSubmit} />
 
-        <TicketCard className="ticket-card--register" id="registre">
-          <div className="section-heading">
-            <p className="eyebrow">Les membres de la Confrérie</p>
-            <h2>Le registre du comptoir</h2>
-          </div>
+        <section className="sheet" id="registre">
+          <p className="eyebrow">Le registre du comptoir</p>
           {event.participants.length === 0 ? (
-            <p>Aucun membre n’a encore signé. L’institution retient son souffle.</p>
+            <p className="lede">Aucun membre n’a encore signé. L’institution retient son souffle.</p>
           ) : (
-            <div className="participant-stack">
+            <div className="people">
               {event.participants.map((participant) => (
-                <article className="participant-card" key={participant.id}>
-                  <div>
-                    <h3>{participant.participantName}</h3>
-                    {participant.brings && <p>{participant.brings}</p>}
+                <div className="person" key={participant.id}>
+                  <i>{getInitials(participant.participantName)}</i>
+                  <div className="person__body">
+                    <div className="person__name">{participant.participantName}</div>
+                    {participant.brings && <div className="person__sub">{participant.brings}</div>}
+                    {participant.comment && (
+                      <div className="person__sub person__sub--quote">{"« "}{participant.comment}{" »"}</div>
+                    )}
                   </div>
-                  {participant.comment && <p className="comment">"{participant.comment}"</p>}
-                </article>
+                </div>
               ))}
             </div>
           )}
-        </TicketCard>
+        </section>
 
         <MobileShareBox url={shareUrl} />
       </div>

@@ -1,57 +1,60 @@
-import type { AperitifEvent, ResultState } from "../types/apero";
-import { formatOption } from "../utils/formatOption";
-import { TicketCard } from "./TicketCard";
+import type { AperitifEvent, AperitifOption, ResultState } from "../types/apero";
 
 type MobileResultsPanelProps = {
   event: AperitifEvent;
   result: ResultState;
 };
 
+function formatWinner(option: AperitifOption): string {
+  const dateLabel = option.date
+    ? new Intl.DateTimeFormat("fr-FR", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+      }).format(new Date(`${option.date}T00:00:00`))
+    : "Date mystère";
+
+  return `${dateLabel} · ${option.time || "?"} — ${option.location}`;
+}
+
 export function MobileResultsPanel({ event, result }: MobileResultsPanelProps) {
-  const winningIds =
+  const highlightedId =
     result.type === "winner"
-      ? [result.optionId]
+      ? result.optionId
       : result.type === "tie"
-        ? result.optionIds
-        : [];
+        ? result.optionIds[0]
+        : undefined;
+
+  const highlightedOption = highlightedId
+    ? event.options.find((option) => option.id === highlightedId)
+    : undefined;
+  const highlightedResult = highlightedId
+    ? result.results.find((item) => item.optionId === highlightedId)
+    : undefined;
 
   return (
-    <TicketCard className="mobile-results-panel ticket-card--verdict">
-      <div className="section-heading section-heading--with-stamp">
-        <p className="eyebrow">Verdict actuel</p>
-        <h2>{result.message}</h2>
+    <div className="verdict">
+      <p className="eyebrow">Verdict provisoire</p>
+      <div className="verdict__title">
+        {highlightedOption ? formatWinner(highlightedOption) : result.message}
       </div>
-
-      <div className="mobile-results-panel__list">
-        {event.options.map((option) => {
-          const optionResult = result.results.find((item) => item.optionId === option.id);
-          const highlighted = winningIds.includes(option.id);
-
-          return (
-            <article
-              className={
-                highlighted
-                  ? "mobile-results-panel__item mobile-results-panel__item--hot"
-                  : "mobile-results-panel__item"
-              }
-              key={option.id}
-            >
-              <h3>{formatOption(option)}</h3>
-              <div className="mobile-results-panel__scores">
-                <span>
-                  Présents <strong>{optionResult?.yesCount ?? 0}</strong>
-                </span>
-                <span>
-                  Réserves <strong>{optionResult?.maybeCount ?? 0}</strong>
-                </span>
-                <span>
-                  Absents <strong>{optionResult?.noCount ?? 0}</strong>
-                </span>
-              </div>
-            </article>
-          );
-        })}
-      </div>
-    </TicketCard>
+      {highlightedOption && <p className="meta">{result.message}</p>}
+      {highlightedResult && (
+        <div className="counts">
+          <div className="cnt">
+            <b>{highlightedResult.yesCount}</b>
+            <span>Présents</span>
+          </div>
+          <div className="cnt">
+            <b>{highlightedResult.maybeCount}</b>
+            <span>Réserve</span>
+          </div>
+          <div className="cnt">
+            <b>{highlightedResult.noCount}</b>
+            <span>Absent</span>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

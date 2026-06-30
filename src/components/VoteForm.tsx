@@ -3,8 +3,6 @@ import type { AperitifEvent, ParticipantResponse, VoteStatus } from "../types/ap
 import { useGentlemanName } from "../hooks/useGentlemanName";
 import { createId } from "../utils/createId";
 import { EventOptionMobileCard } from "./EventOptionMobileCard";
-import { StickyActionBar } from "./StickyActionBar";
-import { TicketCard } from "./TicketCard";
 
 const bringOptions = [
   "Chips",
@@ -97,7 +95,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
     const missingVote = event.options.some((option) => !votes[option.id]);
 
     if (missingVote) {
-      setFeedback("Un suffrage par proposition, sinon l’institution vacille.");
+      setFeedback("Un suffrage par créneau, sinon l’institution vacille.");
       return;
     }
 
@@ -121,11 +119,8 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
   }
 
   return (
-    <TicketCard className="vote-panel">
-      <div className="section-heading">
-        <p className="eyebrow">Déposer son suffrage au zinc</p>
-        <h2>{existingParticipant ? "Amender mon bulletin" : "Le registre t’attend"}</h2>
-      </div>
+    <section className="sheet">
+      <p className="eyebrow">{existingParticipant ? "Amender mon bulletin" : "Déposer son suffrage"}</p>
 
       <form className="vote-form" onSubmit={handleSubmit}>
         <label className="field">
@@ -137,7 +132,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
           />
         </label>
 
-        <div className="vote-stack">
+        <div className="slot-stack">
           {event.options.map((option) => (
             <EventOptionMobileCard
               key={option.id}
@@ -149,7 +144,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
         </div>
 
         <label className="field">
-          <span>Contribution au banquet</span>
+          <span>Ce que tu ramènes</span>
           <input
             list="bring-options"
             value={brings}
@@ -173,17 +168,15 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
           />
         </label>
 
-        <StickyActionBar>
-          <button className="button button--primary button--block" type="submit" disabled={isSaving}>
-            {isSaving ? "Dépôt du suffrage…" : "Déposer mon suffrage"}
-          </button>
-        </StickyActionBar>
+        <button className="button button--primary button--block" type="submit" disabled={isSaving}>
+          {isSaving ? "Dépôt du suffrage…" : "Déposer mon suffrage"}
+        </button>
         {feedback && (
           <p className="feedback" role="status">
             {feedback}
           </p>
         )}
       </form>
-    </TicketCard>
+    </section>
   );
 }

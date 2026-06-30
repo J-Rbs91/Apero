@@ -1,9 +1,9 @@
 import type { VoteStatus } from "../types/apero";
 
-const voteOptions: Array<{ value: VoteStatus; label: string }> = [
-  { value: "yes", label: "Présent, coude levé" },
-  { value: "maybe", label: "Sous réserve du ministre" },
-  { value: "no", label: "Retenu par une affaire de haute importance" },
+const voteOptions: Array<{ value: VoteStatus; label: string; tone: "y" | "m" | "n" }> = [
+  { value: "yes", label: "Présent", tone: "y" },
+  { value: "maybe", label: "Réserve", tone: "m" },
+  { value: "no", label: "Absent", tone: "n" },
 ];
 
 type VoteSegmentedControlProps = {
@@ -18,14 +18,10 @@ export function VoteSegmentedControl({
   onChange,
 }: VoteSegmentedControlProps) {
   return (
-    <div className="vote-segmented-control" role="radiogroup" aria-label={name}>
+    <div className="seg" role="radiogroup" aria-label={name}>
       {voteOptions.map((option) => (
         <label
-          className={
-            value === option.value
-              ? "vote-segmented-control__option vote-segmented-control__option--selected"
-              : "vote-segmented-control__option"
-          }
+          className={value === option.value ? `seg__opt on-${option.tone}` : "seg__opt"}
           key={option.value}
         >
           <input
