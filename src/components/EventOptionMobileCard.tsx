@@ -19,6 +19,9 @@ export function EventOptionMobileCard({
         <span className="option-stamp">Bulletin</span>
         <p className="eyebrow">Proposition au zinc</p>
         <h3>{formatOption(option)}</h3>
+        {option.createdByRole === "participant" && option.createdByName && (
+          <p className="event-option-mobile-card__note">{"Propos\u00e9e par "}{option.createdByName}</p>
+        )}
         {option.note && <p className="event-option-mobile-card__note">{option.note}</p>}
       </div>
       <VoteSegmentedControl

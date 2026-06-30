@@ -13,27 +13,48 @@ type LegacyEvent = Partial<Omit<AperitifEvent, "participants" | "options">> & {
   createdBy?: string;
 };
 
+function normalizeOrganizerOption(
+  option: AperitifOption,
+  organizerName: string,
+  createdAt: string,
+): AperitifOption {
+  return {
+    ...option,
+    createdByRole: option.createdByRole ?? "organizer",
+    createdByName: option.createdByName ?? organizerName,
+    createdAt: option.createdAt ?? createdAt,
+  };
+}
+
 export function normalizeEvent(rawEvent: unknown): AperitifEvent {
   const event = rawEvent as LegacyEvent;
   const now = new Date().toISOString();
   const participants = event.participants ?? event.responses ?? [];
-  const options =
-    event.options ??
-    event.slots?.map((slot) => ({
-      id: slot.id,
-      date: slot.dateTime?.slice(0, 10) ?? "",
-      time: slot.dateTime?.slice(11, 16) ?? "",
-      location: event.location ?? "Établissement à confirmer",
-      note: slot.label,
-    })) ??
-    [];
   const title = event.title?.trim() || undefined;
+  const createdAt = event.createdAt ?? now;
+  const organizerName = event.organizerName ?? event.createdBy ?? "Grand Convoqueur myst\u00e8re";
+  const options =
+    event.options?.map((option) => normalizeOrganizerOption(option, organizerName, createdAt)) ??
+    event.slots?.map((slot) =>
+      normalizeOrganizerOption(
+        {
+          id: slot.id,
+          date: slot.dateTime?.slice(0, 10) ?? "",
+          time: slot.dateTime?.slice(11, 16) ?? "",
+          location: event.location ?? "\u00c9tablissement \u00e0 confirmer",
+          note: slot.label,
+        },
+        organizerName,
+        createdAt,
+      ),
+    ) ??
+    [];
 
   return {
     id: event.id ?? "apero_inconnu",
-    ceremonialName: event.ceremonialName ?? title ?? "Assemblée sans registre",
+    ceremonialName: event.ceremonialName ?? title ?? "Assembl\u00e9e sans registre",
     title,
-    organizerName: event.organizerName ?? event.createdBy ?? "Grand Convoqueur mystère",
+    organizerName,
     description: event.description || undefined,
     beaufLevel: event.beaufLevel ?? "medium",
     status: event.status ?? "active",
@@ -44,9 +65,10 @@ export function normalizeEvent(rawEvent: unknown): AperitifEvent {
       createdAt: participant.createdAt ?? participant.updatedAt ?? now,
       updatedAt: participant.updatedAt ?? now,
     })),
-    createdAt: event.createdAt ?? now,
+    createdAt,
     updatedAt: event.updatedAt ?? now,
     closedAt: event.closedAt,
+    selectedOptionId: event.selectedOptionId,
   };
 }
 
@@ -74,6 +96,17 @@ export function upsertParticipant(
   return {
     ...event,
     participants,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+export function appendEventOption(
+  event: AperitifEvent,
+  option: AperitifOption,
+): AperitifEvent {
+  return {
+    ...event,
+    options: [...event.options, option],
     updatedAt: new Date().toISOString(),
   };
 }

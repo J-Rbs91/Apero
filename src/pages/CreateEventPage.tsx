@@ -115,7 +115,12 @@ export function CreateEventPage() {
         description: description.trim() || undefined,
         beaufLevel,
         status: "active",
-        options: cleanedOptions,
+        options: cleanedOptions.map((option) => ({
+          ...option,
+          createdByRole: "organizer",
+          createdByName: organizerName.trim(),
+          createdAt: now,
+        })),
         participants: [],
         createdAt: now,
         updatedAt: now,

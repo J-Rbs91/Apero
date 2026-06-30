@@ -25,6 +25,9 @@ export function EventOptionCard({
       <div className="option-card__main">
         <p className="eyebrow">Proposition au zinc</p>
         <h3>{formatOption(option)}</h3>
+        {option.createdByRole === "participant" && option.createdByName && (
+          <p>{"Propos\u00e9e par "}{option.createdByName}</p>
+        )}
         {option.note && <p>{option.note}</p>}
       </div>
 

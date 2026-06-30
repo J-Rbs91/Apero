@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { AlternativeOptionForm } from "../components/AlternativeOptionForm";
 import { AperoOrnaments } from "../components/AperoOrnaments";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
@@ -9,7 +10,7 @@ import { MobileShareBox } from "../components/MobileShareBox";
 import { TicketCard } from "../components/TicketCard";
 import { VoteForm } from "../components/VoteForm";
 import { eventStorage } from "../services";
-import type { AperitifEvent, BeaufLevel, ParticipantResponse } from "../types/apero";
+import type { AperitifEvent, AperitifOption, BeaufLevel, ParticipantResponse } from "../types/apero";
 import { calculateBestOptions } from "../utils/calculateResults";
 
 const beaufLabels: Record<BeaufLevel, string> = {
@@ -25,6 +26,7 @@ export function EventPage() {
   const [event, setEvent] = useState<AperitifEvent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isAddingOption, setIsAddingOption] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const result = useMemo(() => (event ? calculateBestOptions(event) : null), [event]);
@@ -93,6 +95,29 @@ export function EventPage() {
       );
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function handleOptionSubmit(option: AperitifOption) {
+    if (!eventId) {
+      return;
+    }
+
+    try {
+      setIsAddingOption(true);
+      setError("");
+      setSuccess("");
+      const updatedEvent = await eventStorage.addEventOption(eventId, option);
+      setEvent(updatedEvent);
+      setSuccess("Contre-proposition ajout\u00e9e au registre de cette assembl\u00e9e.");
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Le registre du zinc refuse la contre-proposition. R\u00e9essaie dans un instant.",
+      );
+    } finally {
+      setIsAddingOption(false);
     }
   }
 
@@ -170,6 +195,7 @@ export function EventPage() {
       <div className="page-stack page-stack--mobile">
         {result && <MobileResultsPanel event={event} result={result} />}
         <VoteForm event={event} isSaving={isSaving} onSubmit={handleVoteSubmit} />
+        <AlternativeOptionForm isSaving={isAddingOption} onSubmit={handleOptionSubmit} />
 
         <TicketCard className="ticket-card--register" id="registre">
           <div className="section-heading">

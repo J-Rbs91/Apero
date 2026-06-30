@@ -8,7 +8,8 @@ export type BadgeId =
   | "SERIAL_VOTER"
   | "BANQUET_PROVIDER"
   | "LAST_MINUTE_MINISTER"
-  | "ZINC_DIPLOMAT";
+  | "ZINC_DIPLOMAT"
+  | "FIRST_SHOT_CONSENSUS";
 
 export type BadgeRarity = "common" | "rare" | "legendary" | "shame";
 
@@ -95,6 +96,14 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     description: "A beaucoup trop souvent répondu sous réserve du ministre.",
     rarity: "common",
     iconName: "minister",
+  },
+  {
+    id: "FIRST_SHOT_CONSENSUS",
+    name: "Consensus du premier coup",
+    description:
+      "A convoqu\u00e9 une assembl\u00e9e si limpide que tout le monde a valid\u00e9 une proposition initiale sans r\u00e9clamer de nouvelle date, de nouvel horaire ou de nouveau lieu.",
+    rarity: "rare",
+    iconName: "crown",
   },
   {
     id: "ZINC_DIPLOMAT",

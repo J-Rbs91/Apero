@@ -4,6 +4,8 @@ export type BeaufLevel = "soft" | "medium" | "legendary";
 
 export type AperitifEventStatus = "active" | "closed" | "archived";
 
+export type OptionCreatorRole = "organizer" | "participant";
+
 export type AperitifEvent = {
   id: string;
   ceremonialName: string;
@@ -17,6 +19,7 @@ export type AperitifEvent = {
   createdAt: string;
   updatedAt: string;
   closedAt?: string;
+  selectedOptionId?: string;
 };
 
 export type AperitifOption = {
@@ -24,7 +27,12 @@ export type AperitifOption = {
   date: string;
   time: string;
   location: string;
+  locationLat?: number;
+  locationLng?: number;
   note?: string;
+  createdByRole?: OptionCreatorRole;
+  createdByName?: string;
+  createdAt?: string;
 };
 
 export type ParticipantResponse = {

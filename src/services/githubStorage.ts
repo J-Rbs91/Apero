@@ -1,6 +1,6 @@
 import { githubConfig, isGithubStorageConfigured } from "../config/githubConfig";
-import type { AperitifEvent, ParticipantResponse } from "../types/apero";
-import { normalizeEvent, upsertParticipant } from "../utils/eventNormalization";
+import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
+import { appendEventOption, normalizeEvent, upsertParticipant } from "../utils/eventNormalization";
 import type { EventStorage } from "./EventStorage";
 
 type GitHubContentResponse = {
@@ -17,8 +17,9 @@ type GitHubDirectoryItem = {
 const COMMIT_MESSAGES = {
   createEvent: "Nouvelle assemblée créée dans La Confrérie du Petit Jaune",
   updateEvent: "Mise à jour du scrutin du zinc",
-  addVote: "Nouveau suffrage déposé au comptoir",
-  updateVote: "Suffrage modifié dans le registre",
+  addVote: "Nouveau suffrage d\u00e9pos\u00e9 au comptoir",
+  updateVote: "Suffrage modifi\u00e9 dans le registre",
+  addOption: "Nouvelle contre-proposition d\u00e9pos\u00e9e au zinc",
 };
 
 type GitHubErrorCode =
@@ -209,6 +210,44 @@ export const githubEventStorage: EventStorage = {
     }
 
     await writeEventFile(event, COMMIT_MESSAGES.updateEvent, existingFile.sha);
+  },
+
+  async addEventOption(eventId: string, option: AperitifOption) {
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const existingFile = await readEventFile(eventId);
+
+      if (!existingFile) {
+        throw new GitHubStorageError("not-found", "Assembl\u00e9e introuvable.");
+      }
+
+      const updatedEvent = appendEventOption(existingFile.event, option);
+
+      try {
+        await writeEventFile(
+          updatedEvent,
+          COMMIT_MESSAGES.addOption,
+          existingFile.sha,
+        );
+        return updatedEvent;
+      } catch (error) {
+        const isLastAttempt = attempt === 1;
+
+        if (
+          error instanceof GitHubStorageError &&
+          error.code === "conflict" &&
+          !isLastAttempt
+        ) {
+          continue;
+        }
+
+        throw error;
+      }
+    }
+
+    throw new GitHubStorageError(
+      "conflict",
+      "Le registre du zinc refuse de s\u2019ouvrir. R\u00e9essaie dans un instant.",
+    );
   },
 
   async saveParticipantResponse(eventId: string, response: ParticipantResponse) {
