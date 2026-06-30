@@ -1,7 +1,7 @@
 :root {
   color-scheme: dark;
   color: #fff7e6;
-  font-family: "Schibsted Grotesk", system-ui, "Segoe UI", Arial, sans-serif;
+  font-family: "Manrope", system-ui, "Segoe UI", Arial, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -145,15 +145,16 @@ a {
 .h1,
 .h2 {
   margin: 0;
-  font-family: "Marcellus", Georgia, serif;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-  line-height: 1.04;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.06;
   color: var(--cream);
 }
 
 .h1 {
   font-size: 32px;
+  font-weight: 800;
   text-shadow: 0 1px 14px rgba(0, 0, 0, 0.4);
 }
 
@@ -477,7 +478,8 @@ textarea::placeholder {
 }
 
 .slot__d {
-  font-family: "Marcellus", Georgia, serif;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-weight: 700;
   font-size: 15.5px;
   line-height: 1.1;
   color: var(--cream);
@@ -593,7 +595,8 @@ textarea::placeholder {
 }
 
 .verdict__title {
-  font-family: "Marcellus", Georgia, serif;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-weight: 700;
   font-size: 18px;
   line-height: 1.12;
   color: var(--cream);
@@ -617,7 +620,8 @@ textarea::placeholder {
 }
 
 .cnt b {
-  font-family: "Marcellus", Georgia, serif;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-weight: 800;
   font-size: 18px;
   line-height: 1;
   color: var(--cream);
@@ -762,7 +766,8 @@ textarea::placeholder {
   border: 1px dashed rgba(255, 247, 230, 0.4);
   border-radius: 14px;
   background: rgba(255, 247, 230, 0.06);
-  font-family: "Marcellus", Georgia, serif;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-weight: 700;
   font-size: 19px;
   text-align: center;
   color: var(--cream);
