@@ -34,6 +34,9 @@ export function HomePage() {
       </section>
 
       <nav className="home-links">
+        <Link className="ghost-link" to="/agenda">
+          Les apéros à venir
+        </Link>
         <Link className="ghost-link" to="/palmares">
           Le palmarès de la Confrérie
         </Link>
