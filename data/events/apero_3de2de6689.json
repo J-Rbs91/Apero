@@ -1,0 +1,22 @@
+{
+  "id": "apero_3de2de6689",
+  "ceremonialName": "La Grande Tablée des Olives",
+  "title": "L'I.A.péro",
+  "organizerName": "Jérémy Rbs",
+  "beaufLevel": "medium",
+  "status": "active",
+  "options": [
+    {
+      "id": "option_dccdb73482",
+      "date": "2026-07-02",
+      "time": "19:00",
+      "location": "La Loule",
+      "createdByRole": "organizer",
+      "createdByName": "Jérémy Rbs",
+      "createdAt": "2026-06-30T23:00:40.901Z"
+    }
+  ],
+  "participants": [],
+  "createdAt": "2026-06-30T23:00:40.901Z",
+  "updatedAt": "2026-06-30T23:00:40.901Z"
+}
