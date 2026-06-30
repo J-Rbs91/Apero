@@ -372,13 +372,14 @@ a {
     repeating-linear-gradient(0deg, rgba(184, 50, 43, 0.08) 0 1px, transparent 1px 13px);
 }
 
-.brand-link {
+.back-button {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.7rem;
-  min-height: 3.25rem;
-  padding: 0.45rem 0.75rem 0.45rem 0.45rem;
+  gap: 0.55rem;
+  align-self: start;
+  min-height: 3rem;
+  padding: 0.45rem 1rem 0.45rem 0.55rem;
   border: 2px solid rgba(255, 244, 210, 0.56);
   border-radius: 16px;
   color: var(--cream);
@@ -386,15 +387,23 @@ a {
     linear-gradient(rgba(18, 60, 45, 0.88), rgba(13, 43, 34, 0.92)),
     repeating-linear-gradient(90deg, rgba(255, 244, 210, 0.08) 0 1px, transparent 1px 9px);
   font-weight: 900;
-  text-decoration: none;
+  font-size: 1rem;
+  cursor: pointer;
   box-shadow: var(--small-shadow);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
 }
 
-.brand-link--mobile {
-  width: 100%;
+.back-button:hover {
+  transform: translateX(-2px);
 }
 
-.brand-mark {
+.back-button:active {
+  transform: translateX(0);
+}
+
+.back-button__arrow {
   display: grid;
   place-items: center;
   width: 2.15rem;
@@ -403,8 +412,6 @@ a {
   border-radius: 50%;
   color: var(--ink);
   background: radial-gradient(circle at 34% 24%, var(--pastis-soft), var(--pastis));
-  font-family: Georgia, "Times New Roman", serif;
-  font-weight: 900;
 }
 
 
@@ -477,7 +484,7 @@ a {
 }
 
 .button:focus-visible,
-.brand-link:focus-visible,
+.back-button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 .vote-segmented-control__option:focus-within,
