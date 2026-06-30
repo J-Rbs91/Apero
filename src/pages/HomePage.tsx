@@ -33,9 +33,14 @@ export function HomePage() {
         <p className="meta meta--center">Propose · partage · le comptoir tranche</p>
       </section>
 
-      <button className="ghost-link" type="button" onClick={requestGentlemanNameEdit}>
-        Modifier mon nom de gentleman
-      </button>
+      <nav className="home-links">
+        <Link className="ghost-link" to="/palmares">
+          Le palmarès de la Confrérie
+        </Link>
+        <button className="ghost-link" type="button" onClick={requestGentlemanNameEdit}>
+          Modifier mon nom de gentleman
+        </button>
+      </nav>
     </MobilePage>
   );
 }

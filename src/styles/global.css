@@ -734,6 +734,120 @@ textarea::placeholder {
   align-self: center;
 }
 
+/* ===== Home links ===== */
+.home-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+/* ===== Palmarès ===== */
+.palmares-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.palmares-avatar {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 247, 230, 0.16);
+  color: var(--cream);
+  font-size: 13px;
+  font-weight: 800;
+  font-style: normal;
+}
+
+.palmares-head__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.palmares-tag {
+  margin-left: 7px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--pastis);
+  color: var(--ink);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+/* ===== Badge medals ===== */
+.badge-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.badge-medal {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 10px 11px;
+  border: 1px solid rgba(255, 247, 230, 0.16);
+  border-radius: 14px;
+  background: rgba(255, 247, 230, 0.05);
+}
+
+.badge-medal__disc {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: var(--cream);
+}
+
+.badge-medal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.badge-medal__name {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--cream);
+}
+
+.badge-medal__desc {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: rgba(255, 247, 230, 0.62);
+}
+
+.badge-medal--legendary .badge-medal__disc {
+  background: radial-gradient(circle at 34% 26%, var(--pastis-soft), var(--pastis));
+  color: #5e4708;
+}
+
+.badge-medal--rare .badge-medal__disc {
+  background: rgba(29, 112, 77, 0.55);
+  color: #d4f0e2;
+}
+
+.badge-medal--common .badge-medal__disc {
+  background: rgba(255, 247, 230, 0.14);
+  color: var(--cream);
+}
+
+.badge-medal--shame .badge-medal__disc {
+  background: rgba(123, 68, 37, 0.55);
+  color: #f0d9c9;
+}
+
 /* ===== Focus ===== */
 .button:focus-visible,
 .bk:focus-visible,

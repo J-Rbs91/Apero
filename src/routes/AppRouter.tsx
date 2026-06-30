@@ -2,6 +2,7 @@ import { HashRouter, Route, Routes } from "react-router-dom";
 import { CreateEventPage } from "../pages/CreateEventPage";
 import { EventPage } from "../pages/EventPage";
 import { HomePage } from "../pages/HomePage";
+import { PalmaresPage } from "../pages/PalmaresPage";
 
 export function AppRouter() {
   return (
@@ -10,6 +11,7 @@ export function AppRouter() {
         <Route path="/" element={<HomePage />} />
         <Route path="/create" element={<CreateEventPage />} />
         <Route path="/event/:eventId" element={<EventPage />} />
+        <Route path="/palmares" element={<PalmaresPage />} />
       </Routes>
     </HashRouter>
   );
