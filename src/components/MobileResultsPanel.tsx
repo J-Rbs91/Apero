@@ -43,7 +43,7 @@ export function MobileResultsPanel({ event, result }: MobileResultsPanelProps) {
         <div className="counts">
           <div className="cnt">
             <b>{highlightedResult.yesCount}</b>
-            <span>Présents</span>
+            <span>Présent</span>
           </div>
           <div className="cnt">
             <b>{highlightedResult.maybeCount}</b>

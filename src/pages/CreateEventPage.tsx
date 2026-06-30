@@ -103,7 +103,7 @@ export function CreateEventPage() {
           ? "La Confrérie est complète. Trop d’apéros sont déjà en cours. Clôture une assemblée avant d’en convoquer une nouvelle."
           : error instanceof Error
             ? error.message
-            : "GitHub a renversé le registre. Réessaie dans deux secondes.",
+            : "Le garçon a renversé le registre. Réessaie dans deux secondes.",
       );
     } finally {
       setIsSubmitting(false);
