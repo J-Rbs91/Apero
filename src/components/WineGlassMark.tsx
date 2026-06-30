@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
-import lottie from "lottie-web";
-import animationData from "../assets/wine-glass.json";
+import type { AnimationItem } from "lottie-web";
 
 type WineGlassMarkProps = {
   size?: number;
@@ -11,19 +10,32 @@ export function WineGlassMark({ size = 28, className = "" }: WineGlassMarkProps)
   const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    if (!ref.current) {
-      return;
-    }
+    let animation: AnimationItem | undefined;
+    let cancelled = false;
 
-    const anim = lottie.loadAnimation({
-      container: ref.current,
-      renderer: "svg",
-      loop: true,
-      autoplay: true,
-      animationData,
+    // Chargement paresseux : le moteur Lottie (build léger SVG) et l'animation
+    // partent dans un chunk séparé, hors du bundle initial.
+    Promise.all([
+      import("lottie-web/build/player/lottie_light"),
+      import("../assets/wine-glass.json"),
+    ]).then(([lottieModule, animationModule]) => {
+      if (cancelled || !ref.current) {
+        return;
+      }
+
+      animation = lottieModule.default.loadAnimation({
+        container: ref.current,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        animationData: animationModule.default,
+      });
     });
 
-    return () => anim.destroy();
+    return () => {
+      cancelled = true;
+      animation?.destroy();
+    };
   }, []);
 
   return (
