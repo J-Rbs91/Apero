@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AlternativeOptionForm } from "../components/AlternativeOptionForm";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
@@ -7,9 +7,11 @@ import { MobilePage } from "../components/MobilePage";
 import { MobileResultsPanel } from "../components/MobileResultsPanel";
 import { MobileShareBox } from "../components/MobileShareBox";
 import { VoteForm } from "../components/VoteForm";
+import { useGentlemanName } from "../hooks/useGentlemanName";
 import { eventStorage } from "../services";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
 import { calculateBestOptions } from "../utils/calculateResults";
+import { normalizeMemberName } from "../utils/memberName";
 import { buildShareText, buildShareTitle } from "../utils/shareMessage";
 
 const MIN_LOADING_MS = 700;
@@ -25,7 +27,9 @@ function getInitials(name: string): string {
 
 export function EventPage() {
   const { eventId } = useParams<{ eventId: string }>();
+  const navigate = useNavigate();
   const location = useLocation();
+  const { gentlemanName } = useGentlemanName();
   const seededEvent = (location.state as { createdEvent?: AperitifEvent } | null)?.createdEvent;
   const initialEvent = seededEvent && seededEvent.id === eventId ? seededEvent : null;
   const [event, setEvent] = useState<AperitifEvent | null>(initialEvent);
@@ -33,6 +37,8 @@ export function EventPage() {
   const [isLoading, setIsLoading] = useState(!initialEvent);
   const [isSaving, setIsSaving] = useState(false);
   const [isAddingOption, setIsAddingOption] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const result = useMemo(() => (event ? calculateBestOptions(event) : null), [event]);
@@ -141,6 +147,26 @@ export function EventPage() {
     }
   }
 
+  async function handleDelete() {
+    if (!eventId) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      setError("");
+      await eventStorage.deleteEvent(eventId);
+      navigate("/agenda", { replace: true });
+    } catch (deleteError) {
+      setError(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "Le registre refuse de lâcher cette assemblée. Réessaie dans un instant.",
+      );
+      setIsDeleting(false);
+    }
+  }
+
   if (isLoading) {
     return (
       <MobilePage className="event-mobile" overlay="scene">
@@ -184,6 +210,9 @@ export function EventPage() {
   }
 
   const metaText = `par ${event.organizerName} · ${event.options.length} créneaux · ${event.participants.length} votants`;
+  const isOrganizer =
+    Boolean(gentlemanName) &&
+    normalizeMemberName(gentlemanName) === normalizeMemberName(event.organizerName);
 
   return (
     <MobilePage className="event-mobile" overlay="scene">
@@ -233,7 +262,54 @@ export function EventPage() {
           title={buildShareTitle(event)}
           text={buildShareText(event)}
         />
+
+        {isOrganizer && (
+          <button
+            type="button"
+            className="ghost-link ghost-link--danger"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
+            Supprimer cette assemblée
+          </button>
+        )}
       </div>
+
+      {showDeleteConfirm && (
+        <div className="modal-backdrop" role="presentation">
+          <section
+            className="sheet modal-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-title"
+          >
+            <p className="eyebrow">Radiation du registre</p>
+            <h2 className="h1 h1--sm" id="delete-title">
+              Supprimer cette assemblée ?
+            </h2>
+            <p className="lede">
+              Le comptoir l’efface pour de bon : créneaux, votes et tout le tralala. Pas de
+              session de rattrapage.
+            </p>
+            <button
+              type="button"
+              className="button button--danger button--block"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Radiation…" : "Oui, raye-la du registre"}
+            </button>
+            <button
+              type="button"
+              className="button button--ghost button--block"
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={isDeleting}
+            >
+              Non, je la garde
+            </button>
+            {error && <p className="feedback">{error}</p>}
+          </section>
+        </div>
+      )}
     </MobilePage>
   );
 }

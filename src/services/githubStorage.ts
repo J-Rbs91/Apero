@@ -432,6 +432,16 @@ export const githubEventStorage: EventStorage = {
     );
   },
 
+  async deleteEvent(id: string) {
+    const existingFile = await readEventFile(id);
+
+    if (!existingFile) {
+      return;
+    }
+
+    await deleteEventFile(id, existingFile.sha);
+  },
+
   async readRewardsLedger() {
     const { ledger } = await readRewardsLedgerFile();
     return ledger;

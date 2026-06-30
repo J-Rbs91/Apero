@@ -12,6 +12,7 @@ export type EventStorage = {
     eventId: string,
     response: ParticipantResponse,
   ): Promise<AperitifEvent>;
+  deleteEvent(id: string): Promise<void>;
   readRewardsLedger(): Promise<RewardsLedger>;
   purgeExpiredEvents(): Promise<void>;
 };

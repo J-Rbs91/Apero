@@ -349,6 +349,11 @@ a {
   border: 1.5px solid rgba(255, 247, 230, 0.55);
 }
 
+.button--danger {
+  color: var(--cream);
+  background: var(--bar-red);
+}
+
 .button--large {
   min-height: 54px;
 }
@@ -373,6 +378,14 @@ a {
 
 .ghost-link:hover {
   color: var(--cream);
+}
+
+.ghost-link--danger {
+  color: rgba(255, 156, 146, 0.82);
+}
+
+.ghost-link--danger:hover {
+  color: #ffd9d4;
 }
 
 /* ===== Back row ===== */
