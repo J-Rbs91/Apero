@@ -1363,3 +1363,91 @@ textarea {
     border-right-color: transparent;
   }
 }
+
+.onboarding-screen {
+  display: grid;
+  min-height: 100dvh;
+  padding: 16px;
+  place-items: center;
+}
+
+.onboarding-card,
+.onboarding-modal {
+  width: min(100%, 440px);
+  border: 2px solid rgba(39, 28, 19, 0.2);
+  border-radius: 22px;
+  background:
+    linear-gradient(rgba(255, 244, 210, 0.96), rgba(255, 244, 210, 0.94)),
+    radial-gradient(circle at 15% 8%, rgba(244, 197, 66, 0.18), transparent 9rem);
+  box-shadow: var(--shadow);
+  color: var(--ink);
+}
+
+.onboarding-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1.15rem;
+}
+
+.onboarding-card h1,
+.onboarding-modal h2,
+.gentleman-name-card h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.02;
+}
+
+.onboarding-card h1 {
+  font-size: 2.1rem;
+}
+
+.onboarding-card p,
+.onboarding-modal p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.onboarding-form,
+.onboarding-modal__actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.onboarding-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  min-height: 100dvh;
+  padding: 16px;
+  place-items: center;
+  background: rgba(10, 38, 30, 0.68);
+  backdrop-filter: blur(8px);
+}
+
+.onboarding-modal {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.onboarding-modal__name {
+  display: block;
+  padding: 0.85rem;
+  border: 1px dashed rgba(39, 28, 19, 0.34);
+  border-radius: 14px;
+  background: rgba(255, 249, 232, 0.78);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.35rem;
+  text-align: center;
+}
+
+.gentleman-name-card {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.gentleman-name-card h2 {
+  font-size: 1.45rem;
+}

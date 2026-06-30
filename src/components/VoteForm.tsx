@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { AperitifEvent, ParticipantResponse, VoteStatus } from "../types/apero";
+import { useGentlemanName } from "../hooks/useGentlemanName";
 import { createId } from "../utils/createId";
 import { EventOptionMobileCard } from "./EventOptionMobileCard";
 import { StickyActionBar } from "./StickyActionBar";
@@ -24,6 +25,7 @@ type VoteFormProps = {
 };
 
 export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
+  const { gentlemanName } = useGentlemanName();
   const emptyVotes = useMemo(
     () =>
       event.options.reduce<DraftVotes>((votes, option) => {
@@ -32,7 +34,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
       }, {}),
     [event.options],
   );
-  const [participantName, setParticipantName] = useState("");
+  const [participantName, setParticipantName] = useState(gentlemanName);
   const [votes, setVotes] = useState<DraftVotes>(emptyVotes);
   const [brings, setBrings] = useState("");
   const [comment, setComment] = useState("");
@@ -56,6 +58,12 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
   useEffect(() => {
     setVotes(emptyVotes);
   }, [emptyVotes]);
+
+  useEffect(() => {
+    if (!participantName && gentlemanName) {
+      setParticipantName(gentlemanName);
+    }
+  }, [gentlemanName, participantName]);
 
   useEffect(() => {
     if (!existingParticipant) {

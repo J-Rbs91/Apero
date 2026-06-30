@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useGentlemanName } from "../hooks/useGentlemanName";
 import type { AperitifOption } from "../types/apero";
 import { createId } from "../utils/createId";
 import { TicketCard } from "./TicketCard";
@@ -9,13 +10,20 @@ type AlternativeOptionFormProps = {
 };
 
 export function AlternativeOptionForm({ isSaving, onSubmit }: AlternativeOptionFormProps) {
+  const { gentlemanName } = useGentlemanName();
   const [isOpen, setIsOpen] = useState(false);
-  const [createdByName, setCreatedByName] = useState("");
+  const [createdByName, setCreatedByName] = useState(gentlemanName);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [location, setLocation] = useState("");
   const [note, setNote] = useState("");
   const [feedback, setFeedback] = useState("");
+
+  useEffect(() => {
+    if (!createdByName && gentlemanName) {
+      setCreatedByName(gentlemanName);
+    }
+  }, [createdByName, gentlemanName]);
 
   async function handleSubmit(formEvent: React.FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();

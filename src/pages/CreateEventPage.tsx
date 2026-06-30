@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AperoOrnaments } from "../components/AperoOrnaments";
 import { MobileHeader } from "../components/MobileHeader";
@@ -6,6 +6,7 @@ import { MobilePage } from "../components/MobilePage";
 import { StickyActionBar } from "../components/StickyActionBar";
 import { TicketCard } from "../components/TicketCard";
 import { eventStorage } from "../services";
+import { useGentlemanName } from "../hooks/useGentlemanName";
 import type { AperitifEvent, AperitifOption, BeaufLevel } from "../types/apero";
 import { createId } from "../utils/createId";
 import { generateUniqueCeremonialName } from "../utils/generateCeremonialName";
@@ -40,8 +41,9 @@ function createEmptyOption(): AperitifOption {
 
 export function CreateEventPage() {
   const navigate = useNavigate();
+  const { gentlemanName } = useGentlemanName();
   const [title, setTitle] = useState("");
-  const [organizerName, setOrganizerName] = useState("");
+  const [organizerName, setOrganizerName] = useState(gentlemanName);
   const [description, setDescription] = useState("");
   const [beaufLevel, setBeaufLevel] = useState<BeaufLevel>("medium");
   const [options, setOptions] = useState<AperitifOption[]>([
@@ -60,6 +62,12 @@ export function CreateEventPage() {
   ]);
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!organizerName && gentlemanName) {
+      setOrganizerName(gentlemanName);
+    }
+  }, [gentlemanName, organizerName]);
 
   function updateOption(optionId: string, updates: Partial<AperitifOption>) {
     setOptions((currentOptions) =>

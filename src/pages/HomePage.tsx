@@ -2,9 +2,12 @@ import { Link } from "react-router-dom";
 import { AperoOrnaments } from "../components/AperoOrnaments";
 import { MobileBottomBar } from "../components/MobileBottomBar";
 import { MobilePage } from "../components/MobilePage";
+import { useGentlemanName } from "../hooks/useGentlemanName";
 import comptoirScene from "../assets/art/comptoir-background.jpg";
 
 export function HomePage() {
+  const { gentlemanName, requestGentlemanNameEdit } = useGentlemanName();
+
   return (
     <MobilePage className="home-mobile">
       <section
@@ -55,6 +58,14 @@ export function HomePage() {
         <Link className="button button--secondary button--block" to="/create">
           Ouvrir le registre
         </Link>
+      </section>
+
+      <section className="secondary-links gentleman-name-card">
+        <p className="eyebrow">Registre personnel</p>
+        <h2>{gentlemanName}</h2>
+        <button className="button button--secondary button--block" type="button" onClick={requestGentlemanNameEdit}>
+          Modifier mon nom de gentleman
+        </button>
       </section>
 
       <footer className="comptoir-footer">
