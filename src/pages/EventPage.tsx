@@ -23,6 +23,7 @@ const MIN_LOADING_MS = 700;
 export function EventPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const [event, setEvent] = useState<AperitifEvent | null>(null);
+  const [isPurged, setIsPurged] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isAddingOption, setIsAddingOption] = useState(false);
@@ -44,10 +45,13 @@ export function EventPage() {
       try {
         setIsLoading(true);
         setError("");
+        setIsPurged(false);
         const fetchedEvent = await eventStorage.getEvent(eventId);
+        const eventWasPurged = fetchedEvent ? false : await eventStorage.isEventPurged(eventId);
 
         if (isMounted) {
           setEvent(fetchedEvent);
+          setIsPurged(eventWasPurged);
         }
       } catch (loadError) {
         if (isMounted) {
@@ -108,12 +112,12 @@ export function EventPage() {
       setSuccess("");
       const updatedEvent = await eventStorage.addEventOption(eventId, option);
       setEvent(updatedEvent);
-      setSuccess("Contre-proposition ajout\u00e9e au registre de cette assembl\u00e9e.");
+      setSuccess("Contre-proposition ajoutée au registre de cette assemblée.");
     } catch (saveError) {
       setError(
         saveError instanceof Error
           ? saveError.message
-          : "Le registre du zinc refuse la contre-proposition. R\u00e9essaie dans un instant.",
+          : "Le registre du zinc refuse la contre-proposition. Réessaie dans un instant.",
       );
     } finally {
       setIsAddingOption(false);
@@ -123,7 +127,24 @@ export function EventPage() {
   if (isLoading) {
     return (
       <MobilePage className="event-mobile">
-        <LoadingScreen title="ap\u00e9ro ?" subtitle="La Confrérie prépare le registre…" />
+        <LoadingScreen title="apéro ?" subtitle="La Confrérie prépare le registre…" />
+      </MobilePage>
+    );
+  }
+
+  if (!event && isPurged) {
+    return (
+      <MobilePage className="event-mobile">
+        <TicketCard className="state-card state-card--error">
+          <p className="eyebrow">Registre nettoyé</p>
+          <h1>Cette assemblée a quitté le comptoir</h1>
+          <p>
+            L’apéro est passé. Le registre actif a été nettoyé, mais les hauts faits des membres ont été conservés pour les badges de la Confrérie.
+          </p>
+          <Link className="button button--primary" to="/">
+            Retourner à l’accueil
+          </Link>
+        </TicketCard>
       </MobilePage>
     );
   }
@@ -172,7 +193,6 @@ export function EventPage() {
         </p>
         {event.description && <p>{event.description}</p>}
       </section>
-
 
       <p className="security-note">
         C’est une institution de comptoir, pas un coffre-fort. Ne mets rien que tu ne voudrais

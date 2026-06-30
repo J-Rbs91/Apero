@@ -1,6 +1,14 @@
 import { githubConfig, isGithubStorageConfigured } from "../config/githubConfig";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
+import type { RewardsLedger } from "../types/rewards";
 import { appendEventOption, normalizeEvent, upsertParticipant } from "../utils/eventNormalization";
+import {
+  buildPurgedEventRecord,
+  createEmptyRewardsLedger,
+  isEventExpired,
+  normalizeRewardsLedger,
+  updateRewardsLedger,
+} from "./eventPurge";
 import type { EventStorage } from "./EventStorage";
 
 type GitHubContentResponse = {
@@ -17,9 +25,10 @@ type GitHubDirectoryItem = {
 const COMMIT_MESSAGES = {
   createEvent: "Nouvelle assemblée créée dans La Confrérie du Petit Jaune",
   updateEvent: "Mise à jour du scrutin du zinc",
-  addVote: "Nouveau suffrage d\u00e9pos\u00e9 au comptoir",
-  updateVote: "Suffrage modifi\u00e9 dans le registre",
-  addOption: "Nouvelle contre-proposition d\u00e9pos\u00e9e au zinc",
+  addVote: "Nouveau suffrage déposé au comptoir",
+  updateVote: "Suffrage modifié dans le registre",
+  addOption: "Nouvelle contre-proposition déposée au zinc",
+  purgeEvent: "Purge des apéros expirés et mise à jour du registre des récompenses",
 };
 
 type GitHubErrorCode =
@@ -40,6 +49,15 @@ export class GitHubStorageError extends Error {
 
 function getEventPath(eventId: string): string {
   return `${githubConfig.dataPath.replace(/\/$/, "")}/${eventId}.json`;
+}
+
+function getRewardsLedgerPath(): string {
+  const normalizedDataPath = githubConfig.dataPath.replace(/\/$/, "");
+  const dataRoot = normalizedDataPath.endsWith("/events")
+    ? normalizedDataPath.slice(0, -"/events".length)
+    : "data";
+
+  return `${dataRoot || "data"}/rewards/ledger.json`;
 }
 
 function getContentsUrlForPath(path: string): string {
@@ -93,10 +111,11 @@ function decodeBase64(value: string): string {
   return new TextDecoder().decode(bytes);
 }
 
-async function readEventFile(
-  eventId: string,
-): Promise<{ event: AperitifEvent; sha: string } | null> {
-  const response = await fetch(`${getContentsUrl(eventId)}?ref=${githubConfig.branch}`, {
+async function readJsonFile<T>(
+  path: string,
+  normalize: (value: unknown) => T,
+): Promise<{ data: T; sha: string } | null> {
+  const response = await fetch(`${getContentsUrlForPath(path)}?ref=${githubConfig.branch}`, {
     headers: createHeaders(false),
   });
 
@@ -112,9 +131,24 @@ async function readEventFile(
   }
 
   const file = (await response.json()) as GitHubContentResponse;
-  const event = normalizeEvent(JSON.parse(decodeBase64(file.content)));
+  return { data: normalize(JSON.parse(decodeBase64(file.content))), sha: file.sha };
+}
 
-  return { event, sha: file.sha };
+async function readEventFile(
+  eventId: string,
+): Promise<{ event: AperitifEvent; sha: string } | null> {
+  const file = await readJsonFile(getEventPath(eventId), normalizeEvent);
+  return file ? { event: file.data, sha: file.sha } : null;
+}
+
+async function readRewardsLedgerFile(): Promise<{ ledger: RewardsLedger; sha?: string }> {
+  const file = await readJsonFile(getRewardsLedgerPath(), (value) => normalizeRewardsLedger(value));
+
+  if (!file) {
+    return { ledger: createEmptyRewardsLedger() };
+  }
+
+  return { ledger: file.data, sha: file.sha };
 }
 
 async function listEventFiles(): Promise<GitHubDirectoryItem[]> {
@@ -138,17 +172,18 @@ async function listEventFiles(): Promise<GitHubDirectoryItem[]> {
   return items.filter((item) => item.type === "file" && item.name.endsWith(".json"));
 }
 
-async function writeEventFile(
-  event: AperitifEvent,
+async function writeJsonFile(
+  path: string,
+  value: unknown,
   message: string,
   sha?: string,
 ): Promise<void> {
-  const response = await fetch(getContentsUrl(event.id), {
+  const response = await fetch(getContentsUrlForPath(path), {
     method: "PUT",
     headers: createHeaders(true),
     body: JSON.stringify({
       message,
-      content: encodeBase64(JSON.stringify(event, null, 2)),
+      content: encodeBase64(JSON.stringify(value, null, 2)),
       branch: githubConfig.branch,
       sha,
     }),
@@ -169,10 +204,97 @@ async function writeEventFile(
   }
 }
 
+async function writeEventFile(
+  event: AperitifEvent,
+  message: string,
+  sha?: string,
+): Promise<void> {
+  await writeJsonFile(getEventPath(event.id), event, message, sha);
+}
+
+async function writeRewardsLedgerFile(ledger: RewardsLedger, sha?: string): Promise<void> {
+  await writeJsonFile(getRewardsLedgerPath(), ledger, COMMIT_MESSAGES.purgeEvent, sha);
+}
+
+async function deleteEventFile(eventId: string, sha: string): Promise<void> {
+  const response = await fetch(getContentsUrl(eventId), {
+    method: "DELETE",
+    headers: createHeaders(true),
+    body: JSON.stringify({
+      message: COMMIT_MESSAGES.purgeEvent,
+      branch: githubConfig.branch,
+      sha,
+    }),
+  });
+
+  if (response.status === 404) {
+    return;
+  }
+
+  if (response.status === 409) {
+    throw new GitHubStorageError(
+      "conflict",
+      "Le comptoir est saturé, réessaie dans deux secondes.",
+    );
+  }
+
+  if (!response.ok) {
+    throw new GitHubStorageError(
+      "github-error",
+      `GitHub refuse de retirer l’assemblée expirée (${response.status}).`,
+    );
+  }
+}
+
+async function purgeEventFile(existingFile: { event: AperitifEvent; sha: string }): Promise<void> {
+  const { ledger, sha: ledgerSha } = await readRewardsLedgerFile();
+  const alreadyPurged = ledger.purgedEvents.some(
+    (record) => record.eventId === existingFile.event.id,
+  );
+
+  if (alreadyPurged) {
+    await deleteEventFile(existingFile.event.id, existingFile.sha);
+    return;
+  }
+
+  const purgedRecord = buildPurgedEventRecord(existingFile.event, new Date());
+  const updatedLedger = updateRewardsLedger(ledger, existingFile.event, purgedRecord);
+  await writeRewardsLedgerFile(updatedLedger, ledgerSha);
+
+  const verifiedLedger = await readRewardsLedgerFile();
+  const hasVerifiedRecord = verifiedLedger.ledger.purgedEvents.some(
+    (record) => record.eventId === existingFile.event.id,
+  );
+
+  if (!hasVerifiedRecord) {
+    throw new GitHubStorageError(
+      "github-error",
+      "La Confrérie refuse de purger sans trace vérifiée dans le registre des récompenses.",
+    );
+  }
+
+  await deleteEventFile(existingFile.event.id, existingFile.sha);
+}
+
 export const githubEventStorage: EventStorage = {
   async getEvent(id: string) {
     const file = await readEventFile(id);
-    return file?.event ?? null;
+
+    if (!file) {
+      return null;
+    }
+
+    if (isEventExpired(file.event, new Date())) {
+      await purgeEventFile(file);
+      return null;
+    }
+
+    return file.event;
+  },
+
+  async isEventPurged(id: string) {
+    const { ledger } = await readRewardsLedgerFile();
+    return ledger.purgedEvents.some((record) => record.eventId === id);
   },
 
   async listActiveEvents() {
@@ -180,7 +302,18 @@ export const githubEventStorage: EventStorage = {
     const events = await Promise.all(
       files.map(async (file) => {
         const eventId = file.name.replace(/\.json$/, "");
-        return this.getEvent(eventId);
+        const eventFile = await readEventFile(eventId);
+
+        if (!eventFile) {
+          return null;
+        }
+
+        if (isEventExpired(eventFile.event, new Date())) {
+          await purgeEventFile(eventFile);
+          return null;
+        }
+
+        return eventFile.event;
       }),
     );
 
@@ -217,7 +350,12 @@ export const githubEventStorage: EventStorage = {
       const existingFile = await readEventFile(eventId);
 
       if (!existingFile) {
-        throw new GitHubStorageError("not-found", "Assembl\u00e9e introuvable.");
+        throw new GitHubStorageError("not-found", "Assemblée introuvable.");
+      }
+
+      if (isEventExpired(existingFile.event, new Date())) {
+        await purgeEventFile(existingFile);
+        throw new GitHubStorageError("not-found", "Cette assemblée a quitté le comptoir.");
       }
 
       const updatedEvent = appendEventOption(existingFile.event, option);
@@ -246,7 +384,7 @@ export const githubEventStorage: EventStorage = {
 
     throw new GitHubStorageError(
       "conflict",
-      "Le registre du zinc refuse de s\u2019ouvrir. R\u00e9essaie dans un instant.",
+      "Le registre du zinc refuse de s’ouvrir. Réessaie dans un instant.",
     );
   },
 
@@ -256,6 +394,11 @@ export const githubEventStorage: EventStorage = {
 
       if (!existingFile) {
         throw new GitHubStorageError("not-found", "Assemblée introuvable.");
+      }
+
+      if (isEventExpired(existingFile.event, new Date())) {
+        await purgeEventFile(existingFile);
+        throw new GitHubStorageError("not-found", "Cette assemblée a quitté le comptoir.");
       }
 
       const updatedEvent = upsertParticipant(existingFile.event, response);
@@ -287,5 +430,22 @@ export const githubEventStorage: EventStorage = {
       "Le comptoir est saturé, réessaie dans deux secondes.",
     );
   },
-};
 
+  async readRewardsLedger() {
+    const { ledger } = await readRewardsLedgerFile();
+    return ledger;
+  },
+
+  async purgeExpiredEvents() {
+    const files = await listEventFiles();
+
+    for (const file of files) {
+      const eventId = file.name.replace(/\.json$/, "");
+      const eventFile = await readEventFile(eventId);
+
+      if (eventFile && isEventExpired(eventFile.event, new Date())) {
+        await purgeEventFile(eventFile);
+      }
+    }
+  },
+};

@@ -1,11 +1,19 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import comptoirScene from "../assets/art/comptoir-background.jpg";
 import { MobileBottomBar } from "../components/MobileBottomBar";
 import { MobilePage } from "../components/MobilePage";
 import { useGentlemanName } from "../hooks/useGentlemanName";
-import comptoirScene from "../assets/art/comptoir-background.jpg";
+import { eventStorage } from "../services";
 
 export function HomePage() {
   const { gentlemanName, requestGentlemanNameEdit } = useGentlemanName();
+
+  useEffect(() => {
+    eventStorage.purgeExpiredEvents().catch(() => {
+      // La purge ne doit pas empêcher l’accueil de s’afficher.
+    });
+  }, []);
 
   return (
     <MobilePage className="home-mobile">
@@ -27,7 +35,6 @@ export function HomePage() {
           </Link>
         </div>
       </section>
-
 
       <section className="mobile-steps" aria-label="Fonctionnement">
         <article>
