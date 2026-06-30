@@ -1,0 +1,22 @@
+{
+  "id": "apero_5e855ef95d",
+  "ceremonialName": "La Réunion des Verres Qui Collent",
+  "title": "L'I.A.péro",
+  "organizerName": "Jérémy Rbs",
+  "beaufLevel": "medium",
+  "status": "active",
+  "options": [
+    {
+      "id": "option_e7e26d3b60",
+      "date": "2026-07-02",
+      "time": "19:00",
+      "location": "La Loule",
+      "createdByRole": "organizer",
+      "createdByName": "Jérémy Rbs",
+      "createdAt": "2026-06-30T23:10:57.340Z"
+    }
+  ],
+  "participants": [],
+  "createdAt": "2026-06-30T23:10:57.340Z",
+  "updatedAt": "2026-06-30T23:10:57.340Z"
+}
