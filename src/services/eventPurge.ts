@@ -5,7 +5,7 @@ import type {
   PurgedParticipantRecord,
   RewardsLedger,
 } from "../types/rewards";
-import { getGuestParticipants, hasFirstShotConsensus } from "../utils/badgeRules";
+import { getGuestParticipants, hasAnyGuestPresent, hasFirstShotConsensus } from "../utils/badgeRules";
 import { normalizeMemberName } from "../utils/memberName";
 
 const LEDGER_VERSION = 1;
@@ -133,6 +133,7 @@ export function buildPurgedEventRecord(event: AperitifEvent, now: Date): PurgedE
     purgedAt: now.toISOString(),
     participantCount: event.participants.length,
     guestCount: getGuestParticipants(event).length,
+    hadPresentGuest: hasAnyGuestPresent(event),
     optionCount: event.options.length,
     participantOptionCount,
     hadParticipantAlternative: participantOptionCount > 0,
@@ -203,8 +204,9 @@ export function updateRewardsLedger(
     organizedEventCount: organizerStats.organizedEventCount + 1,
     organizedRealEventCount:
       organizerStats.organizedRealEventCount + (purgedRecord.guestCount > 0 ? 1 : 0),
+    // Loose = apéro purgé (date dépassée) où aucun invité n'a dit « présent ».
     organizedLonelyEventCount:
-      organizerStats.organizedLonelyEventCount + (purgedRecord.guestCount === 0 ? 1 : 0),
+      organizerStats.organizedLonelyEventCount + (purgedRecord.hadPresentGuest ? 0 : 1),
     organizedPopularEventCount:
       organizerStats.organizedPopularEventCount + (purgedRecord.guestCount > 10 ? 1 : 0),
     firstShotConsensusCount:

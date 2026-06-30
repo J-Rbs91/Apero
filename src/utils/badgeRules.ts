@@ -29,6 +29,13 @@ export function getGuestParticipants(event: AperitifEvent): ParticipantResponse[
   );
 }
 
+// Un invité « présent » = un invité ayant voté oui sur au moins un créneau.
+export function hasAnyGuestPresent(event: AperitifEvent): boolean {
+  return getGuestParticipants(event).some((guest) =>
+    Object.values(guest.votes).some((vote) => vote === "yes"),
+  );
+}
+
 export function hasFirstShotConsensus(event: AperitifEvent): boolean {
   const guests = getGuestParticipants(event);
 
@@ -113,7 +120,8 @@ function addActiveEventToStats(stats: MemberRewardStats, event: AperitifEvent, m
     const guestCount = getGuestParticipants(event).length;
     stats.organizedEventCount += 1;
     stats.organizedRealEventCount += guestCount > 0 ? 1 : 0;
-    stats.organizedLonelyEventCount += guestCount === 0 ? 1 : 0;
+    // Le badge « loose » se juge à la purge (date dépassée) : un apéro actif,
+    // donc encore à venir, n'est jamais considéré comme déserté ici.
     stats.organizedPopularEventCount += guestCount > 10 ? 1 : 0;
     stats.firstShotConsensusCount += hasFirstShotConsensus(event) ? 1 : 0;
   }

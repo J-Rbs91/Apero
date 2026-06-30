@@ -102,8 +102,23 @@ function isEventExpired(event, now) {
   return !referenceDate || referenceDate.getTime() < now.getTime();
 }
 
+function getGuests(event) {
+  const organizerKey = normalizeMemberName(event.organizerName);
+  return event.participants.filter(
+    (participant) => normalizeMemberName(participant.participantName) !== organizerKey,
+  );
+}
+
+function hasAnyGuestPresent(event) {
+  return getGuests(event).some((guest) =>
+    Object.values(guest.votes ?? {}).some((vote) => vote === "yes"),
+  );
+}
+
 function hasFirstShotConsensus(event) {
-  if (event.participants.length === 0) {
+  const guests = getGuests(event);
+
+  if (guests.length === 0) {
     return false;
   }
 
@@ -118,7 +133,7 @@ function hasFirstShotConsensus(event) {
   }
 
   return organizerOptions.some((option) =>
-    event.participants.every((participant) => participant.votes?.[option.id] === "yes"),
+    guests.every((participant) => participant.votes?.[option.id] === "yes"),
   );
 }
 
@@ -185,6 +200,8 @@ function buildPurgedRecord(event, now) {
     eventDateTime: referenceDate?.toISOString(),
     purgedAt: now.toISOString(),
     participantCount: event.participants.length,
+    guestCount: getGuests(event).length,
+    hadPresentGuest: hasAnyGuestPresent(event),
     optionCount: event.options.length,
     participantOptionCount,
     hadParticipantAlternative: participantOptionCount > 0,
@@ -238,9 +255,9 @@ function updateLedger(ledger, event, record) {
   members[record.organizerKey] = {
     ...organizerStats,
     organizedEventCount: organizerStats.organizedEventCount + 1,
-    organizedRealEventCount: organizerStats.organizedRealEventCount + (record.participantCount > 0 ? 1 : 0),
-    organizedLonelyEventCount: organizerStats.organizedLonelyEventCount + (record.participantCount === 0 ? 1 : 0),
-    organizedPopularEventCount: organizerStats.organizedPopularEventCount + (record.participantCount > 10 ? 1 : 0),
+    organizedRealEventCount: organizerStats.organizedRealEventCount + (record.guestCount > 0 ? 1 : 0),
+    organizedLonelyEventCount: organizerStats.organizedLonelyEventCount + (record.hadPresentGuest ? 0 : 1),
+    organizedPopularEventCount: organizerStats.organizedPopularEventCount + (record.guestCount > 10 ? 1 : 0),
     firstShotConsensusCount: organizerStats.firstShotConsensusCount + (record.hadFirstShotConsensus ? 1 : 0),
   };
 

@@ -24,6 +24,7 @@ export type PurgedEventRecord = {
   purgedAt: string;
   participantCount: number;
   guestCount: number;
+  hadPresentGuest: boolean;
   optionCount: number;
   participantOptionCount: number;
   hadParticipantAlternative: boolean;

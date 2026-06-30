@@ -101,6 +101,44 @@ describe("event purge", () => {
     expect(ledger.members.jojo.proposedOptionCount).toBe(1);
   });
 
+  it("awards the loose badge only when no guest said present", () => {
+    const now = new Date("2026-07-05T10:00:00.000Z");
+
+    const lonelyEvent = createEvent({
+      options: [
+        {
+          id: "option_1",
+          date: "2026-06-29",
+          time: "19:00",
+          location: "Le Bar du Coin",
+          createdByRole: "organizer",
+          createdByName: "Jérémy",
+        },
+      ],
+      participants: [
+        {
+          id: "participant_org",
+          participantName: "Jérémy",
+          votes: { option_1: "yes" },
+          createdAt: "2026-06-30T18:00:00.000Z",
+          updatedAt: "2026-06-30T18:00:00.000Z",
+        },
+      ],
+    });
+    const lonelyRecord = buildPurgedEventRecord(lonelyEvent, now);
+    expect(lonelyRecord.hadPresentGuest).toBe(false);
+    const lonelyLedger = updateRewardsLedger(createEmptyRewardsLedger(now), lonelyEvent, lonelyRecord);
+    expect(lonelyLedger.members.jeremy.organizedLonelyEventCount).toBe(1);
+    expect(lonelyLedger.members.jeremy.organizedRealEventCount).toBe(0);
+
+    const livelyEvent = createEvent();
+    const livelyRecord = buildPurgedEventRecord(livelyEvent, now);
+    expect(livelyRecord.hadPresentGuest).toBe(true);
+    const livelyLedger = updateRewardsLedger(createEmptyRewardsLedger(now), livelyEvent, livelyRecord);
+    expect(livelyLedger.members.jeremy.organizedLonelyEventCount).toBe(0);
+    expect(livelyLedger.members.jeremy.organizedRealEventCount).toBe(1);
+  });
+
   it("does not double count an already purged event", () => {
     const now = new Date("2026-07-05T10:00:00.000Z");
     const event = createEvent();
