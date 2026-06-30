@@ -1,13 +1,10 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { BrandMenu } from "../components/BrandMenu";
 import { MobilePage } from "../components/MobilePage";
-import { WineGlassMark } from "../components/WineGlassMark";
-import { useGentlemanName } from "../hooks/useGentlemanName";
 import { eventStorage } from "../services";
 
 export function HomePage() {
-  const { requestGentlemanNameEdit } = useGentlemanName();
-
   useEffect(() => {
     eventStorage.purgeExpiredEvents().catch(() => {
       // La purge ne doit pas empêcher l’accueil de s’afficher.
@@ -16,9 +13,7 @@ export function HomePage() {
 
   return (
     <MobilePage className="home-mobile" overlay="scene">
-      <div className="brandpill">
-        <WineGlassMark size={26} /> La Confrérie
-      </div>
+      <BrandMenu />
 
       <div className="grow" />
 
@@ -32,18 +27,6 @@ export function HomePage() {
         </Link>
         <p className="meta meta--center">Propose · partage · le comptoir tranche</p>
       </section>
-
-      <nav className="home-links">
-        <Link className="ghost-link" to="/agenda">
-          Les apéros à venir
-        </Link>
-        <Link className="ghost-link" to="/palmares">
-          Le palmarès de la Confrérie
-        </Link>
-        <button className="ghost-link" type="button" onClick={requestGentlemanNameEdit}>
-          Modifier mon nom de gentleman
-        </button>
-      </nav>
     </MobilePage>
   );
 }
