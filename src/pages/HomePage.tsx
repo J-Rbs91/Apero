@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { AperoOrnaments } from "../components/AperoOrnaments";
 import { MobileBottomBar } from "../components/MobileBottomBar";
 import { MobilePage } from "../components/MobilePage";
-import comptoirScene from "../assets/art/comptoir-reference.png";
+import comptoirScene from "../assets/art/comptoir-background.jpg";
 
 export function HomePage() {
   return (

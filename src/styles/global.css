@@ -44,13 +44,7 @@ body {
   min-height: 100vh;
   margin: 0;
   overflow-x: hidden;
-  background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(0deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    radial-gradient(circle at 18% 8%, rgba(244, 197, 66, 0.24), transparent 18rem),
-    radial-gradient(circle at 85% 2%, rgba(184, 50, 43, 0.22), transparent 16rem),
-    linear-gradient(135deg, #0c2f25 0%, #14543b 48%, #6d2e20 100%);
-  background-size: 34px 34px, 34px 34px, auto, auto, auto;
+  background: #0c2f25;
 }
 
 body::before {
@@ -64,6 +58,45 @@ body::before {
     radial-gradient(circle at 70% 58%, rgba(255, 244, 210, 0.06), transparent 0.18rem);
   background-size: 18px 18px, 24px 24px;
   opacity: 0.8;
+}
+
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  isolation: isolate;
+  overflow-x: hidden;
+}
+
+.app-shell::before {
+  position: fixed;
+  inset: -24px;
+  z-index: 0;
+  pointer-events: none;
+  content: "";
+  background-image: var(--app-background-image);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  filter: blur(14px) saturate(1.08);
+  transform: scale(1.04);
+}
+
+.app-shell::after {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  content: "";
+  background:
+    linear-gradient(90deg, rgba(10, 38, 30, 0.82), rgba(10, 38, 30, 0.58) 48%, rgba(74, 42, 25, 0.68)),
+    radial-gradient(circle at 16% 12%, rgba(244, 197, 66, 0.2), transparent 16rem),
+    radial-gradient(circle at 82% 8%, rgba(184, 50, 43, 0.18), transparent 18rem),
+    linear-gradient(rgba(18, 60, 45, 0.28), rgba(18, 60, 45, 0.42));
+}
+
+.app-shell__content {
+  position: relative;
+  z-index: 1;
 }
 
 button,
@@ -1150,16 +1183,19 @@ textarea {
 .loading-screen__wall {
   position: relative;
   display: grid;
-  align-content: end;
+  align-content: start;
   min-height: 29rem;
-  padding: 1.25rem;
+  padding: 3.6rem 1.25rem 1.25rem;
   overflow: hidden;
   border: 2px solid rgba(255, 244, 210, 0.28);
   border-radius: 24px;
   background:
-    radial-gradient(circle at 16% 22%, rgba(244, 197, 66, 0.16), transparent 7rem),
-    radial-gradient(circle at 82% 18%, rgba(255, 244, 210, 0.1), transparent 8rem),
-    linear-gradient(180deg, rgba(20, 84, 59, 0.98), rgba(17, 65, 47, 0.98));
+    linear-gradient(90deg, rgba(16, 54, 40, 0.08), rgba(16, 54, 40, 0.7) 58%, rgba(16, 54, 40, 0.16)),
+    radial-gradient(circle at 16% 22%, rgba(244, 197, 66, 0.1), transparent 7rem),
+    var(--app-background-image);
+  background-position: 28% center;
+  background-repeat: no-repeat;
+  background-size: cover;
   box-shadow: var(--shadow);
 }
 
@@ -1196,9 +1232,7 @@ textarea {
   align-self: start;
   justify-self: start;
   min-height: 7rem;
-  padding: 0.85rem 1rem 0.75rem;
-  border-radius: 20px;
-  background: rgba(15, 51, 38, 0.24);
+  padding: 0.35rem 0.3rem 0.65rem;
 }
 
 .loading-screen__handwriting {
