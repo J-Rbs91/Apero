@@ -22,10 +22,7 @@ export function CreateEventPage() {
   const { gentlemanName } = useGentlemanName();
   const [title, setTitle] = useState("");
   const [organizerName, setOrganizerName] = useState(gentlemanName);
-  const [options, setOptions] = useState<AperitifOption[]>([
-    createEmptyOption(),
-    createEmptyOption(),
-  ]);
+  const [options, setOptions] = useState<AperitifOption[]>([createEmptyOption()]);
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
