@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
-import comptoirBackground from "./assets/art/comptoir-background.jpg";
+import comptoirBackground from "./assets/art/Le-zinc.jpg";
 import { GentlemanNameOnboarding } from "./components/onboarding/GentlemanNameOnboarding";
 import {
   GENTLEMAN_NAME_EDIT_EVENT,
