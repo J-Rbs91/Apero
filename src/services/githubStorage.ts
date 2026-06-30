@@ -14,6 +14,13 @@ type GitHubDirectoryItem = {
   type: "file" | "dir" | "symlink" | "submodule";
 };
 
+const COMMIT_MESSAGES = {
+  createEvent: "Nouvelle assemblée créée dans La Confrérie du Petit Jaune",
+  updateEvent: "Mise à jour du scrutin du zinc",
+  addVote: "Nouveau suffrage déposé au comptoir",
+  updateVote: "Suffrage modifié dans le registre",
+};
+
 type GitHubErrorCode =
   | "missing-config"
   | "not-found"
@@ -191,7 +198,7 @@ export const githubEventStorage: EventStorage = {
       );
     }
 
-    await writeEventFile(event, `Convocation scellee: ${event.ceremonialName}`);
+    await writeEventFile(event, COMMIT_MESSAGES.createEvent);
   },
 
   async updateEvent(event: AperitifEvent) {
@@ -201,11 +208,7 @@ export const githubEventStorage: EventStorage = {
       throw new GitHubStorageError("not-found", "Assemblee introuvable.");
     }
 
-    await writeEventFile(
-      event,
-      `Mise a jour du registre: ${event.ceremonialName}`,
-      existingFile.sha,
-    );
+    await writeEventFile(event, COMMIT_MESSAGES.updateEvent, existingFile.sha);
   },
 
   async saveParticipantResponse(eventId: string, response: ParticipantResponse) {
@@ -221,7 +224,7 @@ export const githubEventStorage: EventStorage = {
       try {
         await writeEventFile(
           updatedEvent,
-          `Suffrage depose au zinc par ${response.participantName}`,
+          COMMIT_MESSAGES.addVote,
           existingFile.sha,
         );
         return updatedEvent;
@@ -246,3 +249,4 @@ export const githubEventStorage: EventStorage = {
     );
   },
 };
+
