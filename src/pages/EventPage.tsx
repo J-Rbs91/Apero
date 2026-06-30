@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { AlternativeOptionForm } from "../components/AlternativeOptionForm";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
@@ -25,9 +25,12 @@ function getInitials(name: string): string {
 
 export function EventPage() {
   const { eventId } = useParams<{ eventId: string }>();
-  const [event, setEvent] = useState<AperitifEvent | null>(null);
+  const location = useLocation();
+  const seededEvent = (location.state as { createdEvent?: AperitifEvent } | null)?.createdEvent;
+  const initialEvent = seededEvent && seededEvent.id === eventId ? seededEvent : null;
+  const [event, setEvent] = useState<AperitifEvent | null>(initialEvent);
   const [isPurged, setIsPurged] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!initialEvent);
   const [isSaving, setIsSaving] = useState(false);
   const [isAddingOption, setIsAddingOption] = useState(false);
   const [error, setError] = useState("");
@@ -50,12 +53,23 @@ export function EventPage() {
         setError("");
         setIsPurged(false);
         const fetchedEvent = await eventStorage.getEvent(eventId);
-        const eventWasPurged = fetchedEvent ? false : await eventStorage.isEventPurged(eventId);
 
-        if (isMounted) {
-          setEvent(fetchedEvent);
-          setIsPurged(eventWasPurged);
+        if (fetchedEvent) {
+          if (isMounted) {
+            setEvent(fetchedEvent);
+            setIsPurged(false);
+          }
+        } else if (!initialEvent) {
+          // Pas de version fraîche et pas d'apéro tout juste créé en mémoire :
+          // alors seulement on conclut à l'absence (purgé ou inexistant).
+          const eventWasPurged = await eventStorage.isEventPurged(eventId);
+          if (isMounted) {
+            setEvent(null);
+            setIsPurged(eventWasPurged);
+          }
         }
+        // Sinon : on vient de créer cet apéro, GitHub peut être en retard —
+        // on garde la version en mémoire plutôt que d'afficher « introuvable ».
       } catch (loadError) {
         if (isMounted) {
           setError(

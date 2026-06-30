@@ -117,6 +117,7 @@ async function readJsonFile<T>(
 ): Promise<{ data: T; sha: string } | null> {
   const response = await fetch(`${getContentsUrlForPath(path)}?ref=${githubConfig.branch}`, {
     headers: createHeaders(false),
+    cache: "no-store",
   });
 
   if (response.status === 404) {
@@ -154,7 +155,7 @@ async function readRewardsLedgerFile(): Promise<{ ledger: RewardsLedger; sha?: s
 async function listEventFiles(): Promise<GitHubDirectoryItem[]> {
   const response = await fetch(
     `${getContentsUrlForPath(githubConfig.dataPath)}?ref=${githubConfig.branch}`,
-    { headers: createHeaders(false) },
+    { headers: createHeaders(false), cache: "no-store" },
   );
 
   if (response.status === 404) {

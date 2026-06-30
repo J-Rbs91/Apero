@@ -72,6 +72,17 @@ export function CreateEventPage() {
       return;
     }
 
+    const now = Date.now();
+    const hasFutureSlot = cleanedOptions.some((option) => {
+      const slotTime = new Date(`${option.date}T${option.time}:00`).getTime();
+      return !Number.isNaN(slotTime) && slotTime > now;
+    });
+
+    if (!hasFutureSlot) {
+      setFeedback("Tes créneaux sont déjà passés. Propose au moins une date à venir.");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       const activeEvents = await eventStorage.listActiveEvents();
@@ -96,7 +107,7 @@ export function CreateEventPage() {
       };
 
       await eventStorage.createEvent(event);
-      navigate(`/event/${event.id}`);
+      navigate(`/event/${event.id}`, { state: { createdEvent: event } });
     } catch (error) {
       setFeedback(
         error instanceof Error && error.message === "NO_CEREMONIAL_NAME_AVAILABLE"
