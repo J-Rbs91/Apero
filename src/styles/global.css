@@ -747,16 +747,3 @@ textarea:focus-visible {
   outline: 3px solid var(--pastis);
   outline-offset: 2px;
 }
-
-/* ===== Icon (legacy badge glyphs) ===== */
-.icon {
-  display: inline-block;
-  flex: 0 0 auto;
-  background: currentColor;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-}
