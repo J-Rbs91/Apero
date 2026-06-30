@@ -1,45 +1,49 @@
 import { Link } from "react-router-dom";
+import { MobileBottomBar } from "../components/MobileBottomBar";
+import { MobilePage } from "../components/MobilePage";
 
 export function HomePage() {
   return (
-    <main className="app">
-      <section className="hero">
-        <div className="hero__content">
-          <p className="eyebrow">La grande assemblée des assoiffés raisonnables</p>
-          <h1>La Confrérie du Petit Jaune</h1>
-          <p className="hero__lead">
-            Bienvenue dans La Confrérie du Petit Jaune. Ici, les apéros ne
-            s’improvisent pas. Ils se convoquent, se débattent, se votent, puis
-            se respectent avec la gravité d’une institution légèrement parfumée
-            à la cacahuète.
+    <MobilePage className="home-mobile">
+      <section className="hero hero--mobile">
+        <div className="hero__content hero__content--mobile">
+          <p className="eyebrow">La grande assemblee des assoiffes raisonnables</p>
+          <h1>La Confrerie du Petit Jaune</h1>
+          <p className="hero__lead">La democratie du zinc, enfin dans ta poche.</p>
+          <p className="hero__lead hero__lead--compact">
+            Propose des dates, envoie le lien, laisse le comptoir voter en moins de trente secondes.
           </p>
-          <p className="hero__lead">
-            Crée ton assemblée, propose tes dates, partage la convocation et
-            laisse le peuple du comptoir déposer son suffrage.
-          </p>
-          <Link className="button button--primary button--large" to="/create">
-            Convoquer une assemblée
+          <Link className="button button--primary button--large button--block" to="/create">
+            Convoquer une assemblee
           </Link>
         </div>
       </section>
 
-      <section className="feature-band" aria-label="Fonctionnement">
+      <section className="mobile-steps" aria-label="Fonctionnement">
         <article>
           <span>1</span>
-          <h2>Un ordre ancien</h2>
-          <p>Une mission simple : trouver une date sans perdre la dignité du zinc.</p>
+          <h2>Propose tes dates</h2>
+          <p>Une convocation courte, quelques creneaux, et c'est parti.</p>
         </article>
         <article>
           <span>2</span>
-          <h2>Un nom cérémoniel</h2>
-          <p>Chaque apéro reçoit un titre pompeux, unique et très sérieux.</p>
+          <h2>Envoie le lien</h2>
+          <p>WhatsApp, SMS, Messenger, Discord. Un clic suffit pour rameuter la tablee.</p>
         </article>
-        <article>
+        <article id="registre">
           <span>3</span>
-          <h2>Des registres séparés</h2>
-          <p>Chaque assemblée garde son lien, ses votes et son fichier JSON.</p>
+          <h2>Laisse voter le comptoir</h2>
+          <p>Nom, choix, contribution. Le suffrage se depose sans zoom ni tableau.</p>
         </article>
       </section>
-    </main>
+
+      <section className="secondary-links">
+        <Link className="button button--secondary button--block" to="/create">
+          Ouvrir le registre
+        </Link>
+      </section>
+
+      <MobileBottomBar />
+    </MobilePage>
   );
 }

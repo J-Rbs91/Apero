@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ResultsPanel } from "../components/ResultsPanel";
-import { ShareLinkBox } from "../components/ShareLinkBox";
+import { MobileHeader } from "../components/MobileHeader";
+import { MobilePage } from "../components/MobilePage";
+import { MobileResultsPanel } from "../components/MobileResultsPanel";
+import { MobileShareBox } from "../components/MobileShareBox";
 import { TicketCard } from "../components/TicketCard";
 import { VoteForm } from "../components/VoteForm";
 import { eventStorage } from "../services";
@@ -10,7 +12,7 @@ import { calculateBestOptions } from "../utils/calculateResults";
 
 const beaufLabels: Record<BeaufLevel, string> = {
   soft: "Petit jaune tranquille",
-  medium: "Tournée générale",
+  medium: "Tournee generale",
   legendary: "PMU Champions League",
 };
 
@@ -72,12 +74,12 @@ export function EventPage() {
       setSuccess("");
       const updatedEvent = await eventStorage.saveParticipantResponse(eventId, response);
       setEvent(updatedEvent);
-      setSuccess("Suffrage enregistré. Le registre du zinc est à jour.");
+      setSuccess("Suffrage enregistre. Le registre du zinc est a jour.");
     } catch (saveError) {
       setError(
         saveError instanceof Error
           ? saveError.message
-          : "Le comptoir est saturé, retente dans deux secondes.",
+          : "Le comptoir est sature, retente dans deux secondes.",
       );
     } finally {
       setIsSaving(false);
@@ -86,66 +88,63 @@ export function EventPage() {
 
   if (isLoading) {
     return (
-      <main className="app app--compact">
+      <MobilePage>
         <TicketCard className="state-card">
           <p className="eyebrow">Lecture du registre</p>
-          <h1>On cherche l’assemblée derrière le comptoir...</h1>
+          <h1>On cherche l'assemblee derriere le comptoir...</h1>
         </TicketCard>
-      </main>
+      </MobilePage>
     );
   }
 
   if (!event) {
     return (
-      <main className="app app--compact">
+      <MobilePage>
         <TicketCard className="state-card">
-          <p className="eyebrow">Assemblée introuvable</p>
-          <h1>Cette convocation n’existe pas</h1>
-          <p>
-            Soit le lien est moisi, soit le patron a fermé le bar.
-          </p>
+          <p className="eyebrow">Assemblee introuvable</p>
+          <h1>Cette convocation n'existe pas</h1>
+          <p>Soit le lien est moisi, soit le patron a ferme le bar.</p>
           {error && <p className="feedback">{error}</p>}
           <Link className="button button--primary" to="/">
-            Retour à la Confrérie
+            Retour a la Confrerie
           </Link>
         </TicketCard>
-      </main>
+      </MobilePage>
     );
   }
 
   const locations = Array.from(new Set(event.options.map((option) => option.location)));
 
   return (
-    <main className="app app--compact">
-      <header className="topbar">
-        <Link className="brand-link" to="/">
-          <span className="brand-mark">CJ</span>
-          <span>La Confrérie du Petit Jaune</span>
-        </Link>
-      </header>
+    <MobilePage>
+      <MobileHeader
+        eyebrow={beaufLabels[event.beaufLevel]}
+        title={event.ceremonialName}
+        subtitle="Ouvre, comprends, vote. L'assemblee est pensee pour le telephone."
+      />
 
-      <section className="event-hero">
-        <div>
-          <p className="eyebrow">{beaufLabels[event.beaufLevel]}</p>
-          <h1>{event.ceremonialName}</h1>
-          {event.title && (
-            <p>
-              <strong>Objet de la réunion :</strong> {event.title}
-            </p>
-          )}
-          <p>Convoqué par : {event.organizerName}</p>
-          {event.description && <p>{event.description}</p>}
+      <section className="event-summary-card">
+        {event.title && (
           <p>
-            <strong>Lieu proposé :</strong> {locations.join(" / ")}
+            <strong>Objet :</strong> {event.title}
           </p>
-          <p>Le peuple du comptoir est appelé à voter.</p>
-        </div>
-        <ShareLinkBox url={shareUrl} />
+        )}
+        <p>
+          <strong>Convoque par :</strong> {event.organizerName}
+        </p>
+        <p>
+          <strong>Propositions :</strong> {event.options.length} | <strong>Participants :</strong>{" "}
+          {event.participants.length}
+        </p>
+        <p>
+          <strong>Lieux :</strong> {locations.join(" / ")}
+        </p>
+        {event.description && <p>{event.description}</p>}
       </section>
 
       <p className="security-note">
-        C’est une institution de comptoir, pas un coffre-fort. Ne mets rien que tu ne voudrais
-        pas voir traîner sur une nappe collante publique.
+        C'est une institution de comptoir, pas un coffre-fort. Ne mets rien que tu ne voudrais
+        pas voir trainer sur une nappe collante publique.
       </p>
 
       {error && (
@@ -159,17 +158,17 @@ export function EventPage() {
         </p>
       )}
 
-      <div className="page-stack">
-        {result && <ResultsPanel event={event} result={result} />}
+      <div className="page-stack page-stack--mobile">
+        {result && <MobileResultsPanel event={event} result={result} />}
         <VoteForm event={event} isSaving={isSaving} onSubmit={handleVoteSubmit} />
 
         <TicketCard>
           <div className="section-heading">
-            <p className="eyebrow">Les membres de la Confrérie</p>
+            <p className="eyebrow">Les membres de la Confrerie</p>
             <h2>Le registre du comptoir</h2>
           </div>
           {event.participants.length === 0 ? (
-            <p>Aucun membre n’a encore signé. L’institution retient son souffle.</p>
+            <p>Aucun membre n'a encore signe. L'institution retient son souffle.</p>
           ) : (
             <div className="participant-stack">
               {event.participants.map((participant) => (
@@ -178,13 +177,15 @@ export function EventPage() {
                     <h3>{participant.participantName}</h3>
                     {participant.brings && <p>{participant.brings}</p>}
                   </div>
-                  {participant.comment && <p className="comment">“{participant.comment}”</p>}
+                  {participant.comment && <p className="comment">"{participant.comment}"</p>}
                 </article>
               ))}
             </div>
           )}
         </TicketCard>
+
+        <MobileShareBox url={shareUrl} />
       </div>
-    </main>
+    </MobilePage>
   );
 }

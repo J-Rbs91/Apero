@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { MobileHeader } from "../components/MobileHeader";
+import { MobilePage } from "../components/MobilePage";
+import { StickyActionBar } from "../components/StickyActionBar";
 import { TicketCard } from "../components/TicketCard";
 import { eventStorage } from "../services";
 import type { AperitifEvent, AperitifOption, BeaufLevel } from "../types/apero";
@@ -14,13 +17,13 @@ const beaufLevels: Array<{ value: BeaufLevel; label: string; detail: string }> =
   },
   {
     value: "medium",
-    label: "Tournée générale",
-    detail: "La bande est motivée, le planning tremble déjà.",
+    label: "Tournee generale",
+    detail: "La bande est motivee, le planning tremble deja.",
   },
   {
     value: "legendary",
     label: "PMU Champions League",
-    detail: "Le comité d'organisation sort les grands tickets.",
+    detail: "Le comite d'organisation sort les grands tickets.",
   },
 ];
 
@@ -51,7 +54,7 @@ export function CreateEventPage() {
       ...createEmptyOption(),
       date: "2026-07-04",
       time: "18:30",
-      location: "Chez Dédé",
+      location: "Chez Dede",
     },
   ]);
   const [feedback, setFeedback] = useState("");
@@ -94,7 +97,7 @@ export function CreateEventPage() {
       cleanedOptions.length === 0 ||
       cleanedOptions.some((option) => !option.date || !option.time || !option.location)
     ) {
-      setFeedback("Chaque proposition doit avoir un jour, une heure et un établissement.");
+      setFeedback("Chaque proposition doit avoir un jour, une heure et un etablissement.");
       return;
     }
 
@@ -122,10 +125,10 @@ export function CreateEventPage() {
     } catch (error) {
       setFeedback(
         error instanceof Error && error.message === "NO_CEREMONIAL_NAME_AVAILABLE"
-          ? "La Confrérie est complète. Trop d’apéros sont déjà en cours de magouille. Clôture une assemblée avant d’en convoquer une nouvelle."
+          ? "La Confrerie est complete. Trop d'aperos sont deja en cours. Cloture une assemblee avant d'en convoquer une nouvelle."
           : error instanceof Error
             ? error.message
-            : "GitHub a renversé le registre. Retente dans deux secondes.",
+            : "GitHub a renverse le registre. Retente dans deux secondes.",
       );
     } finally {
       setIsSubmitting(false);
@@ -133,33 +136,26 @@ export function CreateEventPage() {
   }
 
   return (
-    <main className="app app--compact">
-      <header className="topbar">
-        <Link className="brand-link" to="/">
-          <span className="brand-mark">CJ</span>
-          <span>La Confrérie du Petit Jaune</span>
-        </Link>
-      </header>
+    <MobilePage>
+      <MobileHeader
+        eyebrow="Entrer dans la Confrerie"
+        title="Convoquer un apero"
+        subtitle="Une creation simple, lisible et pensee pour le telephone."
+      />
 
-      <section className="page-intro">
-        <p className="eyebrow">Entrer dans la Confrérie</p>
-        <h1>Convoquer un apéro</h1>
-        <p>
-          Le nom cérémoniel sera attribué automatiquement par le grand hasard du
-          comptoir. Le lien restera fondé sur l’identifiant technique, parce que
-          même les institutions ont besoin d’un peu de plomberie.
-        </p>
-      </section>
-
-      <form className="page-stack" onSubmit={handleSubmit}>
+      <form className="page-stack page-stack--mobile" onSubmit={handleSubmit}>
         <TicketCard>
+          <div className="section-heading">
+            <p className="eyebrow">Etape 1</p>
+            <h2>La convocation</h2>
+          </div>
           <div className="form-grid">
             <label className="field">
               <span>Objet officiel de la convocation</span>
               <input
                 value={title}
                 onChange={(eventChange) => setTitle(eventChange.target.value)}
-                placeholder="Apéro fin de chantier"
+                placeholder="Apero fin de chantier"
               />
             </label>
             <label className="field">
@@ -171,12 +167,12 @@ export function CreateEventPage() {
               />
             </label>
             <label className="field field--wide">
-              <span>Motif solennel de la réunion</span>
+              <span>Motif solennel</span>
               <textarea
                 value={description}
                 onChange={(eventChange) => setDescription(eventChange.target.value)}
                 rows={4}
-                placeholder="On enterre cette semaine comme elle le mérite."
+                placeholder="On enterre cette semaine comme elle le merite."
               />
             </label>
           </div>
@@ -184,8 +180,8 @@ export function CreateEventPage() {
 
         <TicketCard>
           <div className="section-heading">
-            <p className="eyebrow">Degré de cérémonie</p>
-            <h2>Choisis l’apparat du zinc</h2>
+            <p className="eyebrow">Apparat</p>
+            <h2>Choisis l'apparat du zinc</h2>
           </div>
           <div className="choice-grid">
             {beaufLevels.map((level) => (
@@ -211,27 +207,35 @@ export function CreateEventPage() {
         </TicketCard>
 
         <TicketCard>
-          <div className="section-heading section-heading--inline">
-            <div>
-              <p className="eyebrow">Soumettre une tablée</p>
-              <h2>Les propositions au zinc</h2>
-            </div>
-            <button
-              className="button button--secondary"
-              type="button"
-              onClick={() =>
-                setOptions((currentOptions) => [...currentOptions, createEmptyOption()])
-              }
-            >
-              Soumettre une proposition au zinc
-            </button>
+          <div className="section-heading">
+            <p className="eyebrow">Etape 2</p>
+            <h2>Les propositions</h2>
           </div>
+          <button
+            className="button button--secondary button--block"
+            type="button"
+            onClick={() =>
+              setOptions((currentOptions) => [...currentOptions, createEmptyOption()])
+            }
+          >
+            Ajouter une proposition
+          </button>
 
           <div className="option-editor-stack">
             {options.map((option, index) => (
-              <article className="option-editor" key={option.id}>
+              <article className="option-editor option-editor--mobile" key={option.id}>
+                <div className="option-editor__title">
+                  <p className="eyebrow">Proposition {index + 1}</p>
+                  <button
+                    className="button button--ghost"
+                    type="button"
+                    onClick={() => removeOption(option.id)}
+                  >
+                    Retirer
+                  </button>
+                </div>
                 <label className="field">
-                  <span>Jour du rassemblement {index + 1}</span>
+                  <span>Jour du rassemblement</span>
                   <input
                     type="date"
                     value={option.date}
@@ -251,7 +255,7 @@ export function CreateEventPage() {
                   />
                 </label>
                 <label className="field">
-                  <span>Établissement de réception</span>
+                  <span>Etablissement de reception</span>
                   <input
                     value={option.location}
                     onChange={(eventChange) =>
@@ -261,38 +265,41 @@ export function CreateEventPage() {
                   />
                 </label>
                 <label className="field">
-                  <span>Annotation du greffe</span>
+                  <span>Note optionnelle</span>
                   <input
                     value={option.note ?? ""}
                     onChange={(eventChange) =>
                       updateOption(option.id, { note: eventChange.target.value })
                     }
-                    placeholder="Terrasse si le ciel coopère"
+                    placeholder="Terrasse si le ciel coopere"
                   />
                 </label>
-                <button
-                  className="button button--ghost"
-                  type="button"
-                  onClick={() => removeOption(option.id)}
-                >
-                  Retirer
-                </button>
               </article>
             ))}
           </div>
         </TicketCard>
 
-        <div className="form-actions">
-          <button className="button button--primary button--large" disabled={isSubmitting}>
+        <TicketCard>
+          <div className="section-heading">
+            <p className="eyebrow">Etape 3</p>
+            <h2>Sceller la convocation</h2>
+          </div>
+          <p>
+            Le nom ceremoniel sera attribue automatiquement. Le lien restera simple a partager dans la conversation.
+          </p>
+        </TicketCard>
+
+        <StickyActionBar>
+          <button className="button button--primary button--large button--block" disabled={isSubmitting}>
             {isSubmitting ? "Scellement du registre..." : "Sceller la convocation"}
           </button>
-          {feedback && (
-            <p className="feedback" role="alert">
-              {feedback}
-            </p>
-          )}
-        </div>
+        </StickyActionBar>
+        {feedback && (
+          <p className="feedback" role="alert">
+            {feedback}
+          </p>
+        )}
       </form>
-    </main>
+    </MobilePage>
   );
 }

@@ -1,23 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import type { AperitifEvent, ParticipantResponse, VoteStatus } from "../types/apero";
 import { createId } from "../utils/createId";
-import { formatOption } from "../utils/formatOption";
+import { EventOptionMobileCard } from "./EventOptionMobileCard";
+import { StickyActionBar } from "./StickyActionBar";
 import { TicketCard } from "./TicketCard";
 
 const bringOptions = [
   "Chips",
   "Saucisson",
-  "Cacahuètes",
+  "Cacahuetes",
   "Un pack",
   "Du soft",
-  "Des glaçons, parce que quelqu'un doit être adulte",
-  "Changer l’eau des olives",
-];
-
-const voteOptions: Array<{ value: VoteStatus; label: string }> = [
-  { value: "yes", label: "Présent, coude levé" },
-  { value: "maybe", label: "Sous réserve du ministre" },
-  { value: "no", label: "Retenu par une affaire de haute importance" },
+  "Des glacons, parce que quelqu'un doit etre adulte",
+  "Changer l'eau des olives",
 ];
 
 type DraftVotes = Record<string, VoteStatus | "">;
@@ -70,7 +65,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
     setVotes({ ...emptyVotes, ...existingParticipant.votes });
     setBrings(existingParticipant.brings ?? "");
     setComment(existingParticipant.comment ?? "");
-    setFeedback("Vote retrouvé. Le retournement de veste est administrativement possible.");
+    setFeedback("Vote retrouve. Le retournement de veste reste administrativement possible.");
   }, [emptyVotes, existingParticipant]);
 
   function updateVote(optionId: string, status: VoteStatus) {
@@ -87,14 +82,14 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
     const trimmedName = participantName.trim();
 
     if (!trimmedName) {
-      setFeedback("Il faut inscrire un membre au registre, même sous pseudo douteux.");
+      setFeedback("Il faut inscrire un membre au registre, meme sous pseudo douteux.");
       return;
     }
 
     const missingVote = event.options.some((option) => !votes[option.id]);
 
     if (missingVote) {
-      setFeedback("Un suffrage par proposition, sinon l’institution vacille.");
+      setFeedback("Un suffrage par proposition, sinon l'institution vacille.");
       return;
     }
 
@@ -112,53 +107,36 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
     await onSubmit(response);
     setFeedback(
       existingParticipant
-        ? "Vote mis à jour. Le retournement de veste est validé."
-        : "Suffrage déposé. Le zinc en prend acte.",
+        ? "Vote mis a jour. Le retournement de veste est valide."
+        : "Suffrage depose. Le zinc en prend acte.",
     );
   }
 
   return (
     <TicketCard className="vote-panel">
       <div className="section-heading">
-        <p className="eyebrow">Déposer son suffrage au zinc</p>
-        <h2>{existingParticipant ? "Amender mon bulletin" : "Le registre t’attend"}</h2>
+        <p className="eyebrow">Deposer son suffrage au zinc</p>
+        <h2>{existingParticipant ? "Amender mon bulletin" : "Le registre t'attend"}</h2>
       </div>
 
       <form className="vote-form" onSubmit={handleSubmit}>
         <label className="field">
-          <span>Nom du membre présent au registre</span>
+          <span>Ton nom dans le registre</span>
           <input
             value={participantName}
             onChange={(eventChange) => setParticipantName(eventChange.target.value)}
-            placeholder="Jojo, Nadine, Grand Maître Chips..."
+            placeholder="Jojo, Nadine, Grand Maitre Chips..."
           />
         </label>
 
         <div className="vote-stack">
           {event.options.map((option) => (
-            <fieldset className="vote-card" key={option.id}>
-              <legend>{formatOption(option)}</legend>
-              <div className="segments">
-                {voteOptions.map((voteOption) => (
-                  <label
-                    className={
-                      votes[option.id] === voteOption.value
-                        ? "segment segment--selected"
-                        : "segment"
-                    }
-                    key={voteOption.value}
-                  >
-                    <input
-                      type="radio"
-                      name={`vote-${option.id}`}
-                      checked={votes[option.id] === voteOption.value}
-                      onChange={() => updateVote(option.id, voteOption.value)}
-                    />
-                    <span>{voteOption.label}</span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
+            <EventOptionMobileCard
+              key={option.id}
+              option={option}
+              value={votes[option.id]}
+              onChange={(status) => updateVote(option.id, status)}
+            />
           ))}
         </div>
 
@@ -168,7 +146,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
             list="bring-options"
             value={brings}
             onChange={(eventChange) => setBrings(eventChange.target.value)}
-            placeholder="Olives, soft, pain, dignité approximative..."
+            placeholder="Olives, soft, pain, dignite approximative..."
           />
           <datalist id="bring-options">
             {bringOptions.map((option) => (
@@ -178,18 +156,20 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
         </label>
 
         <label className="field">
-          <span>Déclaration au comptoir</span>
+          <span>Declaration au comptoir</span>
           <textarea
             value={comment}
             onChange={(eventChange) => setComment(eventChange.target.value)}
             rows={3}
-            placeholder="Je comparais si la réunion finit avant la fin du monde."
+            placeholder="Je comparais si la reunion finit avant la fin du monde."
           />
         </label>
 
-        <button className="button button--primary" type="submit" disabled={isSaving}>
-          {isSaving ? "Dépôt du suffrage..." : "Déposer mon suffrage"}
-        </button>
+        <StickyActionBar>
+          <button className="button button--primary button--block" type="submit" disabled={isSaving}>
+            {isSaving ? "Depot du suffrage..." : "Deposer mon suffrage"}
+          </button>
+        </StickyActionBar>
         {feedback && (
           <p className="feedback" role="status">
             {feedback}
