@@ -1,0 +1,22 @@
+{
+  "id": "apero_38d8f2d0eb",
+  "ceremonialName": "Le Symposium des Olives Molles",
+  "title": "Il faut une appli pour aller boire un verre ou bien ?",
+  "organizerName": "Jérémy Rbs",
+  "beaufLevel": "medium",
+  "status": "active",
+  "options": [
+    {
+      "id": "option_641b724ef2",
+      "date": "2026-07-02",
+      "time": "19:00",
+      "location": "La Loule - Montferrier",
+      "createdByRole": "organizer",
+      "createdByName": "Jérémy Rbs",
+      "createdAt": "2026-06-30T23:33:49.364Z"
+    }
+  ],
+  "participants": [],
+  "createdAt": "2026-06-30T23:33:49.364Z",
+  "updatedAt": "2026-06-30T23:33:49.364Z"
+}
