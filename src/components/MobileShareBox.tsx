@@ -11,11 +11,11 @@ export function MobileShareBox({ url }: MobileShareBoxProps) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "La Confrerie du Petit Jaune",
-          text: "Viens voter pour l'assemblee du comptoir.",
+          title: "La Confrérie du Petit Jaune",
+          text: "Viens voter pour l’assemblée du comptoir.",
           url,
         });
-        setFeedback("Lien partage.");
+        setFeedback("Lien partagé.");
         return;
       } catch {
         setFeedback("");
@@ -24,7 +24,7 @@ export function MobileShareBox({ url }: MobileShareBoxProps) {
 
     try {
       await navigator.clipboard.writeText(url);
-      setFeedback("Lien copie.");
+      setFeedback("Lien copié.");
     } catch {
       setFeedback("Copie impossible ici. Garde le lien sous le coude.");
     }

@@ -17,7 +17,7 @@ export function MobileHeader({
     <header className={compact ? "mobile-header mobile-header--compact" : "mobile-header"}>
       <Link className="brand-link brand-link--mobile" to="/">
         <span className="brand-mark">CJ</span>
-        <span>La Confrerie du Petit Jaune</span>
+        <span>La Confrérie du Petit Jaune</span>
       </Link>
       {(eyebrow || title || subtitle) && (
         <div className="mobile-header__copy">

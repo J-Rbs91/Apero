@@ -7,7 +7,7 @@ type LoadingScreenProps = {
 
 export function LoadingScreen({
   title = "ap\u00e9ro ?",
-  subtitle = "Le comptoir prépare le registre...",
+  subtitle = "Le comptoir pr\u00e9pare le registre\u2026",
 }: LoadingScreenProps) {
   return (
     <div className="loading-screen" role="status" aria-live="polite">

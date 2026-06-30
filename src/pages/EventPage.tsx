@@ -14,7 +14,7 @@ import { calculateBestOptions } from "../utils/calculateResults";
 
 const beaufLabels: Record<BeaufLevel, string> = {
   soft: "Petit jaune tranquille",
-  medium: "Tournee generale",
+  medium: "Tournée générale",
   legendary: "PMU Champions League",
 };
 
@@ -84,12 +84,12 @@ export function EventPage() {
       setSuccess("");
       const updatedEvent = await eventStorage.saveParticipantResponse(eventId, response);
       setEvent(updatedEvent);
-      setSuccess("Suffrage enregistre. Le registre du zinc est a jour.");
+      setSuccess("Suffrage enregistré. Le registre du zinc est à jour.");
     } catch (saveError) {
       setError(
         saveError instanceof Error
           ? saveError.message
-          : "Le comptoir est sature, retente dans deux secondes.",
+          : "Le comptoir est saturé, réessaie dans deux secondes.",
       );
     } finally {
       setIsSaving(false);
@@ -99,7 +99,7 @@ export function EventPage() {
   if (isLoading) {
     return (
       <MobilePage className="event-mobile">
-        <LoadingScreen title="ap\u00e9ro ?" subtitle="La Confrerie prepare le registre..." />
+        <LoadingScreen title="ap\u00e9ro ?" subtitle="La Confrérie prépare le registre…" />
       </MobilePage>
     );
   }
@@ -108,12 +108,12 @@ export function EventPage() {
     return (
       <MobilePage className="event-mobile">
         <TicketCard className="state-card state-card--error">
-          <p className="eyebrow">Assemblee introuvable</p>
-          <h1>Cette convocation n'existe pas</h1>
-          <p>Soit le lien est moisi, soit le patron a ferme le bar.</p>
+          <p className="eyebrow">Assemblée introuvable</p>
+          <h1>Cette convocation n’existe pas</h1>
+          <p>Soit le lien est moisi, soit le patron a fermé le bar.</p>
           {error && <p className="feedback">{error}</p>}
           <Link className="button button--primary" to="/">
-            Retour a la Confrerie
+            Retour à la Confrérie
           </Link>
         </TicketCard>
       </MobilePage>
@@ -127,7 +127,7 @@ export function EventPage() {
       <MobileHeader
         eyebrow={beaufLabels[event.beaufLevel]}
         title={event.ceremonialName}
-        subtitle="Ouvre, comprends, vote. L'assemblee est pensee pour le telephone."
+        subtitle="Ouvre, comprends, vote. L’assemblée est pensée pour le téléphone."
       />
 
       <section className="event-summary-card event-summary-card--counter">
@@ -137,7 +137,7 @@ export function EventPage() {
           </p>
         )}
         <p>
-          <strong>Convoque par :</strong> {event.organizerName}
+          <strong>Convoqué par :</strong> {event.organizerName}
         </p>
         <p>
           <strong>Propositions :</strong> {event.options.length} | <strong>Participants :</strong>{" "}
@@ -152,8 +152,8 @@ export function EventPage() {
       <AperoOrnaments variant="verdict" />
 
       <p className="security-note">
-        C'est une institution de comptoir, pas un coffre-fort. Ne mets rien que tu ne voudrais
-        pas voir trainer sur une nappe collante publique.
+        C’est une institution de comptoir, pas un coffre-fort. Ne mets rien que tu ne voudrais
+        pas voir traîner sur une nappe collante publique.
       </p>
 
       {error && (
@@ -173,11 +173,11 @@ export function EventPage() {
 
         <TicketCard className="ticket-card--register" id="registre">
           <div className="section-heading">
-            <p className="eyebrow">Les membres de la Confrerie</p>
+            <p className="eyebrow">Les membres de la Confrérie</p>
             <h2>Le registre du comptoir</h2>
           </div>
           {event.participants.length === 0 ? (
-            <p>Aucun membre n'a encore signe. L'institution retient son souffle.</p>
+            <p>Aucun membre n’a encore signé. L’institution retient son souffle.</p>
           ) : (
             <div className="participant-stack">
               {event.participants.map((participant) => (

@@ -54,7 +54,7 @@ function assertConfigured() {
   if (!isGithubStorageConfigured()) {
     throw new GitHubStorageError(
       "missing-config",
-      "Configuration GitHub absente. Ajoute les variables VITE_GITHUB_* avant d'ecrire dans le repo.",
+      "Configuration GitHub absente. Ajoute les variables VITE_GITHUB_* avant d’écrire dans le repo.",
     );
   }
 }
@@ -106,7 +106,7 @@ async function readEventFile(
   if (!response.ok) {
     throw new GitHubStorageError(
       "github-error",
-      `GitHub refuse de lire le registre de la Confrerie (${response.status}).`,
+      `GitHub refuse de lire le registre de la Confrérie (${response.status}).`,
     );
   }
 
@@ -129,7 +129,7 @@ async function listEventFiles(): Promise<GitHubDirectoryItem[]> {
   if (!response.ok) {
     throw new GitHubStorageError(
       "github-error",
-      `GitHub refuse de lister les assemblees (${response.status}).`,
+      `GitHub refuse de lister les assemblées (${response.status}).`,
     );
   }
 
@@ -156,14 +156,14 @@ async function writeEventFile(
   if (response.status === 409) {
     throw new GitHubStorageError(
       "conflict",
-      "Le comptoir est sature, retente dans deux secondes.",
+      "Le comptoir est saturé, réessaie dans deux secondes.",
     );
   }
 
   if (!response.ok) {
     throw new GitHubStorageError(
       "github-error",
-      `GitHub refuse d'ecrire sur le registre (${response.status}).`,
+      `GitHub refuse d’écrire sur le registre (${response.status}).`,
     );
   }
 }
@@ -194,7 +194,7 @@ export const githubEventStorage: EventStorage = {
     if (existingFile) {
       throw new GitHubStorageError(
         "conflict",
-        "Un registre existe deja avec cet identifiant. Le hasard a trop traine au bar.",
+        "Un registre existe déjà avec cet identifiant. Le hasard a trop traîné au bar.",
       );
     }
 
@@ -205,7 +205,7 @@ export const githubEventStorage: EventStorage = {
     const existingFile = await readEventFile(event.id);
 
     if (!existingFile) {
-      throw new GitHubStorageError("not-found", "Assemblee introuvable.");
+      throw new GitHubStorageError("not-found", "Assemblée introuvable.");
     }
 
     await writeEventFile(event, COMMIT_MESSAGES.updateEvent, existingFile.sha);
@@ -216,7 +216,7 @@ export const githubEventStorage: EventStorage = {
       const existingFile = await readEventFile(eventId);
 
       if (!existingFile) {
-        throw new GitHubStorageError("not-found", "Assemblee introuvable.");
+        throw new GitHubStorageError("not-found", "Assemblée introuvable.");
       }
 
       const updatedEvent = upsertParticipant(existingFile.event, response);
@@ -245,7 +245,7 @@ export const githubEventStorage: EventStorage = {
 
     throw new GitHubStorageError(
       "conflict",
-      "Le comptoir est sature, retente dans deux secondes.",
+      "Le comptoir est saturé, réessaie dans deux secondes.",
     );
   },
 };

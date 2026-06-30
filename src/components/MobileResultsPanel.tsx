@@ -39,10 +39,10 @@ export function MobileResultsPanel({ event, result }: MobileResultsPanelProps) {
               <h3>{formatOption(option)}</h3>
               <div className="mobile-results-panel__scores">
                 <span>
-                  Presents <strong>{optionResult?.yesCount ?? 0}</strong>
+                  Présents <strong>{optionResult?.yesCount ?? 0}</strong>
                 </span>
                 <span>
-                  Reserves <strong>{optionResult?.maybeCount ?? 0}</strong>
+                  Réserves <strong>{optionResult?.maybeCount ?? 0}</strong>
                 </span>
                 <span>
                   Absents <strong>{optionResult?.noCount ?? 0}</strong>

@@ -15,13 +15,13 @@ export function HomePage() {
       >
         <div className="hero__content hero__content--mobile">
           <p className="eyebrow eyebrow--pastis">Institution officieuse du comptoir</p>
-          <h1>La Confrerie du Petit Jaune</h1>
-          <p className="hero__lead">La democratie du zinc, enfin dans ta poche.</p>
+          <h1>La Confrérie du Petit Jaune</h1>
+          <p className="hero__lead">La démocratie du zinc, enfin dans ta poche.</p>
           <p className="hero__lead hero__lead--compact">
             Propose des dates, envoie le lien, laisse le comptoir voter en moins de trente secondes.
           </p>
           <Link className="button button--primary button--large button--block" to="/create">
-            Convoquer une assemblee
+            Convoquer une assemblée
           </Link>
         </div>
       </section>
@@ -32,25 +32,25 @@ export function HomePage() {
         <article>
           <span>1</span>
           <h2>Propose tes dates</h2>
-          <p>Une convocation courte, quelques creneaux, et c'est parti.</p>
+          <p>Une convocation courte, quelques créneaux, et c’est parti.</p>
         </article>
         <article>
           <span>2</span>
           <h2>Envoie le lien</h2>
-          <p>WhatsApp, SMS, Messenger, Discord. Un clic suffit pour rameuter la tablee.</p>
+          <p>WhatsApp, SMS, Messenger, Discord. Un clic suffit pour rameuter la tablée.</p>
         </article>
         <article id="registre">
           <span>3</span>
           <h2>Laisse voter le comptoir</h2>
-          <p>Nom, choix, contribution. Le suffrage se depose sans zoom ni tableau.</p>
+          <p>Nom, choix, contribution. Le suffrage se dépose sans zoom ni tableau.</p>
         </article>
       </section>
 
       <section className="secondary-links comptoir-notice">
         <p className="eyebrow">Registre de service</p>
-        <h2>Un mini PMU pour trancher l'apero</h2>
+        <h2>Un mini PMU pour trancher l’apéro</h2>
         <p>
-          Pas de tableur, pas de debat interminable. Une convocation, des bulletins, un verdict.
+          Pas de tableur, pas de débat interminable. Une convocation, des bulletins, un verdict.
         </p>
         <Link className="button button--secondary button--block" to="/create">
           Ouvrir le registre

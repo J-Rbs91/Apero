@@ -18,13 +18,13 @@ const beaufLevels: Array<{ value: BeaufLevel; label: string; detail: string }> =
   },
   {
     value: "medium",
-    label: "Tournee generale",
-    detail: "La bande est motivee, le planning tremble deja.",
+    label: "Tournée générale",
+    detail: "La bande est motivée, le planning tremble déjà.",
   },
   {
     value: "legendary",
     label: "PMU Champions League",
-    detail: "Le comite d'organisation sort les grands tickets.",
+    detail: "Le comité d’organisation sort les grands tickets.",
   },
 ];
 
@@ -55,7 +55,7 @@ export function CreateEventPage() {
       ...createEmptyOption(),
       date: "2026-07-04",
       time: "18:30",
-      location: "Chez Dede",
+      location: "Chez Dédé",
     },
   ]);
   const [feedback, setFeedback] = useState("");
@@ -98,7 +98,7 @@ export function CreateEventPage() {
       cleanedOptions.length === 0 ||
       cleanedOptions.some((option) => !option.date || !option.time || !option.location)
     ) {
-      setFeedback("Chaque proposition doit avoir un jour, une heure et un etablissement.");
+      setFeedback("Chaque proposition doit avoir un jour, une heure et un établissement.");
       return;
     }
 
@@ -126,10 +126,10 @@ export function CreateEventPage() {
     } catch (error) {
       setFeedback(
         error instanceof Error && error.message === "NO_CEREMONIAL_NAME_AVAILABLE"
-          ? "La Confrerie est complete. Trop d'aperos sont deja en cours. Cloture une assemblee avant d'en convoquer une nouvelle."
+          ? "La Confrérie est complète. Trop d’apéros sont déjà en cours. Clôture une assemblée avant d’en convoquer une nouvelle."
           : error instanceof Error
             ? error.message
-            : "GitHub a renverse le registre. Retente dans deux secondes.",
+            : "GitHub a renversé le registre. Réessaie dans deux secondes.",
       );
     } finally {
       setIsSubmitting(false);
@@ -140,7 +140,7 @@ export function CreateEventPage() {
     <MobilePage className="create-mobile">
       <MobileHeader
         eyebrow="Registre de convocation"
-        title="Convoquer un apero"
+        title="Convoquer une assemblée"
         subtitle="Une table de zinc, quelques propositions, et le suffrage peut commencer."
       />
 
@@ -149,7 +149,7 @@ export function CreateEventPage() {
       <form className="page-stack page-stack--mobile" onSubmit={handleSubmit}>
         <TicketCard className="ticket-card--registry">
           <div className="section-heading section-heading--with-stamp">
-            <p className="eyebrow">Etape 1</p>
+            <p className="eyebrow">Étape 1</p>
             <h2>La convocation</h2>
           </div>
           <div className="form-grid">
@@ -158,7 +158,7 @@ export function CreateEventPage() {
               <input
                 value={title}
                 onChange={(eventChange) => setTitle(eventChange.target.value)}
-                placeholder="Apero fin de chantier"
+                placeholder="Apéro fin de chantier"
               />
             </label>
             <label className="field">
@@ -170,12 +170,12 @@ export function CreateEventPage() {
               />
             </label>
             <label className="field field--wide">
-              <span>Motif solennel</span>
+              <span>Motif solennel de la réunion</span>
               <textarea
                 value={description}
                 onChange={(eventChange) => setDescription(eventChange.target.value)}
                 rows={4}
-                placeholder="On enterre cette semaine comme elle le merite."
+                placeholder="On enterre cette semaine comme elle le mérite."
               />
             </label>
           </div>
@@ -184,7 +184,7 @@ export function CreateEventPage() {
         <TicketCard className="ticket-card--wood">
           <div className="section-heading">
             <p className="eyebrow">Apparat</p>
-            <h2>Choisis l'apparat du zinc</h2>
+            <h2>Choisis l’apparat du zinc</h2>
           </div>
           <div className="choice-grid">
             {beaufLevels.map((level) => (
@@ -211,7 +211,7 @@ export function CreateEventPage() {
 
         <TicketCard className="ticket-card--counter">
           <div className="section-heading">
-            <p className="eyebrow">Etape 2</p>
+            <p className="eyebrow">Étape 2</p>
             <h2>Les propositions</h2>
           </div>
           <button
@@ -221,7 +221,7 @@ export function CreateEventPage() {
               setOptions((currentOptions) => [...currentOptions, createEmptyOption()])
             }
           >
-            Ajouter une proposition
+            Soumettre une proposition au zinc
           </button>
 
           <div className="option-editor-stack">
@@ -258,7 +258,7 @@ export function CreateEventPage() {
                   />
                 </label>
                 <label className="field">
-                  <span>Etablissement de reception</span>
+                  <span>Établissement de réception</span>
                   <input
                     value={option.location}
                     onChange={(eventChange) =>
@@ -274,7 +274,7 @@ export function CreateEventPage() {
                     onChange={(eventChange) =>
                       updateOption(option.id, { note: eventChange.target.value })
                     }
-                    placeholder="Terrasse si le ciel coopere"
+                    placeholder="Terrasse si le ciel coopère"
                   />
                 </label>
               </article>
@@ -284,17 +284,17 @@ export function CreateEventPage() {
 
         <TicketCard className="ticket-card--seal">
           <div className="section-heading">
-            <p className="eyebrow">Etape 3</p>
+            <p className="eyebrow">Étape 3</p>
             <h2>Sceller la convocation</h2>
           </div>
           <p>
-            Le nom ceremoniel sera attribue automatiquement. Le lien restera simple a partager dans la conversation.
+            Le nom cérémoniel sera attribué automatiquement. Le lien restera simple à partager dans la conversation.
           </p>
         </TicketCard>
 
         <StickyActionBar>
           <button className="button button--primary button--large button--block" disabled={isSubmitting}>
-            {isSubmitting ? "Scellement du registre..." : "Sceller la convocation"}
+            {isSubmitting ? "Scellement du registre…" : "Sceller la convocation"}
           </button>
         </StickyActionBar>
         {feedback && (

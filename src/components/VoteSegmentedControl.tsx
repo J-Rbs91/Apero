@@ -1,9 +1,9 @@
 import type { VoteStatus } from "../types/apero";
 
 const voteOptions: Array<{ value: VoteStatus; label: string }> = [
-  { value: "yes", label: "Present, coude leve" },
-  { value: "maybe", label: "Sous reserve du ministre" },
-  { value: "no", label: "Retenu par affaire grave" },
+  { value: "yes", label: "Présent, coude levé" },
+  { value: "maybe", label: "Sous réserve du ministre" },
+  { value: "no", label: "Retenu par une affaire de haute importance" },
 ];
 
 type VoteSegmentedControlProps = {

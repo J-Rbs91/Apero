@@ -8,11 +8,11 @@ import { TicketCard } from "./TicketCard";
 const bringOptions = [
   "Chips",
   "Saucisson",
-  "Cacahuetes",
+  "Cacahuètes",
   "Un pack",
   "Du soft",
-  "Des glacons, parce que quelqu'un doit etre adulte",
-  "Changer l'eau des olives",
+  "Des glaçons, parce que quelqu’un doit être adulte",
+  "Changer l’eau des olives",
 ];
 
 type DraftVotes = Record<string, VoteStatus | "">;
@@ -65,7 +65,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
     setVotes({ ...emptyVotes, ...existingParticipant.votes });
     setBrings(existingParticipant.brings ?? "");
     setComment(existingParticipant.comment ?? "");
-    setFeedback("Vote retrouve. Le retournement de veste reste administrativement possible.");
+    setFeedback("Vote retrouvé. Le retournement de veste reste administrativement possible.");
   }, [emptyVotes, existingParticipant]);
 
   function updateVote(optionId: string, status: VoteStatus) {
@@ -82,14 +82,14 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
     const trimmedName = participantName.trim();
 
     if (!trimmedName) {
-      setFeedback("Il faut inscrire un membre au registre, meme sous pseudo douteux.");
+      setFeedback("Il faut inscrire un membre au registre, même sous pseudo douteux.");
       return;
     }
 
     const missingVote = event.options.some((option) => !votes[option.id]);
 
     if (missingVote) {
-      setFeedback("Un suffrage par proposition, sinon l'institution vacille.");
+      setFeedback("Un suffrage par proposition, sinon l’institution vacille.");
       return;
     }
 
@@ -107,16 +107,16 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
     await onSubmit(response);
     setFeedback(
       existingParticipant
-        ? "Vote mis a jour. Le retournement de veste est valide."
-        : "Suffrage depose. Le zinc en prend acte.",
+        ? "Vote mis à jour. Le retournement de veste est validé."
+        : "Suffrage déposé. Le zinc en prend acte.",
     );
   }
 
   return (
     <TicketCard className="vote-panel">
       <div className="section-heading">
-        <p className="eyebrow">Deposer son suffrage au zinc</p>
-        <h2>{existingParticipant ? "Amender mon bulletin" : "Le registre t'attend"}</h2>
+        <p className="eyebrow">Déposer son suffrage au zinc</p>
+        <h2>{existingParticipant ? "Amender mon bulletin" : "Le registre t’attend"}</h2>
       </div>
 
       <form className="vote-form" onSubmit={handleSubmit}>
@@ -125,7 +125,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
           <input
             value={participantName}
             onChange={(eventChange) => setParticipantName(eventChange.target.value)}
-            placeholder="Jojo, Nadine, Grand Maitre Chips..."
+            placeholder="Jojo, Nadine, Grand Maître Chips…"
           />
         </label>
 
@@ -146,7 +146,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
             list="bring-options"
             value={brings}
             onChange={(eventChange) => setBrings(eventChange.target.value)}
-            placeholder="Olives, soft, pain, dignite approximative..."
+            placeholder="Olives, soft, pain, dignité approximative…"
           />
           <datalist id="bring-options">
             {bringOptions.map((option) => (
@@ -156,18 +156,18 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
         </label>
 
         <label className="field">
-          <span>Declaration au comptoir</span>
+          <span>Déclaration au comptoir</span>
           <textarea
             value={comment}
             onChange={(eventChange) => setComment(eventChange.target.value)}
             rows={3}
-            placeholder="Je comparais si la reunion finit avant la fin du monde."
+            placeholder="Je comparais si la réunion finit avant la fin du monde."
           />
         </label>
 
         <StickyActionBar>
           <button className="button button--primary button--block" type="submit" disabled={isSaving}>
-            {isSaving ? "Depot du suffrage..." : "Deposer mon suffrage"}
+            {isSaving ? "Dépôt du suffrage…" : "Déposer mon suffrage"}
           </button>
         </StickyActionBar>
         {feedback && (

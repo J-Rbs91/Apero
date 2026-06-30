@@ -7,7 +7,7 @@ export function formatOption(option: AperitifOption): string {
         day: "numeric",
         month: "long",
       }).format(new Date(`${option.date}T00:00:00`))
-    : "Date mystere";
+    : "Date mystère";
 
-  return `${dateLabel} - ${option.time || "heure mystere"} - ${option.location}`;
+  return `${dateLabel} — ${option.time || "heure mystère"} — ${option.location}`;
 }
