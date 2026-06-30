@@ -2,26 +2,43 @@ import { useState } from "react";
 
 type MobileShareBoxProps = {
   url: string;
+  title: string;
+  text: string;
 };
 
-export function MobileShareBox({ url }: MobileShareBoxProps) {
+export function MobileShareBox({ url, title, text }: MobileShareBoxProps) {
   const [feedback, setFeedback] = useState("");
 
+  async function copyFullInvitation() {
+    try {
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+      setFeedback("Invitation copiée. Colle-la dans ta conversation.");
+    } catch {
+      setFeedback("Copie impossible ici. Garde le lien sous le coude.");
+    }
+  }
+
   async function handleShare() {
+    setFeedback("");
+
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: "La Confrérie du Petit Jaune",
-          text: "Viens voter pour l’assemblée du comptoir.",
-          url,
-        });
-        setFeedback("Lien partagé.");
+        await navigator.share({ title, text, url });
         return;
-      } catch {
-        setFeedback("");
+      } catch (shareError) {
+        // L’utilisateur a fermé la feuille de partage : on ne dit rien.
+        if (shareError instanceof DOMException && shareError.name === "AbortError") {
+          return;
+        }
+        // Sinon on retombe sur la copie.
       }
     }
 
+    await copyFullInvitation();
+  }
+
+  async function handleCopyLink() {
+    setFeedback("");
     try {
       await navigator.clipboard.writeText(url);
       setFeedback("Lien copié.");
@@ -32,10 +49,13 @@ export function MobileShareBox({ url }: MobileShareBoxProps) {
 
   return (
     <div className="share-box">
-      <p className="eyebrow">Partager la convocation</p>
+      <p className="eyebrow">Rameuter le comptoir</p>
+      <button className="button button--primary button--block" type="button" onClick={handleShare}>
+        Partager l’invitation
+      </button>
       <div className="share">
         <code>{url}</code>
-        <button className="cp" type="button" onClick={handleShare}>
+        <button className="cp" type="button" onClick={handleCopyLink}>
           Copier
         </button>
       </div>

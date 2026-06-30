@@ -10,6 +10,7 @@ import { VoteForm } from "../components/VoteForm";
 import { eventStorage } from "../services";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
 import { calculateBestOptions } from "../utils/calculateResults";
+import { buildShareText, buildShareTitle } from "../utils/shareMessage";
 
 const MIN_LOADING_MS = 700;
 
@@ -213,7 +214,11 @@ export function EventPage() {
           )}
         </section>
 
-        <MobileShareBox url={shareUrl} />
+        <MobileShareBox
+          url={shareUrl}
+          title={buildShareTitle(event)}
+          text={buildShareText(event)}
+        />
       </div>
     </MobilePage>
   );
