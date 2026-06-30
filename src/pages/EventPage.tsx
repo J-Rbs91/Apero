@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { AperoOrnaments } from "../components/AperoOrnaments";
+import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { MobileResultsPanel } from "../components/MobileResultsPanel";
@@ -16,6 +17,8 @@ const beaufLabels: Record<BeaufLevel, string> = {
   medium: "Tournee generale",
   legendary: "PMU Champions League",
 };
+
+const MIN_LOADING_MS = 700;
 
 export function EventPage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -35,6 +38,8 @@ export function EventPage() {
         return;
       }
 
+      const startedAt = Date.now();
+
       try {
         setIsLoading(true);
         setError("");
@@ -52,9 +57,13 @@ export function EventPage() {
           );
         }
       } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        const elapsed = Date.now() - startedAt;
+        const remaining = Math.max(0, MIN_LOADING_MS - elapsed);
+        window.setTimeout(() => {
+          if (isMounted) {
+            setIsLoading(false);
+          }
+        }, remaining);
       }
     }
 
@@ -90,10 +99,7 @@ export function EventPage() {
   if (isLoading) {
     return (
       <MobilePage className="event-mobile">
-        <TicketCard className="state-card state-card--loading">
-          <p className="eyebrow">Lecture du registre</p>
-          <h1>On cherche l'assemblee derriere le comptoir...</h1>
-        </TicketCard>
+        <LoadingScreen title="ap\u00e9ro ?" subtitle="La Confrerie prepare le registre..." />
       </MobilePage>
     );
   }
