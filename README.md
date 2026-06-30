@@ -1,5 +1,7 @@
 # La Confrérie du Petit Jaune
 
+**App en ligne : [https://j-rbs91.github.io/Apero/](https://j-rbs91.github.io/Apero/)**
+
 La Confrérie du Petit Jaune est un mini Doodle de comptoir : une personne convoque une assemblée, propose plusieurs combinaisons date + heure + lieu, puis partage un lien unique. Les membres invités votent uniquement sur cette assemblée.
 
 Le contraste est volontaire : un nom pompeux, presque chevaleresque, pour une mission absolument essentielle et moyennement distinguée : se mettre d’accord pour boire un coup.
@@ -138,6 +140,10 @@ npm run build
 ```
 
 ## Déploiement GitHub Pages
+
+L’app est déployée automatiquement sur GitHub Pages à chaque push sur `main` (workflow `.github/workflows/deploy.yml`) :
+
+**[https://j-rbs91.github.io/Apero/](https://j-rbs91.github.io/Apero/)**
 
 1. Builder l’app avec `npm run build`.
 2. Publier le dossier `dist`.
