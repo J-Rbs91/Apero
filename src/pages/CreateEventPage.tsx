@@ -23,18 +23,8 @@ export function CreateEventPage() {
   const [title, setTitle] = useState("");
   const [organizerName, setOrganizerName] = useState(gentlemanName);
   const [options, setOptions] = useState<AperitifOption[]>([
-    {
-      ...createEmptyOption(),
-      date: "2026-07-03",
-      time: "19:00",
-      location: "Bar des Sports",
-    },
-    {
-      ...createEmptyOption(),
-      date: "2026-07-04",
-      time: "18:30",
-      location: "Chez Dédé",
-    },
+    createEmptyOption(),
+    createEmptyOption(),
   ]);
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
