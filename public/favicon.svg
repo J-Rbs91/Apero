@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="La Confrérie du Petit Jaune"><rect width="512" height="512" rx="112" fill="#fff7e6"/>
+  <!-- Bottle -->
+  <g>
+    <rect x="168" y="114" width="32" height="32" rx="4" fill="#b8322b"/>
+    <rect x="170" y="138" width="28" height="48" fill="#211a38"/>
+    <path d="M152 212 L216 212 L198 178 L170 178 Z" fill="#211a38"/>
+    <rect x="150" y="204" width="68" height="200" rx="16" fill="#211a38"/>
+    <rect x="159" y="296" width="50" height="82" rx="6" fill="#f1efe8"/>
+    <rect x="167" y="324" width="34" height="5" rx="2.5" fill="#9f2e24"/>
+  </g>
+  <!-- Back glass -->
+  <g>
+    <ellipse cx="352" cy="402" rx="24" ry="6" fill="#bcdfe9"/>
+    <rect x="349" y="326" width="6" height="76" fill="#bcdfe9"/>
+    <circle cx="352" cy="286" r="42" fill="#c2e2eb"/>
+    <path d="M310 286 A42 42 0 0 0 394 286 Z" fill="#4e0c16"/>
+  </g>
+  <!-- Front glass -->
+  <g>
+    <ellipse cx="300" cy="412" rx="26" ry="7" fill="#cfe7f0"/>
+    <rect x="297" y="344" width="6" height="68" fill="#cfe7f0"/>
+    <circle cx="300" cy="300" r="44" fill="#d4ebf3"/>
+    <path d="M256 300 A44 44 0 0 0 344 300 Z" fill="#5c0f1a"/>
+  </g>
+</svg>
