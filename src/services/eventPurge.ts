@@ -5,7 +5,7 @@ import type {
   PurgedParticipantRecord,
   RewardsLedger,
 } from "../types/rewards";
-import { hasFirstShotConsensus } from "../utils/badgeRules";
+import { getGuestParticipants, hasFirstShotConsensus } from "../utils/badgeRules";
 import { normalizeMemberName } from "../utils/memberName";
 
 const LEDGER_VERSION = 1;
@@ -132,6 +132,7 @@ export function buildPurgedEventRecord(event: AperitifEvent, now: Date): PurgedE
     eventDateTime: referenceDate?.toISOString(),
     purgedAt: now.toISOString(),
     participantCount: event.participants.length,
+    guestCount: getGuestParticipants(event).length,
     optionCount: event.options.length,
     participantOptionCount,
     hadParticipantAlternative: participantOptionCount > 0,
@@ -201,11 +202,11 @@ export function updateRewardsLedger(
     ...organizerStats,
     organizedEventCount: organizerStats.organizedEventCount + 1,
     organizedRealEventCount:
-      organizerStats.organizedRealEventCount + (purgedRecord.participantCount > 0 ? 1 : 0),
+      organizerStats.organizedRealEventCount + (purgedRecord.guestCount > 0 ? 1 : 0),
     organizedLonelyEventCount:
-      organizerStats.organizedLonelyEventCount + (purgedRecord.participantCount === 0 ? 1 : 0),
+      organizerStats.organizedLonelyEventCount + (purgedRecord.guestCount === 0 ? 1 : 0),
     organizedPopularEventCount:
-      organizerStats.organizedPopularEventCount + (purgedRecord.participantCount > 10 ? 1 : 0),
+      organizerStats.organizedPopularEventCount + (purgedRecord.guestCount > 10 ? 1 : 0),
     firstShotConsensusCount:
       organizerStats.firstShotConsensusCount + (purgedRecord.hadFirstShotConsensus ? 1 : 0),
   };

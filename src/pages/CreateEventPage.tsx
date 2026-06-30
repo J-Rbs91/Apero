@@ -4,7 +4,7 @@ import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { eventStorage } from "../services";
 import { useGentlemanName } from "../hooks/useGentlemanName";
-import type { AperitifEvent, AperitifOption } from "../types/apero";
+import type { AperitifEvent, AperitifOption, ParticipantResponse, VoteStatus } from "../types/apero";
 import { createId } from "../utils/createId";
 import { generateUniqueCeremonialName } from "../utils/generateCeremonialName";
 
@@ -88,20 +88,35 @@ export function CreateEventPage() {
       const activeEvents = await eventStorage.listActiveEvents();
       const ceremonialName = generateUniqueCeremonialName(activeEvents);
       const now = new Date().toISOString();
+      const trimmedOrganizerName = organizerName.trim();
+
+      // L'organisateur est compté présent par défaut sur tous ses créneaux.
+      const organizerVotes: Record<string, VoteStatus> = {};
+      cleanedOptions.forEach((option) => {
+        organizerVotes[option.id] = "yes";
+      });
+      const organizerParticipant: ParticipantResponse = {
+        id: createId("participant"),
+        participantName: trimmedOrganizerName,
+        votes: organizerVotes,
+        createdAt: now,
+        updatedAt: now,
+      };
+
       const event: AperitifEvent = {
         id: createId("apero"),
         ceremonialName,
         title: title.trim() || undefined,
-        organizerName: organizerName.trim(),
+        organizerName: trimmedOrganizerName,
         beaufLevel: "medium",
         status: "active",
         options: cleanedOptions.map((option) => ({
           ...option,
           createdByRole: "organizer",
-          createdByName: organizerName.trim(),
+          createdByName: trimmedOrganizerName,
           createdAt: now,
         })),
-        participants: [],
+        participants: [organizerParticipant],
         createdAt: now,
         updatedAt: now,
       };

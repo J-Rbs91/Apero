@@ -1,4 +1,4 @@
-import type { AperitifEvent, AperitifOption, VoteStatus } from "../types/apero";
+import type { AperitifEvent, AperitifOption, ParticipantResponse, VoteStatus } from "../types/apero";
 import type { BadgeId } from "../types/badges";
 import type { MemberRewardStats, RewardsLedger } from "../types/rewards";
 import { normalizeMemberName } from "./memberName";
@@ -19,8 +19,20 @@ function isOrganizerOption(option: AperitifOption): boolean {
   return option.createdByRole !== "participant";
 }
 
+// Les invités = les participants autres que l'organisateur (qui est désormais
+// compté présent par défaut). Les badges « a attiré du monde / personne n'est
+// venu / consensus du premier coup » se jugent sur ces invités.
+export function getGuestParticipants(event: AperitifEvent): ParticipantResponse[] {
+  const organizerKey = normalizeMemberName(event.organizerName);
+  return event.participants.filter(
+    (participant) => normalizeMemberName(participant.participantName) !== organizerKey,
+  );
+}
+
 export function hasFirstShotConsensus(event: AperitifEvent): boolean {
-  if (event.participants.length === 0) {
+  const guests = getGuestParticipants(event);
+
+  if (guests.length === 0) {
     return false;
   }
 
@@ -39,7 +51,7 @@ export function hasFirstShotConsensus(event: AperitifEvent): boolean {
   }
 
   return organizerOptions.some((option) =>
-    event.participants.every((participant) => participant.votes[option.id] === "yes"),
+    guests.every((participant) => participant.votes[option.id] === "yes"),
   );
 }
 
@@ -98,10 +110,11 @@ function addVotesToStats(stats: MemberRewardStats, votes: Record<string, VoteSta
 
 function addActiveEventToStats(stats: MemberRewardStats, event: AperitifEvent, memberKey: string) {
   if (normalizeMemberName(event.organizerName) === memberKey) {
+    const guestCount = getGuestParticipants(event).length;
     stats.organizedEventCount += 1;
-    stats.organizedRealEventCount += event.participants.length > 0 ? 1 : 0;
-    stats.organizedLonelyEventCount += event.participants.length === 0 ? 1 : 0;
-    stats.organizedPopularEventCount += event.participants.length > 10 ? 1 : 0;
+    stats.organizedRealEventCount += guestCount > 0 ? 1 : 0;
+    stats.organizedLonelyEventCount += guestCount === 0 ? 1 : 0;
+    stats.organizedPopularEventCount += guestCount > 10 ? 1 : 0;
     stats.firstShotConsensusCount += hasFirstShotConsensus(event) ? 1 : 0;
   }
 
