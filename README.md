@@ -10,7 +10,7 @@ Chaque apero est independant :
 
 ## Mention de securite obligatoire
 
-â€œCette application utilise volontairement GitHub comme pseudo-base de donnÃ©es. Le token GitHub est exposÃ© cÃ´tÃ© frontend. Câ€™est une mauvaise pratique assumÃ©e pour un projet humoristique et non sensible. Ne jamais utiliser cette architecture pour un vrai produit ou pour des donnÃ©es sensibles.â€
+“Cette application utilise volontairement GitHub comme pseudo-base de données. Le token GitHub est exposé côté frontend. C’est une mauvaise pratique assumée pour un projet humoristique et non sensible. Ne jamais utiliser cette architecture pour un vrai produit ou pour des données sensibles.”
 
 En clair : ce projet est volontairement sale techniquement. Le token peut etre lu par n'importe qui dans le navigateur, les donnees sont publiques si le repo est public, quelqu'un peut modifier ou casser les fichiers, et GitHub peut revoquer le token si celui-ci est detecte comme secret expose.
 
