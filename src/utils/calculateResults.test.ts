@@ -5,12 +5,14 @@ import { calculateBestOptions } from "./calculateResults";
 function createEvent(votes: Array<Record<string, VoteStatus>>): AperitifEvent {
   return {
     id: "apero_test",
+    ceremonialName: "La Grande Tablée des Olives",
     title: "Apero test",
     organizerName: "Jojo",
     beaufLevel: "medium",
+    status: "active",
     options: [
       { id: "option_1", date: "2026-07-03", time: "19:00", location: "Bar des Sports" },
-      { id: "option_2", date: "2026-07-04", time: "18:30", location: "Chez Dede" },
+      { id: "option_2", date: "2026-07-04", time: "18:30", location: "Chez Dédé" },
     ],
     participants: votes.map((participantVotes, index) => ({
       id: `participant_${index}`,

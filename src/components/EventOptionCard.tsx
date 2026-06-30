@@ -9,9 +9,9 @@ type EventOptionCardProps = {
 };
 
 const voteLabels = {
-  yes: "Chaud patate",
-  maybe: "Je vais voir",
-  no: "J'ai poney",
+  yes: "Présent, coude levé",
+  maybe: "Sous réserve du ministre",
+  no: "Retenu par une affaire de haute importance",
 } as const;
 
 export function EventOptionCard({
@@ -23,20 +23,20 @@ export function EventOptionCard({
   return (
     <article className={highlighted ? "option-card option-card--hot" : "option-card"}>
       <div className="option-card__main">
-        <p className="eyebrow">Combinaison comptoir</p>
+        <p className="eyebrow">Proposition au zinc</p>
         <h3>{formatOption(option)}</h3>
         {option.note && <p>{option.note}</p>}
       </div>
 
       <div className="option-score">
         <span>
-          Oui <strong>{result?.yesCount ?? 0}</strong>
+          Présents <strong>{result?.yesCount ?? 0}</strong>
         </span>
         <span>
-          Peut-etre <strong>{result?.maybeCount ?? 0}</strong>
+          Réserves <strong>{result?.maybeCount ?? 0}</strong>
         </span>
         <span>
-          Non <strong>{result?.noCount ?? 0}</strong>
+          Absents <strong>{result?.noCount ?? 0}</strong>
         </span>
       </div>
 

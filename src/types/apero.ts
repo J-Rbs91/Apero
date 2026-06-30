@@ -2,16 +2,21 @@ export type VoteStatus = "yes" | "maybe" | "no";
 
 export type BeaufLevel = "soft" | "medium" | "legendary";
 
+export type AperitifEventStatus = "active" | "closed" | "archived";
+
 export type AperitifEvent = {
   id: string;
-  title: string;
+  ceremonialName: string;
+  title?: string;
   organizerName: string;
   description?: string;
   beaufLevel: BeaufLevel;
+  status: AperitifEventStatus;
   options: AperitifOption[];
   participants: ParticipantResponse[];
   createdAt: string;
   updatedAt: string;
+  closedAt?: string;
 };
 
 export type AperitifOption = {

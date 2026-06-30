@@ -40,7 +40,7 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
   if (event.participants.length === 0) {
     return {
       type: "empty",
-      message: "Personne n'a encore glisse son bulletin dans l'urne du zinc.",
+      message: "Le registre est vierge. Aucun membre n’a encore déposé son suffrage.",
       results,
     };
   }
@@ -62,7 +62,7 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
   if (!bestResult || (bestResult.yesCount === 0 && bestResult.maybeCount === 0)) {
     return {
       type: "no-availability",
-      message: "Personne n'est dispo. Change de potes ou change de date.",
+      message: "Personne n’est disponible. La République du zinc est en crise.",
       results,
     };
   }
@@ -77,7 +77,7 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
   if (tiedResults.length > 1) {
     return {
       type: "tie",
-      message: "Egalite parfaite, ca sent le debat de comptoir.",
+      message: "Égalité parfaite. Les débats de comptoir continuent.",
       optionIds: tiedResults.map((result) => result.optionId),
       results,
     };
@@ -87,8 +87,8 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
     type: "winner",
     message:
       bestResult.yesCount > 0
-        ? "On tient une date. Prevenez les glacons."
-        : "Le zinc a rendu son jugement, sans grande conviction.",
+        ? "Le verdict est tombé : les glaçons peuvent se préparer."
+        : "La Confrérie semble pencher pour cette option.",
     optionId: bestResult.optionId,
     results,
   };

@@ -10,7 +10,7 @@ import { calculateBestOptions } from "../utils/calculateResults";
 
 const beaufLabels: Record<BeaufLevel, string> = {
   soft: "Petit jaune tranquille",
-  medium: "Tournee generale",
+  medium: "Tournée générale",
   legendary: "PMU Champions League",
 };
 
@@ -45,7 +45,7 @@ export function EventPage() {
           setError(
             loadError instanceof Error
               ? loadError.message
-              : "Le patron a perdu le ticket.",
+              : "Le greffe a perdu la convocation.",
           );
         }
       } finally {
@@ -72,12 +72,12 @@ export function EventPage() {
       setSuccess("");
       const updatedEvent = await eventStorage.saveParticipantResponse(eventId, response);
       setEvent(updatedEvent);
-      setSuccess("Vote enregistre. Le comptoir a tamponne le bulletin.");
+      setSuccess("Suffrage enregistré. Le registre du zinc est à jour.");
     } catch (saveError) {
       setError(
         saveError instanceof Error
           ? saveError.message
-          : "Le comptoir est sature, retente dans deux secondes.",
+          : "Le comptoir est saturé, retente dans deux secondes.",
       );
     } finally {
       setIsSaving(false);
@@ -88,8 +88,8 @@ export function EventPage() {
     return (
       <main className="app app--compact">
         <TicketCard className="state-card">
-          <p className="eyebrow">Lecture du ticket</p>
-          <h1>On cherche l'apero derriere le comptoir...</h1>
+          <p className="eyebrow">Lecture du registre</p>
+          <h1>On cherche l’assemblée derrière le comptoir...</h1>
         </TicketCard>
       </main>
     );
@@ -99,42 +99,53 @@ export function EventPage() {
     return (
       <main className="app app--compact">
         <TicketCard className="state-card">
-          <p className="eyebrow">Evenement introuvable</p>
-          <h1>Cet apero n'existe pas</h1>
+          <p className="eyebrow">Assemblée introuvable</p>
+          <h1>Cette convocation n’existe pas</h1>
           <p>
-            Soit le lien est moisi, soit le patron a ferme le bar.
+            Soit le lien est moisi, soit le patron a fermé le bar.
           </p>
           {error && <p className="feedback">{error}</p>}
           <Link className="button button--primary" to="/">
-            Retour au comptoir
+            Retour à la Confrérie
           </Link>
         </TicketCard>
       </main>
     );
   }
 
+  const locations = Array.from(new Set(event.options.map((option) => option.location)));
+
   return (
     <main className="app app--compact">
       <header className="topbar">
         <Link className="brand-link" to="/">
-          <span className="brand-mark">AP</span>
-          <span>Apero PMU</span>
+          <span className="brand-mark">CJ</span>
+          <span>La Confrérie du Petit Jaune</span>
         </Link>
       </header>
 
       <section className="event-hero">
         <div>
           <p className="eyebrow">{beaufLabels[event.beaufLevel]}</p>
-          <h1>{event.title}</h1>
-          <p>Organise par {event.organizerName}</p>
+          <h1>{event.ceremonialName}</h1>
+          {event.title && (
+            <p>
+              <strong>Objet de la réunion :</strong> {event.title}
+            </p>
+          )}
+          <p>Convoqué par : {event.organizerName}</p>
           {event.description && <p>{event.description}</p>}
+          <p>
+            <strong>Lieu proposé :</strong> {locations.join(" / ")}
+          </p>
+          <p>Le peuple du comptoir est appelé à voter.</p>
         </div>
         <ShareLinkBox url={shareUrl} />
       </section>
 
       <p className="security-note">
-        C'est une app d'apero, pas un coffre-fort. Ne mets rien que tu ne voudrais
-        pas voir trainer sur un comptoir public.
+        C’est une institution de comptoir, pas un coffre-fort. Ne mets rien que tu ne voudrais
+        pas voir traîner sur une nappe collante publique.
       </p>
 
       {error && (
@@ -154,11 +165,11 @@ export function EventPage() {
 
         <TicketCard>
           <div className="section-heading">
-            <p className="eyebrow">Participants deja inscrits</p>
-            <h2>La liste du comptoir</h2>
+            <p className="eyebrow">Les membres de la Confrérie</p>
+            <h2>Le registre du comptoir</h2>
           </div>
           {event.participants.length === 0 ? (
-            <p>Aucun vote pour le moment. Le zinc retient son souffle.</p>
+            <p>Aucun membre n’a encore signé. L’institution retient son souffle.</p>
           ) : (
             <div className="participant-stack">
               {event.participants.map((participant) => (
@@ -167,7 +178,7 @@ export function EventPage() {
                     <h3>{participant.participantName}</h3>
                     {participant.brings && <p>{participant.brings}</p>}
                   </div>
-                  {participant.comment && <p className="comment">"{participant.comment}"</p>}
+                  {participant.comment && <p className="comment">“{participant.comment}”</p>}
                 </article>
               ))}
             </div>

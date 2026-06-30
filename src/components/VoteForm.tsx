@@ -7,16 +7,17 @@ import { TicketCard } from "./TicketCard";
 const bringOptions = [
   "Chips",
   "Saucisson",
-  "Cacahuetes",
+  "Cacahuètes",
   "Un pack",
   "Du soft",
-  "Des glacons, parce que quelqu'un doit etre adulte",
+  "Des glaçons, parce que quelqu'un doit être adulte",
+  "Changer l’eau des olives",
 ];
 
 const voteOptions: Array<{ value: VoteStatus; label: string }> = [
-  { value: "yes", label: "Chaud patate" },
-  { value: "maybe", label: "Je vais voir avec le ministre" },
-  { value: "no", label: "J'ai poney" },
+  { value: "yes", label: "Présent, coude levé" },
+  { value: "maybe", label: "Sous réserve du ministre" },
+  { value: "no", label: "Retenu par une affaire de haute importance" },
 ];
 
 type DraftVotes = Record<string, VoteStatus | "">;
@@ -69,7 +70,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
     setVotes({ ...emptyVotes, ...existingParticipant.votes });
     setBrings(existingParticipant.brings ?? "");
     setComment(existingParticipant.comment ?? "");
-    setFeedback("Vote retrouve. Tu peux retourner ta veste proprement.");
+    setFeedback("Vote retrouvé. Le retournement de veste est administrativement possible.");
   }, [emptyVotes, existingParticipant]);
 
   function updateVote(optionId: string, status: VoteStatus) {
@@ -86,14 +87,14 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
     const trimmedName = participantName.trim();
 
     if (!trimmedName) {
-      setFeedback("Il faut un pseudo, meme un pseudo de comptoir.");
+      setFeedback("Il faut inscrire un membre au registre, même sous pseudo douteux.");
       return;
     }
 
     const missingVote = event.options.some((option) => !votes[option.id]);
 
     if (missingVote) {
-      setFeedback("Un avis par option, sinon le scrutin part en cacahuete.");
+      setFeedback("Un suffrage par proposition, sinon l’institution vacille.");
       return;
     }
 
@@ -111,25 +112,25 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
     await onSubmit(response);
     setFeedback(
       existingParticipant
-        ? "Vote mis a jour. Le retournement de veste est valide."
-        : "Bulletin depose. Le zinc applaudit discretement.",
+        ? "Vote mis à jour. Le retournement de veste est validé."
+        : "Suffrage déposé. Le zinc en prend acte.",
     );
   }
 
   return (
     <TicketCard className="vote-panel">
       <div className="section-heading">
-        <p className="eyebrow">Deposer son bulletin de soif</p>
-        <h2>{existingParticipant ? "Modifier mon vote" : "A toi de jouer"}</h2>
+        <p className="eyebrow">Déposer son suffrage au zinc</p>
+        <h2>{existingParticipant ? "Amender mon bulletin" : "Le registre t’attend"}</h2>
       </div>
 
       <form className="vote-form" onSubmit={handleSubmit}>
         <label className="field">
-          <span>Prenom ou pseudo</span>
+          <span>Nom du membre présent au registre</span>
           <input
             value={participantName}
             onChange={(eventChange) => setParticipantName(eventChange.target.value)}
-            placeholder="Jojo, Nadine, Captain Chips..."
+            placeholder="Jojo, Nadine, Grand Maître Chips..."
           />
         </label>
 
@@ -162,12 +163,12 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
         </div>
 
         <label className="field">
-          <span>Tu ramenes quoi ?</span>
+          <span>Contribution au banquet</span>
           <input
             list="bring-options"
             value={brings}
             onChange={(eventChange) => setBrings(eventChange.target.value)}
-            placeholder="Olives, soft, bonne humeur..."
+            placeholder="Olives, soft, pain, dignité approximative..."
           />
           <datalist id="bring-options">
             {bringOptions.map((option) => (
@@ -177,17 +178,17 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
         </label>
 
         <label className="field">
-          <span>Commentaire optionnel</span>
+          <span>Déclaration au comptoir</span>
           <textarea
             value={comment}
             onChange={(eventChange) => setComment(eventChange.target.value)}
             rows={3}
-            placeholder="Je viens si la reunion finit avant la fin du monde."
+            placeholder="Je comparais si la réunion finit avant la fin du monde."
           />
         </label>
 
         <button className="button button--primary" type="submit" disabled={isSaving}>
-          {isSaving ? "Depot du bulletin..." : "Enregistrer mon vote"}
+          {isSaving ? "Dépôt du suffrage..." : "Déposer mon suffrage"}
         </button>
         {feedback && (
           <p className="feedback" role="status">

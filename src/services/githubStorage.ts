@@ -8,6 +8,12 @@ type GitHubContentResponse = {
   sha: string;
 };
 
+type GitHubDirectoryItem = {
+  name: string;
+  path: string;
+  type: "file" | "dir" | "symlink" | "submodule";
+};
+
 type GitHubErrorCode =
   | "missing-config"
   | "not-found"
@@ -28,9 +34,13 @@ function getEventPath(eventId: string): string {
   return `${githubConfig.dataPath.replace(/\/$/, "")}/${eventId}.json`;
 }
 
+function getContentsUrlForPath(path: string): string {
+  const encodedPath = encodeURIComponent(path).replaceAll("%2F", "/");
+  return `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${encodedPath}`;
+}
+
 function getContentsUrl(eventId: string): string {
-  const path = encodeURIComponent(getEventPath(eventId)).replaceAll("%2F", "/");
-  return `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${path}`;
+  return getContentsUrlForPath(getEventPath(eventId));
 }
 
 function assertConfigured() {
@@ -89,7 +99,7 @@ async function readEventFile(
   if (!response.ok) {
     throw new GitHubStorageError(
       "github-error",
-      `GitHub refuse de lire le ticket du comptoir (${response.status}).`,
+      `GitHub refuse de lire le registre de la Confrerie (${response.status}).`,
     );
   }
 
@@ -97,6 +107,27 @@ async function readEventFile(
   const event = normalizeEvent(JSON.parse(decodeBase64(file.content)));
 
   return { event, sha: file.sha };
+}
+
+async function listEventFiles(): Promise<GitHubDirectoryItem[]> {
+  const response = await fetch(
+    `${getContentsUrlForPath(githubConfig.dataPath)}?ref=${githubConfig.branch}`,
+    { headers: createHeaders(false) },
+  );
+
+  if (response.status === 404) {
+    return [];
+  }
+
+  if (!response.ok) {
+    throw new GitHubStorageError(
+      "github-error",
+      `GitHub refuse de lister les assemblees (${response.status}).`,
+    );
+  }
+
+  const items = (await response.json()) as GitHubDirectoryItem[];
+  return items.filter((item) => item.type === "file" && item.name.endsWith(".json"));
 }
 
 async function writeEventFile(
@@ -125,7 +156,7 @@ async function writeEventFile(
   if (!response.ok) {
     throw new GitHubStorageError(
       "github-error",
-      `GitHub refuse d'ecrire sur le ticket (${response.status}).`,
+      `GitHub refuse d'ecrire sur le registre (${response.status}).`,
     );
   }
 }
@@ -136,27 +167,45 @@ export const githubEventStorage: EventStorage = {
     return file?.event ?? null;
   },
 
+  async listActiveEvents() {
+    const files = await listEventFiles();
+    const events = await Promise.all(
+      files.map(async (file) => {
+        const eventId = file.name.replace(/\.json$/, "");
+        return this.getEvent(eventId);
+      }),
+    );
+
+    return events.filter(
+      (event): event is AperitifEvent => Boolean(event) && event?.status === "active",
+    );
+  },
+
   async createEvent(event: AperitifEvent) {
     const existingFile = await readEventFile(event.id);
 
     if (existingFile) {
       throw new GitHubStorageError(
         "conflict",
-        "Un ticket existe deja avec cet identifiant. Le hasard a trop traine au bar.",
+        "Un registre existe deja avec cet identifiant. Le hasard a trop traine au bar.",
       );
     }
 
-    await writeEventFile(event, "Nouvel apero pose sur le comptoir");
+    await writeEventFile(event, `Convocation scellee: ${event.ceremonialName}`);
   },
 
   async updateEvent(event: AperitifEvent) {
     const existingFile = await readEventFile(event.id);
 
     if (!existingFile) {
-      throw new GitHubStorageError("not-found", "Evenement introuvable.");
+      throw new GitHubStorageError("not-found", "Assemblee introuvable.");
     }
 
-    await writeEventFile(event, "Mise a jour de l'apero", existingFile.sha);
+    await writeEventFile(
+      event,
+      `Mise a jour du registre: ${event.ceremonialName}`,
+      existingFile.sha,
+    );
   },
 
   async saveParticipantResponse(eventId: string, response: ParticipantResponse) {
@@ -164,7 +213,7 @@ export const githubEventStorage: EventStorage = {
       const existingFile = await readEventFile(eventId);
 
       if (!existingFile) {
-        throw new GitHubStorageError("not-found", "Evenement introuvable.");
+        throw new GitHubStorageError("not-found", "Assemblee introuvable.");
       }
 
       const updatedEvent = upsertParticipant(existingFile.event, response);
@@ -172,7 +221,7 @@ export const githubEventStorage: EventStorage = {
       try {
         await writeEventFile(
           updatedEvent,
-          `Vote ajoute au scrutin du zinc par ${response.participantName}`,
+          `Suffrage depose au zinc par ${response.participantName}`,
           existingFile.sha,
         );
         return updatedEvent;

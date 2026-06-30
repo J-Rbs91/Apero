@@ -23,26 +23,30 @@ export function normalizeEvent(rawEvent: unknown): AperitifEvent {
       id: slot.id,
       date: slot.dateTime?.slice(0, 10) ?? "",
       time: slot.dateTime?.slice(11, 16) ?? "",
-      location: event.location ?? "Lieu a confirmer",
+      location: event.location ?? "Établissement à confirmer",
       note: slot.label,
     })) ??
     [];
+  const title = event.title?.trim() || undefined;
 
   return {
     id: event.id ?? "apero_inconnu",
-    title: event.title ?? "Apero sans etiquette",
-    organizerName: event.organizerName ?? event.createdBy ?? "Organisateur mystere",
+    ceremonialName: event.ceremonialName ?? title ?? "Assemblée sans registre",
+    title,
+    organizerName: event.organizerName ?? event.createdBy ?? "Grand Convoqueur mystère",
     description: event.description || undefined,
     beaufLevel: event.beaufLevel ?? "medium",
+    status: event.status ?? "active",
     options,
     participants: participants.map((participant) => ({
       ...participant,
-      participantName: participant.participantName ?? participant.name ?? "Anonyme",
+      participantName: participant.participantName ?? participant.name ?? "Membre anonyme",
       createdAt: participant.createdAt ?? participant.updatedAt ?? now,
       updatedAt: participant.updatedAt ?? now,
     })),
     createdAt: event.createdAt ?? now,
     updatedAt: event.updatedAt ?? now,
+    closedAt: event.closedAt,
   };
 }
 

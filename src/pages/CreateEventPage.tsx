@@ -4,6 +4,7 @@ import { TicketCard } from "../components/TicketCard";
 import { eventStorage } from "../services";
 import type { AperitifEvent, AperitifOption, BeaufLevel } from "../types/apero";
 import { createId } from "../utils/createId";
+import { generateUniqueCeremonialName } from "../utils/generateCeremonialName";
 
 const beaufLevels: Array<{ value: BeaufLevel; label: string; detail: string }> = [
   {
@@ -13,13 +14,13 @@ const beaufLevels: Array<{ value: BeaufLevel; label: string; detail: string }> =
   },
   {
     value: "medium",
-    label: "Tournee generale",
-    detail: "La bande est motivee, le planning tremble deja.",
+    label: "Tournée générale",
+    detail: "La bande est motivée, le planning tremble déjà.",
   },
   {
     value: "legendary",
     label: "PMU Champions League",
-    detail: "Le comite d'organisation sort les grands tickets.",
+    detail: "Le comité d'organisation sort les grands tickets.",
   },
 ];
 
@@ -50,7 +51,7 @@ export function CreateEventPage() {
       ...createEmptyOption(),
       date: "2026-07-04",
       time: "18:30",
-      location: "Chez Dede",
+      location: "Chez Dédé",
     },
   ]);
   const [feedback, setFeedback] = useState("");
@@ -84,8 +85,8 @@ export function CreateEventPage() {
       }))
       .filter((option) => option.date || option.time || option.location);
 
-    if (!title.trim() || !organizerName.trim()) {
-      setFeedback("Titre et organisateur : le minimum syndical du comptoir.");
+    if (!organizerName.trim()) {
+      setFeedback("Il faut un Grand Convoqueur pour ouvrir le registre.");
       return;
     }
 
@@ -93,32 +94,38 @@ export function CreateEventPage() {
       cleanedOptions.length === 0 ||
       cleanedOptions.some((option) => !option.date || !option.time || !option.location)
     ) {
-      setFeedback("Chaque option doit avoir une date, une heure et un lieu.");
+      setFeedback("Chaque proposition doit avoir un jour, une heure et un établissement.");
       return;
     }
 
-    const now = new Date().toISOString();
-    const event: AperitifEvent = {
-      id: createId("apero"),
-      title: title.trim(),
-      organizerName: organizerName.trim(),
-      description: description.trim() || undefined,
-      beaufLevel,
-      options: cleanedOptions,
-      participants: [],
-      createdAt: now,
-      updatedAt: now,
-    };
-
     try {
       setIsSubmitting(true);
+      const activeEvents = await eventStorage.listActiveEvents();
+      const ceremonialName = generateUniqueCeremonialName(activeEvents);
+      const now = new Date().toISOString();
+      const event: AperitifEvent = {
+        id: createId("apero"),
+        ceremonialName,
+        title: title.trim() || undefined,
+        organizerName: organizerName.trim(),
+        description: description.trim() || undefined,
+        beaufLevel,
+        status: "active",
+        options: cleanedOptions,
+        participants: [],
+        createdAt: now,
+        updatedAt: now,
+      };
+
       await eventStorage.createEvent(event);
       navigate(`/event/${event.id}`);
     } catch (error) {
       setFeedback(
-        error instanceof Error
-          ? error.message
-          : "GitHub a renverse le plateau. Retente dans deux secondes.",
+        error instanceof Error && error.message === "NO_CEREMONIAL_NAME_AVAILABLE"
+          ? "La Confrérie est complète. Trop d’apéros sont déjà en cours de magouille. Clôture une assemblée avant d’en convoquer une nouvelle."
+          : error instanceof Error
+            ? error.message
+            : "GitHub a renversé le registre. Retente dans deux secondes.",
       );
     } finally {
       setIsSubmitting(false);
@@ -129,17 +136,18 @@ export function CreateEventPage() {
     <main className="app app--compact">
       <header className="topbar">
         <Link className="brand-link" to="/">
-          <span className="brand-mark">AP</span>
-          <span>Apero PMU</span>
+          <span className="brand-mark">CJ</span>
+          <span>La Confrérie du Petit Jaune</span>
         </Link>
       </header>
 
       <section className="page-intro">
-        <p className="eyebrow">Creation du scrutin</p>
-        <h1>Lancer un apero</h1>
+        <p className="eyebrow">Entrer dans la Confrérie</p>
+        <h1>Convoquer un apéro</h1>
         <p>
-          Un apéro = un fichier JSON. Un lien = un scrutin. Les groupes restent
-          chacun a leur comptoir.
+          Le nom cérémoniel sera attribué automatiquement par le grand hasard du
+          comptoir. Le lien restera fondé sur l’identifiant technique, parce que
+          même les institutions ont besoin d’un peu de plomberie.
         </p>
       </section>
 
@@ -147,15 +155,15 @@ export function CreateEventPage() {
         <TicketCard>
           <div className="form-grid">
             <label className="field">
-              <span>Titre de l'apero</span>
+              <span>Objet officiel de la convocation</span>
               <input
                 value={title}
                 onChange={(eventChange) => setTitle(eventChange.target.value)}
-                placeholder="Apero fin de semaine"
+                placeholder="Apéro fin de chantier"
               />
             </label>
             <label className="field">
-              <span>Organisateur</span>
+              <span>Nom du Grand Convoqueur</span>
               <input
                 value={organizerName}
                 onChange={(eventChange) => setOrganizerName(eventChange.target.value)}
@@ -163,12 +171,12 @@ export function CreateEventPage() {
               />
             </label>
             <label className="field field--wide">
-              <span>Description optionnelle</span>
+              <span>Motif solennel de la réunion</span>
               <textarea
                 value={description}
                 onChange={(eventChange) => setDescription(eventChange.target.value)}
                 rows={4}
-                placeholder="On enterre cette semaine comme elle le merite."
+                placeholder="On enterre cette semaine comme elle le mérite."
               />
             </label>
           </div>
@@ -176,8 +184,8 @@ export function CreateEventPage() {
 
         <TicketCard>
           <div className="section-heading">
-            <p className="eyebrow">Niveau de beaufitude</p>
-            <h2>Choisis l'ambiance</h2>
+            <p className="eyebrow">Degré de cérémonie</p>
+            <h2>Choisis l’apparat du zinc</h2>
           </div>
           <div className="choice-grid">
             {beaufLevels.map((level) => (
@@ -205,8 +213,8 @@ export function CreateEventPage() {
         <TicketCard>
           <div className="section-heading section-heading--inline">
             <div>
-              <p className="eyebrow">Options date + heure + lieu</p>
-              <h2>Les propositions du zinc</h2>
+              <p className="eyebrow">Soumettre une tablée</p>
+              <h2>Les propositions au zinc</h2>
             </div>
             <button
               className="button button--secondary"
@@ -215,7 +223,7 @@ export function CreateEventPage() {
                 setOptions((currentOptions) => [...currentOptions, createEmptyOption()])
               }
             >
-              Ajouter une option
+              Soumettre une proposition au zinc
             </button>
           </div>
 
@@ -223,7 +231,7 @@ export function CreateEventPage() {
             {options.map((option, index) => (
               <article className="option-editor" key={option.id}>
                 <label className="field">
-                  <span>Date {index + 1}</span>
+                  <span>Jour du rassemblement {index + 1}</span>
                   <input
                     type="date"
                     value={option.date}
@@ -233,7 +241,7 @@ export function CreateEventPage() {
                   />
                 </label>
                 <label className="field">
-                  <span>Heure</span>
+                  <span>Heure de comparution</span>
                   <input
                     type="time"
                     value={option.time}
@@ -243,7 +251,7 @@ export function CreateEventPage() {
                   />
                 </label>
                 <label className="field">
-                  <span>Lieu</span>
+                  <span>Établissement de réception</span>
                   <input
                     value={option.location}
                     onChange={(eventChange) =>
@@ -253,13 +261,13 @@ export function CreateEventPage() {
                   />
                 </label>
                 <label className="field">
-                  <span>Note optionnelle</span>
+                  <span>Annotation du greffe</span>
                   <input
                     value={option.note ?? ""}
                     onChange={(eventChange) =>
                       updateOption(option.id, { note: eventChange.target.value })
                     }
-                    placeholder="Terrasse si le ciel coopere"
+                    placeholder="Terrasse si le ciel coopère"
                   />
                 </label>
                 <button
@@ -276,7 +284,7 @@ export function CreateEventPage() {
 
         <div className="form-actions">
           <button className="button button--primary button--large" disabled={isSubmitting}>
-            {isSubmitting ? "Creation du ticket..." : "Creer le ticket d'apero"}
+            {isSubmitting ? "Scellement du registre..." : "Sceller la convocation"}
           </button>
           {feedback && (
             <p className="feedback" role="alert">

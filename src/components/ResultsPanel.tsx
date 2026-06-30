@@ -20,7 +20,7 @@ export function ResultsPanel({ event, result }: ResultsPanelProps) {
   return (
     <TicketCard className="results-panel">
       <div className="section-heading">
-        <p className="eyebrow">Verdict du zinc</p>
+        <p className="eyebrow">Le verdict du zinc</p>
         <h2>{result.message}</h2>
       </div>
 
@@ -48,9 +48,9 @@ export function ResultsPanel({ event, result }: ResultsPanelProps) {
       </div>
 
       <div className="bring-list">
-        <h3>Qui ramene quoi ?</h3>
+        <h3>Contribution au banquet</h3>
         {contributions.length === 0 ? (
-          <p>Aucune offrande declaree. Les cacahuetes tremblent.</p>
+          <p>Aucune offrande déclarée. Les olives attendent dans le doute.</p>
         ) : (
           <ul>
             {contributions.map((participant) => (
