@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AperoOrnaments } from "../components/AperoOrnaments";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { StickyActionBar } from "../components/StickyActionBar";
@@ -136,16 +137,18 @@ export function CreateEventPage() {
   }
 
   return (
-    <MobilePage>
+    <MobilePage className="create-mobile">
       <MobileHeader
-        eyebrow="Entrer dans la Confrerie"
+        eyebrow="Registre de convocation"
         title="Convoquer un apero"
-        subtitle="Une creation simple, lisible et pensee pour le telephone."
+        subtitle="Une table de zinc, quelques propositions, et le suffrage peut commencer."
       />
 
+      <AperoOrnaments variant="registry" />
+
       <form className="page-stack page-stack--mobile" onSubmit={handleSubmit}>
-        <TicketCard>
-          <div className="section-heading">
+        <TicketCard className="ticket-card--registry">
+          <div className="section-heading section-heading--with-stamp">
             <p className="eyebrow">Etape 1</p>
             <h2>La convocation</h2>
           </div>
@@ -178,7 +181,7 @@ export function CreateEventPage() {
           </div>
         </TicketCard>
 
-        <TicketCard>
+        <TicketCard className="ticket-card--wood">
           <div className="section-heading">
             <p className="eyebrow">Apparat</p>
             <h2>Choisis l'apparat du zinc</h2>
@@ -206,7 +209,7 @@ export function CreateEventPage() {
           </div>
         </TicketCard>
 
-        <TicketCard>
+        <TicketCard className="ticket-card--counter">
           <div className="section-heading">
             <p className="eyebrow">Etape 2</p>
             <h2>Les propositions</h2>
@@ -225,7 +228,7 @@ export function CreateEventPage() {
             {options.map((option, index) => (
               <article className="option-editor option-editor--mobile" key={option.id}>
                 <div className="option-editor__title">
-                  <p className="eyebrow">Proposition {index + 1}</p>
+                  <p className="eyebrow">Ticket {index + 1}</p>
                   <button
                     className="button button--ghost"
                     type="button"
@@ -279,7 +282,7 @@ export function CreateEventPage() {
           </div>
         </TicketCard>
 
-        <TicketCard>
+        <TicketCard className="ticket-card--seal">
           <div className="section-heading">
             <p className="eyebrow">Etape 3</p>
             <h2>Sceller la convocation</h2>

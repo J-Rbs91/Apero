@@ -31,9 +31,10 @@ export function MobileShareBox({ url }: MobileShareBoxProps) {
   }
 
   return (
-    <div className="mobile-share-box">
+    <div className="mobile-share-box mobile-share-box--receipt">
       <div>
-        <p className="eyebrow">Lien de partage</p>
+        <p className="eyebrow">Ticket de rameutage</p>
+        <h2>Partager la convocation</h2>
         <p className="mobile-share-box__url">{url}</p>
       </div>
       <button className="button button--secondary button--block" type="button" onClick={handleShare}>

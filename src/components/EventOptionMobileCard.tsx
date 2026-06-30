@@ -16,7 +16,8 @@ export function EventOptionMobileCard({
   return (
     <article className="event-option-mobile-card">
       <div className="event-option-mobile-card__header">
-        <p className="eyebrow">Proposition</p>
+        <span className="option-stamp">Bulletin</span>
+        <p className="eyebrow">Proposition au zinc</p>
         <h3>{formatOption(option)}</h3>
         {option.note && <p className="event-option-mobile-card__note">{option.note}</p>}
       </div>

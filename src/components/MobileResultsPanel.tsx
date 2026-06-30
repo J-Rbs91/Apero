@@ -16,8 +16,8 @@ export function MobileResultsPanel({ event, result }: MobileResultsPanelProps) {
         : [];
 
   return (
-    <TicketCard className="mobile-results-panel">
-      <div className="section-heading">
+    <TicketCard className="mobile-results-panel ticket-card--verdict">
+      <div className="section-heading section-heading--with-stamp">
         <p className="eyebrow">Verdict actuel</p>
         <h2>{result.message}</h2>
       </div>
