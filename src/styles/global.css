@@ -407,127 +407,6 @@ a {
   font-weight: 900;
 }
 
-.apero-ornaments {
-  display: grid;
-  grid-template-columns: 1fr 0.85fr 1.2fr 0.8fr;
-  gap: 0.6rem;
-  align-items: end;
-  min-height: 72px;
-  padding: 0.7rem 0.5rem 0.45rem;
-  overflow: hidden;
-  border-bottom: 8px solid var(--wood-dark);
-  border-radius: 0 0 18px 18px;
-  background:
-    linear-gradient(180deg, rgba(183, 170, 148, 0.22), rgba(183, 170, 148, 0.04)),
-    linear-gradient(90deg, var(--wood), #9b6337 48%, var(--wood-dark));
-  box-shadow: var(--small-shadow);
-}
-
-.apero-object {
-  position: relative;
-  display: block;
-  justify-self: center;
-}
-
-.apero-object--bowl {
-  width: 4.2rem;
-  height: 2.4rem;
-  border-radius: 0 0 2.2rem 2.2rem;
-  background: linear-gradient(#f0bd37, #c98220);
-  border: 2px solid rgba(39, 28, 19, 0.24);
-}
-
-.apero-object--bowl span {
-  position: absolute;
-  top: -0.45rem;
-  width: 0.85rem;
-  height: 0.85rem;
-  border-radius: 50%;
-  background: #98a82e;
-  border: 2px solid rgba(39, 28, 19, 0.18);
-}
-
-.apero-object--bowl span:nth-child(1) {
-  left: 0.7rem;
-}
-
-.apero-object--bowl span:nth-child(2) {
-  left: 1.65rem;
-  top: -0.62rem;
-}
-
-.apero-object--bowl span:nth-child(3) {
-  left: 2.55rem;
-}
-
-.apero-object--glass {
-  width: 2.2rem;
-  height: 3.8rem;
-  border: 3px solid rgba(255, 249, 232, 0.78);
-  border-top-width: 4px;
-  border-radius: 0.45rem 0.45rem 0.85rem 0.85rem;
-  background: linear-gradient(180deg, rgba(255, 249, 232, 0.42), rgba(244, 197, 66, 0.92));
-  box-shadow: inset 0 -1rem 0 rgba(244, 197, 66, 0.4);
-}
-
-.apero-object--glass::after {
-  position: absolute;
-  top: -0.5rem;
-  left: 1rem;
-  width: 0.25rem;
-  height: 4.8rem;
-  border-radius: 999px;
-  content: "";
-  background: repeating-linear-gradient(180deg, var(--bar-red) 0 8px, var(--cream) 8px 16px);
-  transform: rotate(12deg);
-}
-
-.apero-object--ticket {
-  width: 4.2rem;
-  height: 4.8rem;
-  border-radius: 0.35rem;
-  background:
-    repeating-linear-gradient(0deg, rgba(39, 28, 19, 0.15) 0 1px, transparent 1px 0.55rem),
-    var(--cream);
-  border: 2px solid rgba(39, 28, 19, 0.2);
-  transform: rotate(-5deg);
-}
-
-.apero-object--ticket i {
-  display: block;
-  width: 72%;
-  height: 2px;
-  margin: 0.75rem auto 0;
-  background: rgba(39, 28, 19, 0.28);
-}
-
-.apero-object--sign {
-  width: 2.6rem;
-  height: 4.6rem;
-}
-
-.apero-object--sign::before {
-  position: absolute;
-  top: 0;
-  left: 0.55rem;
-  width: 1.85rem;
-  height: 2.9rem;
-  border: 3px solid var(--cream);
-  border-radius: 999px 999px 0.45rem 0.45rem;
-  content: "";
-  background: var(--bar-red);
-  transform: rotate(9deg);
-}
-
-.apero-object--sign::after {
-  position: absolute;
-  left: 1.38rem;
-  bottom: 0;
-  width: 0.28rem;
-  height: 2rem;
-  content: "";
-  background: var(--ink);
-}
 
 .mobile-steps span {
   display: grid;
@@ -1155,9 +1034,6 @@ textarea {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .apero-ornaments {
-    min-height: 92px;
-  }
 }
 
 @media (max-width: 640px) {

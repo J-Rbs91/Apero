@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AperoOrnaments } from "../components/AperoOrnaments";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { StickyActionBar } from "../components/StickyActionBar";
@@ -157,7 +156,6 @@ export function CreateEventPage() {
         subtitle="Une table de zinc, quelques propositions, et le suffrage peut commencer."
       />
 
-      <AperoOrnaments variant="registry" />
 
       <form className="page-stack page-stack--mobile" onSubmit={handleSubmit}>
         <TicketCard className="ticket-card--registry">

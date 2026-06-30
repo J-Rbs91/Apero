@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { AperoOrnaments } from "../components/AperoOrnaments";
 import { MobileBottomBar } from "../components/MobileBottomBar";
 import { MobilePage } from "../components/MobilePage";
 import { useGentlemanName } from "../hooks/useGentlemanName";
@@ -29,7 +28,6 @@ export function HomePage() {
         </div>
       </section>
 
-      <AperoOrnaments variant="counter" />
 
       <section className="mobile-steps" aria-label="Fonctionnement">
         <article>

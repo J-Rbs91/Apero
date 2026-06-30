@@ -1,5 +1,3 @@
-import { AperoOrnaments } from "./AperoOrnaments";
-
 type LoadingScreenProps = {
   title?: string;
   subtitle?: string;
@@ -17,7 +15,6 @@ export function LoadingScreen({
         </div>
         <p className="loading-screen__subtitle">{subtitle}</p>
       </div>
-      <AperoOrnaments variant="counter" />
       <div className="loading-screen__counter">
         <div className="loading-screen__note">
           <span className="loading-screen__receipt">

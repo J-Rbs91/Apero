@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { AlternativeOptionForm } from "../components/AlternativeOptionForm";
-import { AperoOrnaments } from "../components/AperoOrnaments";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
@@ -174,7 +173,6 @@ export function EventPage() {
         {event.description && <p>{event.description}</p>}
       </section>
 
-      <AperoOrnaments variant="verdict" />
 
       <p className="security-note">
         C’est une institution de comptoir, pas un coffre-fort. Ne mets rien que tu ne voudrais
