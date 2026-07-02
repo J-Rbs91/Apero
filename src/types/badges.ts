@@ -81,9 +81,9 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
   },
   {
     id: "SERIAL_VOTER",
-    name: "Fine Gâchette du Scrutin",
+    name: "Fine Gâchette du Registre",
     description:
-      "A déposé un nombre de suffrages qui frise l’acharnement démocratique dans les assemblées de la Confrérie.",
+      "A déposé un nombre de réponses qui frise l’acharnement administratif dans les assemblées de la Confrérie.",
     rarity: "common",
     iconName: "ballot",
   },
@@ -106,14 +106,14 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     id: "FIRST_SHOT_CONSENSUS",
     name: "Consensus du premier coup",
     description:
-      "A convoqu\u00e9 une assembl\u00e9e si limpide que tout le monde a valid\u00e9 une proposition initiale sans r\u00e9clamer de nouvelle date, de nouvel horaire ou de nouveau lieu.",
+      "A convoqué une assemblée si limpide que tout le monde a validé une proposition initiale sans réclamer de nouvelle date, de nouvel horaire ou de nouveau lieu.",
     rarity: "rare",
     iconName: "crown",
   },
   {
     id: "ZINC_DIPLOMAT",
     name: "Diplomate du Zinc",
-    description: "A participé à plusieurs apéros sans jamais foutre le bazar dans les votes.",
+    description: "A participé à plusieurs apéros sans jamais foutre le bazar dans les réponses.",
     rarity: "rare",
     iconName: "diplomat",
   },
