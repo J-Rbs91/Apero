@@ -22,14 +22,12 @@ export function HomePage() {
         <hr className="accent" />
         <h1 className="h1">La Confrérie du Petit Jaune</h1>
         <p className="lede">
-          La démocratie du zinc, pour toute la tablée, parce qu'au fond, choisir une date d'apéro,
-          c'est déjà de la politique, et la politique, si on la laisse aux autres, elle se fait
-          sans nous — et ça, c'est le drame.
+          Le zinc décide, pour toute la tablée. Choisir une date d'apéro, c'est plus sérieux qu'il
+          n'y paraît.
         </p>
         <p className="hint">
-          Pastaga, pinard, soft, Perrier ou juste des cacahuètes en guise de carburant
-          existentiel : la tablée s'équipe comme elle veut, mais personne n'a le droit de fuir le
-          scrutin, parce que la démocratie ne s'arrête pas au comptoir, figure-toi.
+          Pastaga, pinard, soft, Perrier ou juste des cacahuètes : la tablée s'équipe comme elle
+          veut, mais personne n'a le droit de se défiler, figure-toi.
         </p>
         <Link className="button button--primary button--block" to="/create">
           Convoquer une assemblée
