@@ -54,10 +54,23 @@ function githubHeaders(): Record<string, string> {
   };
 }
 
+async function fetchGitHub(url: string, init: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, {
+      ...init,
+      signal: AbortSignal.timeout(config.githubRequestTimeoutMs),
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    logger.warn(`GitHub request failed before response: ${message}`);
+    throw new ApiError(502, "GITHUB_ERROR", "GitHub API is unreachable or timed out.");
+  }
+}
+
 export async function getAperoFile(
   aperoId: string,
 ): Promise<{ json: unknown; sha: string } | null> {
-  const response = await fetch(`${contentsUrl(aperoId)}?ref=${config.githubBranch}`, {
+  const response = await fetchGitHub(`${contentsUrl(aperoId)}?ref=${config.githubBranch}`, {
     headers: githubHeaders(),
   });
 
@@ -91,7 +104,7 @@ export async function createOrUpdateAperoFile(
 ): Promise<{ sha: string }> {
   const message = sha ? `chore: update apero ${aperoId}` : `chore: create apero ${aperoId}`;
 
-  const response = await fetch(contentsUrl(aperoId), {
+  const response = await fetchGitHub(contentsUrl(aperoId), {
     method: "PUT",
     headers: githubHeaders(),
     body: JSON.stringify({
