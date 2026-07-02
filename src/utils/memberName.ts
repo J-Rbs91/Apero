@@ -1,4 +1,4 @@
-export type GentlemanNameValidation =
+export type ComptoirNameValidation =
   | { ok: true; name: string }
   | { ok: false; message: string };
 
@@ -13,7 +13,7 @@ export function normalizeMemberName(name: string): string {
     .replace(/\p{Diacritic}/gu, "");
 }
 
-export function validateGentlemanName(name: string): GentlemanNameValidation {
+export function validateComptoirName(name: string): ComptoirNameValidation {
   const normalizedName = normalizeDisplayName(name);
 
   if (!normalizedName) {

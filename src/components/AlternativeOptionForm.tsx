@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useGentlemanName } from "../hooks/useGentlemanName";
+import { useComptoirName } from "../hooks/useComptoirName";
 import type { AperitifOption } from "../types/apero";
 import { createId } from "../utils/createId";
 
@@ -9,19 +9,19 @@ type AlternativeOptionFormProps = {
 };
 
 export function AlternativeOptionForm({ isSaving, onSubmit }: AlternativeOptionFormProps) {
-  const { gentlemanName } = useGentlemanName();
+  const { comptoirName } = useComptoirName();
   const [isOpen, setIsOpen] = useState(false);
-  const [createdByName, setCreatedByName] = useState(gentlemanName);
+  const [createdByName, setCreatedByName] = useState(comptoirName);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [location, setLocation] = useState("");
   const [feedback, setFeedback] = useState("");
 
   useEffect(() => {
-    if (!createdByName && gentlemanName) {
-      setCreatedByName(gentlemanName);
+    if (!createdByName && comptoirName) {
+      setCreatedByName(comptoirName);
     }
-  }, [createdByName, gentlemanName]);
+  }, [createdByName, comptoirName]);
 
   async function handleSubmit(formEvent: React.FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
@@ -29,7 +29,7 @@ export function AlternativeOptionForm({ isSaving, onSubmit }: AlternativeOptionF
     const trimmedLocation = location.trim();
 
     if (!trimmedName) {
-      setFeedback("Le zinc exige le nom du contre-proposant.");
+      setFeedback("Le zinc exige une signature sous la contre-proposition. L’anonymat, c’est bon pour les tracts.");
       return;
     }
 
@@ -52,7 +52,7 @@ export function AlternativeOptionForm({ isSaving, onSubmit }: AlternativeOptionF
     setDate("");
     setTime("");
     setLocation("");
-    setFeedback("Contre-proposition déposée dans cette assemblée, pas dans celle du voisin.");
+    setFeedback("Contre-proposition déposée dans cette assemblée, pas dans celle de la table d’à côté.");
     setIsOpen(false);
   }
 
@@ -71,11 +71,11 @@ export function AlternativeOptionForm({ isSaving, onSubmit }: AlternativeOptionF
       ) : (
         <form className="vote-form" onSubmit={handleSubmit}>
           <label className="field">
-            <span>Nom du contre-proposant</span>
+            <span>Signature de la contre-proposition</span>
             <input
               value={createdByName}
               onChange={(eventChange) => setCreatedByName(eventChange.target.value)}
-              placeholder="Jean-Michel Pastaga"
+              placeholder="Nadine Diabolo, Jean-Mi Pastaga…"
             />
           </label>
 

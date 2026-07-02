@@ -12,7 +12,7 @@ function createEvent(options: AperitifEvent["options"], votes: Array<Record<stri
     options,
     participants: votes.map((participantVotes, index) => ({
       id: "participant_" + index,
-      participantName: "Membre " + index,
+      participantName: "Convive " + index,
       votes: participantVotes,
       createdAt: "2026-06-30T18:00:00.000Z",
       updatedAt: "2026-06-30T18:00:00.000Z",

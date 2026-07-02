@@ -2,9 +2,11 @@
 
 **App en ligne : [https://j-rbs91.github.io/Apero/](https://j-rbs91.github.io/Apero/)**
 
-La Confrérie du Petit Jaune est un mini Doodle de comptoir : une personne convoque une assemblée, propose plusieurs combinaisons date + heure + lieu, puis partage un lien unique. Les membres invités votent uniquement sur cette assemblée.
+La Confrérie du Petit Jaune est un mini Doodle de comptoir : une personne convoque une assemblée, propose plusieurs combinaisons date + heure + lieu, puis partage un lien unique. La tablée invitée vote uniquement sur cette assemblée.
 
-Le contraste est volontaire : un nom pompeux, presque chevaleresque, pour une mission absolument essentielle et moyennement distinguée : se mettre d’accord pour boire un coup.
+Le contraste est volontaire : un nom pompeux, presque chevaleresque, pour une mission absolument essentielle et moyennement distinguée : se mettre d’accord pour boire un coup. Chaque convive vient avec son carburant — pastaga, pinard, soft, Perrier ou cacahuètes — mais tout le monde passe par le registre.
+
+Ligne éditoriale : *une app d’apéro de comptoir, absurde, alcool-compatible et pleine de gouaille, ouverte à toute la tablée — pas seulement aux gentlemen du pastaga.*
 
 ## Principe multi-apéros
 
@@ -36,7 +38,7 @@ Ce nom ne remplace pas l’identifiant technique :
 
 - `id` : utilisé pour l’URL et le stockage GitHub ;
 - `ceremonialName` : utilisé comme nom principal visible dans l’interface ;
-- `title` : objet libre et optionnel saisi par l’organisateur.
+- `title` : objet libre et optionnel saisi par la personne qui organise.
 
 ## Règle d’unicité
 
@@ -156,10 +158,11 @@ L’app est déployée automatiquement sur GitHub Pages à chaque push sur `main
 - Création d’une assemblée avec nom cérémoniel unique.
 - Propositions complètes : jour, heure, établissement de réception, note.
 - Page publique par lien unique basé sur l’`id` technique.
-- Vote par pseudo : présent, réserve, absent.
+- Vote par pseudo : j’y serai, j’me tâte, sans moi.
 - Modification du vote si le même pseudo revient.
 - Contributions au banquet et déclarations au comptoir.
-- Calcul du verdict : priorité aux présents, départage aux réserves, égalités conservées.
+- Registre du comptoir groupé : les présences en tête, les désertions et les culs entre deux chaises dans un menu dépliant.
+- Calcul du verdict : priorité aux « j’y serai », départage aux « j’me tâte », égalités conservées.
 - Gestion simple des conflits GitHub : relecture, fusion, deuxième tentative.
 
 ## Évolutions possibles

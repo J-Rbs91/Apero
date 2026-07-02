@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { eventStorage } from "../services";
-import { useGentlemanName } from "../hooks/useGentlemanName";
+import { useComptoirName } from "../hooks/useComptoirName";
 import type { AperitifEvent, AperitifOption, ParticipantResponse, VoteStatus } from "../types/apero";
 import { createId } from "../utils/createId";
 import { generateUniqueCeremonialName } from "../utils/generateCeremonialName";
@@ -19,18 +19,18 @@ function createEmptyOption(): AperitifOption {
 
 export function CreateEventPage() {
   const navigate = useNavigate();
-  const { gentlemanName } = useGentlemanName();
+  const { comptoirName } = useComptoirName();
   const [title, setTitle] = useState("");
-  const [organizerName, setOrganizerName] = useState(gentlemanName);
+  const [organizerName, setOrganizerName] = useState(comptoirName);
   const [options, setOptions] = useState<AperitifOption[]>([createEmptyOption()]);
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!organizerName && gentlemanName) {
-      setOrganizerName(gentlemanName);
+    if (!organizerName && comptoirName) {
+      setOrganizerName(comptoirName);
     }
-  }, [gentlemanName, organizerName]);
+  }, [comptoirName, organizerName]);
 
   function updateOption(optionId: string, updates: Partial<AperitifOption>) {
     setOptions((currentOptions) =>
@@ -60,7 +60,7 @@ export function CreateEventPage() {
       .filter((option) => option.date || option.time || option.location);
 
     if (!organizerName.trim()) {
-      setFeedback("Il faut un Grand Convoqueur pour ouvrir le registre.");
+      setFeedback("Pas de signature, pas de registre. La tablée ne se convoque pas toute seule.");
       return;
     }
 
@@ -126,10 +126,10 @@ export function CreateEventPage() {
     } catch (error) {
       setFeedback(
         error instanceof Error && error.message === "NO_CEREMONIAL_NAME_AVAILABLE"
-          ? "La Confrérie est complète. Trop d’apéros sont déjà en cours. Clôture une assemblée avant d’en convoquer une nouvelle."
+          ? "La Confrérie est complète. Trop d’apéros sont déjà en cours de magouille. Clôture une assemblée avant d’en convoquer une nouvelle."
           : error instanceof Error
             ? error.message
-            : "Le garçon a renversé le registre. Réessaie dans deux secondes.",
+            : "Le service a renversé le registre. Réessaie dans deux secondes.",
       );
     } finally {
       setIsSubmitting(false);
@@ -158,7 +158,7 @@ export function CreateEventPage() {
           <input
             value={organizerName}
             onChange={(eventChange) => setOrganizerName(eventChange.target.value)}
-            placeholder="Jean-Mi Pastaga"
+            placeholder="Jean-Mi Pastaga, Mémé Cacahuète…"
           />
         </label>
 

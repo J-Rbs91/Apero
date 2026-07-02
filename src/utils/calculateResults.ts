@@ -40,7 +40,7 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
   if (event.participants.length === 0) {
     return {
       type: "empty",
-      message: "Le registre est vierge. Aucun membre n’a encore déposé son suffrage.",
+      message: "Le registre est vierge. Aucun convive n’a encore déposé son suffrage.",
       results,
     };
   }

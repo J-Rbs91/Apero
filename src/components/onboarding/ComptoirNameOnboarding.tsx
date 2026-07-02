@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { WineGlassMark } from "../WineGlassMark";
-import { validateGentlemanName } from "../../utils/memberName";
+import { validateComptoirName } from "../../utils/memberName";
 
-type GentlemanNameOnboardingProps = {
+type ComptoirNameOnboardingProps = {
   initialName?: string;
   onConfirm: (name: string) => void;
 };
 
-export function GentlemanNameOnboarding({
+export function ComptoirNameOnboarding({
   initialName = "",
   onConfirm,
-}: GentlemanNameOnboardingProps) {
+}: ComptoirNameOnboardingProps) {
   const [draftName, setDraftName] = useState(initialName);
   const [confirmedName, setConfirmedName] = useState("");
   const [error, setError] = useState("");
@@ -21,7 +21,7 @@ export function GentlemanNameOnboarding({
 
   function handleSubmit(formEvent: React.FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
-    const validation = validateGentlemanName(draftName);
+    const validation = validateComptoirName(draftName);
 
     if (!validation.ok) {
       setError(validation.message);
@@ -48,25 +48,25 @@ export function GentlemanNameOnboarding({
 
         <div className="grow" />
 
-        <section className="sheet" aria-labelledby="gentleman-title">
+        <section className="sheet" aria-labelledby="comptoir-title">
           <p className="eyebrow">{"Entrée dans la Confrérie"}</p>
           <hr className="accent" />
-          <h1 className="h1 h1--sm" id="gentleman-title">
-            Il te faut un nom de gentleman
+          <h1 className="h1 h1--sm" id="comptoir-title">
+            Il te faut un nom de comptoir
           </h1>
           <p className="lede">
-            {"C’est sous ce blaze que le zinc se souviendra de toi."}
+            {"C’est sous ce blaze que le zinc se souviendra de toi. Pastaga, pinard, soft ou Perrier : la tablée ne juge pas le carburant, elle grave les noms."}
           </p>
 
           <form className="vote-form" onSubmit={handleSubmit}>
             <label className="field">
-              <span>Nom de gentleman</span>
+              <span>Nom de comptoir</span>
               <input
                 autoFocus
                 maxLength={48}
                 value={draftName}
                 onChange={(eventChange) => setDraftName(eventChange.target.value)}
-                placeholder="Jean-Michel Pastaga"
+                placeholder="Jean-Michel Pastaga, Gisèle Perrier…"
               />
             </label>
             <button className="button button--primary button--block" type="submit">
@@ -84,13 +84,13 @@ export function GentlemanNameOnboarding({
       {confirmedName && (
         <div className="modal-backdrop" role="presentation">
           <section
-            aria-labelledby="gentleman-confirm-title"
+            aria-labelledby="comptoir-confirm-title"
             aria-modal="true"
             className="sheet modal-sheet"
             role="dialog"
           >
             <p className="eyebrow">Validation du registre</p>
-            <h2 className="h1 h1--sm" id="gentleman-confirm-title">
+            <h2 className="h1 h1--sm" id="comptoir-confirm-title">
               {"Sérieux, c’est ça ton blaze ?"}
             </h2>
             <span className="blaze">
