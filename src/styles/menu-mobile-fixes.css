@@ -1,0 +1,48 @@
+/* Focused overrides for the menu trigger and mobile home viewport behavior. */
+.mobile-page {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.mobile-page__inner {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.brandpill--button {
+  border-color: rgba(244, 197, 66, 0.4);
+  background: rgba(10, 36, 29, 0.68);
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.brandpill--button:hover,
+.brandpill--button:active,
+.brandpill--button[aria-expanded="true"] {
+  border-color: rgba(244, 197, 66, 0.7);
+  background: rgba(10, 36, 29, 0.82);
+}
+
+.brandpill__menu-icon {
+  flex: 0 0 auto;
+  margin-left: 2px;
+  color: var(--pastis);
+}
+
+.brandpill__menu-line {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 180ms ease, opacity 140ms ease;
+}
+
+.brandpill--button[aria-expanded="true"] .brandpill__menu-line--top {
+  transform: translateY(5px) rotate(45deg);
+}
+
+.brandpill--button[aria-expanded="true"] .brandpill__menu-line--mid {
+  opacity: 0;
+}
+
+.brandpill--button[aria-expanded="true"] .brandpill__menu-line--bottom {
+  transform: translateY(-5px) rotate(-45deg);
+}
