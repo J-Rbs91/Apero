@@ -3,27 +3,42 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { config, isGithubWriteConfigured } from "./config.js";
-import { errorHandler, notFoundHandler } from "./errors.js";
+import { ApiError, errorHandler, notFoundHandler } from "./errors.js";
 import { logger } from "./logger.js";
 import { aperosRouter } from "./routes/aperos.js";
 import { healthRouter } from "./routes/health.js";
 
 const app = express();
 
-// Derrière Nginx sur le VPS : fait confiance au premier proxy pour retrouver
-// l'IP cliente réelle (nécessaire au rate limit).
-app.set("trust proxy", 1);
+// Derrière Caddy/Nginx sur le VPS : fait confiance au proxy configuré pour
+// retrouver l'IP cliente réelle (nécessaire au rate limit).
+app.set("trust proxy", config.trustProxyHops);
 app.disable("x-powered-by");
 
-app.use(helmet());
+app.use(
+  helmet({
+    referrerPolicy: { policy: "no-referrer" },
+  }),
+);
 app.use(
   cors({
     origin: config.allowedOrigins,
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
+    optionsSuccessStatus: 204,
   }),
 );
-app.use(express.json({ limit: config.jsonBodyLimit }));
+
+app.use((req, _res, next) => {
+  if (["POST", "PUT", "PATCH"].includes(req.method) && !req.is("application/json")) {
+    next(new ApiError(415, "UNSUPPORTED_MEDIA_TYPE", "Content-Type must be application/json."));
+    return;
+  }
+
+  next();
+});
+
+app.use(express.json({ limit: config.jsonBodyLimit, strict: true }));
 
 // Log d'accès minimal : jamais de body, jamais de header.
 app.use((req, res, next) => {
@@ -34,27 +49,38 @@ app.use((req, res, next) => {
   next();
 });
 
+function rateLimitResponse(_req: express.Request, res: express.Response): void {
+  res.status(429).json({
+    ok: false,
+    error: "RATE_LIMITED",
+    message: "Too many requests. Retry later.",
+  });
+}
+
 const apiLimiter = rateLimit({
-  windowMs: 60_000,
-  limit: 30,
-  standardHeaders: true,
+  windowMs: config.apiRateLimitWindowMs,
+  limit: config.apiRateLimitMax,
+  standardHeaders: "draft-8",
   legacyHeaders: false,
-  handler: (_req, res) => {
-    res.status(429).json({
-      ok: false,
-      error: "RATE_LIMITED",
-      message: "Too many requests. Retry later.",
-    });
-  },
+  handler: rateLimitResponse,
+});
+
+const writeLimiter = rateLimit({
+  windowMs: config.writeRateLimitWindowMs,
+  limit: config.writeRateLimitMax,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  handler: rateLimitResponse,
 });
 
 app.use(healthRouter);
-app.use("/api", apiLimiter, aperosRouter);
+app.use("/api", apiLimiter);
+app.use("/api/aperos", writeLimiter, aperosRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-app.listen(config.port, config.host, () => {
+const server = app.listen(config.port, config.host, () => {
   logger.info(`apero-api à l'écoute sur ${config.host}:${config.port}`);
 
   if (!isGithubWriteConfigured()) {
@@ -63,3 +89,7 @@ app.listen(config.port, config.host, () => {
     );
   }
 });
+
+server.requestTimeout = config.serverRequestTimeoutMs;
+server.headersTimeout = Math.min(config.serverRequestTimeoutMs + 1_000, 60_000);
+server.keepAliveTimeout = 5_000;
