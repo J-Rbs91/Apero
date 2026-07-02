@@ -1,6 +1,7 @@
 // Géocodage via l'API publique Photon (komoot), basée sur OpenStreetMap.
 // Gratuite, sans clé, compatible CORS — parfaite pour une app sans backend.
-const PHOTON_ENDPOINT = "https://photon.komoot.io/api/";
+const PHOTON_SEARCH_ENDPOINT = "https://photon.komoot.io/api/";
+const PHOTON_REVERSE_ENDPOINT = "https://photon.komoot.io/reverse";
 
 export type PlaceSuggestion = {
   id: string;
@@ -37,6 +38,27 @@ function buildAddress(properties: NonNullable<PhotonFeature["properties"]>): str
     .join(", ");
 }
 
+function parseFeature(feature: PhotonFeature, fallbackIndex: number): PlaceSuggestion | undefined {
+  const properties = feature.properties;
+  const coordinates = feature.geometry?.coordinates;
+
+  if (!coordinates) {
+    return undefined;
+  }
+
+  const [lng, lat] = coordinates;
+  const address = properties ? buildAddress(properties) : "";
+  const name = properties?.name || properties?.street || address || "Position choisie";
+
+  return {
+    id: `${properties?.osm_type ?? "X"}${properties?.osm_id ?? fallbackIndex}`,
+    name,
+    address,
+    lat,
+    lng,
+  };
+}
+
 export async function searchPlaces(
   query: string,
   signal?: AbortSignal,
@@ -47,7 +69,7 @@ export async function searchPlaces(
     limit: "6",
   });
 
-  const response = await fetch(`${PHOTON_ENDPOINT}?${params.toString()}`, { signal });
+  const response = await fetch(`${PHOTON_SEARCH_ENDPOINT}?${params.toString()}`, { signal });
 
   if (!response.ok) {
     throw new Error(`Photon a renvoyé ${response.status}.`);
@@ -57,22 +79,38 @@ export async function searchPlaces(
   const suggestions: PlaceSuggestion[] = [];
 
   for (const feature of payload.features ?? []) {
-    const properties = feature.properties;
-    const coordinates = feature.geometry?.coordinates;
-
-    if (!properties?.name || !coordinates) {
+    if (!feature.properties?.name) {
       continue;
     }
 
-    const [lng, lat] = coordinates;
-    suggestions.push({
-      id: `${properties.osm_type ?? "X"}${properties.osm_id ?? suggestions.length}`,
-      name: properties.name,
-      address: buildAddress(properties),
-      lat,
-      lng,
-    });
+    const suggestion = parseFeature(feature, suggestions.length);
+    if (suggestion) {
+      suggestions.push(suggestion);
+    }
   }
 
   return suggestions;
+}
+
+export async function reverseGeocode(
+  lat: number,
+  lng: number,
+  signal?: AbortSignal,
+): Promise<PlaceSuggestion | null> {
+  const params = new URLSearchParams({
+    lon: String(lng),
+    lat: String(lat),
+    lang: "fr",
+  });
+
+  const response = await fetch(`${PHOTON_REVERSE_ENDPOINT}?${params.toString()}`, { signal });
+
+  if (!response.ok) {
+    throw new Error(`Photon a renvoyé ${response.status}.`);
+  }
+
+  const payload = (await response.json()) as { features?: PhotonFeature[] };
+  const feature = payload.features?.[0];
+
+  return feature ? parseFeature(feature, 0) ?? null : null;
 }

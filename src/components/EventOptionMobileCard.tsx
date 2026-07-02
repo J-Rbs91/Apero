@@ -1,4 +1,5 @@
 import type { AperitifOption, VoteStatus } from "../types/apero";
+import { OpenInMapsButton } from "./OpenInMapsButton";
 import { VoteSegmentedControl } from "./VoteSegmentedControl";
 
 type EventOptionMobileCardProps = {
@@ -35,7 +36,15 @@ export function EventOptionMobileCard({
         <div>
           <div className="slot__d">{formatDateTime(option)}</div>
           <div className="slot__p">{subtitle}</div>
-          {option.locationAddress && <div className="slot__p">{option.locationAddress}</div>}
+          {(option.locationAddress || (option.locationLat != null && option.locationLng != null)) && (
+            <OpenInMapsButton
+              className="slot__maplink"
+              label={option.location}
+              address={option.locationAddress}
+              lat={option.locationLat}
+              lng={option.locationLng}
+            />
+          )}
           {option.note && <div className="slot__p">{option.note}</div>}
         </div>
       </div>

@@ -59,16 +59,12 @@ export function MobileResultsPanel({ event, result }: MobileResultsPanelProps) {
       {highlightedOption &&
         highlightedOption.locationLat != null &&
         highlightedOption.locationLng != null && (
-          <>
-            {highlightedOption.locationAddress && (
-              <p className="meta">{highlightedOption.locationAddress}</p>
-            )}
-            <MiniMap
-              lat={highlightedOption.locationLat}
-              lng={highlightedOption.locationLng}
-              label={highlightedOption.location}
-            />
-          </>
+          <MiniMap
+            lat={highlightedOption.locationLat}
+            lng={highlightedOption.locationLng}
+            label={highlightedOption.location}
+            address={highlightedOption.locationAddress}
+          />
         )}
     </div>
   );
