@@ -8,8 +8,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "purge:expired": "node scripts/purge-expired-events.mjs"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@types/leaflet": "^1.9.21",

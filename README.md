@@ -8,25 +8,18 @@ Le contraste est volontaire : un nom pompeux, presque chevaleresque, pour une mi
 
 Ligne éditoriale : *une app d’apéro de comptoir, absurde, alcool-compatible et pleine de gouaille, ouverte à toute la tablée — pas seulement aux gentlemen du pastaga.*
 
-## Principe multi-apéros
+## Principe multi-aperos
 
-Chaque apéro reste indépendant :
+Chaque apero reste independant :
 
-- un apéro = un fichier JSON dans `data/events/<eventId>.json` ;
-- un lien = une assemblée précise ;
-- les participants d’une assemblée ne polluent jamais une autre ;
-- les votes sont fusionnés uniquement dans le fichier JSON de l’événement concerné.
+- un apero = un fichier chiffre dans `data/aperos/<aperoId>.json` ;
+- un lien = une assemblee precise, avec les cles dans le fragment d'URL ;
+- les participants d'une assemblee ne polluent jamais une autre ;
+- les votes sont fusionnes via l'API VPS, jamais via un token GitHub dans le navigateur.
 
-Exemple :
+Le frontend lit les fichiers chiffres publiquement, mais il ne sait pas ecrire dans GitHub. Les ecritures passent par `server/`, ou le token GitHub reste cote serveur.
 
-```txt
-data/
-  events/
-    apero_k8f3x9p2.json
-    apero_7mqp4zda.json
-```
-
-## Noms cérémoniels
+## Noms ceremoniels
 
 Chaque assemblée reçoit automatiquement un `ceremonialName` lisible, choisi parmi 30 noms prédéfinis, par exemple :
 
@@ -40,46 +33,22 @@ Ce nom ne remplace pas l’identifiant technique :
 - `ceremonialName` : utilisé comme nom principal visible dans l’interface ;
 - `title` : objet libre et optionnel saisi par la personne qui organise.
 
-## Règle d’unicité
+## Regle d'unicite
 
-Deux assemblées actives ne peuvent jamais avoir le même `ceremonialName`.
-
-À la création :
-
-1. l’app liste les fichiers dans `data/events/` ;
-2. elle charge les événements actifs ;
-3. elle extrait les noms cérémoniels déjà utilisés ;
-4. elle choisit un nom disponible parmi les 30 ;
-5. si les 30 noms sont pris, la création est bloquée.
-
-Un apéro `closed` ou `archived` peut libérer son nom. Tant que la logique de clôture n’est pas utilisée, la limite pratique est donc de 30 apéros actifs simultanés.
-
-Message en cas de saturation :
-
-```txt
-La Confrérie est complète. Trop d’apéros sont déjà en cours de magouille. Clôture une assemblée avant d’en convoquer une nouvelle.
-```
+En mode `api-vps`, les assemblees sont chiffrees : l'app ne liste plus tout le repo pour garantir l'unicite globale du nom ceremoniel. Le nom est donc tire au sort localement, et l'acces a chaque apero se fait par son lien d'invitation.
 
 ## Structure JSON
 
 ```json
 {
-  "id": "apero_k8f3x9p2",
-  "ceremonialName": "La Grande Tablée des Olives",
-  "title": "Apéro fin de chantier",
-  "organizerName": "Jojo",
-  "description": "On enterre cette semaine comme elle le mérite.",
-  "beaufLevel": "medium",
-  "status": "active",
-  "options": [
-    {
-      "id": "option_1",
-      "date": "2026-07-03",
-      "time": "19:00",
-      "location": "Bar des Sports"
-    }
-  ],
-  "participants": [],
+  "id": "apero_abc123",
+  "version": 1,
+  "writeKeyHash": "sha256_hex_du_write_key",
+  "encryption": {
+    "algorithm": "AES-GCM",
+    "iv": "base64url_iv",
+    "ciphertext": "base64url_payload_chiffre"
+  },
   "createdAt": "2026-06-30T18:00:00.000Z",
   "updatedAt": "2026-06-30T18:00:00.000Z"
 }
@@ -91,37 +60,28 @@ La Confrérie est complète. Trop d’apéros sont déjà en cours de magouille.
 npm install
 ```
 
-## Configuration GitHub
+## Configuration
 
-Copier `.env.example` en `.env.local`, puis renseigner :
+Copier `.env.example` en `.env.local`, puis renseigner les variables publiques du frontend :
 
 ```bash
+VITE_APP_BASE_URL=https://j-rbs91.github.io/Apero
+VITE_APERO_STORAGE_MODE=api-vps
+VITE_APERO_API_BASE_URL=https://ton-api-apero.example.com
 VITE_GITHUB_OWNER=J-Rbs91
 VITE_GITHUB_REPO=Apero
 VITE_GITHUB_BRANCH=main
-VITE_GITHUB_DATA_PATH=data/events
-VITE_GITHUB_TOKEN=TOKEN_GITHUB_A_METTRE_ICI_EN_MODE_KAMIKAZE
 ```
 
-Permissions minimales recommandées pour un fine-grained personal access token :
+Le token GitHub ne doit jamais etre dans une variable `VITE_`. Il vit uniquement dans l'environnement du serveur `server/` :
 
-- Repository access : uniquement `J-Rbs91/Apero` ;
-- Contents : read and write ;
-- aucune permission inutile.
+```bash
+GITHUB_TOKEN=token_serveur_uniquement
+```
 
-## Avertissement sécurité
+## Avertissement securite
 
-Cette application utilise volontairement GitHub comme pseudo-base de données. Le token GitHub est exposé côté frontend. C’est une mauvaise pratique assumée pour un projet humoristique et non sensible. Ne jamais utiliser cette architecture pour un vrai produit ou pour des données sensibles.
-
-Conséquences :
-
-- n’importe qui peut lire le token dans le navigateur ;
-- n’importe qui avec le token peut modifier ou casser les données ;
-- les données d’un repo public sont publiques ;
-- GitHub peut révoquer le token si celui-ci est détecté comme secret exposé ;
-- les commits peuvent devenir nombreux.
-
-La version sérieuse utiliserait un petit backend ou un Cloudflare Worker pour garder le token côté serveur.
+Toute variable prefixee `VITE_` est publique dans le bundle navigateur. Ne jamais y placer de secret. Le frontend ne fait aucune requete GitHub authentifiee ; les ecritures GitHub passent par la mini API VPS.
 
 ## Lancement local
 
@@ -171,7 +131,6 @@ L’app est déployée automatiquement sur GitHub Pages à chaque push sur `main
 
 - Clôturer ou archiver une assemblée depuis l’interface.
 - Libérer explicitement les noms cérémoniels des assemblées terminées.
-- Cloudflare Worker pour ne plus exposer le token.
 - QR code de convocation.
 - Export image du verdict du zinc.
 - PWA installable.

@@ -23,8 +23,7 @@ jobs:
       VITE_GITHUB_OWNER: j-rbs91
       VITE_GITHUB_REPO: Apero
       VITE_GITHUB_BRANCH: main
-      VITE_GITHUB_DATA_PATH: data/events
-      VITE_GITHUB_TOKEN: ${{ secrets.APERO_GITHUB_TOKEN }}
+      VITE_APERO_STORAGE_MODE: api-vps
 
     steps:
       - name: Checkout

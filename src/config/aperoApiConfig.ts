@@ -6,9 +6,11 @@
 export type AperoStorageMode = "legacy-github" | "api-vps";
 
 export function getAperoStorageMode(): AperoStorageMode {
-  // Toute valeur absente ou inconnue retombe sur le mode historique :
-  // c'est le comportement le moins risqué tant que la migration n'est pas validée.
-  return import.meta.env.VITE_APERO_STORAGE_MODE === "api-vps" ? "api-vps" : "legacy-github";
+  // Le mode sur API VPS est le chemin par defaut : aucun token GitHub ne doit
+  // pouvoir repartir dans un build frontend par accident.
+  return import.meta.env.VITE_APERO_STORAGE_MODE === "legacy-github"
+    ? "legacy-github"
+    : "api-vps";
 }
 
 export function getAperoApiBaseUrl(): string {
