@@ -39,11 +39,11 @@ export function BrandMenu() {
         className="brandpill brandpill--button"
         aria-haspopup="menu"
         aria-expanded={isOpen}
-        aria-label="Ouvrir le menu de navigation"
+        aria-label="Menu de la Confrérie"
         onClick={() => setIsOpen((open) => !open)}
       >
         <WineGlassMark size={26} />
-        <span>La Confrérie</span>
+        <span>Menu de la Confrérie</span>
         <svg className="brandpill__menu-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
           <path
             className="brandpill__menu-line brandpill__menu-line--top"
