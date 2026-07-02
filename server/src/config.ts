@@ -20,6 +20,14 @@ const envSchema = z.object({
     .regex(/^\d+(b|kb|mb)$/i, "attendu: un volume du type 100kb")
     .default("100kb"),
   LOG_LEVEL: z.enum(["error", "warn", "info", "debug"]).default("info"),
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(3).default(1),
+  API_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().min(1_000).max(3_600_000).default(60_000),
+  API_RATE_LIMIT_MAX: z.coerce.number().int().min(1).max(10_000).default(60),
+  WRITE_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().min(1_000).max(3_600_000).default(60_000),
+  WRITE_RATE_LIMIT_MAX: z.coerce.number().int().min(1).max(1_000).default(10),
+  MAX_CIPHERTEXT_LENGTH: z.coerce.number().int().min(1_024).max(200_000).default(80_000),
+  GITHUB_REQUEST_TIMEOUT_MS: z.coerce.number().int().min(500).max(30_000).default(8_000),
+  SERVER_REQUEST_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(120_000).default(15_000),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -43,6 +51,14 @@ export const config = {
   port: parsed.data.PORT,
   jsonBodyLimit: parsed.data.JSON_BODY_LIMIT,
   logLevel: parsed.data.LOG_LEVEL,
+  trustProxyHops: parsed.data.TRUST_PROXY_HOPS,
+  apiRateLimitWindowMs: parsed.data.API_RATE_LIMIT_WINDOW_MS,
+  apiRateLimitMax: parsed.data.API_RATE_LIMIT_MAX,
+  writeRateLimitWindowMs: parsed.data.WRITE_RATE_LIMIT_WINDOW_MS,
+  writeRateLimitMax: parsed.data.WRITE_RATE_LIMIT_MAX,
+  maxCiphertextLength: parsed.data.MAX_CIPHERTEXT_LENGTH,
+  githubRequestTimeoutMs: parsed.data.GITHUB_REQUEST_TIMEOUT_MS,
+  serverRequestTimeoutMs: parsed.data.SERVER_REQUEST_TIMEOUT_MS,
   // Chemin d'écriture volontairement verrouillé dans le code, pas en variable
   // d'environnement : l'API ne doit jamais pouvoir écrire ailleurs.
   aperosDataPath: "data/aperos",
