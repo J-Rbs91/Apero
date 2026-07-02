@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { LocationPickerMap } from "./LocationPickerMap";
 import type { PlaceSuggestion } from "../utils/photonGeocoding";
-import { searchPlaces } from "../utils/photonGeocoding";
+import { reverseGeocode, searchPlaces } from "../utils/photonGeocoding";
 
 const SEARCH_DEBOUNCE_MS = 300;
 const MIN_QUERY_LENGTH = 3;
@@ -27,9 +28,10 @@ export function LocationField({
 }: LocationFieldProps) {
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  // Coupe la recherche après un choix dans la liste : le texte change mais
-  // ce n'est pas une frappe utilisateur.
+  // Coupe la recherche après un choix dans la liste ou sur la carte : le texte
+  // change mais ce n'est pas une frappe utilisateur.
   const skipNextSearchRef = useRef(false);
 
   useEffect(() => {
@@ -111,6 +113,41 @@ export function LocationField({
     });
   }
 
+  async function handleMapPick(lat: number, lng: number) {
+    const currentName = value.location.trim();
+    skipNextSearchRef.current = true;
+    onChange({
+      location: currentName || "Point posé sur la carte",
+      locationAddress: undefined,
+      locationLat: lat,
+      locationLng: lng,
+    });
+
+    try {
+      const place = await reverseGeocode(lat, lng);
+      if (place) {
+        skipNextSearchRef.current = true;
+        onChange({
+          location: currentName || place.name,
+          locationAddress: place.address || undefined,
+          locationLat: lat,
+          locationLng: lng,
+        });
+      }
+    } catch {
+      // Photon injoignable : le point posé suffit, l'adresse restera muette.
+    }
+  }
+
+  function handleRemovePin() {
+    onChange({
+      location: value.location,
+      locationAddress: undefined,
+      locationLat: undefined,
+      locationLng: undefined,
+    });
+  }
+
   return (
     <div className="locfield" ref={containerRef}>
       <label className="field field--wide">
@@ -145,6 +182,34 @@ export function LocationField({
             </li>
           ))}
         </ul>
+      )}
+
+      <button
+        type="button"
+        className="ghost-link locfield__pin-toggle"
+        onClick={() => setIsPickerOpen((isShown) => !isShown)}
+      >
+        {isPickerOpen
+          ? "Cacher la carte"
+          : value.locationLat != null
+            ? "Corriger le point sur la carte"
+            : "Introuvable ? Pointe-le toi-même sur la carte"}
+      </button>
+
+      {isPickerOpen && (
+        <div className="locpicker">
+          <p className="hint">Clique sur la carte à l’endroit exact du rade.</p>
+          <LocationPickerMap
+            lat={value.locationLat}
+            lng={value.locationLng}
+            onPick={handleMapPick}
+          />
+          {value.locationLat != null && (
+            <button type="button" className="ghost-link" onClick={handleRemovePin}>
+              Retirer le point
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
