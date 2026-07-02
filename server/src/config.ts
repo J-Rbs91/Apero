@@ -8,8 +8,13 @@ const envSchema = z.object({
   GITHUB_OWNER: z.string().min(1).default("J-Rbs91"),
   GITHUB_REPO: z.string().min(1).default("Apero"),
   GITHUB_BRANCH: z.string().min(1).default("main"),
-  ALLOWED_ORIGIN: z.string().url().default("https://j-rbs91.github.io"),
-  PORT: z.coerce.number().int().min(1).max(65535).default(3000),
+  // Une ou plusieurs origines, separees par des virgules
+  // (ex. https://j-rbs91.github.io,http://localhost:5173).
+  ALLOWED_ORIGIN: z.string().min(1).default("https://j-rbs91.github.io"),
+  // Sur le VPS l'API reste derriere Caddy : ecoute locale uniquement.
+  HOST: z.string().min(1).default("127.0.0.1"),
+  // 3001 = PANUM, 3002 = ORTABEL, 3103 = Apero.
+  PORT: z.coerce.number().int().min(1).max(65535).default(3103),
   JSON_BODY_LIMIT: z
     .string()
     .regex(/^\d+(b|kb|mb)$/i, "attendu: un volume du type 100kb")
@@ -31,7 +36,10 @@ export const config = {
   githubOwner: parsed.data.GITHUB_OWNER,
   githubRepo: parsed.data.GITHUB_REPO,
   githubBranch: parsed.data.GITHUB_BRANCH,
-  allowedOrigin: parsed.data.ALLOWED_ORIGIN,
+  allowedOrigins: parsed.data.ALLOWED_ORIGIN.split(",")
+    .map((origin) => origin.trim())
+    .filter((origin) => origin.length > 0),
+  host: parsed.data.HOST,
   port: parsed.data.PORT,
   jsonBodyLimit: parsed.data.JSON_BODY_LIMIT,
   logLevel: parsed.data.LOG_LEVEL,

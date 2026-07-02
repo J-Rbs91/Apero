@@ -4,9 +4,11 @@ type MobileShareBoxProps = {
   url: string;
   title: string;
   text: string;
+  /** Version affichée du lien (ex. lien d'invitation avec clés masquées). */
+  displayUrl?: string;
 };
 
-export function MobileShareBox({ url, title, text }: MobileShareBoxProps) {
+export function MobileShareBox({ url, title, text, displayUrl }: MobileShareBoxProps) {
   const [feedback, setFeedback] = useState("");
 
   async function copyFullInvitation() {
@@ -54,7 +56,7 @@ export function MobileShareBox({ url, title, text }: MobileShareBoxProps) {
         Partager l’invitation
       </button>
       <div className="share">
-        <code>{url}</code>
+        <code>{displayUrl ?? url}</code>
         <button className="cp" type="button" onClick={handleCopyLink}>
           Copier
         </button>

@@ -3,11 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { LocationField } from "../components/LocationField";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
+import { getAperoStorageMode } from "../config/aperoApiConfig";
 import { eventStorage } from "../services";
+import { AperoApiError } from "../services/aperoApiClient";
+import { createEncryptedApero } from "../services/encryptedAperoRepository";
 import { useComptoirName } from "../hooks/useComptoirName";
 import type { AperitifEvent, AperitifOption, ParticipantResponse, VoteStatus } from "../types/apero";
 import { createId } from "../utils/createId";
-import { generateUniqueCeremonialName } from "../utils/generateCeremonialName";
+import {
+  generateUniqueCeremonialName,
+  pickRandomCeremonialName,
+} from "../utils/generateCeremonialName";
+import { buildInvitePath } from "../utils/inviteLink";
 
 function createEmptyOption(): AperitifOption {
   return {
@@ -92,8 +99,13 @@ export function CreateEventPage() {
 
     try {
       setIsSubmitting(true);
-      const activeEvents = await eventStorage.listActiveEvents();
-      const ceremonialName = generateUniqueCeremonialName(activeEvents);
+      const storageMode = getAperoStorageMode();
+      // Mode api-vps : les assemblées sont chiffrées, impossible de lister
+      // l'existant pour garantir un nom unique — on tire au sort, simplement.
+      const ceremonialName =
+        storageMode === "api-vps"
+          ? pickRandomCeremonialName()
+          : generateUniqueCeremonialName(await eventStorage.listActiveEvents());
       const now = new Date().toISOString();
       const trimmedOrganizerName = organizerName.trim();
 
@@ -109,6 +121,37 @@ export function CreateEventPage() {
         createdAt: now,
         updatedAt: now,
       };
+
+      if (storageMode === "api-vps") {
+        // Nouveau flux : chiffrement côté client puis écriture via l'API VPS.
+        // L'aperoId et les clés sont générés par le repository ; le lien
+        // d'invitation (avec clés en fragment) devient la seule porte d'entrée.
+        const created = await createEncryptedApero({
+          ceremonialName,
+          title: title.trim() || undefined,
+          organizerName: trimmedOrganizerName,
+          beaufLevel: "medium",
+          status: "active",
+          options: cleanedOptions.map((option) => ({
+            ...option,
+            createdByRole: "organizer",
+            createdByName: trimmedOrganizerName,
+            createdAt: now,
+          })),
+          participants: [organizerParticipant],
+          createdAt: now,
+          updatedAt: now,
+        });
+
+        navigate(
+          buildInvitePath(created.aperoId, {
+            encryptionKey: created.encryptionKey,
+            writeKey: created.writeKey,
+          }),
+          { state: { createdEvent: created.event } },
+        );
+        return;
+      }
 
       const event: AperitifEvent = {
         id: createId("apero"),
@@ -132,11 +175,15 @@ export function CreateEventPage() {
       navigate(`/event/${event.id}`, { state: { createdEvent: event } });
     } catch (error) {
       setFeedback(
-        error instanceof Error && error.message === "NO_CEREMONIAL_NAME_AVAILABLE"
-          ? "La Confrérie est complète, archi-complète même : trop d’apéros tournent déjà en coulisses dans une magouille généralisée que plus personne ne maîtrise vraiment. Clôture une assemblée avant d’en convoquer une nouvelle, sinon c’est le chaos institutionnel."
-          : error instanceof Error
-            ? error.message
-            : "Le service a renversé le registre, on ne sait pas comment, et franchement personne ne veut savoir comment. Réessaie dans deux secondes, ça se répare presque toujours tout seul.",
+        error instanceof AperoApiError && error.code === "API_NOT_CONFIGURED"
+          ? "Le comptoir numérique n'est pas encore raccordé (API non configurée) : impossible de sceller la convocation dans ce mode. Repasse en mode classique ou configure VITE_APERO_API_BASE_URL."
+          : error instanceof AperoApiError && error.code === "NETWORK_ERROR"
+            ? "Impossible de joindre le comptoir numérique. Vérifie la connexion (ou que l'API tourne bien) et réessaie."
+            : error instanceof Error && error.message === "NO_CEREMONIAL_NAME_AVAILABLE"
+              ? "La Confrérie est complète, archi-complète même : trop d’apéros tournent déjà en coulisses dans une magouille généralisée que plus personne ne maîtrise vraiment. Clôture une assemblée avant d’en convoquer une nouvelle, sinon c’est le chaos institutionnel."
+              : error instanceof Error
+                ? error.message
+                : "Le service a renversé le registre, on ne sait pas comment, et franchement personne ne veut savoir comment. Réessaie dans deux secondes, ça se répare presque toujours tout seul.",
       );
     } finally {
       setIsSubmitting(false);

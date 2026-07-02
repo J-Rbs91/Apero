@@ -3,7 +3,9 @@ import { Link } from "react-router-dom";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
+import { getAperoStorageMode } from "../config/aperoApiConfig";
 import { eventStorage } from "../services";
+import { getMyAperos } from "../services/encryptedAperoRepository";
 import type { AperitifEvent, AperitifOption } from "../types/apero";
 import { calculateBestOptions } from "../utils/calculateResults";
 
@@ -34,6 +36,18 @@ type AgendaItem = {
   winnerId?: string;
 };
 
+const storageMode = getAperoStorageMode();
+
+// Mode api-vps : « Mes apéros » ne liste plus tout le repo, uniquement les
+// assemblées créées ou rejointes sur cet appareil (registre localStorage),
+// chargées en lecture publique puis déchiffrées localement.
+async function loadMyLocalAperos(): Promise<AperitifEvent[]> {
+  const mine = await getMyAperos();
+  return mine
+    .map((item) => item.event)
+    .filter((event): event is AperitifEvent => Boolean(event && event.status === "active"));
+}
+
 export function AgendaPage() {
   const [events, setEvents] = useState<AperitifEvent[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,7 +60,10 @@ export function AgendaPage() {
       try {
         setIsLoading(true);
         setError("");
-        const list = await eventStorage.listActiveEvents();
+        const list =
+          storageMode === "api-vps"
+            ? await loadMyLocalAperos()
+            : await eventStorage.listActiveEvents();
         if (isMounted) {
           setEvents(list);
         }
@@ -155,7 +172,12 @@ export function AgendaPage() {
                 ))}
               </div>
 
-              <Link className="button button--ghost button--block" to={`/event/${event.id}`}>
+              <Link
+                className="button button--ghost button--block"
+                to={
+                  storageMode === "api-vps" ? `/invite/${event.id}` : `/event/${event.id}`
+                }
+              >
                 Voir l’assemblée
               </Link>
             </section>

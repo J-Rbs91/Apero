@@ -18,7 +18,7 @@ app.disable("x-powered-by");
 app.use(helmet());
 app.use(
   cors({
-    origin: config.allowedOrigin,
+    origin: config.allowedOrigins,
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
   }),
@@ -54,8 +54,8 @@ app.use("/api", apiLimiter, aperosRouter);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-app.listen(config.port, () => {
-  logger.info(`apero-api à l'écoute sur le port ${config.port}`);
+app.listen(config.port, config.host, () => {
+  logger.info(`apero-api à l'écoute sur ${config.host}:${config.port}`);
 
   if (!isGithubWriteConfigured()) {
     logger.warn(

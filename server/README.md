@@ -43,10 +43,14 @@ Voir aussi le `.env.example` à la racine du repo (section SERVER).
 | `GITHUB_OWNER`    | Propriétaire du repo                            | `J-Rbs91`                     |
 | `GITHUB_REPO`     | Nom du repo                                     | `Apero`                       |
 | `GITHUB_BRANCH`   | Branche cible des écritures                     | `main`                        |
-| `ALLOWED_ORIGIN`  | Origine frontend autorisée pour CORS            | `https://j-rbs91.github.io`   |
-| `PORT`            | Port d'écoute local                             | `3000`                        |
+| `ALLOWED_ORIGIN`  | Origine(s) CORS, séparées par des virgules      | `https://j-rbs91.github.io`   |
+| `HOST`            | Adresse d'écoute (derrière Caddy : locale)      | `127.0.0.1`                   |
+| `PORT`            | Port d'écoute local (3103 réservé Apéro sur le VPS) | `3103`                    |
 | `JSON_BODY_LIMIT` | Taille max des payloads JSON                    | `100kb`                       |
 | `LOG_LEVEL`       | `error` \| `warn` \| `info` \| `debug`          | `info`                        |
+
+Pour tester le frontend local (Vite) contre l'API locale, ajouter l'origine du
+dev server : `ALLOWED_ORIGIN=https://j-rbs91.github.io,http://localhost:5173`.
 
 Le vrai `.env` ne doit **jamais** être commité (déjà couvert par le
 `.gitignore` racine). En local, placer un `.env` dans `server/` ; sur le VPS,
@@ -74,7 +78,7 @@ validation) : les routes d'écriture répondent alors `500 SERVER_MISCONFIGURED`
 ## Tester `/health`
 
 ```bash
-curl http://localhost:3000/health
+curl http://127.0.0.1:3103/health
 ```
 
 Réponse attendue :
@@ -95,7 +99,7 @@ node -e "console.log(require('crypto').createHash('sha256').update('test-write-k
 Exemple de création (les valeurs ci-dessous sont cohérentes entre elles) :
 
 ```bash
-curl -X POST http://localhost:3000/api/aperos/apero_TEST123 \
+curl -X POST http://127.0.0.1:3103/api/aperos/apero_TEST123 \
   -H "Content-Type: application/json" \
   -d '{
     "writeKey": "test-write-key",
@@ -161,11 +165,15 @@ Aucune réponse d'erreur ni aucun log ne contient de secret.
 - validation stricte des entrées avec zod ;
 - comparaison des hashes en temps constant ;
 - chemin d'écriture GitHub verrouillé sur `data/aperos/` ;
+- écoute locale par défaut (`HOST=127.0.0.1`), exposition uniquement via le
+  reverse proxy ;
 - logs d'accès minimaux (méthode, chemin, statut, durée — jamais de body).
 
 ## Déploiement (étape suivante, hors périmètre ici)
 
-Cette API sera déployée sur un VPS derrière Nginx en reverse proxy avec HTTPS
-(Certbot). `trust proxy` est déjà activé pour que le rate limit voie la vraie
-IP cliente derrière Nginx. La configuration Nginx/Certbot et le service
-systemd font partie de l'étape de déploiement, pas de celle-ci.
+Le VPS est déjà équipé de **Caddy** (reverse proxy + HTTPS automatique) :
+l'API Apéro y écoutera sur `127.0.0.1:3103` (3001 et 3002 sont pris par PANUM
+et ORTABEL) et sera exposée via un bloc du type `api-apero.example.com {
+reverse_proxy 127.0.0.1:3103 }`. `trust proxy` est déjà activé pour que le
+rate limit voie la vraie IP cliente derrière le proxy. La configuration Caddy
+et le service systemd font partie de l'étape de déploiement, pas de celle-ci.
