@@ -75,7 +75,8 @@ const writeLimiter = rateLimit({
 
 app.use(healthRouter);
 app.use("/api", apiLimiter);
-app.use("/api/aperos", writeLimiter, aperosRouter);
+app.use("/api/aperos/:aperoId", writeLimiter);
+app.use("/api", aperosRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
