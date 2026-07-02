@@ -19,7 +19,7 @@ export function buildShareText(event: AperitifEvent): string {
     lines.push(`• ${formatOption(option)}`);
   }
   lines.push("");
-  lines.push("Pastaga, pinard, soft ou cacahuètes : chaque convive son carburant, tout le monde vote.");
+  lines.push("Petite mousse, pinard, soft ou cacahuètes : chaque convive son carburant, tout le monde vote.");
   lines.push("Dépose ton suffrage :");
 
   return lines.join("\n");
