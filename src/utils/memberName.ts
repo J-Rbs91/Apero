@@ -23,14 +23,16 @@ export function validateComptoirName(name: string): ComptoirNameValidation {
   if (normalizedName.length < 2) {
     return {
       ok: false,
-      message: "C\u2019est un peu court pour entrer dans les archives du zinc.",
+      message:
+        "C\u2019est un peu court pour entrer dans les grandes archives du zinc, qui ont leur dignit\u00e9.",
     };
   }
 
   if (normalizedName.length > 40) {
     return {
       ok: false,
-      message: "Le registre n\u2019a pas assez de papier pour un blaze pareil.",
+      message:
+        "Le registre n\u2019a pas assez de papier pour un blaze pareil, et le greffier commence \u00e0 s\u2019inqui\u00e9ter.",
     };
   }
 

@@ -198,7 +198,9 @@ export function LocationField({
 
       {isPickerOpen && (
         <div className="locpicker">
-          <p className="hint">Clique sur la carte à l’endroit exact du rade.</p>
+          <p className="hint">
+            Clique sur la carte à l’endroit exact du rade, au pixel près si possible.
+          </p>
           <LocationPickerMap
             lat={value.locationLat}
             lng={value.locationLng}

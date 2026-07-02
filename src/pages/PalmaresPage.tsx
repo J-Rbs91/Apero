@@ -88,7 +88,7 @@ export function PalmaresPage() {
       } catch {
         if (isMounted) {
           setError(
-            "Le grand livre du palmarès est resté coincé sous le comptoir. Réessaie dans un instant.",
+            "Le grand livre du palmarès est resté coincé sous le comptoir, entre deux ronds de bière. Réessaie dans un instant.",
           );
         }
       } finally {
@@ -163,7 +163,7 @@ export function PalmaresPage() {
 
       <section className="sheet">
         <h1 className="h1 h1--sm">Le Palmarès de la Confrérie</h1>
-        <p className="lede">Qui a décroché quoi à la force du coude.</p>
+        <p className="lede">Qui a décroché quoi, à la force du coude et parfois du foie.</p>
       </section>
 
       {error ? (
@@ -173,8 +173,8 @@ export function PalmaresPage() {
       ) : shownMembers.length === 0 ? (
         <section className="sheet">
           <p className="lede">
-            Le tableau est encore vierge. Convoque, vote, ramène le saucisson : les breloques
-            suivront.
+            Le tableau est encore vierge, d’une blancheur presque suspecte. Convoque, vote, ramène
+            le saucisson : les breloques, elles, suivront — elles suivent toujours.
           </p>
         </section>
       ) : (
@@ -199,7 +199,7 @@ export function PalmaresPage() {
               {member.badges.length === 0 ? (
                 <p className="hint">
                   {member.key === myKey
-                    ? "Ton tableau est vide. Le zinc attend tes exploits."
+                    ? "Ton tableau est vide. Le zinc attend tes exploits avec une patience qui commence, il faut le dire, à s’éroder."
                     : "Rien encore au tableau."}
                 </p>
               ) : (

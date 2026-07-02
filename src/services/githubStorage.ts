@@ -193,7 +193,7 @@ async function writeJsonFile(
   if (response.status === 409) {
     throw new GitHubStorageError(
       "conflict",
-      "Le comptoir est saturé, réessaie dans deux secondes.",
+      "Le comptoir est saturé, complètement débordé, à deux doigts de la rupture d’anévrisme administratif. Réessaie dans deux secondes, ça devrait passer.",
     );
   }
 
@@ -235,7 +235,7 @@ async function deleteEventFile(eventId: string, sha: string): Promise<void> {
   if (response.status === 409) {
     throw new GitHubStorageError(
       "conflict",
-      "Le comptoir est saturé, réessaie dans deux secondes.",
+      "Le comptoir est saturé, complètement débordé, à deux doigts de la rupture d’anévrisme administratif. Réessaie dans deux secondes, ça devrait passer.",
     );
   }
 
@@ -270,7 +270,7 @@ async function purgeEventFile(existingFile: { event: AperitifEvent; sha: string 
   if (!hasVerifiedRecord) {
     throw new GitHubStorageError(
       "github-error",
-      "La Confrérie refuse de purger sans trace vérifiée dans le registre des récompenses.",
+      "La Confrérie refuse tout net de purger sans trace vérifiée dans le registre des récompenses : pas de preuve, pas de radiation.",
     );
   }
 
@@ -385,7 +385,7 @@ export const githubEventStorage: EventStorage = {
 
     throw new GitHubStorageError(
       "conflict",
-      "Le registre du zinc refuse de s’ouvrir. Réessaie dans un instant.",
+      "Le registre du zinc s’entête à refuser de s’ouvrir, avec une mauvaise foi qui force presque le respect. Réessaie dans un instant.",
     );
   },
 
@@ -428,7 +428,7 @@ export const githubEventStorage: EventStorage = {
 
     throw new GitHubStorageError(
       "conflict",
-      "Le comptoir est saturé, réessaie dans deux secondes.",
+      "Le comptoir est saturé, complètement débordé, à deux doigts de la rupture d’anévrisme administratif. Réessaie dans deux secondes, ça devrait passer.",
     );
   },
 

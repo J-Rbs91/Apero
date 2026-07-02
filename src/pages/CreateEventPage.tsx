@@ -61,7 +61,9 @@ export function CreateEventPage() {
       .filter((option) => option.date || option.time || option.location);
 
     if (!organizerName.trim()) {
-      setFeedback("Pas de signature, pas de registre. La tablée ne se convoque pas toute seule.");
+      setFeedback(
+        "Pas de signature, pas de registre, et sans registre, techniquement, cette assemblée n'existe pas encore — ce qui est un comble pour un apéro qu'on est en train d'organiser depuis dix bonnes minutes.",
+      );
       return;
     }
 
@@ -69,7 +71,9 @@ export function CreateEventPage() {
       cleanedOptions.length === 0 ||
       cleanedOptions.some((option) => !option.date || !option.time || !option.location)
     ) {
-      setFeedback("Chaque créneau doit avoir un jour, une heure et un établissement.");
+      setFeedback(
+        "Chaque créneau réclame un jour, une heure et un établissement, parce qu'un apéro sans lieu ni horaire, ce n'est plus un apéro, c'est un concept — et ici, on n'organise pas de concepts.",
+      );
       return;
     }
 
@@ -80,7 +84,9 @@ export function CreateEventPage() {
     });
 
     if (!hasFutureSlot) {
-      setFeedback("Tes créneaux sont déjà passés. Propose au moins une date à venir.");
+      setFeedback(
+        "Tous tes créneaux sont déjà dans le passé, ce qui est un joli exploit temporel mais totalement inutile pour convoquer qui que ce soit. Propose une date à venir, la machine à remonter le temps est encore en réparation.",
+      );
       return;
     }
 
@@ -127,10 +133,10 @@ export function CreateEventPage() {
     } catch (error) {
       setFeedback(
         error instanceof Error && error.message === "NO_CEREMONIAL_NAME_AVAILABLE"
-          ? "La Confrérie est complète. Trop d’apéros sont déjà en cours de magouille. Clôture une assemblée avant d’en convoquer une nouvelle."
+          ? "La Confrérie est complète, archi-complète même : trop d’apéros tournent déjà en coulisses dans une magouille généralisée que plus personne ne maîtrise vraiment. Clôture une assemblée avant d’en convoquer une nouvelle, sinon c’est le chaos institutionnel."
           : error instanceof Error
             ? error.message
-            : "Le service a renversé le registre. Réessaie dans deux secondes.",
+            : "Le service a renversé le registre, on ne sait pas comment, et franchement personne ne veut savoir comment. Réessaie dans deux secondes, ça se répare presque toujours tout seul.",
       );
     } finally {
       setIsSubmitting(false);
@@ -152,7 +158,10 @@ export function CreateEventPage() {
             placeholder="Apéro fin de chantier"
           />
         </label>
-        <p className="hint">Vide → nom de baptême tiré au sort.</p>
+        <p className="hint">
+          Vide → un nom de baptême tombe du ciel, tiré au sort par le grand ordinateur du zinc,
+          qui a d’ailleurs un humour assez discutable.
+        </p>
 
         <label className="field">
           <span>Toi</span>

@@ -21,10 +21,15 @@ export function HomePage() {
         <p className="eyebrow">Institution officieuse du comptoir</p>
         <hr className="accent" />
         <h1 className="h1">La Confrérie du Petit Jaune</h1>
-        <p className="lede">La démocratie du zinc, pour toute la tablée.</p>
+        <p className="lede">
+          La démocratie du zinc, pour toute la tablée, parce qu'au fond, choisir une date d'apéro,
+          c'est déjà de la politique, et la politique, si on la laisse aux autres, elle se fait
+          sans nous — et ça, c'est le drame.
+        </p>
         <p className="hint">
-          Pastaga, pinard, soft ou cacahuètes : chaque convive vient avec son carburant, personne
-          ne fuit le scrutin.
+          Pastaga, pinard, soft, Perrier ou juste des cacahuètes en guise de carburant
+          existentiel : la tablée s'équipe comme elle veut, mais personne n'a le droit de fuir le
+          scrutin, parce que la démocratie ne s'arrête pas au comptoir, figure-toi.
         </p>
         <Link className="button button--primary button--block" to="/create">
           Convoquer une assemblée

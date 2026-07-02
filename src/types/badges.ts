@@ -37,14 +37,16 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
   {
     id: "FIRST_REAL_ORGANIZER",
     name: "Éminence Fondatrice",
-    description: "A organisé le premier apéro ayant attiré au moins un convive de la Confrérie.",
+    description:
+      "A organisé le tout premier apéro ayant réussi à attirer au moins un convive de la Confrérie, ce qui n’avait rien d’évident au départ.",
     rarity: "legendary",
     iconName: "institution",
   },
   {
     id: "FIRST_LOCATION_DISCOVERER",
     name: "Vigie du Zinc",
-    description: "A proposé ce lieu sacré avant tout le monde, dans un rayon d’environ 1 km.",
+    description:
+      "A proposé ce lieu sacré avant tout le monde, dans un rayon d’environ 1 km, ce qui tient à la fois de l’exploit et de la drôle de coïncidence.",
     rarity: "rare",
     iconName: "location",
   },
@@ -58,7 +60,8 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
   {
     id: "LONELY_CONVOKER",
     name: "Grand-Croix de la Loose",
-    description: "A convoqué une assemblée à laquelle absolument personne n’est venu. Respect dans l’échec.",
+    description:
+      "A convoqué une assemblée à laquelle absolument personne, pas même le chien du quartier, n’est venu. Respect dans l’échec.",
     rarity: "shame",
     iconName: "emptyChair",
   },
@@ -79,7 +82,8 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
   {
     id: "SERIAL_VOTER",
     name: "Fine Gâchette du Scrutin",
-    description: "A déposé de nombreux suffrages dans les assemblées de la Confrérie.",
+    description:
+      "A déposé un nombre de suffrages qui frise l’acharnement démocratique dans les assemblées de la Confrérie.",
     rarity: "common",
     iconName: "ballot",
   },
@@ -93,7 +97,8 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
   {
     id: "LAST_MINUTE_MINISTER",
     name: "Ministre du Peut-être",
-    description: "A beaucoup trop souvent répondu sous réserve du ministre.",
+    description:
+      "A beaucoup trop souvent répondu « J’me tâte », avec la constance d’un vrai ministre du doute.",
     rarity: "common",
     iconName: "minister",
   },

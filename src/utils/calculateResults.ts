@@ -40,7 +40,8 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
   if (event.participants.length === 0) {
     return {
       type: "empty",
-      message: "Le registre est vierge. Aucun convive n’a encore déposé son suffrage.",
+      message:
+        "Le registre est vierge, d’un blanc presque religieux. Aucun convive n’a encore déposé son suffrage, et en démocratie, ça s’appelle une abstention généralisée.",
       results,
     };
   }
@@ -62,7 +63,8 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
   if (!bestResult || (bestResult.yesCount === 0 && bestResult.maybeCount === 0)) {
     return {
       type: "no-availability",
-      message: "Personne n’est disponible. La République du zinc est en crise.",
+      message:
+        "Personne n’est disponible, absolument personne, et ça, dans l’histoire du zinc, ça s’appelle une crise de régime.",
       results,
     };
   }
@@ -77,7 +79,8 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
   if (tiedResults.length > 1) {
     return {
       type: "tie",
-      message: "Égalité parfaite. Les débats de comptoir continuent.",
+      message:
+        "Égalité parfaite, au suffrage près, ce qui ne s’était pas vu depuis la dernière fois. Les débats de comptoir continuent, plus vifs que jamais.",
       optionIds: tiedResults.map((result) => result.optionId),
       results,
     };
@@ -87,7 +90,7 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
     type: "winner",
     message:
       bestResult.yesCount > 0
-        ? "Le verdict est tombé : les glaçons peuvent se préparer."
+        ? "Le verdict est tombé, dans le silence recueilli qui sied aux grandes décisions : les glaçons peuvent se préparer."
         : "La Confrérie semble pencher pour cette option.",
     optionId: bestResult.optionId,
     results,
