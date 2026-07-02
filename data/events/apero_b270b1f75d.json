@@ -1,0 +1,48 @@
+{
+  "id": "apero_b270b1f75d",
+  "ceremonialName": "Le Conseil des Cacahuètes",
+  "title": "Gertrude",
+  "organizerName": "Anne-Marie",
+  "beaufLevel": "medium",
+  "status": "active",
+  "options": [
+    {
+      "id": "option_83a4a887c9",
+      "date": "2026-07-14",
+      "time": "20:00",
+      "location": "La Barbote",
+      "locationAddress": "1 Rue des Deux Ponts, 34000 Montpellier",
+      "locationLat": 43.6052067,
+      "locationLng": 3.8823519,
+      "createdByRole": "organizer",
+      "createdByName": "Anne-Marie",
+      "createdAt": "2026-07-02T17:56:58.989Z"
+    },
+    {
+      "id": "option_3834529f61",
+      "date": "2026-07-21",
+      "time": "19:00",
+      "location": "Broc' Café",
+      "locationAddress": "Rue Jean-Jacques Rousseau, 34062 Montpellier",
+      "locationLat": 43.612628,
+      "locationLng": 3.8727201,
+      "createdByRole": "organizer",
+      "createdByName": "Anne-Marie",
+      "createdAt": "2026-07-02T17:56:58.989Z"
+    }
+  ],
+  "participants": [
+    {
+      "id": "participant_ed99f4aee6",
+      "participantName": "Anne-Marie",
+      "votes": {
+        "option_83a4a887c9": "yes",
+        "option_3834529f61": "yes"
+      },
+      "createdAt": "2026-07-02T17:56:58.989Z",
+      "updatedAt": "2026-07-02T17:56:58.989Z"
+    }
+  ],
+  "createdAt": "2026-07-02T17:56:58.989Z",
+  "updatedAt": "2026-07-02T17:56:58.989Z"
+}
