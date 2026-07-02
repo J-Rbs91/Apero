@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LocationField } from "../components/LocationField";
 import { MobileHeader } from "../components/MobileHeader";
@@ -31,16 +31,9 @@ export function CreateEventPage() {
   const { comptoirName } = useComptoirName();
   const [ceremonialNameInput, setCeremonialNameInput] = useState("");
   const [title, setTitle] = useState("");
-  const [organizerName, setOrganizerName] = useState(comptoirName);
   const [options, setOptions] = useState<AperitifOption[]>([createEmptyOption()]);
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!organizerName && comptoirName) {
-      setOrganizerName(comptoirName);
-    }
-  }, [comptoirName, organizerName]);
 
   function updateOption(optionId: string, updates: Partial<AperitifOption>) {
     setOptions((currentOptions) =>
@@ -68,13 +61,6 @@ export function CreateEventPage() {
         location: option.location.trim(),
       }))
       .filter((option) => option.date || option.time || option.location);
-
-    if (!organizerName.trim()) {
-      setFeedback(
-        "Pas de signature, pas de registre, et sans registre, techniquement, cette assemblée n'existe pas encore — ce qui est un comble pour un apéro qu'on est en train d'organiser depuis dix bonnes minutes.",
-      );
-      return;
-    }
 
     if (
       cleanedOptions.length === 0 ||
@@ -121,7 +107,7 @@ export function CreateEventPage() {
           ? pickRandomCeremonialName()
           : generateUniqueCeremonialName(activeEvents);
       const now = new Date().toISOString();
-      const trimmedOrganizerName = organizerName.trim();
+      const trimmedOrganizerName = comptoirName.trim();
 
       // L'organisateur est compté présent par défaut sur tous ses créneaux.
       const organizerVotes: Record<string, VoteStatus> = {};
@@ -219,26 +205,13 @@ export function CreateEventPage() {
             placeholder="La Grande Tablée des Olives"
           />
         </label>
-        <p className="hint">
-          Vide → un nom de baptême tombe du ciel, tiré au sort par le grand ordinateur du zinc,
-          qui a d’ailleurs un humour assez discutable.
-        </p>
 
         <label className="field">
-          <span>Objet (optionnel)</span>
+          <span>Description</span>
           <input
             value={title}
             onChange={(eventChange) => setTitle(eventChange.target.value)}
             placeholder="Apéro fin de chantier"
-          />
-        </label>
-
-        <label className="field">
-          <span>Toi</span>
-          <input
-            value={organizerName}
-            onChange={(eventChange) => setOrganizerName(eventChange.target.value)}
-            placeholder="Jean-Mi Pastaga, Mémé Cacahuète…"
           />
         </label>
 
