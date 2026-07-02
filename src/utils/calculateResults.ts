@@ -34,6 +34,22 @@ export function calculateEventResults(event: AperitifEvent): EventResults[] {
   });
 }
 
+export const TRAQUENARD_LEVEL_MAX = 10;
+
+// Moyenne du Traquenard-O-mètre parmi les convives qui ont voté.
+// `null` tant que personne n'a encore donné son avis.
+export function calculateAverageTraquenardLevel(event: AperitifEvent): number | null {
+  const levels = event.participants
+    .map((participant) => participant.traquenardLevel)
+    .filter((level): level is number => typeof level === "number");
+
+  if (levels.length === 0) {
+    return null;
+  }
+
+  return levels.reduce((total, level) => total + level, 0) / levels.length;
+}
+
 export function calculateBestOptions(event: AperitifEvent): ResultState {
   const results = calculateEventResults(event);
 

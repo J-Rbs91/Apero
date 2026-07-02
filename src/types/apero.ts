@@ -42,6 +42,8 @@ export type ParticipantResponse = {
   votes: Record<string, VoteStatus>;
   brings?: string;
   comment?: string;
+  // Traquenard-O-mètre : 0 (petite soirée sage) à 10 (traquenard total).
+  traquenardLevel?: number;
   createdAt: string;
   updatedAt: string;
 };

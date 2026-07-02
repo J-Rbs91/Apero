@@ -14,6 +14,7 @@
   --pastis-soft: #ffe39a;
   --bar-red: #b8322b;
   --bar-red-dark: #9f2e24;
+  --calm-blue: #2f6fb0;
   --cream: #fff7e6;
   --ink: #241a12;
   --muted: rgba(255, 247, 230, 0.6);
@@ -451,6 +452,14 @@ textarea {
 input::placeholder,
 textarea::placeholder {
   color: rgba(255, 247, 230, 0.45);
+}
+
+input[type="range"] {
+  min-height: 28px;
+  border: none;
+  padding: 0;
+  background: transparent;
+  accent-color: var(--pastis);
 }
 
 /* ===== Slots (créneaux) ===== */
@@ -1103,6 +1112,70 @@ textarea:focus-visible {
 .minimap__close:hover {
   color: var(--cream);
   border-color: rgba(255, 247, 230, 0.5);
+}
+
+/* ===== Traquenard-O-mètre ===== */
+.minimap-with-gauge {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.minimap-with-gauge .minimap {
+  flex: 1;
+  min-width: 0;
+}
+
+.traquenard-gauge {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 58px;
+}
+
+.traquenard-gauge__track {
+  position: relative;
+  width: 12px;
+  height: 150px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--bar-red) 0%, var(--pastis) 50%, var(--calm-blue) 100%);
+  border: 1px solid rgba(255, 247, 230, 0.22);
+}
+
+.traquenard-gauge__marker {
+  position: absolute;
+  left: 50%;
+  width: 22px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--cream);
+  box-shadow: 0 0 0 2px rgba(36, 26, 18, 0.6);
+  transform: translate(-50%, 50%);
+}
+
+.traquenard-gauge__legend {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.traquenard-gauge__title {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+  color: rgba(255, 247, 230, 0.8);
+  text-align: center;
+}
+
+.traquenard-gauge__value {
+  font-size: 9.5px;
+  font-weight: 600;
+  line-height: 1.15;
+  color: rgba(255, 247, 230, 0.6);
+  text-align: center;
 }
 
 /* ===== Ouvrir dans une appli GPS ===== */

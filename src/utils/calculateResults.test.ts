@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { AperitifEvent, VoteStatus } from "../types/apero";
-import { calculateBestOptions } from "./calculateResults";
+import { calculateAverageTraquenardLevel, calculateBestOptions } from "./calculateResults";
 
-function createEvent(votes: Array<Record<string, VoteStatus>>): AperitifEvent {
+function createEvent(
+  votes: Array<Record<string, VoteStatus>>,
+  traquenardLevels: Array<number | undefined> = [],
+): AperitifEvent {
   return {
     id: "apero_test",
     ceremonialName: "La Grande Tablée des Olives",
@@ -18,6 +21,7 @@ function createEvent(votes: Array<Record<string, VoteStatus>>): AperitifEvent {
       id: `participant_${index}`,
       participantName: `Copain ${index}`,
       votes: participantVotes,
+      traquenardLevel: traquenardLevels[index],
       createdAt: "2026-06-30T18:00:00.000Z",
       updatedAt: "2026-06-30T18:00:00.000Z",
     })),
@@ -76,5 +80,26 @@ describe("calculateBestOptions", () => {
     );
 
     expect(result.type).toBe("no-availability");
+  });
+});
+
+describe("calculateAverageTraquenardLevel", () => {
+  it("returns null when nobody has voted", () => {
+    const event = createEvent([{ option_1: "yes", option_2: "no" }]);
+
+    expect(calculateAverageTraquenardLevel(event)).toBeNull();
+  });
+
+  it("averages only the participants who voted", () => {
+    const event = createEvent(
+      [
+        { option_1: "yes", option_2: "no" },
+        { option_1: "yes", option_2: "no" },
+        { option_1: "yes", option_2: "no" },
+      ],
+      [10, 4, undefined],
+    );
+
+    expect(calculateAverageTraquenardLevel(event)).toBe(7);
   });
 });

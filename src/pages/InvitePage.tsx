@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { LoadingScreen } from "../components/LoadingScreen";
+import { MiniMap } from "../components/MiniMap";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { MobileShareBox } from "../components/MobileShareBox";
+import { TraquenardGauge } from "../components/TraquenardGauge";
 import { useComptoirName } from "../hooks/useComptoirName";
 import { AperoApiError } from "../services/aperoApiClient";
 import { isValidAperoId } from "../services/aperoCryptoKeys";
@@ -11,6 +13,7 @@ import { AperoCryptoError } from "../services/aperoEncryption";
 import { getEncryptedAperoById, joinApero } from "../services/encryptedAperoRepository";
 import { findLocalApero } from "../services/localAperoRegistry";
 import type { AperitifEvent, ParticipantResponse } from "../types/apero";
+import { calculateAverageTraquenardLevel, TRAQUENARD_LEVEL_MAX } from "../utils/calculateResults";
 import { createId } from "../utils/createId";
 import { formatOption } from "../utils/formatOption";
 import { normalizeDisplayName } from "../utils/memberName";
@@ -73,6 +76,7 @@ export function InvitePage() {
 
   const [state, setState] = useState<LoadState>({ status: "loading" });
   const [guestName, setGuestName] = useState("");
+  const [traquenardVote, setTraquenardVote] = useState(5);
   const [isJoining, setIsJoining] = useState(false);
   const [joinFeedback, setJoinFeedback] = useState("");
   const [joinedLocally, setJoinedLocally] = useState(
@@ -157,6 +161,7 @@ export function InvitePage() {
       id: createId("participant"),
       participantName: normalizedName,
       votes: {},
+      traquenardLevel: traquenardVote,
       createdAt: now,
       updatedAt: now,
     };
@@ -214,6 +219,13 @@ export function InvitePage() {
   }
 
   const { event } = state;
+  const mapOption = event.options.find(
+    (option) => option.locationLat != null && option.locationLng != null,
+  );
+  const averageTraquenardLevel = calculateAverageTraquenardLevel(event);
+  const traquenardVoteCount = event.participants.filter(
+    (participant) => typeof participant.traquenardLevel === "number",
+  ).length;
   const canShare = Boolean(aperoId && keys.encryptionKey);
   const inviteUrl = canShare
     ? buildInviteUrl({
@@ -246,6 +258,18 @@ export function InvitePage() {
             </div>
           ))}
         </div>
+
+        {mapOption && (
+          <div className="minimap-with-gauge">
+            <MiniMap
+              lat={mapOption.locationLat as number}
+              lng={mapOption.locationLng as number}
+              label={mapOption.location}
+              address={mapOption.locationAddress}
+            />
+            <TraquenardGauge level={averageTraquenardLevel} voteCount={traquenardVoteCount} />
+          </div>
+        )}
       </section>
 
       {event.participants.length > 0 && (
@@ -282,6 +306,23 @@ export function InvitePage() {
               placeholder="Jean-Mi Pastaga, Mémé Cacahuète…"
             />
           </label>
+
+          <label className="field">
+            <span>Traquenard-O-mètre : ton pronostic</span>
+            <input
+              type="range"
+              min={0}
+              max={TRAQUENARD_LEVEL_MAX}
+              step={1}
+              value={traquenardVote}
+              onChange={(changeEvent) => setTraquenardVote(Number(changeEvent.target.value))}
+            />
+          </label>
+          <p className="hint">
+            0 = petite soirée sage, {TRAQUENARD_LEVEL_MAX} = traquenard total. Ton pronostic
+            actuel : {traquenardVote}/{TRAQUENARD_LEVEL_MAX}.
+          </p>
+
           <button className="button button--primary button--block" disabled={isJoining}>
             {isJoining ? "Émargement en cours…" : "Rejoindre l'assemblée"}
           </button>
