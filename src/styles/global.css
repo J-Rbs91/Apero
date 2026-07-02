@@ -951,3 +951,100 @@ textarea:focus-visible {
   outline: 3px solid var(--pastis);
   outline-offset: 2px;
 }
+
+/* ===== Lieu : autocomplétion ===== */
+.locfield {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.slot__fields .locfield {
+  grid-column: 1 / -1;
+}
+
+.locfield__picked {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgba(255, 247, 230, 0.62);
+}
+
+.locfield__list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: rgba(10, 30, 24, 0.96);
+  border: 1px solid rgba(255, 247, 230, 0.22);
+  border-radius: 14px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.locfield__option {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--cream);
+  text-align: left;
+  cursor: pointer;
+}
+
+.locfield__option:hover,
+.locfield__option:focus-visible {
+  background: rgba(255, 247, 230, 0.12);
+}
+
+.locfield__name {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.locfield__addr {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgba(255, 247, 230, 0.6);
+}
+
+/* ===== Mini carte ===== */
+.minimap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.minimap__canvas {
+  height: 150px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 247, 230, 0.22);
+  overflow: hidden;
+}
+
+.minimap__link {
+  align-self: flex-end;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: rgba(255, 247, 230, 0.7);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+
+.minimap__link:hover {
+  color: var(--cream);
+}

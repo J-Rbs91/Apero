@@ -162,6 +162,8 @@ L’app est déployée automatiquement sur GitHub Pages à chaque push sur `main
 - Modification du vote si le même pseudo revient.
 - Contributions au banquet et déclarations au comptoir.
 - Registre du comptoir groupé : les présences en tête, les désertions et les culs entre deux chaises dans un menu dépliant.
+- Lieu avec autocomplétion OpenStreetMap (API publique Photon, sans clé) : nom de l’établissement → adresse + coordonnées, saisie libre conservée pour « chez Dédé ».
+- Mini-carte Leaflet sous le verdict quand le créneau en tête a des coordonnées, avec lien vers OpenStreetMap.
 - Calcul du verdict : priorité aux « j’y serai », départage aux « j’me tâte », égalités conservées.
 - Gestion simple des conflits GitHub : relecture, fusion, deuxième tentative.
 

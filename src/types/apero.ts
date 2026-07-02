@@ -27,6 +27,7 @@ export type AperitifOption = {
   date: string;
   time: string;
   location: string;
+  locationAddress?: string;
   locationLat?: number;
   locationLng?: number;
   note?: string;
