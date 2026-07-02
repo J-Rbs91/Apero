@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { config } from "./config.js";
 import { ApiError } from "./errors.js";
 
 export const APERO_ID_PATTERN = /^apero_[A-Za-z0-9_-]{5,64}$/;
@@ -27,14 +28,14 @@ const base64UrlSchema = z
 const encryptionSchema = z
   .object({
     algorithm: z.literal("AES-GCM"),
-    iv: base64UrlSchema.min(8).max(128),
-    ciphertext: base64UrlSchema.min(1),
+    iv: base64UrlSchema.min(16).max(32),
+    ciphertext: base64UrlSchema.min(1).max(config.maxCiphertextLength),
   })
   .strict();
 
 export const writeAperoBodySchema = z
   .object({
-    writeKey: z.string().min(8).max(256),
+    writeKey: z.string().min(16).max(256),
     encryptedPayload: z
       .object({
         version: z.literal(1),
