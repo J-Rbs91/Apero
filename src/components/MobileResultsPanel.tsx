@@ -1,4 +1,5 @@
 import type { AperitifEvent, AperitifOption, ResultState } from "../types/apero";
+import { MiniMap } from "./MiniMap";
 
 type MobileResultsPanelProps = {
   event: AperitifEvent;
@@ -55,6 +56,20 @@ export function MobileResultsPanel({ event, result }: MobileResultsPanelProps) {
           </div>
         </div>
       )}
+      {highlightedOption &&
+        highlightedOption.locationLat != null &&
+        highlightedOption.locationLng != null && (
+          <>
+            {highlightedOption.locationAddress && (
+              <p className="meta">{highlightedOption.locationAddress}</p>
+            )}
+            <MiniMap
+              lat={highlightedOption.locationLat}
+              lng={highlightedOption.locationLng}
+              label={highlightedOption.location}
+            />
+          </>
+        )}
     </div>
   );
 }

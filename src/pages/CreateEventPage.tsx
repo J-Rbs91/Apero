@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { LocationField } from "../components/LocationField";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { eventStorage } from "../services";
@@ -200,16 +201,15 @@ export function CreateEventPage() {
                     }
                   />
                 </label>
-                <label className="field field--wide">
-                  <span>Lieu</span>
-                  <input
-                    value={option.location}
-                    onChange={(eventChange) =>
-                      updateOption(option.id, { location: eventChange.target.value })
-                    }
-                    placeholder="Bar des Sports"
-                  />
-                </label>
+                <LocationField
+                  value={{
+                    location: option.location,
+                    locationAddress: option.locationAddress,
+                    locationLat: option.locationLat,
+                    locationLng: option.locationLng,
+                  }}
+                  onChange={(locationValue) => updateOption(option.id, locationValue)}
+                />
               </div>
             </div>
           ))}

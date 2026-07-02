@@ -35,6 +35,7 @@ export function EventOptionMobileCard({
         <div>
           <div className="slot__d">{formatDateTime(option)}</div>
           <div className="slot__p">{subtitle}</div>
+          {option.locationAddress && <div className="slot__p">{option.locationAddress}</div>}
           {option.note && <div className="slot__p">{option.note}</div>}
         </div>
       </div>

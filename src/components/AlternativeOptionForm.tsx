@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useComptoirName } from "../hooks/useComptoirName";
 import type { AperitifOption } from "../types/apero";
 import { createId } from "../utils/createId";
+import { LocationField, type LocationValue } from "./LocationField";
 
 type AlternativeOptionFormProps = {
   isSaving: boolean;
@@ -14,7 +15,7 @@ export function AlternativeOptionForm({ isSaving, onSubmit }: AlternativeOptionF
   const [createdByName, setCreatedByName] = useState(comptoirName);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [location, setLocation] = useState("");
+  const [locationValue, setLocationValue] = useState<LocationValue>({ location: "" });
   const [feedback, setFeedback] = useState("");
 
   useEffect(() => {
@@ -26,7 +27,7 @@ export function AlternativeOptionForm({ isSaving, onSubmit }: AlternativeOptionF
   async function handleSubmit(formEvent: React.FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
     const trimmedName = createdByName.trim().replace(/\s+/g, " ");
-    const trimmedLocation = location.trim();
+    const trimmedLocation = locationValue.location.trim();
 
     if (!trimmedName) {
       setFeedback("Le zinc exige une signature sous la contre-proposition. L’anonymat, c’est bon pour les tracts.");
@@ -44,6 +45,9 @@ export function AlternativeOptionForm({ isSaving, onSubmit }: AlternativeOptionF
       date,
       time,
       location: trimmedLocation,
+      locationAddress: locationValue.locationAddress,
+      locationLat: locationValue.locationLat,
+      locationLng: locationValue.locationLng,
       createdByRole: "participant",
       createdByName: trimmedName,
       createdAt: now,
@@ -51,7 +55,7 @@ export function AlternativeOptionForm({ isSaving, onSubmit }: AlternativeOptionF
 
     setDate("");
     setTime("");
-    setLocation("");
+    setLocationValue({ location: "" });
     setFeedback("Contre-proposition déposée dans cette assemblée, pas dans celle de la table d’à côté.");
     setIsOpen(false);
   }
@@ -97,14 +101,12 @@ export function AlternativeOptionForm({ isSaving, onSubmit }: AlternativeOptionF
                   onChange={(eventChange) => setTime(eventChange.target.value)}
                 />
               </label>
-              <label className="field field--wide">
-                <span>{"Établissement"}</span>
-                <input
-                  value={location}
-                  onChange={(eventChange) => setLocation(eventChange.target.value)}
-                  placeholder="Le Bar du Coin"
-                />
-              </label>
+              <LocationField
+                label="Établissement"
+                placeholder="Le Bar du Coin"
+                value={locationValue}
+                onChange={setLocationValue}
+              />
             </div>
           </div>
 
