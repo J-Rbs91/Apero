@@ -20,9 +20,9 @@ export function buildShareText(event: AperitifEvent): string {
   }
   lines.push("");
   lines.push(
-    "Petite mousse, pinard, soft ou cacahuètes : chaque convive vient avec son carburant, mais personne, sous aucun prétexte, ne vote à sa place.",
+    "Petite mousse, pinard, soft ou cacahuètes : chaque convive vient avec son carburant, mais personne, sous aucun prétexte, ne répond à sa place.",
   );
-  lines.push("Dépose ton suffrage :");
+  lines.push("Dépose ta réponse :");
 
   return lines.join("\n");
 }
