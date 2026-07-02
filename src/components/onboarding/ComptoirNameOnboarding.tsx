@@ -55,7 +55,7 @@ export function ComptoirNameOnboarding({
             Il te faut un nom de comptoir
           </h1>
           <p className="lede">
-            {"C’est sous ce blaze que le zinc se souviendra de toi. Pastaga, pinard, soft ou Perrier : la tablée ne juge pas le carburant, elle grave les noms."}
+            {"C’est sous ce blaze que le zinc se souviendra de toi. La tablée ne juge pas, elle grave les noms."}
           </p>
 
           <form className="vote-form" onSubmit={handleSubmit}>
