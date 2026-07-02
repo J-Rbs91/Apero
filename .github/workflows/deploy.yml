@@ -24,10 +24,19 @@ jobs:
       VITE_GITHUB_REPO: Apero
       VITE_GITHUB_BRANCH: main
       VITE_APERO_STORAGE_MODE: api-vps
+      VITE_APP_BASE_URL: https://j-rbs91.github.io/Apero
+      # URL publique de la mini API VPS, injectee au build via une variable de
+      # depot GitHub (Settings > Secrets and variables > Actions > Variables).
+      VITE_APERO_API_BASE_URL: ${{ vars.VITE_APERO_API_BASE_URL }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+
+      - name: Verifier la configuration de l'API apero
+        if: ${{ vars.VITE_APERO_API_BASE_URL == '' }}
+        run: |
+          echo "::warning title=VITE_APERO_API_BASE_URL absente::La variable de depot VITE_APERO_API_BASE_URL n'est pas definie. Le site deploye affichera 'comptoir numerique non raccorde' et ne pourra pas sceller de convocation. Definir la variable dans Settings > Secrets and variables > Actions > Variables, puis relancer ce workflow."
 
       - name: Setup Node
         uses: actions/setup-node@v6
