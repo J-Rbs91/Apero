@@ -45,6 +45,14 @@ export function getAvailableCeremonialNames(activeEvents: AperitifEvent[]): stri
   return APERO_CEREMONIAL_NAMES.filter((name) => !usedNames.has(name));
 }
 
+export function isCeremonialNameTaken(name: string, activeEvents: AperitifEvent[]): boolean {
+  const normalizedName = name.trim().toLowerCase();
+
+  return activeEvents
+    .filter(isActiveEvent)
+    .some((event) => event.ceremonialName.trim().toLowerCase() === normalizedName);
+}
+
 // Variante pour le flux chiffré (mode api-vps) : impossible de lister les
 // assemblées existantes (elles sont chiffrées), donc pas de garantie
 // d'unicité — l'identifiant unique reste l'aperoId, le nom n'est que décorum.

@@ -4,6 +4,7 @@ import {
   APERO_CEREMONIAL_NAMES,
   generateUniqueCeremonialName,
   getAvailableCeremonialNames,
+  isCeremonialNameTaken,
 } from "./generateCeremonialName";
 
 function createActiveEvent(ceremonialName: string, status: AperitifEvent["status"] = "active"): AperitifEvent {
@@ -49,5 +50,24 @@ describe("ceremonial name generation", () => {
     expect(() => generateUniqueCeremonialName(activeEvents)).toThrow(
       "NO_CEREMONIAL_NAME_AVAILABLE",
     );
+  });
+});
+
+describe("isCeremonialNameTaken", () => {
+  it("returns true when an active event already uses the name (case/whitespace-insensitive)", () => {
+    const activeEvents = [createActiveEvent("La Grande Tablée des Olives")];
+
+    expect(isCeremonialNameTaken("la grande tablée des olives", activeEvents)).toBe(true);
+    expect(isCeremonialNameTaken("  La Grande Tablée des Olives  ", activeEvents)).toBe(true);
+  });
+
+  it("ignores names used only by inactive events", () => {
+    const activeEvents = [createActiveEvent("Le Concile du Saucisson", "closed")];
+
+    expect(isCeremonialNameTaken("Le Concile du Saucisson", activeEvents)).toBe(false);
+  });
+
+  it("returns false for an unused name", () => {
+    expect(isCeremonialNameTaken("Un nom inédit", [createActiveEvent("Autre nom")])).toBe(false);
   });
 });

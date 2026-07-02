@@ -21,7 +21,7 @@ Le frontend lit les fichiers chiffres publiquement, mais il ne sait pas ecrire d
 
 ## Noms ceremoniels
 
-Chaque assemblée reçoit automatiquement un `ceremonialName` lisible, choisi parmi 30 noms prédéfinis, par exemple :
+À la création, la personne qui organise peut saisir elle-même le `ceremonialName` de l’assemblée. Si elle laisse le champ vide, un nom lisible est tiré au sort parmi 30 noms prédéfinis, par exemple :
 
 - `La Grande Tablée des Olives`
 - `Le Concile du Saucisson`
@@ -33,9 +33,11 @@ Ce nom ne remplace pas l’identifiant technique :
 - `ceremonialName` : utilisé comme nom principal visible dans l’interface ;
 - `title` : objet libre et optionnel saisi par la personne qui organise.
 
-## Regle d'unicite
+## Règle d’unicité
 
-En mode `api-vps`, les assemblees sont chiffrees : l'app ne liste plus tout le repo pour garantir l'unicite globale du nom ceremoniel. Le nom est donc tire au sort localement, et l'acces a chaque apero se fait par son lien d'invitation.
+En mode `api-vps` (le mode par défaut, seul flux d’écriture actif — voir plus haut), les assemblées sont chiffrées : l’app ne peut plus lister tout le repo pour garantir l’unicité globale du nom cérémoniel. Un nom saisi manuellement est donc utilisé tel quel, sans vérification d’unicité ; en l’absence de saisie, le nom est simplement tiré au sort parmi les 30 prédéfinis. L’accès à chaque apéro se fait par son lien d’invitation, pas par son nom.
+
+Le mode `legacy-github` (écriture directe depuis le navigateur) est désactivé côté frontend. Le code d’unicité stricte qui lui était associé (vérification qu’aucune assemblée active ne partage déjà le même `ceremonialName`, tirage parmi les noms disponibles) reste dans `src/utils/generateCeremonialName.ts` mais n’est plus exercé en pratique.
 
 ## Structure JSON
 

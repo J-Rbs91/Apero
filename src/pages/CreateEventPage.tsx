@@ -12,6 +12,7 @@ import type { AperitifEvent, AperitifOption, ParticipantResponse, VoteStatus } f
 import { createId } from "../utils/createId";
 import {
   generateUniqueCeremonialName,
+  isCeremonialNameTaken,
   pickRandomCeremonialName,
 } from "../utils/generateCeremonialName";
 import { buildInvitePath } from "../utils/inviteLink";
@@ -28,6 +29,7 @@ function createEmptyOption(): AperitifOption {
 export function CreateEventPage() {
   const navigate = useNavigate();
   const { comptoirName } = useComptoirName();
+  const [ceremonialNameInput, setCeremonialNameInput] = useState("");
   const [title, setTitle] = useState("");
   const [organizerName, setOrganizerName] = useState(comptoirName);
   const [options, setOptions] = useState<AperitifOption[]>([createEmptyOption()]);
@@ -101,11 +103,23 @@ export function CreateEventPage() {
       setIsSubmitting(true);
       const storageMode = getAperoStorageMode();
       // Mode api-vps : les assemblées sont chiffrées, impossible de lister
-      // l'existant pour garantir un nom unique — on tire au sort, simplement.
-      const ceremonialName =
-        storageMode === "api-vps"
+      // l'existant pour garantir un nom unique.
+      const activeEvents =
+        storageMode === "api-vps" ? [] : await eventStorage.listActiveEvents();
+      const trimmedCeremonialName = ceremonialNameInput.trim();
+
+      if (trimmedCeremonialName && storageMode !== "api-vps" && isCeremonialNameTaken(trimmedCeremonialName, activeEvents)) {
+        setFeedback(
+          "Ce nom d'assemblée est déjà pris par une convocation en cours. Trouve-en un autre, ou laisse le champ vide pour un tirage au sort.",
+        );
+        return;
+      }
+
+      const ceremonialName = trimmedCeremonialName
+        ? trimmedCeremonialName
+        : storageMode === "api-vps"
           ? pickRandomCeremonialName()
-          : generateUniqueCeremonialName(await eventStorage.listActiveEvents());
+          : generateUniqueCeremonialName(activeEvents);
       const now = new Date().toISOString();
       const trimmedOrganizerName = organizerName.trim();
 
@@ -198,6 +212,19 @@ export function CreateEventPage() {
         <h1 className="h1 h1--sm">Convoquer</h1>
 
         <label className="field">
+          <span>Nom de l’assemblée (optionnel)</span>
+          <input
+            value={ceremonialNameInput}
+            onChange={(eventChange) => setCeremonialNameInput(eventChange.target.value)}
+            placeholder="La Grande Tablée des Olives"
+          />
+        </label>
+        <p className="hint">
+          Vide → un nom de baptême tombe du ciel, tiré au sort par le grand ordinateur du zinc,
+          qui a d’ailleurs un humour assez discutable.
+        </p>
+
+        <label className="field">
           <span>Objet (optionnel)</span>
           <input
             value={title}
@@ -205,10 +232,6 @@ export function CreateEventPage() {
             placeholder="Apéro fin de chantier"
           />
         </label>
-        <p className="hint">
-          Vide → un nom de baptême tombe du ciel, tiré au sort par le grand ordinateur du zinc,
-          qui a d’ailleurs un humour assez discutable.
-        </p>
 
         <label className="field">
           <span>Toi</span>
