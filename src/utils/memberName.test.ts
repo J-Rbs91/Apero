@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeDisplayName, normalizeMemberName, validateGentlemanName } from "./memberName";
+import { normalizeDisplayName, normalizeMemberName, validateComptoirName } from "./memberName";
 
 describe("member names", () => {
   it("normalizes display names", () => {
@@ -10,9 +10,9 @@ describe("member names", () => {
     expect(normalizeMemberName("  J\u00e9r\u00e9my  D\u00e9D\u00e9  ")).toBe("jeremy dede");
   });
 
-  it("validates gentleman names", () => {
-    expect(validateGentlemanName("J").ok).toBe(false);
-    expect(validateGentlemanName("Jean-Michel Pastaga")).toEqual({
+  it("validates comptoir names", () => {
+    expect(validateComptoirName("J").ok).toBe(false);
+    expect(validateComptoirName("Jean-Michel Pastaga")).toEqual({
       ok: true,
       name: "Jean-Michel Pastaga",
     });

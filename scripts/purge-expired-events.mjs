@@ -21,7 +21,7 @@ function normalizeEvent(rawEvent) {
   const participants = rawEvent.participants ?? rawEvent.responses ?? [];
   const title = rawEvent.title?.trim() || undefined;
   const createdAt = rawEvent.createdAt ?? now;
-  const organizerName = rawEvent.organizerName ?? rawEvent.createdBy ?? "Grand Convoqueur mystère";
+  const organizerName = rawEvent.organizerName ?? rawEvent.createdBy ?? "Plume mystère du registre";
   const options =
     rawEvent.options?.map((option) => ({
       ...option,
@@ -52,7 +52,7 @@ function normalizeEvent(rawEvent) {
     options,
     participants: participants.map((participant) => ({
       ...participant,
-      participantName: participant.participantName ?? participant.name ?? "Membre anonyme",
+      participantName: participant.participantName ?? participant.name ?? "Convive anonyme",
       createdAt: participant.createdAt ?? participant.updatedAt ?? now,
       updatedAt: participant.updatedAt ?? now,
     })),

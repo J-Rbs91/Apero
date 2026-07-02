@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { requestGentlemanNameEdit } from "../hooks/useGentlemanName";
+import { requestComptoirNameEdit } from "../hooks/useComptoirName";
 import { WineGlassMark } from "./WineGlassMark";
 
 export function BrandMenu() {
@@ -78,7 +78,7 @@ export function BrandMenu() {
             role="menuitem"
             onClick={() => {
               setIsOpen(false);
-              requestGentlemanNameEdit();
+              requestComptoirNameEdit();
             }}
           >
             Changer de blaze

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { AperitifEvent, ParticipantResponse, VoteStatus } from "../types/apero";
-import { useGentlemanName } from "../hooks/useGentlemanName";
+import { useComptoirName } from "../hooks/useComptoirName";
 import { createId } from "../utils/createId";
 import { EventOptionMobileCard } from "./EventOptionMobileCard";
 
@@ -9,7 +9,8 @@ const bringOptions = [
   "Saucisson",
   "Cacahuètes",
   "Un pack",
-  "Du soft",
+  "Du soft de compétition",
+  "Un Perrier, par conviction personnelle",
   "Des glaçons, parce que quelqu’un doit être adulte",
   "Changer l’eau des olives",
 ];
@@ -23,7 +24,7 @@ type VoteFormProps = {
 };
 
 export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
-  const { gentlemanName } = useGentlemanName();
+  const { comptoirName } = useComptoirName();
   const emptyVotes = useMemo(
     () =>
       event.options.reduce<DraftVotes>((votes, option) => {
@@ -32,7 +33,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
       }, {}),
     [event.options],
   );
-  const [participantName, setParticipantName] = useState(gentlemanName);
+  const [participantName, setParticipantName] = useState(comptoirName);
   const [votes, setVotes] = useState<DraftVotes>(emptyVotes);
   const [brings, setBrings] = useState("");
   const [comment, setComment] = useState("");
@@ -58,10 +59,10 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
   }, [emptyVotes]);
 
   useEffect(() => {
-    if (!participantName && gentlemanName) {
-      setParticipantName(gentlemanName);
+    if (!participantName && comptoirName) {
+      setParticipantName(comptoirName);
     }
-  }, [gentlemanName, participantName]);
+  }, [comptoirName, participantName]);
 
   useEffect(() => {
     if (!existingParticipant) {
@@ -88,7 +89,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
     const trimmedName = participantName.trim();
 
     if (!trimmedName) {
-      setFeedback("Il faut inscrire un membre au registre, même sous pseudo douteux.");
+      setFeedback("Il faut inscrire un convive au registre, même sous pseudo douteux.");
       return;
     }
 
@@ -128,7 +129,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
           <input
             value={participantName}
             onChange={(eventChange) => setParticipantName(eventChange.target.value)}
-            placeholder="Jojo, Nadine, Grand Maître Chips…"
+            placeholder="Jojo, Nadine, Éminence Chips…"
           />
         </label>
 

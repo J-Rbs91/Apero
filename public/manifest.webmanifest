@@ -1,7 +1,7 @@
 {
   "name": "La Confrérie du Petit Jaune",
   "short_name": "La Confrérie",
-  "description": "La démocratie du zinc, enfin dans ta poche.",
+  "description": "La démocratie du zinc, pour toute la tablée — enfin dans ta poche.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

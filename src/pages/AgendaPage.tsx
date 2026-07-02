@@ -129,7 +129,7 @@ export function AgendaPage() {
             <section className="sheet" key={event.id}>
               <p className="eyebrow">
                 {upcomingSlots.length} créneau{upcomingSlots.length > 1 ? "x" : ""} ·{" "}
-                {event.participants.length} votant{event.participants.length > 1 ? "s" : ""}
+                {event.participants.length} voix
               </p>
               <h2 className="h2">{event.ceremonialName}</h2>
               {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}

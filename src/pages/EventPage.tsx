@@ -7,7 +7,7 @@ import { MobilePage } from "../components/MobilePage";
 import { MobileResultsPanel } from "../components/MobileResultsPanel";
 import { MobileShareBox } from "../components/MobileShareBox";
 import { VoteForm } from "../components/VoteForm";
-import { useGentlemanName } from "../hooks/useGentlemanName";
+import { useComptoirName } from "../hooks/useComptoirName";
 import { eventStorage } from "../services";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
 import { calculateBestOptions } from "../utils/calculateResults";
@@ -25,11 +25,42 @@ function getInitials(name: string): string {
     .join("");
 }
 
+type PresenceGroup = "coming" | "wavering" | "declined";
+
+function getPresenceGroup(participant: ParticipantResponse): PresenceGroup {
+  const votes = Object.values(participant.votes);
+
+  if (votes.some((vote) => vote === "yes")) {
+    return "coming";
+  }
+
+  if (votes.some((vote) => vote === "maybe")) {
+    return "wavering";
+  }
+
+  return "declined";
+}
+
+function ParticipantRow({ participant }: { participant: ParticipantResponse }) {
+  return (
+    <div className="person">
+      <i>{getInitials(participant.participantName)}</i>
+      <div className="person__body">
+        <div className="person__name">{participant.participantName}</div>
+        {participant.brings && <div className="person__sub">{participant.brings}</div>}
+        {participant.comment && (
+          <div className="person__sub person__sub--quote">{"« "}{participant.comment}{" »"}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function EventPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { gentlemanName } = useGentlemanName();
+  const { comptoirName } = useComptoirName();
   const seededEvent = (location.state as { createdEvent?: AperitifEvent } | null)?.createdEvent;
   const initialEvent = seededEvent && seededEvent.id === eventId ? seededEvent : null;
   const [event, setEvent] = useState<AperitifEvent | null>(initialEvent);
@@ -39,6 +70,7 @@ export function EventPage() {
   const [isAddingOption, setIsAddingOption] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showAbsentees, setShowAbsentees] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const result = useMemo(() => (event ? calculateBestOptions(event) : null), [event]);
@@ -182,7 +214,7 @@ export function EventPage() {
         <section className="sheet">
           <h1 className="h1 h1--sm">Cette assemblée a quitté le comptoir</h1>
           <p className="lede">
-            L’apéro est passé. Le registre actif a été nettoyé, mais les hauts faits des membres
+            L’apéro est passé. Le registre actif a été nettoyé, mais les hauts faits de la tablée
             restent gravés dans la Confrérie.
           </p>
           <Link className="button button--primary button--block" to="/">
@@ -199,7 +231,7 @@ export function EventPage() {
         <MobileHeader eyebrow="Assemblée introuvable" />
         <section className="sheet">
           <h1 className="h1 h1--sm">Cette convocation n’existe pas</h1>
-          <p className="lede">Soit le lien est moisi, soit le patron a fermé le bar.</p>
+          <p className="lede">Soit le lien est moisi, soit le troquet a fermé boutique.</p>
           {error && <p className="feedback">{error}</p>}
           <Link className="button button--primary button--block" to="/">
             Retour à la Confrérie
@@ -209,10 +241,20 @@ export function EventPage() {
     );
   }
 
-  const metaText = `par ${event.organizerName} · ${event.options.length} créneaux · ${event.participants.length} votants`;
+  const metaText = `par ${event.organizerName} · ${event.options.length} créneaux · ${event.participants.length} voix`;
+  const comingParticipants = event.participants.filter(
+    (participant) => getPresenceGroup(participant) === "coming",
+  );
+  const waveringParticipants = event.participants.filter(
+    (participant) => getPresenceGroup(participant) === "wavering",
+  );
+  const decliningParticipants = event.participants.filter(
+    (participant) => getPresenceGroup(participant) === "declined",
+  );
+  const absenteeCount = waveringParticipants.length + decliningParticipants.length;
   const isOrganizer =
-    Boolean(gentlemanName) &&
-    normalizeMemberName(gentlemanName) === normalizeMemberName(event.organizerName);
+    Boolean(comptoirName) &&
+    normalizeMemberName(comptoirName) === normalizeMemberName(event.organizerName);
 
   return (
     <MobilePage className="event-mobile" overlay="scene">
@@ -238,22 +280,63 @@ export function EventPage() {
         <section className="sheet" id="registre">
           <p className="eyebrow">Le registre du comptoir</p>
           {event.participants.length === 0 ? (
-            <p className="lede">Aucun membre n’a encore signé. L’institution retient son souffle.</p>
+            <p className="lede">Aucun convive n’a encore signé. L’institution retient son souffle.</p>
           ) : (
-            <div className="people">
-              {event.participants.map((participant) => (
-                <div className="person" key={participant.id}>
-                  <i>{getInitials(participant.participantName)}</i>
-                  <div className="person__body">
-                    <div className="person__name">{participant.participantName}</div>
-                    {participant.brings && <div className="person__sub">{participant.brings}</div>}
-                    {participant.comment && (
-                      <div className="person__sub person__sub--quote">{"« "}{participant.comment}{" »"}</div>
-                    )}
-                  </div>
+            <>
+              {comingParticipants.length === 0 ? (
+                <p className="lede">
+                  Personne n’a encore juré présence. Le zinc garde les verres au frais, sans
+                  illusion.
+                </p>
+              ) : (
+                <div className="people">
+                  {comingParticipants.map((participant) => (
+                    <ParticipantRow key={participant.id} participant={participant} />
+                  ))}
                 </div>
-              ))}
-            </div>
+              )}
+
+              {absenteeCount > 0 && (
+                <>
+                  <button
+                    type="button"
+                    className="ghost-link"
+                    aria-expanded={showAbsentees}
+                    aria-controls="registre-absents"
+                    onClick={() => setShowAbsentees((isShown) => !isShown)}
+                  >
+                    {showAbsentees
+                      ? "Replier les dossiers sensibles"
+                      : `Qui se défile, qui se tâte (${absenteeCount})`}
+                  </button>
+
+                  {showAbsentees && (
+                    <div id="registre-absents" className="event-stack">
+                      {waveringParticipants.length > 0 && (
+                        <>
+                          <p className="lbl">Le cul entre deux chaises</p>
+                          <div className="people">
+                            {waveringParticipants.map((participant) => (
+                              <ParticipantRow key={participant.id} participant={participant} />
+                            ))}
+                          </div>
+                        </>
+                      )}
+                      {decliningParticipants.length > 0 && (
+                        <>
+                          <p className="lbl">Désertions assumées</p>
+                          <div className="people">
+                            {decliningParticipants.map((participant) => (
+                              <ParticipantRow key={participant.id} participant={participant} />
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </>
           )}
         </section>
 

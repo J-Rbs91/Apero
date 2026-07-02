@@ -32,7 +32,7 @@ export function normalizeEvent(rawEvent: unknown): AperitifEvent {
   const participants = event.participants ?? event.responses ?? [];
   const title = event.title?.trim() || undefined;
   const createdAt = event.createdAt ?? now;
-  const organizerName = event.organizerName ?? event.createdBy ?? "Grand Convoqueur myst\u00e8re";
+  const organizerName = event.organizerName ?? event.createdBy ?? "Plume myst\u00e8re du registre";
   const options =
     event.options?.map((option) => normalizeOrganizerOption(option, organizerName, createdAt)) ??
     event.slots?.map((slot) =>
@@ -61,7 +61,7 @@ export function normalizeEvent(rawEvent: unknown): AperitifEvent {
     options,
     participants: participants.map((participant) => ({
       ...participant,
-      participantName: participant.participantName ?? participant.name ?? "Membre anonyme",
+      participantName: participant.participantName ?? participant.name ?? "Convive anonyme",
       createdAt: participant.createdAt ?? participant.updatedAt ?? now,
       updatedAt: participant.updatedAt ?? now,
     })),

@@ -3,7 +3,7 @@ import { BadgeMedal } from "../components/BadgeMedal";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
-import { useGentlemanName } from "../hooks/useGentlemanName";
+import { useComptoirName } from "../hooks/useComptoirName";
 import { eventStorage } from "../services";
 import type { AperitifEvent } from "../types/apero";
 import type { BadgeDefinition } from "../types/badges";
@@ -59,7 +59,7 @@ function getInitials(name: string): string {
 }
 
 export function PalmaresPage() {
-  const { gentlemanName } = useGentlemanName();
+  const { comptoirName } = useComptoirName();
   const [ledger, setLedger] = useState<RewardsLedger | null>(null);
   const [activeEvents, setActiveEvents] = useState<AperitifEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -104,7 +104,7 @@ export function PalmaresPage() {
     };
   }, []);
 
-  const myKey = normalizeMemberName(gentlemanName);
+  const myKey = normalizeMemberName(comptoirName);
 
   const members = useMemo<MemberPalmares[]>(() => {
     if (!ledger) {
@@ -113,7 +113,7 @@ export function PalmaresPage() {
 
     const names = collectMemberNames(ledger, activeEvents);
     if (myKey && !names.has(myKey)) {
-      names.set(myKey, normalizeDisplayName(gentlemanName));
+      names.set(myKey, normalizeDisplayName(comptoirName));
     }
 
     const list: MemberPalmares[] = [];
@@ -139,7 +139,7 @@ export function PalmaresPage() {
     });
 
     return list;
-  }, [ledger, activeEvents, myKey, gentlemanName]);
+  }, [ledger, activeEvents, myKey, comptoirName]);
 
   const shownMembers = members.filter(
     (member) => member.key === myKey || member.badges.length > 0,
@@ -214,7 +214,7 @@ export function PalmaresPage() {
 
           {emptyOthers > 0 && (
             <p className="meta meta--center">
-              {emptyOthers} autre{emptyOthers > 1 ? "s" : ""} membre
+              {emptyOthers} autre{emptyOthers > 1 ? "s" : ""} convive
               {emptyOthers > 1 ? "s" : ""} sans breloque pour l’instant.
             </p>
           )}

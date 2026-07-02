@@ -12,13 +12,14 @@ export function buildShareText(event: AperitifEvent): string {
   if (event.title) {
     lines.push(`Objet : ${event.title}`);
   }
-  lines.push(`Convoqué par ${event.organizerName}.`);
+  lines.push(`Convocation signée ${event.organizerName}.`);
   lines.push("");
   lines.push(event.options.length > 1 ? "Créneaux proposés :" : "Créneau proposé :");
   for (const option of event.options) {
     lines.push(`• ${formatOption(option)}`);
   }
   lines.push("");
+  lines.push("Pastaga, pinard, soft ou cacahuètes : chaque convive son carburant, tout le monde vote.");
   lines.push("Dépose ton suffrage :");
 
   return lines.join("\n");

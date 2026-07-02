@@ -21,7 +21,11 @@ export function HomePage() {
         <p className="eyebrow">Institution officieuse du comptoir</p>
         <hr className="accent" />
         <h1 className="h1">La Confrérie du Petit Jaune</h1>
-        <p className="lede">La démocratie du zinc, enfin dans ta poche.</p>
+        <p className="lede">La démocratie du zinc, pour toute la tablée.</p>
+        <p className="hint">
+          Pastaga, pinard, soft ou cacahuètes : chaque convive vient avec son carburant, personne
+          ne fuit le scrutin.
+        </p>
         <Link className="button button--primary button--block" to="/create">
           Convoquer une assemblée
         </Link>

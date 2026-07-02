@@ -1,10 +1,10 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import comptoirBackground from "./assets/art/Le-zinc.jpg";
-import { GentlemanNameOnboarding } from "./components/onboarding/GentlemanNameOnboarding";
+import { ComptoirNameOnboarding } from "./components/onboarding/ComptoirNameOnboarding";
 import {
-  GENTLEMAN_NAME_EDIT_EVENT,
-  useGentlemanName,
-} from "./hooks/useGentlemanName";
+  COMPTOIR_NAME_EDIT_EVENT,
+  useComptoirName,
+} from "./hooks/useComptoirName";
 import { AppRouter } from "./routes/AppRouter";
 
 const appShellStyle = {
@@ -12,29 +12,29 @@ const appShellStyle = {
 } as CSSProperties;
 
 export function App() {
-  const { gentlemanName, setGentlemanName } = useGentlemanName();
-  const [isEditingGentlemanName, setIsEditingGentlemanName] = useState(false);
+  const { comptoirName, setComptoirName } = useComptoirName();
+  const [isEditingComptoirName, setIsEditingComptoirName] = useState(false);
 
   useEffect(() => {
     function handleEditRequest() {
-      setIsEditingGentlemanName(true);
+      setIsEditingComptoirName(true);
     }
 
-    window.addEventListener(GENTLEMAN_NAME_EDIT_EVENT, handleEditRequest);
-    return () => window.removeEventListener(GENTLEMAN_NAME_EDIT_EVENT, handleEditRequest);
+    window.addEventListener(COMPTOIR_NAME_EDIT_EVENT, handleEditRequest);
+    return () => window.removeEventListener(COMPTOIR_NAME_EDIT_EVENT, handleEditRequest);
   }, []);
 
-  const shouldShowOnboarding = !gentlemanName || isEditingGentlemanName;
+  const shouldShowOnboarding = !comptoirName || isEditingComptoirName;
 
   return (
     <div className="app-shell" style={appShellStyle}>
       <div className="app-shell__content">
         {shouldShowOnboarding ? (
-          <GentlemanNameOnboarding
-            initialName={gentlemanName}
+          <ComptoirNameOnboarding
+            initialName={comptoirName}
             onConfirm={(name) => {
-              setGentlemanName(name);
-              setIsEditingGentlemanName(false);
+              setComptoirName(name);
+              setIsEditingComptoirName(false);
             }}
           />
         ) : (
