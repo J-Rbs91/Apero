@@ -72,7 +72,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
     setVotes({ ...emptyVotes, ...existingParticipant.votes });
     setBrings(existingParticipant.brings ?? "");
     setComment(existingParticipant.comment ?? "");
-    setFeedback("Vote retrouvé. Le retournement de veste reste administrativement possible.");
+    setFeedback("Réponse retrouvée. Le retournement de veste reste administrativement possible.");
   }, [emptyVotes, existingParticipant]);
 
   function updateVote(optionId: string, status: VoteStatus) {
@@ -90,7 +90,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
 
     if (!trimmedName) {
       setFeedback(
-        "Il faut inscrire un convive au registre, même sous un pseudo douteux, parce qu’un fantôme, ça ne vote pas, en tout cas pas ici.",
+        "Il faut inscrire un convive au registre, même sous un pseudo douteux, parce qu’un fantôme, ça ne répond pas, en tout cas pas ici.",
       );
       return;
     }
@@ -99,7 +99,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
 
     if (missingVote) {
       setFeedback(
-        "Un suffrage par créneau, pas un de moins, sinon c’est l’institution tout entière qui vacille sur ses fondations.",
+        "Une réponse par créneau, pas une de moins, sinon c’est l’institution tout entière qui vacille sur ses fondations.",
       );
       return;
     }
@@ -118,14 +118,14 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
     await onSubmit(response);
     setFeedback(
       existingParticipant
-        ? "Vote mis à jour. Le retournement de veste est validé."
-        : "Suffrage déposé, dûment enregistré. Le zinc en prend acte, solennellement.",
+        ? "Réponse mise à jour. Le retournement de veste est validé."
+        : "Réponse déposée, dûment enregistrée. Le zinc en prend acte, solennellement.",
     );
   }
 
   return (
     <section className="sheet">
-      <p className="eyebrow">{existingParticipant ? "Amender mon bulletin" : "Déposer son suffrage"}</p>
+      <p className="eyebrow">{existingParticipant ? "Amender ma déclaration" : "Déposer ma réponse"}</p>
 
       <form className="vote-form" onSubmit={handleSubmit}>
         <label className="field">
@@ -174,7 +174,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
         </label>
 
         <button className="button button--primary button--block" type="submit" disabled={isSaving}>
-          {isSaving ? "Dépôt du suffrage…" : "Déposer mon suffrage"}
+          {isSaving ? "Dépôt de la réponse…" : "Déposer ma réponse"}
         </button>
         {feedback && (
           <p className="feedback" role="status">
