@@ -52,7 +52,9 @@ export function AgendaPage() {
         }
       } catch {
         if (isMounted) {
-          setError("L’ardoise est restée à la cave. Réessaie dans un instant.");
+          setError(
+            "L’ardoise est restée coincée à la cave, on ne sait pas pourquoi, mais réessaie dans un instant, elle finit toujours par remonter.",
+          );
         }
       } finally {
         if (isMounted) {
@@ -107,7 +109,9 @@ export function AgendaPage() {
 
       <section className="sheet">
         <h1 className="h1 h1--sm">Les apéros à venir</h1>
-        <p className="lede">Les assemblées encore debout, triées par date la plus proche.</p>
+        <p className="lede">
+          Les assemblées encore debout, celles qui tiennent bon, triées par date la plus proche.
+        </p>
       </section>
 
       {error ? (
@@ -117,7 +121,9 @@ export function AgendaPage() {
       ) : items.length === 0 ? (
         <section className="sheet">
           <p className="lede">
-            L’ardoise est vide. Le comptoir est désespérément calme — à toi de relancer la machine.
+            L’ardoise est vide, désespérément vide, le comptoir tourne au ralenti dans un silence
+            presque inquiétant — à toi de relancer la machine avant que ça devienne
+            philosophique.
           </p>
           <Link className="button button--primary button--block" to="/create">
             Convoquer une assemblée

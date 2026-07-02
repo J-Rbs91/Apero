@@ -35,7 +35,9 @@ export function AlternativeOptionForm({ isSaving, onSubmit }: AlternativeOptionF
     }
 
     if (!date || !time || !trimmedLocation) {
-      setFeedback("Il faut un jour, une heure et un établissement pour troubler le Conseil.");
+      setFeedback(
+        "Il faut un jour, une heure et un établissement en bonne et due forme pour espérer troubler le Conseil.",
+      );
       return;
     }
 

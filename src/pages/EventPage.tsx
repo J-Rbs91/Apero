@@ -113,7 +113,7 @@ export function EventPage() {
           setError(
             loadError instanceof Error
               ? loadError.message
-              : "Le greffe a perdu la convocation.",
+              : "Le greffe a perdu la convocation, on ne sait plus où, on ne sait plus comment, et à la limite on ne sait même plus si elle a vraiment existé un jour.",
           );
         }
       } finally {
@@ -144,12 +144,12 @@ export function EventPage() {
       setSuccess("");
       const updatedEvent = await eventStorage.saveParticipantResponse(eventId, response);
       setEvent(updatedEvent);
-      setSuccess("Suffrage enregistré. Le registre du zinc est à jour.");
+      setSuccess("Suffrage enregistré, gravé, scellé dans le marbre du zinc : le registre est à jour, et l’Histoire, la vraie, en prend acte.");
     } catch (saveError) {
       setError(
         saveError instanceof Error
           ? saveError.message
-          : "Le comptoir est saturé, réessaie dans deux secondes.",
+          : "Le comptoir est saturé, complètement débordé, à deux doigts de la rupture d’anévrisme administratif. Réessaie dans deux secondes, ça devrait passer.",
       );
     } finally {
       setIsSaving(false);
@@ -167,12 +167,12 @@ export function EventPage() {
       setSuccess("");
       const updatedEvent = await eventStorage.addEventOption(eventId, option);
       setEvent(updatedEvent);
-      setSuccess("Contre-proposition ajoutée au registre de cette assemblée.");
+      setSuccess("Contre-proposition ajoutée au registre de cette assemblée, dûment considérée, et le Conseil, désormais, en délibère avec le sérieux qu’elle mérite.");
     } catch (saveError) {
       setError(
         saveError instanceof Error
           ? saveError.message
-          : "Le registre du zinc refuse la contre-proposition. Réessaie dans un instant.",
+          : "Le registre du zinc refuse net la contre-proposition, sans explication, avec l’autorité tranquille d’une institution qui n’a de comptes à rendre à personne. Réessaie dans un instant.",
       );
     } finally {
       setIsAddingOption(false);
@@ -193,7 +193,7 @@ export function EventPage() {
       setError(
         deleteError instanceof Error
           ? deleteError.message
-          : "Le registre refuse de lâcher cette assemblée. Réessaie dans un instant.",
+          : "Le registre s’accroche à cette assemblée comme à sa dernière olive, et refuse obstinément de la lâcher. Réessaie dans un instant.",
       );
       setIsDeleting(false);
     }
@@ -214,8 +214,9 @@ export function EventPage() {
         <section className="sheet">
           <h1 className="h1 h1--sm">Cette assemblée a quitté le comptoir</h1>
           <p className="lede">
-            L’apéro est passé. Le registre actif a été nettoyé, mais les hauts faits de la tablée
-            restent gravés dans la Confrérie.
+            L’apéro est passé, le registre actif a été nettoyé, mais rassure-toi : les hauts faits
+            de la tablée, eux, restent gravés dans la Confrérie pour l’éternité — ou en tout cas
+            jusqu’à la prochaine purge.
           </p>
           <Link className="button button--primary button--block" to="/">
             Retourner à l’accueil
@@ -231,7 +232,10 @@ export function EventPage() {
         <MobileHeader eyebrow="Assemblée introuvable" />
         <section className="sheet">
           <h1 className="h1 h1--sm">Cette convocation n’existe pas</h1>
-          <p className="lede">Soit le lien est moisi, soit le troquet a fermé boutique.</p>
+          <p className="lede">
+            Soit le lien est complètement moisi, soit le troquet a purement et simplement fermé
+            boutique — et dans les deux cas, on ne peut plus rien pour toi ici.
+          </p>
           {error && <p className="feedback">{error}</p>}
           <Link className="button button--primary button--block" to="/">
             Retour à la Confrérie
@@ -280,13 +284,17 @@ export function EventPage() {
         <section className="sheet" id="registre">
           <p className="eyebrow">Le registre du comptoir</p>
           {event.participants.length === 0 ? (
-            <p className="lede">Aucun convive n’a encore signé. L’institution retient son souffle.</p>
+            <p className="lede">
+              Aucun convive n’a encore signé le registre. L’institution retient son souffle,
+              suspendue à la première signature comme à un premier amour.
+            </p>
           ) : (
             <>
               {comingParticipants.length === 0 ? (
                 <p className="lede">
                   Personne n’a encore juré présence. Le zinc garde les verres au frais, sans
-                  illusion.
+                  illusion excessive, mais avec l’espoir tenace qui caractérise les grandes
+                  institutions.
                 </p>
               ) : (
                 <div className="people">
@@ -370,8 +378,9 @@ export function EventPage() {
               Supprimer cette assemblée ?
             </h2>
             <p className="lede">
-              Le comptoir l’efface pour de bon : créneaux, votes et tout le tralala. Pas de
-              session de rattrapage.
+              Le comptoir efface tout, pour de bon : créneaux, votes, contre-propositions, tout le
+              tralala administratif. Il n’y a pas de session de rattrapage, pas de recours, pas de
+              commission d’appel.
             </p>
             <button
               type="button"

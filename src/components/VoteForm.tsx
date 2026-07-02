@@ -89,14 +89,18 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
     const trimmedName = participantName.trim();
 
     if (!trimmedName) {
-      setFeedback("Il faut inscrire un convive au registre, même sous pseudo douteux.");
+      setFeedback(
+        "Il faut inscrire un convive au registre, même sous un pseudo douteux, parce qu’un fantôme, ça ne vote pas, en tout cas pas ici.",
+      );
       return;
     }
 
     const missingVote = event.options.some((option) => !votes[option.id]);
 
     if (missingVote) {
-      setFeedback("Un suffrage par créneau, sinon l’institution vacille.");
+      setFeedback(
+        "Un suffrage par créneau, pas un de moins, sinon c’est l’institution tout entière qui vacille sur ses fondations.",
+      );
       return;
     }
 
@@ -115,7 +119,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
     setFeedback(
       existingParticipant
         ? "Vote mis à jour. Le retournement de veste est validé."
-        : "Suffrage déposé. Le zinc en prend acte.",
+        : "Suffrage déposé, dûment enregistré. Le zinc en prend acte, solennellement.",
     );
   }
 

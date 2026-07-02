@@ -12,7 +12,7 @@ export function MobileShareBox({ url, title, text }: MobileShareBoxProps) {
   async function copyFullInvitation() {
     try {
       await navigator.clipboard.writeText(`${text}\n${url}`);
-      setFeedback("Invitation copiée. Colle-la dans ta conversation.");
+      setFeedback("Invitation copiée, mot pour mot. Colle-la dans ta conversation, le reste suivra tout seul.");
     } catch {
       setFeedback("Copie impossible ici. Garde le lien sous le coude.");
     }
