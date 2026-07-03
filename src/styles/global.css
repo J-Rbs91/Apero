@@ -1158,56 +1158,180 @@ textarea:focus-visible {
   min-width: 0;
 }
 
-.traquenard-gauge {
-  flex: 0 0 auto;
+/* ===== Traquenard-O-mètre : jauge intégrée =====
+   Une même échelle (--traq-ratio 0→1, --traq-color) pilote deux formes :
+   verticale interactive dans les cartes d'action, horizontale récapitulative
+   dans les cartes de synthèse. */
+.traq {
+  --traq-track: rgba(255, 247, 230, 0.14);
+  display: flex;
+  gap: 10px;
+}
+
+.traq__title {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: rgba(255, 247, 230, 0.82);
+}
+
+.traq__value {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--traq-color);
+  transition: color 0.18s ease;
+}
+
+.traq__track {
+  position: relative;
+  border-radius: 999px;
+  background: var(--traq-track);
+  border: 1px solid rgba(255, 247, 230, 0.16);
+  overflow: hidden;
+}
+
+.traq__fill {
+  position: absolute;
+  border-radius: 999px;
+  background: var(--traq-color);
+  transition:
+    width 0.18s ease,
+    height 0.18s ease,
+    background-color 0.18s ease;
+}
+
+.traq__thumb {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--cream);
+  border: 4px solid var(--traq-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  transition:
+    bottom 0.18s ease,
+    left 0.18s ease,
+    border-color 0.18s ease;
+}
+
+/* --- Horizontale, récapitulative --- */
+.traq--horizontal {
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.traq--horizontal .traq__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.traq--horizontal .traq__gauge {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.traq--horizontal .traq__track {
+  width: 100%;
+  height: 10px;
+}
+
+.traq--horizontal .traq__fill {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(var(--traq-ratio) * 100%);
+}
+
+.traq--horizontal .traq__thumb {
+  width: 16px;
+  height: 16px;
+  border-width: 3px;
+  left: clamp(8px, calc(var(--traq-ratio) * 100%), calc(100% - 8px));
+  transform: translateX(-50%);
+}
+
+/* --- Verticale, interactive --- */
+.traq--vertical {
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 66px;
+}
+
+.traq__scale {
+  position: relative;
+  width: 34px;
+  height: 168px;
+  display: flex;
+  justify-content: center;
+}
+
+.traq--vertical .traq__track {
+  width: 12px;
+  height: 100%;
+}
+
+.traq--vertical .traq__fill {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(var(--traq-ratio) * 100%);
+}
+
+.traq--vertical .traq__thumb {
+  left: 50%;
+  bottom: calc(var(--traq-ratio) * 100%);
+  transform: translate(-50%, 50%);
+  pointer-events: none;
+}
+
+/* Curseur natif rendu invisible mais pleinement fonctionnel : l'écriture
+   verticale mappe le glissement du bas (0) vers le haut (max). */
+.traq__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.traq--vertical .traq__head {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  width: 58px;
-}
-
-.traquenard-gauge__track {
-  position: relative;
-  width: 12px;
-  height: 150px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, var(--bar-red) 0%, var(--pastis) 50%, var(--calm-blue) 100%);
-  border: 1px solid rgba(255, 247, 230, 0.22);
-}
-
-.traquenard-gauge__marker {
-  position: absolute;
-  left: 50%;
-  width: 22px;
-  height: 4px;
-  border-radius: 999px;
-  background: var(--cream);
-  box-shadow: 0 0 0 2px rgba(36, 26, 18, 0.6);
-  transform: translate(-50%, 50%);
-}
-
-.traquenard-gauge__legend {
-  display: flex;
-  flex-direction: column;
   gap: 2px;
-}
-
-.traquenard-gauge__title {
-  font-size: 9.5px;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  line-height: 1.15;
-  color: rgba(255, 247, 230, 0.8);
   text-align: center;
 }
 
-.traquenard-gauge__value {
-  font-size: 9.5px;
-  font-weight: 600;
-  line-height: 1.15;
-  color: rgba(255, 247, 230, 0.6);
-  text-align: center;
+/* --- Carte d'action portant la jauge sur son bord --- */
+.sheet--with-gauge {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.sheet--with-gauge .sheet__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.sheet__gauge {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 4px;
 }
 
 /* ===== Ouvrir dans une appli GPS ===== */
