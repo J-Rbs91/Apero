@@ -270,32 +270,13 @@ export function InvitePage() {
 
       <MobileResultsPanel event={event} result={result} />
 
-      <section className="sheet" style={{ display: "flex", justifyContent: "center" }}>
-        <TraquenardGauge level={averageTraquenardLevel} voteCount={traquenardVoteCount} />
-      </section>
-
-      <section className="sheet">
-        <p className="lbl">{event.options.length > 1 ? "Toutes les dates proposées" : "Le créneau proposé"}</p>
-        <div className="slot-stack">
-          {event.options.map((option) => (
-            <div className="slot" key={option.id}>
-              <div className="slot__top">
-                <div>
-                  <div className="slot__d">{formatOption(option)}</div>
-                </div>
-                {option.id === winnerId && <span className="agenda-lead">En tête</span>}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {keys.writeKey ? (
         <>
           <VoteForm
             event={event}
             isSaving={isSaving}
             onSubmit={handleVoteSubmit}
+            leadingOptionId={winnerId}
             extraFields={
               <label className="field">
                 <span>Traquenard-O-mètre : ton pronostic</span>
@@ -318,6 +299,19 @@ export function InvitePage() {
         </>
       ) : (
         <section className="sheet">
+          <p className="lbl">{event.options.length > 1 ? "Toutes les dates proposées" : "Le créneau proposé"}</p>
+          <div className="slot-stack">
+            {event.options.map((option) => (
+              <div className="slot" key={option.id}>
+                <div className="slot__top">
+                  <div>
+                    <div className="slot__d">{formatOption(option)}</div>
+                  </div>
+                  {option.id === winnerId && <span className="agenda-lead">En tête</span>}
+                </div>
+              </div>
+            ))}
+          </div>
           <p className="lede">
             Ce lien permet de consulter l’apéro, mais pas d’y répondre : il manque la clé
             d’écriture. Demande le lien complet à la personne qui t’a invité·e.
@@ -326,6 +320,10 @@ export function InvitePage() {
       )}
 
       <ParticipantList participants={event.participants} />
+
+      <section className="sheet" style={{ display: "flex", justifyContent: "center" }}>
+        <TraquenardGauge level={averageTraquenardLevel} voteCount={traquenardVoteCount} />
+      </section>
 
       {canShare && (
         <MobileShareBox

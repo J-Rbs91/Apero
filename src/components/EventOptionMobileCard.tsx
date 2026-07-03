@@ -6,6 +6,8 @@ type EventOptionMobileCardProps = {
   option: AperitifOption;
   value: VoteStatus | "";
   onChange: (status: VoteStatus) => void;
+  /** Créneau actuellement en tête (le plus de présences confirmées). */
+  isLeading?: boolean;
 };
 
 function formatDateTime(option: AperitifOption): string {
@@ -24,6 +26,7 @@ export function EventOptionMobileCard({
   option,
   value,
   onChange,
+  isLeading,
 }: EventOptionMobileCardProps) {
   const subtitle =
     option.createdByRole === "participant" && option.createdByName
@@ -47,6 +50,7 @@ export function EventOptionMobileCard({
           )}
           {option.note && <div className="slot__p">{option.note}</div>}
         </div>
+        {isLeading && <span className="agenda-lead">En tête</span>}
       </div>
       <VoteSegmentedControl
         name={`vote-${option.id}`}

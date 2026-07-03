@@ -23,9 +23,11 @@ type VoteFormProps = {
   onSubmit: (response: ParticipantResponse) => Promise<void>;
   /** Champs additionnels affichés avant le bouton d'envoi (ex. pronostic ludique). */
   extraFields?: React.ReactNode;
+  /** Créneau actuellement en tête, mis en évidence dans la liste des cartes. */
+  leadingOptionId?: string;
 };
 
-export function VoteForm({ event, isSaving, onSubmit, extraFields }: VoteFormProps) {
+export function VoteForm({ event, isSaving, onSubmit, extraFields, leadingOptionId }: VoteFormProps) {
   const { comptoirName } = useComptoirName();
   const emptyVotes = useMemo(
     () =>
@@ -151,6 +153,7 @@ export function VoteForm({ event, isSaving, onSubmit, extraFields }: VoteFormPro
               option={option}
               value={votes[option.id]}
               onChange={(status) => updateVote(option.id, status)}
+              isLeading={option.id === leadingOptionId}
             />
           ))}
         </div>

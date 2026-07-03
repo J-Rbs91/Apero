@@ -228,7 +228,12 @@ export function EventPage() {
 
       <div className="event-stack">
         {result && <MobileResultsPanel event={event} result={result} />}
-        <VoteForm event={event} isSaving={isSaving} onSubmit={handleVoteSubmit} />
+        <VoteForm
+          event={event}
+          isSaving={isSaving}
+          onSubmit={handleVoteSubmit}
+          leadingOptionId={result?.type === "winner" ? result.optionId : undefined}
+        />
         <AlternativeOptionForm isSaving={isAddingOption} onSubmit={handleOptionSubmit} />
 
         <ParticipantList participants={event.participants} />
