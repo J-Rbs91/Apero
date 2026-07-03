@@ -31,8 +31,7 @@ export function validateComptoirName(name: string): ComptoirNameValidation {
   if (normalizedName.length > 40) {
     return {
       ok: false,
-      message:
-        "Le registre n\u2019a pas assez de papier pour un blaze pareil, et le greffier commence \u00e0 s\u2019inqui\u00e9ter.",
+      message: "C\u2019est un peu long pour un blaze. Fais plus court, \u00e7a passera mieux au comptoir.",
     };
   }
 

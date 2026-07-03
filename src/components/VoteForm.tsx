@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { AperitifEvent, ParticipantResponse, VoteStatus } from "../types/apero";
 import { useComptoirName } from "../hooks/useComptoirName";
 import { createId } from "../utils/createId";
@@ -21,9 +21,11 @@ type VoteFormProps = {
   event: AperitifEvent;
   isSaving: boolean;
   onSubmit: (response: ParticipantResponse) => Promise<void>;
+  /** Champs additionnels affichés avant le bouton d'envoi (ex. pronostic ludique). */
+  extraFields?: React.ReactNode;
 };
 
-export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
+export function VoteForm({ event, isSaving, onSubmit, extraFields }: VoteFormProps) {
   const { comptoirName } = useComptoirName();
   const emptyVotes = useMemo(
     () =>
@@ -38,6 +40,9 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
   const [brings, setBrings] = useState("");
   const [comment, setComment] = useState("");
   const [feedback, setFeedback] = useState("");
+  // Évite qu'une soumission qu'on vient de faire soi-même ne déclenche le
+  // message « réponse retrouvée » quand l'event mis à jour redescend en prop.
+  const justSubmittedRef = useRef(false);
 
   const existingParticipant = useMemo(() => {
     const normalizedName = participantName.trim().toLowerCase();
@@ -72,7 +77,14 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
     setVotes({ ...emptyVotes, ...existingParticipant.votes });
     setBrings(existingParticipant.brings ?? "");
     setComment(existingParticipant.comment ?? "");
-    setFeedback("Réponse retrouvée. Le retournement de veste reste administrativement possible.");
+
+    if (justSubmittedRef.current) {
+      // C'est notre propre envoi qui vient de faire apparaître cette entrée :
+      // le message de succès de handleSubmit prime, pas celui-ci.
+      justSubmittedRef.current = false;
+    } else {
+      setFeedback("On a retrouvé ta réponse, tu peux la modifier.");
+    }
   }, [emptyVotes, existingParticipant]);
 
   function updateVote(optionId: string, status: VoteStatus) {
@@ -89,9 +101,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
     const trimmedName = participantName.trim();
 
     if (!trimmedName) {
-      setFeedback(
-        "Il faut inscrire un convive au registre, même sous un pseudo douteux, parce qu’un fantôme, ça ne répond pas, en tout cas pas ici.",
-      );
+      setFeedback("Il faut un petit nom pour savoir qui vient — même un pseudo fera l’affaire.");
       return;
     }
 
@@ -99,7 +109,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
 
     if (missingVote) {
       setFeedback(
-        "Une réponse par créneau, pas une de moins, sinon c’est l’institution tout entière qui vacille sur ses fondations.",
+        "Réponds à chaque créneau proposé (dispo, pas dispo, ou pas sûr), histoire d’y voir clair.",
       );
       return;
     }
@@ -115,21 +125,18 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
       updatedAt: now,
     };
 
+    justSubmittedRef.current = true;
     await onSubmit(response);
-    setFeedback(
-      existingParticipant
-        ? "Réponse mise à jour. Le retournement de veste est validé."
-        : "Réponse déposée, dûment enregistrée. Le zinc en prend acte, solennellement.",
-    );
+    setFeedback(existingParticipant ? "Réponse mise à jour, merci !" : "Réponse bien reçue, merci d’avoir répondu !");
   }
 
   return (
     <section className="sheet">
-      <p className="eyebrow">{existingParticipant ? "Amender ma déclaration" : "Déposer ma réponse"}</p>
+      <p className="eyebrow">{existingParticipant ? "Modifier ma réponse" : "Répondre à l’invitation"}</p>
 
       <form className="vote-form" onSubmit={handleSubmit}>
         <label className="field">
-          <span>Ton nom dans le registre</span>
+          <span>Ton prénom (ou blaze)</span>
           <input
             value={participantName}
             onChange={(eventChange) => setParticipantName(eventChange.target.value)}
@@ -164,17 +171,19 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
         </label>
 
         <label className="field">
-          <span>Déclaration au comptoir</span>
+          <span>Un petit mot pour la troupe</span>
           <textarea
             value={comment}
             onChange={(eventChange) => setComment(eventChange.target.value)}
             rows={3}
-            placeholder="Je comparais si la réunion finit avant la fin du monde."
+            placeholder="Je viendrai si le monde ne s’est pas arrêté de tourner d’ici là."
           />
         </label>
 
+        {extraFields}
+
         <button className="button button--primary button--block" type="submit" disabled={isSaving}>
-          {isSaving ? "Dépôt de la réponse…" : "Déposer ma réponse"}
+          {isSaving ? "Envoi de ta réponse…" : "Répondre à l’invitation"}
         </button>
         {feedback && (
           <p className="feedback" role="status">

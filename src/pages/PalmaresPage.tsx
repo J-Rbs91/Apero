@@ -77,8 +77,8 @@ export function PalmaresPage() {
         try {
           loadedEvents = await eventStorage.listActiveEvents();
         } catch {
-          // Les assemblées en cours sont un bonus : le palmarès tient déjà
-          // debout avec le seul registre des récompenses.
+          // Les apéros en cours sont un bonus : le palmarès tient déjà
+          // debout avec le seul grand livre des récompenses.
         }
 
         if (isMounted) {
@@ -173,7 +173,7 @@ export function PalmaresPage() {
       ) : shownMembers.length === 0 ? (
         <section className="sheet">
           <p className="lede">
-            Le tableau est encore vierge, d’une blancheur presque suspecte. Convoque, réponds,
+            Le tableau est encore vierge, d’une blancheur presque suspecte. Organise, réponds,
             ramène le saucisson : les breloques, elles, suivront — elles suivent toujours.
           </p>
         </section>

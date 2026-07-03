@@ -30,14 +30,12 @@ export function AlternativeOptionForm({ isSaving, onSubmit }: AlternativeOptionF
     const trimmedLocation = locationValue.location.trim();
 
     if (!trimmedName) {
-      setFeedback("Le zinc exige une signature sous la contre-proposition. L’anonymat, c’est bon pour les tracts.");
+      setFeedback("Indique ton prénom, pour qu’on sache qui propose ce créneau.");
       return;
     }
 
     if (!date || !time || !trimmedLocation) {
-      setFeedback(
-        "Il faut un jour, une heure et un établissement en bonne et due forme pour espérer troubler le Conseil.",
-      );
+      setFeedback("Il manque un jour, une heure ou un lieu pour cette proposition.");
       return;
     }
 
@@ -58,13 +56,13 @@ export function AlternativeOptionForm({ isSaving, onSubmit }: AlternativeOptionF
     setDate("");
     setTime("");
     setLocationValue({ location: "" });
-    setFeedback("Contre-proposition déposée dans cette assemblée, pas dans celle de la table d’à côté.");
+    setFeedback("Nouvelle date proposée, elle apparaît maintenant dans la liste.");
     setIsOpen(false);
   }
 
   return (
     <section className="sheet">
-      <p className="eyebrow">Contre-proposition</p>
+      <p className="eyebrow">Proposer une autre date</p>
 
       {!isOpen ? (
         <button
@@ -77,7 +75,7 @@ export function AlternativeOptionForm({ isSaving, onSubmit }: AlternativeOptionF
       ) : (
         <form className="vote-form" onSubmit={handleSubmit}>
           <label className="field">
-            <span>Signature de la contre-proposition</span>
+            <span>Ton prénom</span>
             <input
               value={createdByName}
               onChange={(eventChange) => setCreatedByName(eventChange.target.value)}
@@ -114,7 +112,7 @@ export function AlternativeOptionForm({ isSaving, onSubmit }: AlternativeOptionF
 
           <div className="vote-form">
             <button className="button button--primary button--block" disabled={isSaving} type="submit">
-              {isSaving ? "Dépôt…" : "Déposer la contre-proposition"}
+              {isSaving ? "Envoi…" : "Proposer cette date"}
             </button>
             <button className="button button--ghost button--block" type="button" onClick={() => setIsOpen(false)}>
               Annuler

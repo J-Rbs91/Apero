@@ -30,7 +30,7 @@ export function HomePage() {
           veut, mais personne n'a le droit de se défiler, figure-toi.
         </p>
         <Link className="button button--primary button--block" to="/create">
-          Convoquer une assemblée
+          Organiser un apéro
         </Link>
         <p className="meta meta--center">Propose · partage · le comptoir tranche</p>
       </section>

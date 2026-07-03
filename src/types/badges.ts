@@ -53,7 +53,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
   {
     id: "POPULAR_TABLE",
     name: "Table de Dix",
-    description: "A organisé une assemblée avec plus de 10 convives. La nappe a souffert.",
+    description: "A organisé un apéro avec plus de 10 convives. La nappe a souffert.",
     rarity: "rare",
     iconName: "table",
   },
@@ -61,7 +61,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     id: "LONELY_CONVOKER",
     name: "Grand-Croix de la Loose",
     description:
-      "A convoqué une assemblée à laquelle absolument personne, pas même le chien du quartier, n’est venu. Respect dans l’échec.",
+      "A organisé un apéro auquel absolument personne, pas même le chien du quartier, n’est venu. Respect dans l’échec.",
     rarity: "shame",
     iconName: "emptyChair",
   },
@@ -83,7 +83,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     id: "SERIAL_VOTER",
     name: "Fine Gâchette du Registre",
     description:
-      "A déposé un nombre de réponses qui frise l’acharnement administratif dans les assemblées de la Confrérie.",
+      "A déposé un nombre de réponses qui frise l’acharnement dans les apéros de la Confrérie.",
     rarity: "common",
     iconName: "ballot",
   },
@@ -106,7 +106,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     id: "FIRST_SHOT_CONSENSUS",
     name: "Consensus du premier coup",
     description:
-      "A convoqué une assemblée si limpide que tout le monde a validé une proposition initiale sans réclamer de nouvelle date, de nouvel horaire ou de nouveau lieu.",
+      "A organisé un apéro si limpide que tout le monde a validé la proposition initiale sans réclamer de nouvelle date, de nouvel horaire ou de nouveau lieu.",
     rarity: "rare",
     iconName: "crown",
   },
