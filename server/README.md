@@ -169,11 +169,40 @@ Aucune réponse d'erreur ni aucun log ne contient de secret.
   reverse proxy ;
 - logs d'accès minimaux (méthode, chemin, statut, durée — jamais de body).
 
-## Déploiement (étape suivante, hors périmètre ici)
+## Déploiement
 
-Le VPS est déjà équipé de **Caddy** (reverse proxy + HTTPS automatique) :
-l'API Apéro y écoutera sur `127.0.0.1:3103` (3001 et 3002 sont pris par PANUM
-et ORTABEL) et sera exposée via un bloc du type `api-apero.example.com {
-reverse_proxy 127.0.0.1:3103 }`. `trust proxy` est déjà activé pour que le
-rate limit voie la vraie IP cliente derrière le proxy. La configuration Caddy
-et le service systemd font partie de l'étape de déploiement, pas de celle-ci.
+Le VPS est équipé de **Caddy** (reverse proxy + HTTPS automatique). L'API
+Apéro écoute en local sur `127.0.0.1:3103` (3001 et 3002 sont pris par PANUM
+et ORTABEL) et est exposée non pas via un sous-domaine dédié mais en
+sous-chemin d'un domaine existant :
+
+```txt
+https://panum.fr/_svc/a
+```
+
+Le Caddyfile utilise `handle_path` pour retirer le préfixe `/_svc/a` avant de
+transmettre la requête à l'API locale — Express n'a besoin de connaître que
+ses propres routes (`/health`, `/api/aperos/:aperoId`), jamais ce préfixe :
+
+```caddyfile
+handle_path /_svc/a/* {
+    reverse_proxy 127.0.0.1:3103 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+    }
+}
+```
+
+`trust proxy` est déjà activé côté Express (`config.trustProxyHops`) pour que
+le rate limit voie la vraie IP cliente derrière le proxy.
+
+Côté frontend, `VITE_APERO_API_BASE_URL` doit valoir cette URL telle quelle,
+préfixe inclus :
+
+```env
+VITE_APERO_API_BASE_URL=https://panum.fr/_svc/a
+```
+
+`joinApiUrl` (`src/services/aperoApiClient.ts`) construit alors
+`https://panum.fr/_svc/a/api/aperos/{id}` ; Caddy le retransforme en
+`/api/aperos/{id}` avant de l'envoyer à Express.
