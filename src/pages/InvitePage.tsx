@@ -172,7 +172,7 @@ export function InvitePage() {
       const updatedEvent = await joinApero(aperoId, keys.writeKey, keys.encryptionKey, participant);
       setJoinedLocally(true);
       setState({ status: "ready", event: updatedEvent });
-      setJoinFeedback("Bien noté au registre. Le vote créneau par créneau arrive bientôt sur cette page.");
+      setJoinFeedback("Bien noté au registre. La réponse créneau par créneau arrive bientôt sur cette page.");
     } catch (joinError) {
       // joinApero mémorise l'apéro localement avant l'écriture réseau :
       // l'entrée « Mes apéros » existe donc déjà, on l'assume dans le message.

@@ -31,7 +31,7 @@ export function TraquenardGauge({ level, voteCount }: TraquenardGaugeProps) {
         role="img"
         aria-label={
           level == null
-            ? "Traquenard-O-mètre : aucun vote pour l’instant"
+            ? "Traquenard-O-mètre : aucune réponse pour l’instant"
             : `Traquenard-O-mètre : ${level.toFixed(1)} sur ${TRAQUENARD_LEVEL_MAX}, ${describeLevel(level)}`
         }
       >
@@ -44,8 +44,8 @@ export function TraquenardGauge({ level, voteCount }: TraquenardGaugeProps) {
         <p className="traquenard-gauge__value">
           {level == null
             ? voteCount === 0
-              ? "Personne n’a encore voté"
-              : "En attente de votes"
+              ? "Personne n’a encore répondu"
+              : "En attente de réponses"
             : `${level.toFixed(1)}/${TRAQUENARD_LEVEL_MAX} · ${describeLevel(level)}`}
         </p>
       </div>
