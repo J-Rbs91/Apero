@@ -18,6 +18,17 @@ function formatWinner(option: AperitifOption): string {
   return `${dateLabel} · ${option.time || "?"} — ${option.location}`;
 }
 
+function describeEyebrow(result: ResultState): string {
+  switch (result.type) {
+    case "winner":
+      return "Le rendez-vous retenu";
+    case "tie":
+      return "Plusieurs options en lice";
+    default:
+      return "En attente de réponses";
+  }
+}
+
 export function MobileResultsPanel({ event, result }: MobileResultsPanelProps) {
   const highlightedId =
     result.type === "winner"
@@ -35,7 +46,7 @@ export function MobileResultsPanel({ event, result }: MobileResultsPanelProps) {
 
   return (
     <div className="verdict">
-      <p className="eyebrow">Verdict provisoire</p>
+      <p className="eyebrow">{describeEyebrow(result)}</p>
       <div className="verdict__title">
         {highlightedOption ? formatWinner(highlightedOption) : result.message}
       </div>

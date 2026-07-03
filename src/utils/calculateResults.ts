@@ -56,8 +56,7 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
   if (event.participants.length === 0) {
     return {
       type: "empty",
-      message:
-        "Le registre est vierge, d’un blanc presque religieux. Aucun convive n’a encore répondu, et dans n’importe quelle institution sérieuse, ça s’appelle un silence qui en dit long.",
+      message: "Personne n’a encore répondu. Sois le premier, ou la première, à donner le ton !",
       results,
     };
   }
@@ -79,8 +78,7 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
   if (!bestResult || (bestResult.yesCount === 0 && bestResult.maybeCount === 0)) {
     return {
       type: "no-availability",
-      message:
-        "Personne n’est disponible, absolument personne, et ça, dans l’histoire du zinc, ça s’appelle une crise sans précédent.",
+      message: "Personne n’est chaud pour l’instant. Une nouvelle date fera peut-être pencher la balance.",
       results,
     };
   }
@@ -95,8 +93,7 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
   if (tiedResults.length > 1) {
     return {
       type: "tie",
-      message:
-        "Égalité parfaite, à une réponse près, ce qui ne s’était pas vu depuis la dernière fois. Les débats de comptoir continuent, plus vifs que jamais.",
+      message: "Ça hésite encore entre plusieurs options, les avis ne sont pas tranchés.",
       optionIds: tiedResults.map((result) => result.optionId),
       results,
     };
@@ -106,8 +103,8 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
     type: "winner",
     message:
       bestResult.yesCount > 0
-        ? "Le verdict est tombé, dans le silence recueilli qui sied aux grandes décisions : les glaçons peuvent se préparer."
-        : "La Confrérie semble pencher pour cette option.",
+        ? "C’est calé : il ne reste plus qu’à sortir les glaçons !"
+        : "Ça penche pour cette option, sans certitude absolue.",
     optionId: bestResult.optionId,
     results,
   };

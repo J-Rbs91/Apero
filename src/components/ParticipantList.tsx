@@ -1,18 +1,19 @@
+import { useState } from "react";
 import type { ParticipantResponse } from "../types/apero";
-
-// Registre du comptoir : présences en tête, hésitations et désertions dans un
-// dépliant. Partagé par les pages d'apéro pour un rendu cohérent.
 
 type PresenceGroup = "coming" | "wavering" | "declined";
 
 function getPresenceGroup(participant: ParticipantResponse): PresenceGroup {
   const votes = Object.values(participant.votes);
+
   if (votes.some((vote) => vote === "yes")) {
     return "coming";
   }
+
   if (votes.some((vote) => vote === "maybe")) {
     return "wavering";
   }
+
   return "declined";
 }
 
@@ -40,76 +41,71 @@ function ParticipantRow({ participant }: { participant: ParticipantResponse }) {
   );
 }
 
-type EventRegistryProps = {
+type ParticipantListProps = {
   participants: ParticipantResponse[];
-  showAbsentees: boolean;
-  onToggleAbsentees: () => void;
 };
 
-export function EventRegistry({
-  participants,
-  showAbsentees,
-  onToggleAbsentees,
-}: EventRegistryProps) {
-  const coming = participants.filter((participant) => getPresenceGroup(participant) === "coming");
-  const wavering = participants.filter((participant) => getPresenceGroup(participant) === "wavering");
-  const declining = participants.filter((participant) => getPresenceGroup(participant) === "declined");
-  const absenteeCount = wavering.length + declining.length;
+export function ParticipantList({ participants }: ParticipantListProps) {
+  const [showOthers, setShowOthers] = useState(false);
+  const comingParticipants = participants.filter(
+    (participant) => getPresenceGroup(participant) === "coming",
+  );
+  const waveringParticipants = participants.filter(
+    (participant) => getPresenceGroup(participant) === "wavering",
+  );
+  const decliningParticipants = participants.filter(
+    (participant) => getPresenceGroup(participant) === "declined",
+  );
+  const othersCount = waveringParticipants.length + decliningParticipants.length;
 
   return (
-    <section className="sheet" id="registre">
-      <p className="eyebrow">Le registre du comptoir</p>
+    <section className="sheet" id="reponses">
+      <p className="eyebrow">Qui vient ?</p>
       {participants.length === 0 ? (
-        <p className="lede">
-          Aucun convive n’a encore signé le registre. L’institution retient son souffle, suspendue à
-          la première signature comme à un premier amour.
-        </p>
+        <p className="lede">Personne n’a encore répondu. Sois le premier, ou la première !</p>
       ) : (
         <>
-          {coming.length === 0 ? (
-            <p className="lede">
-              Personne n’a encore juré présence. Le zinc garde les verres au frais, sans illusion
-              excessive, mais avec l’espoir tenace qui caractérise les grandes institutions.
-            </p>
+          {comingParticipants.length === 0 ? (
+            <p className="lede">Personne n’a encore confirmé sa venue pour l’instant.</p>
           ) : (
             <div className="people">
-              {coming.map((participant) => (
+              {comingParticipants.map((participant) => (
                 <ParticipantRow key={participant.id} participant={participant} />
               ))}
             </div>
           )}
 
-          {absenteeCount > 0 && (
+          {othersCount > 0 && (
             <>
               <button
                 type="button"
                 className="ghost-link"
-                aria-expanded={showAbsentees}
-                aria-controls="registre-absents"
-                onClick={onToggleAbsentees}
+                aria-expanded={showOthers}
+                aria-controls="reponses-autres"
+                onClick={() => setShowOthers((isShown) => !isShown)}
               >
-                {showAbsentees
-                  ? "Replier les dossiers sensibles"
-                  : `Qui se défile, qui se tâte (${absenteeCount})`}
+                {showOthers
+                  ? "Masquer les autres réponses"
+                  : `Voir qui hésite ou décline (${othersCount})`}
               </button>
 
-              {showAbsentees && (
-                <div id="registre-absents" className="event-stack">
-                  {wavering.length > 0 && (
+              {showOthers && (
+                <div id="reponses-autres" className="event-stack">
+                  {waveringParticipants.length > 0 && (
                     <>
-                      <p className="lbl">Le cul entre deux chaises</p>
+                      <p className="lbl">Pas encore sûrs</p>
                       <div className="people">
-                        {wavering.map((participant) => (
+                        {waveringParticipants.map((participant) => (
                           <ParticipantRow key={participant.id} participant={participant} />
                         ))}
                       </div>
                     </>
                   )}
-                  {declining.length > 0 && (
+                  {decliningParticipants.length > 0 && (
                     <>
-                      <p className="lbl">Désertions assumées</p>
+                      <p className="lbl">Ne viendront pas</p>
                       <div className="people">
-                        {declining.map((participant) => (
+                        {decliningParticipants.map((participant) => (
                           <ParticipantRow key={participant.id} participant={participant} />
                         ))}
                       </div>

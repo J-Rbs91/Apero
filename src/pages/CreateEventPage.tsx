@@ -80,7 +80,7 @@ export function CreateEventPage() {
 
     if (!hasFutureSlot) {
       setFeedback(
-        "Tous tes créneaux sont déjà dans le passé, ce qui est un joli exploit temporel mais totalement inutile pour convoquer qui que ce soit. Propose une date à venir, la machine à remonter le temps est encore en réparation.",
+        "Tous tes créneaux sont déjà dans le passé, ce qui est un joli exploit temporel mais totalement inutile pour inviter qui que ce soit. Propose une date à venir, la machine à remonter le temps est encore en réparation.",
       );
       return;
     }
@@ -88,7 +88,7 @@ export function CreateEventPage() {
     try {
       setIsSubmitting(true);
       const storageMode = getAperoStorageMode();
-      // Mode api-vps : les assemblées sont chiffrées, impossible de lister
+      // Mode api-vps : les apéros sont chiffrés, impossible de lister
       // l'existant pour garantir un nom unique.
       const activeEvents =
         storageMode === "api-vps" ? [] : await eventStorage.listActiveEvents();
@@ -96,7 +96,7 @@ export function CreateEventPage() {
 
       if (trimmedCeremonialName && storageMode !== "api-vps" && isCeremonialNameTaken(trimmedCeremonialName, activeEvents)) {
         setFeedback(
-          "Ce nom d'assemblée est déjà pris par une convocation en cours. Trouve-en un autre, ou laisse le champ vide pour un tirage au sort.",
+          "Ce nom d'apéro est déjà pris par un événement en cours. Trouve-en un autre, ou laisse le champ vide pour un tirage au sort.",
         );
         return;
       }
@@ -176,14 +176,14 @@ export function CreateEventPage() {
     } catch (error) {
       setFeedback(
         error instanceof AperoApiError && error.code === "API_NOT_CONFIGURED"
-          ? "Le comptoir numérique n'est pas encore raccordé (API non configurée) : impossible de sceller la convocation dans ce mode. Repasse en mode classique ou configure VITE_APERO_API_BASE_URL."
+          ? "Le comptoir numérique n'est pas encore raccordé (API non configurée) : impossible d'envoyer l'invitation dans ce mode. Repasse en mode classique ou configure VITE_APERO_API_BASE_URL."
           : error instanceof AperoApiError && error.code === "NETWORK_ERROR"
             ? "Impossible de joindre le comptoir numérique. Vérifie la connexion (ou que l'API tourne bien) et réessaie."
             : error instanceof Error && error.message === "NO_CEREMONIAL_NAME_AVAILABLE"
-              ? "La Confrérie est complète, archi-complète même : trop d’apéros tournent déjà en coulisses dans une magouille généralisée que plus personne ne maîtrise vraiment. Clôture une assemblée avant d’en convoquer une nouvelle, sinon c’est le chaos institutionnel."
+              ? "La Confrérie est complète, archi-complète même : trop d’apéros tournent déjà en coulisses dans une magouille généralisée que plus personne ne maîtrise vraiment. Clôture un apéro avant d’en lancer un nouveau, sinon c’est le chaos total."
               : error instanceof Error
                 ? error.message
-                : "Le service a renversé le registre, on ne sait pas comment, et franchement personne ne veut savoir comment. Réessaie dans deux secondes, ça se répare presque toujours tout seul.",
+                : "Le service a fait une bêtise, on ne sait pas comment, et franchement personne ne veut savoir comment. Réessaie dans deux secondes, ça se répare presque toujours tout seul.",
       );
     } finally {
       setIsSubmitting(false);
@@ -192,13 +192,13 @@ export function CreateEventPage() {
 
   return (
     <MobilePage className="create-mobile" overlay="deep">
-      <MobileHeader eyebrow="Convocation" />
+      <MobileHeader eyebrow="Invitation" />
 
       <form className="sheet" onSubmit={handleSubmit}>
-        <h1 className="h1 h1--sm">Convoquer</h1>
+        <h1 className="h1 h1--sm">Organiser un apéro</h1>
 
         <label className="field">
-          <span>Nom de l’assemblée (optionnel)</span>
+          <span>Nom de l’apéro (optionnel)</span>
           <input
             value={ceremonialNameInput}
             onChange={(eventChange) => setCeremonialNameInput(eventChange.target.value)}
@@ -276,7 +276,7 @@ export function CreateEventPage() {
         </button>
 
         <button className="button button--primary button--block" disabled={isSubmitting}>
-          {isSubmitting ? "Scellement du registre…" : "Sceller la convocation"}
+          {isSubmitting ? "Envoi de l’invitation…" : "Envoyer l’invitation"}
         </button>
         {feedback && (
           <p className="feedback" role="alert">

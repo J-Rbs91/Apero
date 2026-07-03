@@ -39,8 +39,8 @@ type AgendaItem = {
 const storageMode = getAperoStorageMode();
 
 // Mode api-vps : « Mes apéros » ne liste plus tout le repo, uniquement les
-// assemblées créées ou rejointes sur cet appareil (registre localStorage),
-// chargées en lecture publique puis déchiffrées localement.
+// apéros créés ou rejoints sur cet appareil (registre local dans le
+// localStorage), chargés en lecture publique puis déchiffrés localement.
 async function loadMyLocalAperos(): Promise<AperitifEvent[]> {
   const mine = await getMyAperos();
   return mine
@@ -127,7 +127,7 @@ export function AgendaPage() {
       <section className="sheet">
         <h1 className="h1 h1--sm">Les apéros à venir</h1>
         <p className="lede">
-          Les assemblées encore debout, celles qui tiennent bon, triées par date la plus proche.
+          Les apéros encore debout, ceux qui tiennent bon, triés par date la plus proche.
         </p>
       </section>
 
@@ -143,7 +143,7 @@ export function AgendaPage() {
             philosophique.
           </p>
           <Link className="button button--primary button--block" to="/create">
-            Convoquer une assemblée
+            Organiser un apéro
           </Link>
         </section>
       ) : (
@@ -178,7 +178,7 @@ export function AgendaPage() {
                   storageMode === "api-vps" ? `/invite/${event.id}` : `/event/${event.id}`
                 }
               >
-                Voir l’assemblée
+                Voir l’apéro
               </Link>
             </section>
           ))}

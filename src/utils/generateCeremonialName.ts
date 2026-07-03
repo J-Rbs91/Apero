@@ -4,33 +4,23 @@ export const APERO_CEREMONIAL_NAMES = [
   "La Grande Tablée des Olives",
   "Le Concile du Saucisson",
   "Le Sommet des Glaçons",
-  "L’Assemblée du Zinc",
-  "Le Conseil des Cacahuètes",
+  "La Bande à Zinc",
   "La Sainte Tournée",
   "Le Banquet des Gobelets",
   "Le Cercle du Petit Jaune",
   "La Réunion des Verres Qui Collent",
-  "Le Haut Comité de la Chips",
-  "La Chambre des Tire-Bouchons",
-  "Le Synode du Comptoir",
-  "La Commission des Nappes Collantes",
-  "Le Tribunal de l’Olive Verte",
+  "La Fine Équipe de la Chips",
+  "Le Club des Tire-Bouchons",
+  "La Tablée du Comptoir",
   "Le Grand Ordre du Sauciflard",
-  "La Session Extraordinaire du Bar-Tabac",
-  "Le Bureau des Affaires Apéritives",
+  "La Sortie Improvisée du Bar-Tabac",
   "La Table Ronde des Coudes Posés",
-  "Le Ministère du Fond de Verre",
   "L’Académie du Dernier Pour la Route",
-  "Le Directoire des Glaçons Fondus",
+  "La Bande des Glaçons Fondus",
   "La Loge des Cacahuètes Salées",
-  "Le Conseil Constitutionnel du Pastaga",
-  "La Conférence des Chaises en Plastique",
-  "Le Sénat du Paquet de Chips",
-  "La Cour Suprême du Tire-Bouchon",
-  "Le Cercle Diplomatique du Comptoir",
+  "La Fête des Chaises en Plastique",
   "La Brigade d’Honneur du Saucisson",
   "Le Symposium des Olives Molles",
-  "La Grande Chancellerie du Verre Ballon",
 ];
 
 function isActiveEvent(event: AperitifEvent): boolean {
@@ -54,7 +44,7 @@ export function isCeremonialNameTaken(name: string, activeEvents: AperitifEvent[
 }
 
 // Variante pour le flux chiffré (mode api-vps) : impossible de lister les
-// assemblées existantes (elles sont chiffrées), donc pas de garantie
+// apéros existants (ils sont chiffrés), donc pas de garantie
 // d'unicité — l'identifiant unique reste l'aperoId, le nom n'est que décorum.
 export function pickRandomCeremonialName(): string {
   const randomIndex = Math.floor(Math.random() * APERO_CEREMONIAL_NAMES.length);

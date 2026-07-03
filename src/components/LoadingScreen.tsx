@@ -6,7 +6,7 @@ type LoadingScreenProps = {
 };
 
 export function LoadingScreen({
-  title = "On prépare le registre",
+  title = "Un instant…",
   subtitle = "La Confrérie ouvre le comptoir…",
 }: LoadingScreenProps) {
   return (

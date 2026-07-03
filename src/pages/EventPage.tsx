@@ -6,6 +6,7 @@ import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { MobileResultsPanel } from "../components/MobileResultsPanel";
 import { MobileShareBox } from "../components/MobileShareBox";
+import { ParticipantList } from "../components/ParticipantList";
 import { VoteForm } from "../components/VoteForm";
 import { useComptoirName } from "../hooks/useComptoirName";
 import { eventStorage } from "../services";
@@ -15,46 +16,6 @@ import { normalizeMemberName } from "../utils/memberName";
 import { buildShareText, buildShareTitle } from "../utils/shareMessage";
 
 const MIN_LOADING_MS = 700;
-
-function getInitials(name: string): string {
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join("");
-}
-
-type PresenceGroup = "coming" | "wavering" | "declined";
-
-function getPresenceGroup(participant: ParticipantResponse): PresenceGroup {
-  const votes = Object.values(participant.votes);
-
-  if (votes.some((vote) => vote === "yes")) {
-    return "coming";
-  }
-
-  if (votes.some((vote) => vote === "maybe")) {
-    return "wavering";
-  }
-
-  return "declined";
-}
-
-function ParticipantRow({ participant }: { participant: ParticipantResponse }) {
-  return (
-    <div className="person">
-      <i>{getInitials(participant.participantName)}</i>
-      <div className="person__body">
-        <div className="person__name">{participant.participantName}</div>
-        {participant.brings && <div className="person__sub">{participant.brings}</div>}
-        {participant.comment && (
-          <div className="person__sub person__sub--quote">{"« "}{participant.comment}{" »"}</div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 export function EventPage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -70,7 +31,6 @@ export function EventPage() {
   const [isAddingOption, setIsAddingOption] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showAbsentees, setShowAbsentees] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const result = useMemo(() => (event ? calculateBestOptions(event) : null), [event]);
@@ -113,7 +73,7 @@ export function EventPage() {
           setError(
             loadError instanceof Error
               ? loadError.message
-              : "Le greffe a perdu la convocation, on ne sait plus où, on ne sait plus comment, et à la limite on ne sait même plus si elle a vraiment existé un jour.",
+              : "Impossible de récupérer cet apéro pour le moment. Réessaie dans un instant.",
           );
         }
       } finally {
@@ -144,12 +104,12 @@ export function EventPage() {
       setSuccess("");
       const updatedEvent = await eventStorage.saveParticipantResponse(eventId, response);
       setEvent(updatedEvent);
-      setSuccess("Réponse enregistrée, gravée, scellée dans le marbre du zinc : le registre est à jour, et l’Histoire, la vraie, en prend acte.");
+      setSuccess("Réponse bien reçue, merci !");
     } catch (saveError) {
       setError(
         saveError instanceof Error
           ? saveError.message
-          : "Le comptoir est saturé, complètement débordé, à deux doigts de la rupture d’anévrisme administratif. Réessaie dans deux secondes, ça devrait passer.",
+          : "Le comptoir est débordé. Réessaie dans deux secondes, ça devrait passer.",
       );
     } finally {
       setIsSaving(false);
@@ -167,12 +127,12 @@ export function EventPage() {
       setSuccess("");
       const updatedEvent = await eventStorage.addEventOption(eventId, option);
       setEvent(updatedEvent);
-      setSuccess("Contre-proposition ajoutée au registre de cette assemblée, dûment considérée, et le Conseil, désormais, en délibère avec le sérieux qu’elle mérite.");
+      setSuccess("Nouvelle date proposée, elle apparaît maintenant dans la liste.");
     } catch (saveError) {
       setError(
         saveError instanceof Error
           ? saveError.message
-          : "Le registre du zinc refuse net la contre-proposition, sans explication, avec l’autorité tranquille d’une institution qui n’a de comptes à rendre à personne. Réessaie dans un instant.",
+          : "Impossible d’ajouter cette proposition pour le moment. Réessaie dans un instant.",
       );
     } finally {
       setIsAddingOption(false);
@@ -193,7 +153,7 @@ export function EventPage() {
       setError(
         deleteError instanceof Error
           ? deleteError.message
-          : "Le registre s’accroche à cette assemblée comme à sa dernière olive, et refuse obstinément de la lâcher. Réessaie dans un instant.",
+          : "Impossible de supprimer cet apéro pour le moment. Réessaie dans un instant.",
       );
       setIsDeleting(false);
     }
@@ -210,11 +170,11 @@ export function EventPage() {
   if (!event && isPurged) {
     return (
       <MobilePage className="event-mobile" overlay="deep">
-        <MobileHeader eyebrow="Registre nettoyé" />
+        <MobileHeader eyebrow="Apéro archivé" />
         <section className="sheet">
-          <h1 className="h1 h1--sm">Cette assemblée a quitté le comptoir</h1>
+          <h1 className="h1 h1--sm">Cet apéro est terminé</h1>
           <p className="lede">
-            L’apéro est passé, le registre actif a été nettoyé, mais rassure-toi : les hauts faits
+            La soirée est passée, cette page a été nettoyée, mais rassure-toi : les hauts faits
             de la tablée, eux, restent gravés dans la Confrérie pour l’éternité — ou en tout cas
             jusqu’à la prochaine purge.
           </p>
@@ -229,9 +189,9 @@ export function EventPage() {
   if (!event) {
     return (
       <MobilePage className="event-mobile" overlay="deep">
-        <MobileHeader eyebrow="Assemblée introuvable" />
+        <MobileHeader eyebrow="Apéro introuvable" />
         <section className="sheet">
-          <h1 className="h1 h1--sm">Cette convocation n’existe pas</h1>
+          <h1 className="h1 h1--sm">Cet apéro n’existe pas</h1>
           <p className="lede">
             Soit le lien est complètement moisi, soit le troquet a purement et simplement fermé
             boutique — et dans les deux cas, on ne peut plus rien pour toi ici.
@@ -246,23 +206,13 @@ export function EventPage() {
   }
 
   const metaText = `par ${event.organizerName} · ${event.options.length} créneaux · ${event.participants.length} réponses`;
-  const comingParticipants = event.participants.filter(
-    (participant) => getPresenceGroup(participant) === "coming",
-  );
-  const waveringParticipants = event.participants.filter(
-    (participant) => getPresenceGroup(participant) === "wavering",
-  );
-  const decliningParticipants = event.participants.filter(
-    (participant) => getPresenceGroup(participant) === "declined",
-  );
-  const absenteeCount = waveringParticipants.length + decliningParticipants.length;
   const isOrganizer =
     Boolean(comptoirName) &&
     normalizeMemberName(comptoirName) === normalizeMemberName(event.organizerName);
 
   return (
     <MobilePage className="event-mobile" overlay="scene">
-      <MobileHeader eyebrow="Assemblée" title={event.ceremonialName} meta={metaText} />
+      <MobileHeader eyebrow="Ton apéro" title={event.ceremonialName} meta={metaText} />
       {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
 
       {error && (
@@ -278,75 +228,15 @@ export function EventPage() {
 
       <div className="event-stack">
         {result && <MobileResultsPanel event={event} result={result} />}
-        <VoteForm event={event} isSaving={isSaving} onSubmit={handleVoteSubmit} />
+        <VoteForm
+          event={event}
+          isSaving={isSaving}
+          onSubmit={handleVoteSubmit}
+          leadingOptionId={result?.type === "winner" ? result.optionId : undefined}
+        />
         <AlternativeOptionForm isSaving={isAddingOption} onSubmit={handleOptionSubmit} />
 
-        <section className="sheet" id="registre">
-          <p className="eyebrow">Le registre du comptoir</p>
-          {event.participants.length === 0 ? (
-            <p className="lede">
-              Aucun convive n’a encore signé le registre. L’institution retient son souffle,
-              suspendue à la première signature comme à un premier amour.
-            </p>
-          ) : (
-            <>
-              {comingParticipants.length === 0 ? (
-                <p className="lede">
-                  Personne n’a encore juré présence. Le zinc garde les verres au frais, sans
-                  illusion excessive, mais avec l’espoir tenace qui caractérise les grandes
-                  institutions.
-                </p>
-              ) : (
-                <div className="people">
-                  {comingParticipants.map((participant) => (
-                    <ParticipantRow key={participant.id} participant={participant} />
-                  ))}
-                </div>
-              )}
-
-              {absenteeCount > 0 && (
-                <>
-                  <button
-                    type="button"
-                    className="ghost-link"
-                    aria-expanded={showAbsentees}
-                    aria-controls="registre-absents"
-                    onClick={() => setShowAbsentees((isShown) => !isShown)}
-                  >
-                    {showAbsentees
-                      ? "Replier les dossiers sensibles"
-                      : `Qui se défile, qui se tâte (${absenteeCount})`}
-                  </button>
-
-                  {showAbsentees && (
-                    <div id="registre-absents" className="event-stack">
-                      {waveringParticipants.length > 0 && (
-                        <>
-                          <p className="lbl">Le cul entre deux chaises</p>
-                          <div className="people">
-                            {waveringParticipants.map((participant) => (
-                              <ParticipantRow key={participant.id} participant={participant} />
-                            ))}
-                          </div>
-                        </>
-                      )}
-                      {decliningParticipants.length > 0 && (
-                        <>
-                          <p className="lbl">Désertions assumées</p>
-                          <div className="people">
-                            {decliningParticipants.map((participant) => (
-                              <ParticipantRow key={participant.id} participant={participant} />
-                            ))}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
-            </>
-          )}
-        </section>
+        <ParticipantList participants={event.participants} />
 
         <MobileShareBox
           url={shareUrl}
@@ -360,7 +250,7 @@ export function EventPage() {
             className="ghost-link ghost-link--danger"
             onClick={() => setShowDeleteConfirm(true)}
           >
-            Supprimer cette assemblée
+            Supprimer cet apéro
           </button>
         )}
       </div>
@@ -373,14 +263,13 @@ export function EventPage() {
             aria-modal="true"
             aria-labelledby="delete-title"
           >
-            <p className="eyebrow">Radiation du registre</p>
+            <p className="eyebrow">Suppression</p>
             <h2 className="h1 h1--sm" id="delete-title">
-              Supprimer cette assemblée ?
+              Supprimer cet apéro ?
             </h2>
             <p className="lede">
-              Le comptoir efface tout, pour de bon : créneaux, réponses, contre-propositions, tout le
-              tralala administratif. Il n’y a pas de session de rattrapage, pas de recours, pas de
-              commission d’appel.
+              Ça efface tout, pour de bon : créneaux, réponses, propositions, tout y passe. Pas de
+              retour en arrière possible.
             </p>
             <button
               type="button"
@@ -388,7 +277,7 @@ export function EventPage() {
               onClick={handleDelete}
               disabled={isDeleting}
             >
-              {isDeleting ? "Radiation…" : "Oui, raye-la du registre"}
+              {isDeleting ? "Suppression…" : "Oui, supprimer"}
             </button>
             <button
               type="button"

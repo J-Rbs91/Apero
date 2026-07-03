@@ -72,7 +72,7 @@ export function ComptoirNameOnboarding({
               />
             </label>
             <button className="button button--primary button--block" type="submit">
-              Graver mon blaze au registre
+              Valider mon blaze
             </button>
             {error && (
               <p className="feedback" role="alert">
@@ -91,7 +91,7 @@ export function ComptoirNameOnboarding({
             className="sheet modal-sheet"
             role="dialog"
           >
-            <p className="eyebrow">Validation du registre</p>
+            <p className="eyebrow">On confirme ?</p>
             <h2 className="h1 h1--sm" id="comptoir-confirm-title">
               {"Sérieux, c’est ça ton blaze ?"}
             </h2>
