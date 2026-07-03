@@ -138,6 +138,41 @@ Cette URL n’est pas un secret (elle est publique dans le bundle), une variable
 - Mini-carte Leaflet sous le verdict quand le créneau en tête a des coordonnées, avec lien vers OpenStreetMap.
 - Calcul du verdict : priorité aux « j’y serai », départage aux « j’me tâte », égalités conservées.
 - Gestion simple des conflits GitHub : relecture, fusion, deuxième tentative.
+- Notifications selon le rôle et la réponse (voir section dédiée).
+
+## Notifications
+
+Le système notifie chaque personne selon son **rôle** (créateur ou invité) et sa **réponse** (oui, peut-être, non), sur deux canaux : un **badge interne** (rond rouge avec le nombre de non-lues, façon Facebook) et, si l’utilisateur l’autorise, des **notifications système** du téléphone.
+
+### Règles de diffusion
+
+| Destinataire | Reçoit |
+| --- | --- |
+| Créateur | réponse d’un invité, modification d’une réponse, nouvelle proposition de créneau par un invité |
+| Invité « oui » (ou encore indécis) | nouvelle proposition, modification d’un créneau, confirmation finale, changement important |
+| Invité « peut-être » | rappels automatiques 48 h / 24 h / 2 h avant l’apéro |
+| Invité « non » | rien — sauf s’il change lui-même sa réponse, ce qui réactive le canal |
+
+Le moteur ne s’auto-notifie jamais des actions de l’utilisateur lui-même (le créateur qui ajoute un créneau, l’invité qui vote…).
+
+### Autorisation à l’onboarding
+
+Une fois le blaze gravé, l’app propose (une seule fois) d’activer les notifications système, en expliquant pourquoi : recevoir les réponses des invités, être informé des nouvelles propositions, ne pas oublier de confirmer sa présence, recevoir les rappels avant l’apéro. **Refuser n’enlève rien** : le badge interne rouge reste actif dans tous les cas.
+
+### Contrainte d’architecture (zero-knowledge)
+
+Les apéros sont chiffrés de bout en bout : le serveur VPS ne stocke que du ciphertext et le hash de la write key (`server/src/routes/aperos.ts`). Il **ne peut pas** savoir qui a voté « peut-être » ni quand tombe l’apéro. Toute la logique de notification est donc **calculée côté client**, là où les données sont déchiffrées : à chaque affichage, on diffe l’apéro fraîchement déchiffré contre un instantané « déjà vu » gardé en `localStorage`.
+
+Conséquence pour les notifications système : on fait du **best-effort** via l’API `Notification` et un service worker minimal (`public/notifications-sw.js`) — vraies notifications OS quand l’app / le SW est vivant, et réouverture de l’app au clic. Un push serveur en tâche de fond (app totalement fermée) exigerait Web Push + VAPID + un store d’abonnements côté serveur, **incompatible avec le modèle zero-knowledge actuel** : il n’est donc volontairement pas branché. Le badge interne reste la garantie universelle.
+
+### Où ça vit
+
+- `src/services/notificationEngine.ts` — logique pure et testée (diff + rappels), sans effet de bord.
+- `src/services/notificationSync.ts` — orchestration : déchiffre, applique le moteur, alimente le badge, déclenche le best-effort système.
+- `src/services/notificationStore.ts` / `notificationSnapshots.ts` — persistance `localStorage` (notifications + instantanés « déjà vu »).
+- `src/services/systemNotifications.ts` + `public/notifications-sw.js` — pont notifications OS.
+- `src/pages/NotificationsPage.tsx`, `src/components/NotificationBell.tsx`, `NotificationBadge.tsx` — le centre et le badge.
+- `src/components/onboarding/NotificationPermissionOnboarding.tsx` — l’écran d’autorisation.
 
 ## Évolutions possibles
 

@@ -12,6 +12,7 @@ import { isValidAperoId } from "../services/aperoCryptoKeys";
 import { AperoCryptoError } from "../services/aperoEncryption";
 import { getEncryptedAperoById, joinApero } from "../services/encryptedAperoRepository";
 import { findLocalApero } from "../services/localAperoRegistry";
+import { syncAperoNotificationsFromRegistry } from "../services/notificationSync";
 import type { AperitifEvent, ParticipantResponse } from "../types/apero";
 import { calculateAverageTraquenardLevel, TRAQUENARD_LEVEL_MAX } from "../utils/calculateResults";
 import { createId } from "../utils/createId";
@@ -117,6 +118,9 @@ export function InvitePage() {
         }
 
         setState({ status: "ready", event: loaded.event });
+        // Génère les notifications de cet apéro (si connu localement) à partir
+        // de l'écart avec le dernier état vu sur cet appareil.
+        syncAperoNotificationsFromRegistry(loaded.event);
       } catch (loadError) {
         if (!isMounted) {
           return;
@@ -172,6 +176,8 @@ export function InvitePage() {
       const updatedEvent = await joinApero(aperoId, keys.writeKey, keys.encryptionKey, participant);
       setJoinedLocally(true);
       setState({ status: "ready", event: updatedEvent });
+      // Enregistre l'état vu après adhésion sans se notifier soi-même.
+      syncAperoNotificationsFromRegistry(updatedEvent);
       setJoinFeedback("Bien noté au registre. La réponse créneau par créneau arrive bientôt sur cette page.");
     } catch (joinError) {
       // joinApero mémorise l'apéro localement avant l'écriture réseau :

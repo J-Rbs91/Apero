@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { requestComptoirNameEdit } from "../hooks/useComptoirName";
+import { NotificationBell } from "./NotificationBell";
 import { WineGlassMark } from "./WineGlassMark";
 
 export function BrandMenu() {
@@ -33,7 +34,8 @@ export function BrandMenu() {
   }, [isOpen]);
 
   return (
-    <div className="brand-menu" ref={containerRef}>
+    <div className="brand-row">
+      <div className="brand-menu" ref={containerRef}>
       <button
         type="button"
         className="brandpill brandpill--button"
@@ -74,6 +76,14 @@ export function BrandMenu() {
           <Link
             className="brand-menu__item"
             role="menuitem"
+            to="/notifications"
+            onClick={() => setIsOpen(false)}
+          >
+            Notifications
+          </Link>
+          <Link
+            className="brand-menu__item"
+            role="menuitem"
             to="/agenda"
             onClick={() => setIsOpen(false)}
           >
@@ -100,6 +110,8 @@ export function BrandMenu() {
           </button>
         </div>
       )}
+      </div>
+      <NotificationBell />
     </div>
   );
 }

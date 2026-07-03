@@ -1,0 +1,346 @@
+// Moteur de notifications — logique pure et testable.
+//
+// Il ne touche ni au localStorage, ni au DOM, ni à l'API Notification : il
+// prend un apéro déjà déchiffré + l'instantané « déjà vu » précédent, et rend
+// la liste des notifications à créer + le prochain instantané. La persistance
+// et la diffusion (badge, notifications système) vivent ailleurs.
+
+import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
+import type {
+  AppNotification,
+  NotificationEventType,
+  NotificationViewer,
+  ViewerVote,
+} from "../types/notifications";
+import { normalizeMemberName } from "../utils/memberName";
+
+// Instantané de l'état « déjà vu » d'un apéro sur cet appareil.
+export type AperoSnapshot = {
+  // Signature de contenu de chaque créneau, indexée par id.
+  optionSignatures: Record<string, string>;
+  // Signature du vote de chaque participant, indexée par nom normalisé.
+  participantVotes: Record<string, string>;
+  // Créneau confirmé au moment du dernier sync.
+  selectedOptionId?: string;
+  // Rappels « peut-être » déjà déclenchés ("48h", "24h", "2h").
+  firedReminders: string[];
+  // Faux tant qu'on n'a jamais synchronisé cet apéro : le tout premier passage
+  // ne fait qu'enregistrer l'état, sans notifier l'historique déjà présent.
+  initialized: boolean;
+};
+
+export function createEmptySnapshot(): AperoSnapshot {
+  return {
+    optionSignatures: {},
+    participantVotes: {},
+    selectedOptionId: undefined,
+    firedReminders: [],
+    initialized: false,
+  };
+}
+
+// Réponse d'un participant dérivée de ses votes créneau par créneau.
+export function deriveVote(participant: ParticipantResponse | undefined): ViewerVote {
+  if (!participant) {
+    return "none";
+  }
+  const votes = Object.values(participant.votes ?? {});
+  if (votes.length === 0) {
+    return "none";
+  }
+  if (votes.some((vote) => vote === "yes")) {
+    return "yes";
+  }
+  if (votes.some((vote) => vote === "maybe")) {
+    return "maybe";
+  }
+  return "no";
+}
+
+function optionSignature(option: AperitifOption): string {
+  return [
+    option.date,
+    option.time,
+    option.location,
+    option.locationAddress ?? "",
+    option.locationLat ?? "",
+    option.locationLng ?? "",
+    option.note ?? "",
+  ].join("|");
+}
+
+function participantVoteSignature(participant: ParticipantResponse): string {
+  const entries = Object.entries(participant.votes ?? {}).sort(([a], [b]) => a.localeCompare(b));
+  return JSON.stringify(entries);
+}
+
+export function snapshotApero(event: AperitifEvent): AperoSnapshot {
+  const optionSignatures: Record<string, string> = {};
+  for (const option of event.options) {
+    optionSignatures[option.id] = optionSignature(option);
+  }
+
+  const participantVotes: Record<string, string> = {};
+  for (const participant of event.participants) {
+    participantVotes[normalizeMemberName(participant.participantName)] =
+      participantVoteSignature(participant);
+  }
+
+  return {
+    optionSignatures,
+    participantVotes,
+    selectedOptionId: event.selectedOptionId,
+    firedReminders: [],
+    initialized: true,
+  };
+}
+
+// Un invité « oui » ou encore indécis (« none ») est tenu au courant des
+// évolutions de l'apéro. Un « peut-être » ne reçoit que des rappels, un « non »
+// plus rien (section 4 : sauf s'il rechange lui-même sa réponse — ce qui le
+// fait repasser « oui/peut-être/none » et réactive donc ce canal).
+function guestFollowsUpdates(vote: ViewerVote): boolean {
+  return vote === "yes" || vote === "none";
+}
+
+type DraftNotification = {
+  type: NotificationEventType;
+  title: string;
+  body: string;
+  dedupeKey: string;
+};
+
+function buildNotifications(
+  event: AperitifEvent,
+  previous: AperoSnapshot,
+  viewer: NotificationViewer,
+): DraftNotification[] {
+  const drafts: DraftNotification[] = [];
+  const isCreator = viewer.role === "creator";
+
+  // 1) Participants : réponses des invités (canal créateur uniquement).
+  if (isCreator) {
+    for (const participant of event.participants) {
+      const key = normalizeMemberName(participant.participantName);
+      // Ne jamais s'auto-notifier de sa propre ligne.
+      if (key === viewer.normalizedName) {
+        continue;
+      }
+      const signature = participantVoteSignature(participant);
+      const previousSignature = previous.participantVotes[key];
+
+      if (previousSignature === undefined) {
+        drafts.push({
+          type: "guest-responded",
+          title: "Nouvelle réponse au registre",
+          body: `${participant.participantName} vient d'émarger à « ${event.ceremonialName} ».`,
+          dedupeKey: `${event.id}:responded:${key}`,
+        });
+      } else if (previousSignature !== signature) {
+        drafts.push({
+          type: "guest-changed-response",
+          title: "Un convive a changé d'avis",
+          body: `${participant.participantName} a modifié sa réponse à « ${event.ceremonialName} ».`,
+          // La signature entre dans la clé : chaque modification distincte
+          // produit sa propre notification.
+          dedupeKey: `${event.id}:changed:${key}:${signature}`,
+        });
+      }
+    }
+  }
+
+  // 2) Créneaux ajoutés ou modifiés.
+  for (const option of event.options) {
+    const signature = optionSignature(option);
+    const previousSignature = previous.optionSignatures[option.id];
+    const addedByViewer =
+      option.createdByName != null &&
+      normalizeMemberName(option.createdByName) === viewer.normalizedName;
+
+    if (previousSignature === undefined) {
+      // Créneau nouveau.
+      if (isCreator && !addedByViewer && option.createdByRole === "participant") {
+        // Le créateur est prévenu qu'un invité a proposé un créneau.
+        drafts.push({
+          type: "guest-proposed-option",
+          title: "Nouvelle proposition de créneau",
+          body: `${option.createdByName ?? "Un convive"} propose un créneau pour « ${event.ceremonialName} ».`,
+          dedupeKey: `${event.id}:proposed:${option.id}`,
+        });
+      }
+      if (!isCreator && !addedByViewer && guestFollowsUpdates(viewer.vote)) {
+        // Les invités engagés sont prévenus des nouvelles propositions.
+        drafts.push({
+          type: "new-option",
+          title: "Nouvelle proposition de créneau",
+          body: `Un nouveau créneau a été proposé pour « ${event.ceremonialName} ».`,
+          dedupeKey: `${event.id}:new-option:${option.id}`,
+        });
+      }
+    } else if (previousSignature !== signature && !addedByViewer) {
+      // Créneau modifié : les invités engagés sont prévenus.
+      if (!isCreator && guestFollowsUpdates(viewer.vote)) {
+        drafts.push({
+          type: "option-modified",
+          title: "Un créneau a été modifié",
+          body: `Un créneau de « ${event.ceremonialName} » a changé.`,
+          dedupeKey: `${event.id}:option-modified:${option.id}:${signature}`,
+        });
+      }
+    }
+  }
+
+  // 3) Confirmation finale : le créneau retenu vient d'être fixé ou changé.
+  if (
+    event.selectedOptionId &&
+    event.selectedOptionId !== previous.selectedOptionId &&
+    !isCreator &&
+    guestFollowsUpdates(viewer.vote)
+  ) {
+    const selected = event.options.find((option) => option.id === event.selectedOptionId);
+    const wasAlreadySet = Boolean(previous.selectedOptionId);
+    drafts.push({
+      type: wasAlreadySet ? "important-change" : "final-confirmation",
+      title: wasAlreadySet ? "Changement important" : "C'est confirmé !",
+      body: selected
+        ? `« ${event.ceremonialName} » est calé : ${selected.date} à ${selected.time}, ${selected.location}.`
+        : `Le créneau retenu de « ${event.ceremonialName} » a changé.`,
+      dedupeKey: `${event.id}:confirmed:${event.selectedOptionId}`,
+    });
+  }
+
+  return drafts;
+}
+
+// ---- Rappels « peut-être » (section 3) --------------------------------------
+
+const HOUR_MS = 60 * 60 * 1000;
+
+const REMINDER_WINDOWS: Array<{ id: string; type: NotificationEventType; hours: number }> = [
+  { id: "48h", type: "reminder-48h", hours: 48 },
+  { id: "24h", type: "reminder-24h", hours: 24 },
+  { id: "2h", type: "reminder-2h", hours: 2 },
+];
+
+function optionStartMs(option: AperitifOption): number {
+  if (!option.date || !option.time) {
+    return Number.NaN;
+  }
+  const time = new Date(`${option.date}T${option.time}:00`).getTime();
+  return Number.isNaN(time) ? Number.NaN : time;
+}
+
+// Cible temporelle de l'apéro : le créneau confirmé s'il existe, sinon le
+// prochain créneau à venir.
+export function resolveAperoStartMs(event: AperitifEvent, nowMs: number): number {
+  if (event.selectedOptionId) {
+    const selected = event.options.find((option) => option.id === event.selectedOptionId);
+    const selectedMs = selected ? optionStartMs(selected) : Number.NaN;
+    if (!Number.isNaN(selectedMs)) {
+      return selectedMs;
+    }
+  }
+  const upcoming = event.options
+    .map(optionStartMs)
+    .filter((ms) => !Number.isNaN(ms) && ms >= nowMs)
+    .sort((a, b) => a - b);
+  return upcoming.length ? upcoming[0] : Number.NaN;
+}
+
+// Rappels à déclencher pour un « peut-être ». On ne rejoue jamais un palier
+// déjà déclenché, et si plusieurs paliers sont franchis d'un coup (l'app était
+// fermée), on n'émet que le plus proche de l'apéro pour ne pas spammer — les
+// autres sont marqués comme déclenchés.
+export function computeReminders(
+  event: AperitifEvent,
+  viewer: NotificationViewer,
+  previous: AperoSnapshot,
+  nowMs: number,
+): { drafts: DraftNotification[]; firedReminders: string[] } {
+  if (viewer.vote !== "maybe") {
+    return { drafts: [], firedReminders: previous.firedReminders };
+  }
+
+  const startMs = resolveAperoStartMs(event, nowMs);
+  if (Number.isNaN(startMs) || startMs <= nowMs) {
+    return { drafts: [], firedReminders: previous.firedReminders };
+  }
+
+  const fired = new Set(previous.firedReminders);
+  const crossedUnfired = REMINDER_WINDOWS.filter(
+    (window) => nowMs >= startMs - window.hours * HOUR_MS && !fired.has(window.id),
+  );
+
+  if (crossedUnfired.length === 0) {
+    return { drafts: [], firedReminders: previous.firedReminders };
+  }
+
+  // Marquer tous les paliers franchis comme déclenchés (pas de rattrapage).
+  for (const window of crossedUnfired) {
+    fired.add(window.id);
+  }
+
+  // N'émettre que le plus urgent (plus petite fenêtre) parmi les franchis.
+  const mostUrgent = crossedUnfired.reduce((closest, window) =>
+    window.hours < closest.hours ? window : closest,
+  );
+
+  const draft: DraftNotification = {
+    type: mostUrgent.type,
+    title: "Tu te tâtes encore ?",
+    body: `« ${event.ceremonialName} » approche (${mostUrgent.id}). Confirme ta présence, la tablée compte sur toi.`,
+    dedupeKey: `${event.id}:reminder:${mostUrgent.id}`,
+  };
+
+  return { drafts: [draft], firedReminders: Array.from(fired) };
+}
+
+// ---- Entrée principale du moteur --------------------------------------------
+
+export type EngineResult = {
+  notifications: AppNotification[];
+  snapshot: AperoSnapshot;
+};
+
+// Diffe un apéro contre son instantané précédent et rend les notifications à
+// créer + l'instantané à persister. `makeId` est injecté (pas de Date.now /
+// random ici) pour rester déterministe et testable.
+export function diffAperoNotifications(
+  event: AperitifEvent,
+  previous: AperoSnapshot,
+  viewer: NotificationViewer,
+  nowMs: number,
+  makeId: (dedupeKey: string) => string,
+  nowIso: string,
+): EngineResult {
+  // Premier contact avec cet apéro : on enregistre l'état sans notifier
+  // l'historique déjà présent, mais on garde la trace des rappels.
+  if (!previous.initialized) {
+    return { notifications: [], snapshot: snapshotApero(event) };
+  }
+
+  const eventDrafts = buildNotifications(event, previous, viewer);
+  const { drafts: reminderDrafts, firedReminders } = computeReminders(
+    event,
+    viewer,
+    previous,
+    nowMs,
+  );
+
+  const nextSnapshot = snapshotApero(event);
+  nextSnapshot.firedReminders = firedReminders;
+
+  const notifications: AppNotification[] = [...eventDrafts, ...reminderDrafts].map((draft) => ({
+    id: makeId(draft.dedupeKey),
+    aperoId: event.id,
+    aperoName: event.ceremonialName,
+    type: draft.type,
+    title: draft.title,
+    body: draft.body,
+    createdAt: nowIso,
+    read: false,
+    dedupeKey: draft.dedupeKey,
+  }));
+
+  return { notifications, snapshot: nextSnapshot };
+}
