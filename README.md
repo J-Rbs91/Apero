@@ -116,13 +116,15 @@ L’app est déployée automatiquement sur GitHub Pages à chaque push sur `main
 
 ### Raccorder le comptoir numérique (API VPS)
 
-Le workflow injecte `VITE_APERO_API_BASE_URL` au build depuis une **variable de dépôt GitHub**. Sans elle, le site déployé affiche « Le comptoir numérique n’est pas encore raccordé » et refuse de sceller les convocations.
+Le workflow injecte `VITE_APERO_API_BASE_URL` au build depuis une **variable de dépôt GitHub**. Sans elle, le build **échoue volontairement** (plutôt que de déployer un site qui afficherait « Le comptoir numérique n’est pas encore raccordé » et refuserait de sceller les convocations).
 
 1. Sur GitHub : `Settings` → `Secrets and variables` → `Actions` → onglet `Variables` → `New repository variable`.
 2. Nom : `VITE_APERO_API_BASE_URL`, valeur : l’URL publique de la mini API (ex. `https://api-apero.example.com`, l’URL exposée par Caddy devant `server/`).
 3. Relancer le workflow `Deploy Vite app to GitHub Pages` (onglet `Actions` → `Run workflow`) ou pousser sur `main`.
 
-Cette URL n’est pas un secret (elle est publique dans le bundle), une variable suffit — pas besoin d’un secret GitHub.
+Cette URL n’est pas un secret (elle est publique dans le bundle), une variable suffit — pas besoin d’un secret GitHub. Par tolérance, le workflow accepte aussi un **secret** du même nom si la variable est absente, mais l’onglet `Variables` reste l’endroit recommandé.
+
+La procédure complète (mise en service de l’API sur le VPS + raccordement GitHub) est décrite dans [`docs/RACCORDEMENT-VPS.md`](docs/RACCORDEMENT-VPS.md).
 
 ## Fonctionnalités
 
