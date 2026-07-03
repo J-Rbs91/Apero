@@ -74,7 +74,15 @@ export function InvitePage() {
     };
   }, [aperoId, location.search]);
 
-  const [state, setState] = useState<LoadState>({ status: "loading" });
+  // Apéro tout juste créé (state de navigation) : sert de repli tant que la
+  // lecture publique GitHub n'a pas rattrapé le commit d'écriture — évite un
+  // faux « introuvable » juste après avoir scellé la convocation.
+  const seededEvent = (location.state as { createdEvent?: AperitifEvent } | null)?.createdEvent;
+  const initialEvent = seededEvent && seededEvent.id === aperoId ? seededEvent : null;
+
+  const [state, setState] = useState<LoadState>(
+    initialEvent ? { status: "ready", event: initialEvent } : { status: "loading" },
+  );
   const [guestName, setGuestName] = useState("");
   const [traquenardVote, setTraquenardVote] = useState(5);
   const [isJoining, setIsJoining] = useState(false);
@@ -104,7 +112,9 @@ export function InvitePage() {
       }
 
       try {
-        setState({ status: "loading" });
+        if (!initialEvent) {
+          setState({ status: "loading" });
+        }
         const loaded = await getEncryptedAperoById(aperoId, keys.encryptionKey);
 
         if (!isMounted) {
@@ -112,7 +122,12 @@ export function InvitePage() {
         }
 
         if (!loaded) {
-          setState({ status: "not-found" });
+          if (!initialEvent) {
+            setState({ status: "not-found" });
+          }
+          // Sinon : on vient de créer cet apéro, la lecture publique GitHub
+          // peut être en retard sur l'écriture — on garde la version fraîche
+          // en mémoire plutôt que d'afficher « introuvable ».
           return;
         }
 
@@ -127,11 +142,13 @@ export function InvitePage() {
           return;
         }
 
-        setState({
-          status: "error",
-          message:
-            "Le greffe n'arrive pas à sortir le registre. Réessaie dans un instant, il finit toujours par céder.",
-        });
+        if (!initialEvent) {
+          setState({
+            status: "error",
+            message:
+              "Le greffe n'arrive pas à sortir le registre. Réessaie dans un instant, il finit toujours par céder.",
+          });
+        }
       }
     }
 
