@@ -81,9 +81,9 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
   },
   {
     id: "SERIAL_VOTER",
-    name: "Fine Gâchette du Scrutin",
+    name: "Fine Gâchette du Registre",
     description:
-      "A déposé un nombre de suffrages qui frise l’acharnement démocratique dans les assemblées de la Confrérie.",
+      "A déposé un nombre de réponses qui frise l’acharnement administratif dans les assemblées de la Confrérie.",
     rarity: "common",
     iconName: "ballot",
   },
@@ -113,7 +113,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
   {
     id: "ZINC_DIPLOMAT",
     name: "Diplomate du Zinc",
-    description: "A participé à plusieurs apéros sans jamais foutre le bazar dans les votes.",
+    description: "A participé à plusieurs apéros sans jamais foutre le bazar dans les réponses.",
     rarity: "rare",
     iconName: "diplomat",
   },

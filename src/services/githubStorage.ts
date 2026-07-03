@@ -24,9 +24,9 @@ type GitHubDirectoryItem = {
 
 const COMMIT_MESSAGES = {
   createEvent: "Nouvelle assemblée créée dans La Confrérie du Petit Jaune",
-  updateEvent: "Mise à jour du scrutin du zinc",
-  addVote: "Nouveau suffrage déposé au comptoir",
-  updateVote: "Suffrage modifié dans le registre",
+  updateEvent: "Mise à jour du registre du zinc",
+  addVote: "Nouvelle réponse déposée au comptoir",
+  updateVote: "Réponse modifiée dans le registre",
   addOption: "Nouvelle contre-proposition déposée au zinc",
   purgeEvent: "Purge des apéros expirés et mise à jour du registre des récompenses",
 };

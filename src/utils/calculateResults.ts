@@ -41,7 +41,7 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
     return {
       type: "empty",
       message:
-        "Le registre est vierge, d’un blanc presque religieux. Aucun convive n’a encore déposé son suffrage, et en démocratie, ça s’appelle une abstention généralisée.",
+        "Le registre est vierge, d’un blanc presque religieux. Aucun convive n’a encore répondu, et dans n’importe quelle institution sérieuse, ça s’appelle un silence qui en dit long.",
       results,
     };
   }
@@ -64,7 +64,7 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
     return {
       type: "no-availability",
       message:
-        "Personne n’est disponible, absolument personne, et ça, dans l’histoire du zinc, ça s’appelle une crise de régime.",
+        "Personne n’est disponible, absolument personne, et ça, dans l’histoire du zinc, ça s’appelle une crise sans précédent.",
       results,
     };
   }
@@ -80,7 +80,7 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
     return {
       type: "tie",
       message:
-        "Égalité parfaite, au suffrage près, ce qui ne s’était pas vu depuis la dernière fois. Les débats de comptoir continuent, plus vifs que jamais.",
+        "Égalité parfaite, à une réponse près, ce qui ne s’était pas vu depuis la dernière fois. Les débats de comptoir continuent, plus vifs que jamais.",
       optionIds: tiedResults.map((result) => result.optionId),
       results,
     };

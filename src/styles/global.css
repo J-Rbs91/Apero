@@ -111,12 +111,16 @@ a {
 }
 
 /* ===== Screen layout ===== */
+/* Hauteur fixée au viewport + défilement interne : le décor et le
+   dégradé fixes restent parfaitement calés même si le contenu de la
+   carte dépasse la hauteur disponible (petits écrans, texte long). */
 .mobile-page {
   position: relative;
   width: 100%;
   max-width: 480px;
-  min-height: 100dvh;
+  height: 100dvh;
   margin: 0 auto;
+  overflow: hidden;
 }
 
 .mobile-page__inner,
@@ -126,7 +130,9 @@ a {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  min-height: 100dvh;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: calc(14px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom));
 }
 
@@ -138,7 +144,9 @@ a {
   position: relative;
   width: 100%;
   max-width: 480px;
+  height: 100dvh;
   margin: 0 auto;
+  overflow: hidden;
 }
 
 /* ===== Typography ===== */
@@ -255,16 +263,40 @@ a {
 
 .brandpill--button {
   cursor: pointer;
+  border-color: rgba(244, 197, 66, 0.4);
+  background: rgba(10, 36, 29, 0.68);
+  transition: border-color 160ms ease, background-color 160ms ease;
 }
 
-.brandpill__chev {
+.brandpill--button:hover,
+.brandpill--button:active,
+.brandpill--button[aria-expanded="true"] {
+  border-color: rgba(244, 197, 66, 0.7);
+  background: rgba(10, 36, 29, 0.82);
+}
+
+.brandpill__menu-icon {
   margin-left: 2px;
-  opacity: 0.7;
-  transition: transform 160ms ease;
+  flex: 0 0 auto;
+  color: var(--pastis);
 }
 
-.brandpill--button[aria-expanded="true"] .brandpill__chev {
-  transform: rotate(180deg);
+.brandpill__menu-line {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 180ms ease, opacity 140ms ease;
+}
+
+.brandpill--button[aria-expanded="true"] .brandpill__menu-line--top {
+  transform: translateY(5px) rotate(45deg);
+}
+
+.brandpill--button[aria-expanded="true"] .brandpill__menu-line--mid {
+  opacity: 0;
+}
+
+.brandpill--button[aria-expanded="true"] .brandpill__menu-line--bottom {
+  transform: translateY(-5px) rotate(-45deg);
 }
 
 .brand-menu__panel {

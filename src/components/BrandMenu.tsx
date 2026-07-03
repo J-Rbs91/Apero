@@ -43,13 +43,27 @@ export function BrandMenu() {
       >
         <WineGlassMark size={26} />
         <span>La Confrérie</span>
-        <svg className="brandpill__chev" viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+        <svg className="brandpill__menu-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
           <path
-            d="M6 9l6 6 6-6"
+            className="brandpill__menu-line brandpill__menu-line--top"
+            d="M4 7h16"
             stroke="currentColor"
-            strokeWidth="2.2"
+            strokeWidth="2.3"
             strokeLinecap="round"
-            strokeLinejoin="round"
+          />
+          <path
+            className="brandpill__menu-line brandpill__menu-line--mid"
+            d="M4 12h16"
+            stroke="currentColor"
+            strokeWidth="2.3"
+            strokeLinecap="round"
+          />
+          <path
+            className="brandpill__menu-line brandpill__menu-line--bottom"
+            d="M4 17h16"
+            stroke="currentColor"
+            strokeWidth="2.3"
+            strokeLinecap="round"
           />
         </svg>
       </button>

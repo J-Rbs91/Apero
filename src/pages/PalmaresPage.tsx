@@ -173,8 +173,8 @@ export function PalmaresPage() {
       ) : shownMembers.length === 0 ? (
         <section className="sheet">
           <p className="lede">
-            Le tableau est encore vierge, d’une blancheur presque suspecte. Convoque, vote, ramène
-            le saucisson : les breloques, elles, suivront — elles suivent toujours.
+            Le tableau est encore vierge, d’une blancheur presque suspecte. Convoque, réponds,
+            ramène le saucisson : les breloques, elles, suivront — elles suivent toujours.
           </p>
         </section>
       ) : (

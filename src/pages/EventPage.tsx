@@ -144,7 +144,7 @@ export function EventPage() {
       setSuccess("");
       const updatedEvent = await eventStorage.saveParticipantResponse(eventId, response);
       setEvent(updatedEvent);
-      setSuccess("Suffrage enregistré, gravé, scellé dans le marbre du zinc : le registre est à jour, et l’Histoire, la vraie, en prend acte.");
+      setSuccess("Réponse enregistrée, gravée, scellée dans le marbre du zinc : le registre est à jour, et l’Histoire, la vraie, en prend acte.");
     } catch (saveError) {
       setError(
         saveError instanceof Error
@@ -245,7 +245,7 @@ export function EventPage() {
     );
   }
 
-  const metaText = `par ${event.organizerName} · ${event.options.length} créneaux · ${event.participants.length} voix`;
+  const metaText = `par ${event.organizerName} · ${event.options.length} créneaux · ${event.participants.length} réponses`;
   const comingParticipants = event.participants.filter(
     (participant) => getPresenceGroup(participant) === "coming",
   );
