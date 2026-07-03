@@ -5,13 +5,17 @@
 // (aperoApiClient). Aucun appel GitHub authentifié ne part d'ici.
 
 import { githubConfig } from "../config/githubConfig";
-import type { AperitifEvent, ParticipantResponse } from "../types/apero";
+import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
 import type { LocalAperoEntry, StoredEncryptedAperoFile } from "../types/encryptedApero";
-import { upsertParticipant } from "../utils/eventNormalization";
-import { AperoApiError, createOrUpdateEncryptedApero } from "./aperoApiClient";
+import { appendEventOption, upsertParticipant } from "../utils/eventNormalization";
+import {
+  AperoApiError,
+  createOrUpdateEncryptedApero,
+  deleteEncryptedApero as deleteEncryptedAperoApi,
+} from "./aperoApiClient";
 import { generateAperoId, generateBase64UrlRandomKey, isValidAperoId, sha256Hex } from "./aperoCryptoKeys";
 import { decryptAperoData, encryptAperoData, ENCRYPTION_KEY_BYTE_LENGTH } from "./aperoEncryption";
-import { findLocalApero, getLocalAperos, saveLocalApero } from "./localAperoRegistry";
+import { findLocalApero, getLocalAperos, removeLocalApero, saveLocalApero } from "./localAperoRegistry";
 
 // Longueur du writeKey en octets (24 octets => 32 caractères base64url,
 // compatible avec la contrainte serveur de 8 à 256 caractères).
@@ -222,6 +226,31 @@ export async function joinApero(
   return updateEncryptedApero(aperoId, writeKey, encryptionKey, (event) =>
     upsertParticipant(event, participant),
   );
+}
+
+/**
+ * Ajoute un créneau (proposition de date / horaire / lieu) à un apéro chiffré.
+ * Ouvert à tous les porteurs de la write key : organisateur comme invités.
+ */
+export async function addEncryptedAperoOption(
+  aperoId: string,
+  writeKey: string,
+  encryptionKey: string,
+  option: AperitifOption,
+): Promise<AperitifEvent> {
+  return updateEncryptedApero(aperoId, writeKey, encryptionKey, (event) =>
+    appendEventOption(event, option),
+  );
+}
+
+/**
+ * Suppression définitive d'un apéro par l'organisateur (fausse manip, erreur
+ * de création, annulation). Authentifiée par la write key côté serveur. On
+ * nettoie ensuite tout ce qui reste localement (registre « Mes apéros »).
+ */
+export async function deleteEncryptedApero(aperoId: string, writeKey: string): Promise<void> {
+  await deleteEncryptedAperoApi({ aperoId, writeKey });
+  removeLocalApero(aperoId);
 }
 
 export type MyAperoItem = {

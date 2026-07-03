@@ -1,10 +1,15 @@
 import { Router } from "express";
 import { safeEqualHex, sha256Hex } from "../crypto.js";
 import { ApiError } from "../errors.js";
-import { createOrUpdateAperoFile, getAperoFile } from "../githubClient.js";
+import { createOrUpdateAperoFile, deleteAperoFile, getAperoFile } from "../githubClient.js";
 import type { StoredAperoFile } from "../githubClient.js";
 import { logger } from "../logger.js";
-import { parseWriteAperoBody, storedAperoFileSchema, validateAperoId } from "../validators.js";
+import {
+  parseDeleteAperoBody,
+  parseWriteAperoBody,
+  storedAperoFileSchema,
+  validateAperoId,
+} from "../validators.js";
 
 export const aperosRouter = Router();
 
@@ -88,6 +93,39 @@ aperosRouter.post("/aperos/:aperoId", async (req, res, next) => {
     const { sha } = await createOrUpdateAperoFile(aperoId, file, existing.sha);
     logger.info(`Apero updated: ${aperoId}`);
     res.json({ ok: true, created: false, updated: true, aperoId, sha });
+  } catch (error) {
+    next(error);
+  }
+});
+
+aperosRouter.delete("/aperos/:aperoId", async (req, res, next) => {
+  try {
+    const aperoId = validateAperoId(req.params.aperoId);
+    const body = parseDeleteAperoBody(req.body);
+    const receivedKeyHash = sha256Hex(body.writeKey);
+
+    const existing = await getAperoFile(aperoId);
+
+    if (!existing) {
+      // Rien à supprimer : objectif déjà atteint (idempotence).
+      res.json({ ok: true, deleted: false, aperoId });
+      return;
+    }
+
+    const stored = storedAperoFileSchema.safeParse(existing.json);
+
+    if (!stored.success) {
+      // Default deny : un fichier sans writeKeyHash vérifiable reste verrouillé.
+      throw new ApiError(403, "WRITE_NOT_ALLOWED", "Existing apero file cannot be verified.");
+    }
+
+    if (!safeEqualHex(receivedKeyHash, stored.data.writeKeyHash)) {
+      throw new ApiError(403, "INVALID_WRITE_KEY", "Invalid write key.");
+    }
+
+    await deleteAperoFile(aperoId, existing.sha);
+    logger.info(`Apero deleted: ${aperoId}`);
+    res.json({ ok: true, deleted: true, aperoId });
   } catch (error) {
     next(error);
   }

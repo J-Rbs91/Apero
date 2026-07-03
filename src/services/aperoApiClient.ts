@@ -152,3 +152,68 @@ export async function createOrUpdateEncryptedApero(
 
   return result;
 }
+
+export type DeleteEncryptedAperoParams = {
+  aperoId: string;
+  writeKey: string;
+};
+
+export type DeleteEncryptedAperoResult = {
+  ok: true;
+  deleted: boolean;
+  aperoId: string;
+};
+
+export async function deleteEncryptedApero(
+  params: DeleteEncryptedAperoParams,
+): Promise<DeleteEncryptedAperoResult> {
+  const baseUrl = getAperoApiBaseUrl();
+
+  if (!baseUrl) {
+    throw new AperoApiError(
+      "API_NOT_CONFIGURED",
+      "VITE_APERO_API_BASE_URL est absente : impossible de joindre l'API apéro.",
+    );
+  }
+
+  const url = joinApiUrl(baseUrl, `api/aperos/${encodeURIComponent(params.aperoId)}`);
+
+  let response: Response;
+
+  try {
+    response = await fetch(url, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ writeKey: params.writeKey }),
+    });
+  } catch {
+    throw new AperoApiError(
+      "NETWORK_ERROR",
+      "L'API apéro est injoignable (réseau, CORS ou serveur arrêté).",
+    );
+  }
+
+  if (!response.ok) {
+    const { serverCode, message } = await readErrorBody(response);
+    throw new AperoApiError(
+      mapStatusToErrorCode(response.status),
+      message ?? `L'API apéro a refusé la suppression (HTTP ${response.status}).`,
+      response.status,
+      serverCode,
+    );
+  }
+
+  let result: DeleteEncryptedAperoResult;
+
+  try {
+    result = (await response.json()) as DeleteEncryptedAperoResult;
+  } catch {
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse illisible de l'API apéro.");
+  }
+
+  if (result?.ok !== true) {
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse inattendue de l'API apéro.");
+  }
+
+  return result;
+}

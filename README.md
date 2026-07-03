@@ -138,6 +138,7 @@ Cette URL n’est pas un secret (elle est publique dans le bundle), une variable
 - Mini-carte Leaflet sous le verdict quand le créneau en tête a des coordonnées, avec lien vers OpenStreetMap.
 - Calcul du verdict : priorité aux « j’y serai », départage aux « j’me tâte », égalités conservées.
 - Gestion simple des conflits GitHub : relecture, fusion, deuxième tentative.
+- Page d’apéro complète via le lien chiffré (`/invite/:aperoId`), identique pour l’organisateur et les invités : verdict, votes créneau par créneau, contre-propositions, registre. L’organisateur y garde en plus la suppression définitive de l’apéro.
 - Notifications selon le rôle et la réponse (voir section dédiée).
 
 ## Notifications

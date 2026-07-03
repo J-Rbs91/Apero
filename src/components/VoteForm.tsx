@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { AperitifEvent, ParticipantResponse, VoteStatus } from "../types/apero";
 import { useComptoirName } from "../hooks/useComptoirName";
+import { TRAQUENARD_LEVEL_MAX } from "../utils/calculateResults";
 import { createId } from "../utils/createId";
 import { EventOptionMobileCard } from "./EventOptionMobileCard";
 
@@ -21,9 +22,14 @@ type VoteFormProps = {
   event: AperitifEvent;
   isSaving: boolean;
   onSubmit: (response: ParticipantResponse) => Promise<void>;
+  // Affiche le pronostic Traquenard-O-mètre (flux chiffré /invite). Sur le
+  // flux legacy (EventPage), il reste masqué : comportement inchangé.
+  showTraquenard?: boolean;
 };
 
-export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
+const DEFAULT_TRAQUENARD = 5;
+
+export function VoteForm({ event, isSaving, onSubmit, showTraquenard = false }: VoteFormProps) {
   const { comptoirName } = useComptoirName();
   const emptyVotes = useMemo(
     () =>
@@ -37,6 +43,7 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
   const [votes, setVotes] = useState<DraftVotes>(emptyVotes);
   const [brings, setBrings] = useState("");
   const [comment, setComment] = useState("");
+  const [traquenardLevel, setTraquenardLevel] = useState(DEFAULT_TRAQUENARD);
   const [feedback, setFeedback] = useState("");
 
   const existingParticipant = useMemo(() => {
@@ -72,6 +79,9 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
     setVotes({ ...emptyVotes, ...existingParticipant.votes });
     setBrings(existingParticipant.brings ?? "");
     setComment(existingParticipant.comment ?? "");
+    if (typeof existingParticipant.traquenardLevel === "number") {
+      setTraquenardLevel(existingParticipant.traquenardLevel);
+    }
     setFeedback("Réponse retrouvée. Le retournement de veste reste administrativement possible.");
   }, [emptyVotes, existingParticipant]);
 
@@ -111,6 +121,9 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
       votes: votes as Record<string, VoteStatus>,
       brings: brings.trim() || undefined,
       comment: comment.trim() || undefined,
+      traquenardLevel: showTraquenard
+        ? traquenardLevel
+        : existingParticipant?.traquenardLevel,
       createdAt: existingParticipant?.createdAt ?? now,
       updatedAt: now,
     };
@@ -172,6 +185,26 @@ export function VoteForm({ event, isSaving, onSubmit }: VoteFormProps) {
             placeholder="Je comparais si la réunion finit avant la fin du monde."
           />
         </label>
+
+        {showTraquenard && (
+          <>
+            <label className="field">
+              <span>Traquenard-O-mètre : ton pronostic</span>
+              <input
+                type="range"
+                min={0}
+                max={TRAQUENARD_LEVEL_MAX}
+                step={1}
+                value={traquenardLevel}
+                onChange={(eventChange) => setTraquenardLevel(Number(eventChange.target.value))}
+              />
+            </label>
+            <p className="hint">
+              0 = petite soirée sage, {TRAQUENARD_LEVEL_MAX} = traquenard total. Ton pronostic
+              actuel : {traquenardLevel}/{TRAQUENARD_LEVEL_MAX}.
+            </p>
+          </>
+        )}
 
         <button className="button button--primary button--block" type="submit" disabled={isSaving}>
           {isSaving ? "Dépôt de la réponse…" : "Déposer ma réponse"}

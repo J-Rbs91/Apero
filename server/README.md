@@ -32,6 +32,7 @@ les payloads et ne stocke jamais `writeKey` ni `encryptionKey`.
 | ------- | ------------------------ | ------------------------------------------------- |
 | GET     | `/health`                | Vérification de vie du service                    |
 | POST    | `/api/aperos/:aperoId`   | Création ou mise à jour d'un fichier apéro chiffré |
+| DELETE  | `/api/aperos/:aperoId`   | Suppression définitive d'un apéro (corps `{ writeKey }`), authentifiée par le hash de la write key |
 
 ## Variables d'environnement
 

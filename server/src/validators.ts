@@ -69,6 +69,30 @@ export function parseWriteAperoBody(body: unknown): WriteAperoBody {
   return result.data;
 }
 
+// Suppression : seule la write key est requise (même modèle d'auth que
+// l'écriture). Le serveur ne déchiffre toujours rien.
+export const deleteAperoBodySchema = z
+  .object({
+    writeKey: z.string().min(16).max(256),
+  })
+  .strict();
+
+export type DeleteAperoBody = z.infer<typeof deleteAperoBodySchema>;
+
+export function parseDeleteAperoBody(body: unknown): DeleteAperoBody {
+  const result = deleteAperoBodySchema.safeParse(body);
+
+  if (!result.success) {
+    const details = result.error.issues
+      .slice(0, 3)
+      .map((issue) => (issue.path.length ? `${issue.path.join(".")}: ${issue.message}` : issue.message))
+      .join("; ");
+    throw new ApiError(400, "INVALID_PAYLOAD", `Invalid payload. ${details}`);
+  }
+
+  return result.data;
+}
+
 // Champs minimaux qu'un fichier apéro déjà stocké doit exposer pour autoriser
 // une mise à jour. Tout fichier illisible reste verrouillé (default deny).
 export const storedAperoFileSchema = z

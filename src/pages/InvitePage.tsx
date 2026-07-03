@@ -1,32 +1,45 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { AlternativeOptionForm } from "../components/AlternativeOptionForm";
+import { EventRegistry } from "../components/EventRegistry";
 import { LoadingScreen } from "../components/LoadingScreen";
-import { MiniMap } from "../components/MiniMap";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
+import { MobileResultsPanel } from "../components/MobileResultsPanel";
 import { MobileShareBox } from "../components/MobileShareBox";
 import { TraquenardGauge } from "../components/TraquenardGauge";
+import { VoteForm } from "../components/VoteForm";
 import { useComptoirName } from "../hooks/useComptoirName";
 import { AperoApiError } from "../services/aperoApiClient";
 import { isValidAperoId } from "../services/aperoCryptoKeys";
 import { AperoCryptoError } from "../services/aperoEncryption";
-import { getEncryptedAperoById, joinApero } from "../services/encryptedAperoRepository";
+import {
+  addEncryptedAperoOption,
+  deleteEncryptedApero,
+  getEncryptedAperoById,
+  joinApero,
+} from "../services/encryptedAperoRepository";
 import { findLocalApero } from "../services/localAperoRegistry";
 import { syncAperoNotificationsFromRegistry } from "../services/notificationSync";
-import type { AperitifEvent, ParticipantResponse } from "../types/apero";
-import { calculateAverageTraquenardLevel, TRAQUENARD_LEVEL_MAX } from "../utils/calculateResults";
-import { createId } from "../utils/createId";
+import { removeSnapshot } from "../services/notificationSnapshots";
+import { removeNotificationsForApero } from "../services/notificationStore";
+import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
+import {
+  calculateAverageTraquenardLevel,
+  calculateBestOptions,
+} from "../utils/calculateResults";
 import { formatOption } from "../utils/formatOption";
-import { normalizeDisplayName } from "../utils/memberName";
+import { normalizeMemberName } from "../utils/memberName";
 import { buildInviteUrl, maskInviteUrl, resolveInviteKeys } from "../utils/inviteLink";
 import { buildShareText, buildShareTitle } from "../utils/shareMessage";
 
-// Page d'invitation du nouveau flux chiffré (mode api-vps).
+// Page d'apéro du flux chiffré (mode api-vps).
 // Route : #/invite/:aperoId?k=ENCRYPTION_KEY&w=WRITE_KEY — les clés restent
 // dans le fragment d'URL et ne sont jamais envoyées à un serveur.
-// Version volontairement minimale pour cette étape de migration : lecture,
-// déchiffrement, adhésion (nom). Les votes par créneau et contre-propositions
-// seront branchés à l'étape suivante.
+//
+// C'est la page COMPLÈTE de l'apéro, pour tout le monde (organisateur comme
+// invités) : détails, verdict, votes créneau par créneau, contre-propositions
+// et registre. L'organisateur conserve en plus le droit de supprimer l'apéro.
 
 type LoadState =
   | { status: "loading" }
@@ -41,9 +54,9 @@ function describeApiError(error: unknown): string {
   if (error instanceof AperoApiError) {
     switch (error.code) {
       case "API_NOT_CONFIGURED":
-        return "Le comptoir numérique n'est pas encore raccordé (API non configurée). Ta place est notée localement, la réponse partira quand le zinc rouvrira.";
+        return "Le comptoir numérique n'est pas encore raccordé (API non configurée). Ta réponse est notée localement, elle partira quand le zinc rouvrira.";
       case "NETWORK_ERROR":
-        return "Impossible de joindre le comptoir numérique. Vérifie la connexion et réessaie — ta place reste notée sur cet appareil.";
+        return "Impossible de joindre le comptoir numérique. Vérifie la connexion et réessaie — ta réponse reste notée sur cet appareil.";
       case "CONFLICT":
         return "Quelqu'un a griffonné le registre en même temps que toi. Recharge la page et réessaie, ça passe presque toujours du deuxième coup.";
       case "WRITE_FORBIDDEN":
@@ -61,6 +74,7 @@ function describeApiError(error: unknown): string {
 export function InvitePage() {
   const { aperoId } = useParams<{ aperoId: string }>();
   const location = useLocation();
+  const navigate = useNavigate();
   const { comptoirName, setComptoirName } = useComptoirName();
 
   // Clés : d'abord le lien (fragment), sinon le registre local (apéro déjà
@@ -76,19 +90,13 @@ export function InvitePage() {
   }, [aperoId, location.search]);
 
   const [state, setState] = useState<LoadState>({ status: "loading" });
-  const [guestName, setGuestName] = useState("");
-  const [traquenardVote, setTraquenardVote] = useState(5);
-  const [isJoining, setIsJoining] = useState(false);
-  const [joinFeedback, setJoinFeedback] = useState("");
-  const [joinedLocally, setJoinedLocally] = useState(
-    () => Boolean(aperoId && findLocalApero(aperoId)),
-  );
-
-  useEffect(() => {
-    if (!guestName && comptoirName) {
-      setGuestName(comptoirName);
-    }
-  }, [comptoirName, guestName]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isAddingOption, setIsAddingOption] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showAbsentees, setShowAbsentees] = useState(false);
+  const [feedback, setFeedback] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -145,47 +153,74 @@ export function InvitePage() {
     };
   }, [aperoId, keys.encryptionKey]);
 
-  async function handleJoin(formEvent: React.FormEvent<HTMLFormElement>) {
-    formEvent.preventDefault();
-    setJoinFeedback("");
-
+  async function handleVoteSubmit(response: ParticipantResponse) {
     if (state.status !== "ready" || !aperoId || !keys.encryptionKey || !keys.writeKey) {
       return;
     }
 
-    const normalizedName = normalizeDisplayName(guestName);
+    setError("");
+    setFeedback("");
 
-    if (!normalizedName) {
-      setJoinFeedback("Un blaze, même d'emprunt, est exigé pour émarger au registre.");
+    try {
+      setIsSaving(true);
+      setComptoirName(response.participantName);
+      const updatedEvent = await joinApero(aperoId, keys.writeKey, keys.encryptionKey, response);
+      setState({ status: "ready", event: updatedEvent });
+      // Enregistre l'état vu après vote sans se notifier soi-même.
+      syncAperoNotificationsFromRegistry(updatedEvent);
+    } catch (voteError) {
+      setError(describeApiError(voteError));
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleOptionSubmit(option: AperitifOption) {
+    if (state.status !== "ready" || !aperoId || !keys.encryptionKey || !keys.writeKey) {
       return;
     }
 
-    const now = new Date().toISOString();
-    const participant: ParticipantResponse = {
-      id: createId("participant"),
-      participantName: normalizedName,
-      votes: {},
-      traquenardLevel: traquenardVote,
-      createdAt: now,
-      updatedAt: now,
-    };
+    setError("");
+    setFeedback("");
 
     try {
-      setIsJoining(true);
-      setComptoirName(normalizedName);
-      const updatedEvent = await joinApero(aperoId, keys.writeKey, keys.encryptionKey, participant);
-      setJoinedLocally(true);
+      setIsAddingOption(true);
+      const updatedEvent = await addEncryptedAperoOption(
+        aperoId,
+        keys.writeKey,
+        keys.encryptionKey,
+        option,
+      );
       setState({ status: "ready", event: updatedEvent });
-      // Enregistre l'état vu après adhésion sans se notifier soi-même.
       syncAperoNotificationsFromRegistry(updatedEvent);
-      setJoinFeedback("Bien noté au registre. La réponse créneau par créneau arrive bientôt sur cette page.");
-    } catch (joinError) {
-      // joinApero mémorise l'apéro localement avant l'écriture réseau :
-      // l'entrée « Mes apéros » existe donc déjà, on l'assume dans le message.
-      setJoinedLocally(Boolean(findLocalApero(aperoId)));
-      setJoinFeedback(describeApiError(joinError));
+      setFeedback(
+        "Contre-proposition ajoutée au registre de cette assemblée, dûment considérée par le Conseil.",
+      );
+    } catch (optionError) {
+      setError(describeApiError(optionError));
     } finally {
-      setIsJoining(false);
+      setIsAddingOption(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!aperoId || !keys.writeKey) {
+      return;
+    }
+
+    setError("");
+
+    try {
+      setIsDeleting(true);
+      await deleteEncryptedApero(aperoId, keys.writeKey);
+      // Nettoyage local : plus de notifications ni d'instantané pour un apéro
+      // qui n'existe plus.
+      removeNotificationsForApero(aperoId);
+      removeSnapshot(aperoId);
+      navigate("/agenda", { replace: true });
+    } catch (deleteError) {
+      setError(describeApiError(deleteError));
+      setIsDeleting(false);
     }
   }
 
@@ -225,13 +260,12 @@ export function InvitePage() {
   }
 
   const { event } = state;
-  const mapOption = event.options.find(
-    (option) => option.locationLat != null && option.locationLng != null,
-  );
+  const result = calculateBestOptions(event);
   const averageTraquenardLevel = calculateAverageTraquenardLevel(event);
   const traquenardVoteCount = event.participants.filter(
     (participant) => typeof participant.traquenardLevel === "number",
   ).length;
+  const canWrite = Boolean(keys.writeKey);
   const canShare = Boolean(aperoId && keys.encryptionKey);
   const inviteUrl = canShare
     ? buildInviteUrl({
@@ -241,119 +275,130 @@ export function InvitePage() {
       })
     : "";
 
+  // L'organisateur : soit le rôle « creator » du registre local, soit un blaze
+  // qui correspond au nom de l'organisateur. Il garde le droit de supprimer.
+  const localEntry = aperoId ? findLocalApero(aperoId) : null;
+  const isOrganizer =
+    localEntry?.role === "creator" ||
+    (Boolean(comptoirName) &&
+      normalizeMemberName(comptoirName) === normalizeMemberName(event.organizerName));
+
+  const metaText = `Convocation signée ${event.organizerName} · ${event.options.length} créneau${
+    event.options.length > 1 ? "x" : ""
+  } · ${event.participants.length} réponse${event.participants.length > 1 ? "s" : ""}`;
+
   return (
     <MobilePage className="event-mobile" overlay="deep">
-      <MobileHeader eyebrow="Invitation" />
+      <MobileHeader eyebrow="Assemblée" title={event.ceremonialName} meta={metaText} />
+      {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
 
-      <section className="sheet">
-        <p className="eyebrow">
-          {event.participants.length} réponse{event.participants.length > 1 ? "s" : ""} au registre
+      {error && (
+        <p className="page-message page-message--error" role="alert">
+          {error}
         </p>
-        <h1 className="h1 h1--sm">{event.ceremonialName}</h1>
-        {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
-        <p className="meta">Convocation signée {event.organizerName}</p>
+      )}
+      {feedback && (
+        <p className="page-message page-message--success" role="status">
+          {feedback}
+        </p>
+      )}
 
-        <div className="slot-stack">
-          {event.options.map((option) => (
-            <div className="slot" key={option.id}>
-              <div className="slot__top">
-                <div>
-                  <div className="slot__d">{formatOption(option)}</div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+      <div className="event-stack">
+        <MobileResultsPanel event={event} result={result} />
 
-        {mapOption && (
-          <div className="minimap-with-gauge">
-            <MiniMap
-              lat={mapOption.locationLat as number}
-              lng={mapOption.locationLng as number}
-              label={mapOption.location}
-              address={mapOption.locationAddress}
-            />
+        {traquenardVoteCount > 0 && (
+          <section className="sheet">
             <TraquenardGauge level={averageTraquenardLevel} voteCount={traquenardVoteCount} />
-          </div>
+          </section>
         )}
-      </section>
 
-      {event.participants.length > 0 && (
-        <section className="sheet">
-          <p className="lbl">Déjà au registre</p>
-          {event.participants.map((participant) => (
-            <p className="meta" key={participant.id}>
-              {participant.participantName}
+        {canWrite ? (
+          <>
+            <VoteForm event={event} isSaving={isSaving} onSubmit={handleVoteSubmit} showTraquenard />
+            <AlternativeOptionForm isSaving={isAddingOption} onSubmit={handleOptionSubmit} />
+          </>
+        ) : (
+          <section className="sheet">
+            <p className="lbl">Les créneaux proposés</p>
+            <div className="slot-stack">
+              {event.options.map((option) => (
+                <div className="slot" key={option.id}>
+                  <div className="slot__top">
+                    <div>
+                      <div className="slot__d">{formatOption(option)}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="lede">
+              Ce lien permet de consulter l'assemblée, mais pas d'y voter : il lui manque la clé
+              d'écriture. Réclame le lien complet à la personne qui t'a convoqué.
             </p>
-          ))}
-        </section>
-      )}
+          </section>
+        )}
 
-      {joinedLocally ? (
-        <section className="sheet">
-          <p className="lede">
-            Cette assemblée est consignée sur ton appareil : tu la retrouveras dans l'agenda du
-            comptoir.
-          </p>
-          {joinFeedback && (
-            <p className="feedback" role="status">
-              {joinFeedback}
-            </p>
-          )}
-        </section>
-      ) : keys.writeKey ? (
-        <form className="sheet" onSubmit={handleJoin}>
-          <p className="lbl">Émarger au registre</p>
-          <label className="field">
-            <span>Ton blaze</span>
-            <input
-              value={guestName}
-              onChange={(changeEvent) => setGuestName(changeEvent.target.value)}
-              placeholder="Jean-Mi Pastaga, Mémé Cacahuète…"
-            />
-          </label>
-
-          <label className="field">
-            <span>Traquenard-O-mètre : ton pronostic</span>
-            <input
-              type="range"
-              min={0}
-              max={TRAQUENARD_LEVEL_MAX}
-              step={1}
-              value={traquenardVote}
-              onChange={(changeEvent) => setTraquenardVote(Number(changeEvent.target.value))}
-            />
-          </label>
-          <p className="hint">
-            0 = petite soirée sage, {TRAQUENARD_LEVEL_MAX} = traquenard total. Ton pronostic
-            actuel : {traquenardVote}/{TRAQUENARD_LEVEL_MAX}.
-          </p>
-
-          <button className="button button--primary button--block" disabled={isJoining}>
-            {isJoining ? "Émargement en cours…" : "Rejoindre l'assemblée"}
-          </button>
-          {joinFeedback && (
-            <p className="feedback" role="alert">
-              {joinFeedback}
-            </p>
-          )}
-        </form>
-      ) : (
-        <section className="sheet">
-          <p className="lede">
-            Ce lien permet de consulter l'assemblée, mais pas d'y émarger : il lui manque la clé
-            d'écriture. Réclame le lien complet à la personne qui t'a convoqué.
-          </p>
-        </section>
-      )}
-
-      {canShare && (
-        <MobileShareBox
-          url={inviteUrl}
-          displayUrl={maskInviteUrl(inviteUrl)}
-          title={buildShareTitle(event)}
-          text={buildShareText(event)}
+        <EventRegistry
+          participants={event.participants}
+          showAbsentees={showAbsentees}
+          onToggleAbsentees={() => setShowAbsentees((isShown) => !isShown)}
         />
+
+        {canShare && (
+          <MobileShareBox
+            url={inviteUrl}
+            displayUrl={maskInviteUrl(inviteUrl)}
+            title={buildShareTitle(event)}
+            text={buildShareText(event)}
+          />
+        )}
+
+        {isOrganizer && canWrite && (
+          <button
+            type="button"
+            className="ghost-link ghost-link--danger"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
+            Supprimer cet évènement
+          </button>
+        )}
+      </div>
+
+      {showDeleteConfirm && (
+        <div className="modal-backdrop" role="presentation">
+          <section
+            className="sheet modal-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-title"
+          >
+            <p className="eyebrow">Radiation du registre</p>
+            <h2 className="h1 h1--sm" id="delete-title">
+              Es-tu sûr de vouloir supprimer cet évènement ?
+            </h2>
+            <p className="lede">
+              Cette action est définitive : créneaux, réponses, votes et contre-propositions, tout
+              part à la cave pour de bon. Pas de session de rattrapage, pas de commission d'appel.
+            </p>
+            <button
+              type="button"
+              className="button button--danger button--block"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Radiation…" : "Oui, supprimer définitivement"}
+            </button>
+            <button
+              type="button"
+              className="button button--ghost button--block"
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={isDeleting}
+            >
+              Non, je la garde
+            </button>
+            {error && <p className="feedback">{error}</p>}
+          </section>
+        </div>
       )}
     </MobilePage>
   );

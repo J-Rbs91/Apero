@@ -140,3 +140,36 @@ export async function createOrUpdateAperoFile(
 
   return { sha: newSha };
 }
+
+export async function deleteAperoFile(aperoId: string, sha: string): Promise<void> {
+  const response = await fetchGitHub(contentsUrl(aperoId), {
+    method: "DELETE",
+    headers: githubHeaders(),
+    body: JSON.stringify({
+      message: `chore: delete apero ${aperoId}`,
+      sha,
+      branch: config.githubBranch,
+    }),
+  });
+
+  // Fichier déjà disparu entre le get et le delete : on considère l'objectif
+  // atteint (idempotence).
+  if (response.status === 404) {
+    return;
+  }
+
+  // 409 / 422 : le sha a bougé (course d'écriture). Le client doit relire.
+  if (response.status === 409 || response.status === 422) {
+    logger.warn(`GitHub delete conflict for ${aperoId} (status ${response.status})`);
+    throw new ApiError(
+      409,
+      "CONFLICT",
+      "The apero file changed on GitHub. Fetch the latest version and retry.",
+    );
+  }
+
+  if (!response.ok) {
+    logger.warn(`GitHub delete failed for ${aperoId} (status ${response.status})`);
+    throw new ApiError(502, "GITHUB_ERROR", "GitHub API rejected the delete request.");
+  }
+}

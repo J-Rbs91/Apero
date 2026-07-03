@@ -23,7 +23,7 @@ app.use(
 app.use(
   cors({
     origin: config.allowedOrigins,
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "DELETE"],
     allowedHeaders: ["Content-Type"],
     optionsSuccessStatus: 204,
   }),
