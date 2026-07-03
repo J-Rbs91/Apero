@@ -1,5 +1,7 @@
 import type { AperitifEvent, AperitifOption, ResultState } from "../types/apero";
+import { calculateAverageTraquenardLevel } from "../utils/calculateResults";
 import { MiniMap } from "./MiniMap";
+import { TraquenardGauge } from "./TraquenardGauge";
 
 type MobileResultsPanelProps = {
   event: AperitifEvent;
@@ -44,6 +46,11 @@ export function MobileResultsPanel({ event, result }: MobileResultsPanelProps) {
     ? result.results.find((item) => item.optionId === highlightedId)
     : undefined;
 
+  const averageTraquenardLevel = calculateAverageTraquenardLevel(event);
+  const traquenardVoteCount = event.participants.filter(
+    (participant) => typeof participant.traquenardLevel === "number",
+  ).length;
+
   return (
     <div className="verdict">
       <p className="eyebrow">{describeEyebrow(result)}</p>
@@ -77,6 +84,11 @@ export function MobileResultsPanel({ event, result }: MobileResultsPanelProps) {
             address={highlightedOption.locationAddress}
           />
         )}
+      <TraquenardGauge
+        level={averageTraquenardLevel}
+        voteCount={traquenardVoteCount}
+        orientation="horizontal"
+      />
     </div>
   );
 }

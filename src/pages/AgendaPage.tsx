@@ -3,11 +3,15 @@ import { Link } from "react-router-dom";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
+import { TraquenardGauge } from "../components/TraquenardGauge";
 import { getAperoStorageMode } from "../config/aperoApiConfig";
 import { eventStorage } from "../services";
 import { getMyAperos } from "../services/encryptedAperoRepository";
 import type { AperitifEvent, AperitifOption } from "../types/apero";
-import { calculateBestOptions } from "../utils/calculateResults";
+import {
+  calculateAverageTraquenardLevel,
+  calculateBestOptions,
+} from "../utils/calculateResults";
 
 function getSlotTime(option: AperitifOption): number {
   if (!option.date || !option.time) {
@@ -171,6 +175,16 @@ export function AgendaPage() {
                   </div>
                 ))}
               </div>
+
+              <TraquenardGauge
+                level={calculateAverageTraquenardLevel(event)}
+                voteCount={
+                  event.participants.filter(
+                    (participant) => typeof participant.traquenardLevel === "number",
+                  ).length
+                }
+                orientation="horizontal"
+              />
 
               <Link
                 className="button button--ghost button--block"

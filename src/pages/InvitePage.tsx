@@ -7,7 +7,7 @@ import { MobilePage } from "../components/MobilePage";
 import { MobileResultsPanel } from "../components/MobileResultsPanel";
 import { MobileShareBox } from "../components/MobileShareBox";
 import { ParticipantList } from "../components/ParticipantList";
-import { TraquenardGauge } from "../components/TraquenardGauge";
+import { TraquenardSlider } from "../components/TraquenardGauge";
 import { VoteForm } from "../components/VoteForm";
 import { useComptoirName } from "../hooks/useComptoirName";
 import { AperoApiError } from "../services/aperoApiClient";
@@ -24,11 +24,7 @@ import { syncAperoNotificationsFromRegistry } from "../services/notificationSync
 import { removeSnapshot } from "../services/notificationSnapshots";
 import { removeNotificationsForApero } from "../services/notificationStore";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
-import {
-  calculateAverageTraquenardLevel,
-  calculateBestOptions,
-  TRAQUENARD_LEVEL_MAX,
-} from "../utils/calculateResults";
+import { calculateBestOptions } from "../utils/calculateResults";
 import { formatOption } from "../utils/formatOption";
 import { normalizeMemberName } from "../utils/memberName";
 import { buildInviteUrl, maskInviteUrl, resolveInviteKeys } from "../utils/inviteLink";
@@ -274,10 +270,6 @@ export function InvitePage() {
   const { event } = state;
   const result = calculateBestOptions(event);
   const winnerId = result.type === "winner" ? result.optionId : undefined;
-  const averageTraquenardLevel = calculateAverageTraquenardLevel(event);
-  const traquenardVoteCount = event.participants.filter(
-    (participant) => typeof participant.traquenardLevel === "number",
-  ).length;
   const canShare = Boolean(aperoId && keys.encryptionKey);
   const inviteUrl = canShare
     ? buildInviteUrl({
@@ -323,22 +315,8 @@ export function InvitePage() {
             isSaving={isSaving}
             onSubmit={handleVoteSubmit}
             leadingOptionId={winnerId}
-            extraFields={
-              <label className="field">
-                <span>Traquenard-O-mètre : ton pronostic</span>
-                <input
-                  type="range"
-                  min={0}
-                  max={TRAQUENARD_LEVEL_MAX}
-                  step={1}
-                  value={traquenardVote}
-                  onChange={(changeEvent) => setTraquenardVote(Number(changeEvent.target.value))}
-                />
-                <span className="hint">
-                  0 = petite soirée sage, {TRAQUENARD_LEVEL_MAX} = grand n’importe quoi. Pour
-                  l’instant : {traquenardVote}/{TRAQUENARD_LEVEL_MAX}.
-                </span>
-              </label>
+            sideSlot={
+              <TraquenardSlider value={traquenardVote} onChange={setTraquenardVote} />
             }
           />
           <AlternativeOptionForm isSaving={isAddingOption} onSubmit={handleOptionSubmit} />
@@ -366,10 +344,6 @@ export function InvitePage() {
       )}
 
       <ParticipantList participants={event.participants} />
-
-      <section className="sheet" style={{ display: "flex", justifyContent: "center" }}>
-        <TraquenardGauge level={averageTraquenardLevel} voteCount={traquenardVoteCount} />
-      </section>
 
       {canShare && (
         <MobileShareBox

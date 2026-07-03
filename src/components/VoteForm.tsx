@@ -23,11 +23,20 @@ type VoteFormProps = {
   onSubmit: (response: ParticipantResponse) => Promise<void>;
   /** Champs additionnels affichés avant le bouton d'envoi (ex. pronostic ludique). */
   extraFields?: React.ReactNode;
+  /** Jauge verticale (Traquenard-O-mètre) collée sur le bord de la carte. */
+  sideSlot?: React.ReactNode;
   /** Créneau actuellement en tête, mis en évidence dans la liste des cartes. */
   leadingOptionId?: string;
 };
 
-export function VoteForm({ event, isSaving, onSubmit, extraFields, leadingOptionId }: VoteFormProps) {
+export function VoteForm({
+  event,
+  isSaving,
+  onSubmit,
+  extraFields,
+  sideSlot,
+  leadingOptionId,
+}: VoteFormProps) {
   const { comptoirName } = useComptoirName();
   const emptyVotes = useMemo(
     () =>
@@ -133,7 +142,9 @@ export function VoteForm({ event, isSaving, onSubmit, extraFields, leadingOption
   }
 
   return (
-    <section className="sheet">
+    <section className={`sheet${sideSlot ? " sheet--with-gauge" : ""}`}>
+      {sideSlot && <div className="sheet__gauge">{sideSlot}</div>}
+      <div className="sheet__body">
       <p className="eyebrow">{existingParticipant ? "Modifier ma réponse" : "Répondre à l’invitation"}</p>
 
       <form className="vote-form" onSubmit={handleSubmit}>
@@ -194,6 +205,7 @@ export function VoteForm({ event, isSaving, onSubmit, extraFields, leadingOption
           </p>
         )}
       </form>
+      </div>
     </section>
   );
 }
