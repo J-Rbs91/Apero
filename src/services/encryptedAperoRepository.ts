@@ -117,6 +117,16 @@ function cacheLocalAperoEvent(aperoId: string, event: AperitifEvent): void {
   });
 }
 
+function isAdminKeyHashUnsupported(error: unknown): error is AperoApiError {
+  return Boolean(
+    error instanceof AperoApiError &&
+      error.code === "INVALID_REQUEST" &&
+      error.serverCode === "INVALID_PAYLOAD" &&
+      /adminKeyHash/i.test(error.message) &&
+      /unrecognized key/i.test(error.message),
+  );
+}
+
 export type CreateEncryptedAperoInput = Omit<AperitifEvent, "id">;
 
 export type CreateEncryptedAperoResult = {
@@ -146,19 +156,38 @@ export async function createEncryptedApero(
   const writeKeyHash = await sha256Hex(writeKey);
   const adminKeyHash = await sha256Hex(adminKey);
 
-  const result = await createOrUpdateEncryptedApero({
-    aperoId,
-    writeKey,
-    encryptedPayload,
-    writeKeyHash,
-    adminKeyHash,
-  });
+  let result: Awaited<ReturnType<typeof createOrUpdateEncryptedApero>>;
+  let adminKeyForLocalStorage: string | undefined = adminKey;
+
+  try {
+    result = await createOrUpdateEncryptedApero({
+      aperoId,
+      writeKey,
+      encryptedPayload,
+      writeKeyHash,
+      adminKeyHash,
+    });
+  } catch (error) {
+    if (!isAdminKeyHashUnsupported(error)) {
+      throw error;
+    }
+
+    // Compatibilite temporaire avec l'API VPS deja deployee, qui ne connait
+    // pas encore adminKeyHash. Ces aperos restent en mode suppression legacy.
+    result = await createOrUpdateEncryptedApero({
+      aperoId,
+      writeKey,
+      encryptedPayload,
+      writeKeyHash,
+    });
+    adminKeyForLocalStorage = undefined;
+  }
 
   saveLocalApero({
     aperoId,
     encryptionKey,
     writeKey,
-    adminKey,
+    adminKey: adminKeyForLocalStorage,
     lastKnownEvent: event,
     displayName: event.organizerName,
     role: "creator",

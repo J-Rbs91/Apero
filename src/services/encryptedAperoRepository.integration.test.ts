@@ -193,6 +193,45 @@ describe("encryptedAperoRepository (round-trip fetch stubbé)", () => {
     expect(local?.lastKnownEvent?.ceremonialName).toBe(input.ceremonialName);
   });
 
+  it("createEncryptedApero retente sans adminKeyHash avec l'ancienne API", async () => {
+    const sentBodies: Array<Record<string, unknown>> = [];
+
+    vi.stubGlobal("window", { localStorage: createStorageStub() });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        sentBodies.push(JSON.parse(init?.body as string));
+
+        if (sentBodies.length === 1) {
+          return new Response(
+            JSON.stringify({
+              ok: false,
+              error: "INVALID_PAYLOAD",
+              message: "Invalid payload. Unrecognized key(s) in object: 'adminKeyHash'",
+            }),
+            { status: 400 },
+          );
+        }
+
+        return new Response(
+          JSON.stringify({ ok: true, created: true, updated: false, aperoId: "apero_legacy1", sha: "e".repeat(40) }),
+          { status: 201 },
+        );
+      }),
+    );
+
+    const { id: _ignoredId, ...input } = baseEvent("apero_source2");
+    const created = await createEncryptedApero(input);
+    const local = findLocalApero(created.aperoId);
+
+    expect(sentBodies).toHaveLength(2);
+    expect(sentBodies[0].adminKeyHash).toBeTruthy();
+    expect(sentBodies[1].adminKeyHash).toBeUndefined();
+    expect(local?.role).toBe("creator");
+    expect(local?.adminKey).toBeUndefined();
+    expect(local?.lastKnownEvent?.id).toBe(created.aperoId);
+  });
+
   it("getMyAperos affiche l'instantane local si GitHub n'a pas encore le fichier", async () => {
     const aperoId = generateAperoId();
     const cachedEvent = baseEvent(aperoId);
