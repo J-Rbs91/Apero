@@ -87,6 +87,36 @@ export async function readPublicAperoFile(
   }
 }
 
+function getCachedEvent(entry: LocalAperoEntry): AperitifEvent | null {
+  if (!entry.lastKnownEvent) {
+    return null;
+  }
+
+  try {
+    return normalizeEvent(entry.lastKnownEvent, entry.aperoId);
+  } catch {
+    return null;
+  }
+}
+
+function cacheLocalAperoEvent(aperoId: string, event: AperitifEvent): void {
+  const entry = findLocalApero(aperoId);
+
+  if (!entry) {
+    return;
+  }
+
+  saveLocalApero({
+    aperoId,
+    encryptionKey: entry.encryptionKey,
+    writeKey: entry.writeKey,
+    adminKey: entry.adminKey,
+    lastKnownEvent: event,
+    displayName: entry.displayName,
+    role: entry.role,
+  });
+}
+
 export type CreateEncryptedAperoInput = Omit<AperitifEvent, "id">;
 
 export type CreateEncryptedAperoResult = {
@@ -129,6 +159,7 @@ export async function createEncryptedApero(
     encryptionKey,
     writeKey,
     adminKey,
+    lastKnownEvent: event,
     displayName: event.organizerName,
     role: "creator",
   });
@@ -197,6 +228,7 @@ export async function updateEncryptedApero(
         encryptedPayload,
         baseSha: current.sha,
       });
+      cacheLocalAperoEvent(aperoId, updatedEvent);
       return updatedEvent;
     } catch (error) {
       const isRetryableConflict =
@@ -277,11 +309,19 @@ export async function getMyAperos(): Promise<MyAperoItem[]> {
 
   return Promise.all(
     entries.map(async (entry) => {
+      const cachedEvent = getCachedEvent(entry);
+
       try {
         const loaded = await getEncryptedAperoById(entry.aperoId, entry.encryptionKey);
-        return { entry, event: loaded?.event ?? null };
+
+        if (loaded?.event) {
+          cacheLocalAperoEvent(entry.aperoId, loaded.event);
+          return { entry: findLocalApero(entry.aperoId) ?? entry, event: loaded.event };
+        }
+
+        return { entry, event: cachedEvent };
       } catch {
-        return { entry, event: null };
+        return { entry, event: cachedEvent };
       }
     }),
   );

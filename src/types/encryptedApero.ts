@@ -1,6 +1,8 @@
 // Types du nouveau flux chiffré (migration API VPS).
 // Miroir exact du contrat de la mini API serveur (server/src/validators.ts).
 
+import type { AperitifEvent } from "./apero";
+
 export type AperoEncryptionBlock = {
   algorithm: "AES-GCM";
   iv: string;
@@ -34,6 +36,7 @@ export type LocalAperoEntry = {
   encryptionKey: string;
   writeKey: string;
   adminKey?: string;
+  lastKnownEvent?: AperitifEvent;
   displayName?: string;
   role?: LocalAperoRole;
   joinedAt: string;

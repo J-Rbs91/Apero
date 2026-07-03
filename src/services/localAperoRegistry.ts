@@ -13,6 +13,7 @@ export type SaveLocalAperoInput = {
   encryptionKey: string;
   writeKey: string;
   adminKey?: string;
+  lastKnownEvent?: LocalAperoEntry["lastKnownEvent"];
   displayName?: string;
   role?: LocalAperoEntry["role"];
 };
@@ -37,6 +38,8 @@ function isValidEntry(value: unknown): value is LocalAperoEntry {
       typeof entry.writeKey === "string" &&
       entry.writeKey.length > 0 &&
       (entry.adminKey === undefined || typeof entry.adminKey === "string") &&
+      (entry.lastKnownEvent === undefined ||
+        (typeof entry.lastKnownEvent === "object" && entry.lastKnownEvent !== null)) &&
       typeof entry.joinedAt === "string" &&
       typeof entry.updatedAt === "string",
   );
@@ -119,6 +122,7 @@ export function saveLocalApero(input: SaveLocalAperoInput): LocalAperoEntry {
     encryptionKey: input.encryptionKey,
     writeKey: input.writeKey,
     adminKey: input.adminKey ?? existing?.adminKey,
+    lastKnownEvent: input.lastKnownEvent ?? existing?.lastKnownEvent,
     displayName: input.displayName ?? existing?.displayName,
     role: existing?.role === "creator" ? "creator" : (input.role ?? existing?.role),
     joinedAt: existing?.joinedAt ?? now,

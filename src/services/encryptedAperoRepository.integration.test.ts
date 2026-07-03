@@ -3,7 +3,13 @@ import type { AperitifEvent, AperitifOption } from "../types/apero";
 import type { StoredEncryptedAperoFile } from "../types/encryptedApero";
 import { generateAperoId, generateBase64UrlRandomKey } from "./aperoCryptoKeys";
 import { decryptAperoData, encryptAperoData, ENCRYPTION_KEY_BYTE_LENGTH } from "./aperoEncryption";
-import { addEncryptedAperoOption, deleteEncryptedApero } from "./encryptedAperoRepository";
+import {
+  addEncryptedAperoOption,
+  createEncryptedApero,
+  deleteEncryptedApero,
+  getMyAperos,
+} from "./encryptedAperoRepository";
+import { findLocalApero, saveLocalApero } from "./localAperoRegistry";
 
 const API_BASE = "https://api.example.test";
 const FAKE_SHA = "a".repeat(40);
@@ -51,6 +57,25 @@ function base64(json: unknown): string {
     binary += String.fromCharCode(byte);
   }
   return btoa(binary);
+}
+
+function createStorageStub(): Storage {
+  const store = new Map<string, string>();
+
+  return {
+    get length() {
+      return store.size;
+    },
+    clear: () => store.clear(),
+    getItem: (key: string) => store.get(key) ?? null,
+    key: (index: number) => Array.from(store.keys())[index] ?? null,
+    removeItem: (key: string) => {
+      store.delete(key);
+    },
+    setItem: (key: string, value: string) => {
+      store.set(key, value);
+    },
+  };
 }
 
 describe("encryptedAperoRepository (round-trip fetch stubbé)", () => {
@@ -143,5 +168,53 @@ describe("encryptedAperoRepository (round-trip fetch stubbé)", () => {
     expect(deleteCall!.url).toBe(`${API_BASE}/api/aperos/${aperoId}/delete`);
     expect((deleteCall!.body as { adminKey: string; baseSha: string }).adminKey).toBe(adminKey);
     expect((deleteCall!.body as { adminKey: string; baseSha: string }).baseSha).toBe(FAKE_SHA);
+  });
+
+  it("createEncryptedApero memorise l'evenement cree dans le registre local", async () => {
+    vi.stubGlobal("window", { localStorage: createStorageStub() });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        const aperoId = url.slice(url.lastIndexOf("/") + 1);
+        return new Response(
+          JSON.stringify({ ok: true, created: true, updated: false, aperoId, sha: "d".repeat(40) }),
+          { status: 200 },
+        );
+      }),
+    );
+
+    const { id: _ignoredId, ...input } = baseEvent("apero_source1");
+    const created = await createEncryptedApero(input);
+    const local = findLocalApero(created.aperoId);
+
+    expect(local?.role).toBe("creator");
+    expect(local?.lastKnownEvent?.id).toBe(created.aperoId);
+    expect(local?.lastKnownEvent?.ceremonialName).toBe(input.ceremonialName);
+  });
+
+  it("getMyAperos affiche l'instantane local si GitHub n'a pas encore le fichier", async () => {
+    const aperoId = generateAperoId();
+    const cachedEvent = baseEvent(aperoId);
+    const fetchMock = vi.fn(async () => new Response("{}", { status: 404 }));
+
+    vi.stubGlobal("window", { localStorage: createStorageStub() });
+    vi.stubGlobal("fetch", fetchMock);
+
+    saveLocalApero({
+      aperoId,
+      encryptionKey: "cle-chiffrement",
+      writeKey: "cle-ecriture",
+      adminKey: "cle-admin",
+      lastKnownEvent: cachedEvent,
+      role: "creator",
+    });
+
+    const mine = await getMyAperos();
+
+    expect(mine).toHaveLength(1);
+    expect(mine[0].event?.id).toBe(aperoId);
+    expect(mine[0].event?.ceremonialName).toBe(cachedEvent.ceremonialName);
+    expect(fetchMock).toHaveBeenCalledOnce();
   });
 });
