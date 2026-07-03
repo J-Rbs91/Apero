@@ -1,4 +1,6 @@
+import type { Request, Response } from "express";
 import { Router } from "express";
+import { config } from "../config.js";
 import { safeEqualHex, sha256Hex } from "../crypto.js";
 import { ApiError } from "../errors.js";
 import { createOrUpdateAperoFile, deleteAperoFile, getAperoFile } from "../githubClient.js";
@@ -23,7 +25,7 @@ aperosRouter.post("/aperos/:aperoId", async (req, res, next) => {
     const now = new Date().toISOString();
 
     if (!existing) {
-      // Cas 1 — création initiale.
+      // Initial creation.
       if (body.baseSha) {
         throw new ApiError(
           409,
@@ -38,6 +40,13 @@ aperosRouter.post("/aperos/:aperoId", async (req, res, next) => {
           "writeKeyHash is required to create a new apero.",
         );
       }
+      if (!body.adminKeyHash) {
+        throw new ApiError(
+          400,
+          "MISSING_ADMIN_KEY_HASH",
+          "adminKeyHash is required to create a new apero.",
+        );
+      }
       if (!safeEqualHex(receivedKeyHash, body.writeKeyHash)) {
         throw new ApiError(
           400,
@@ -45,11 +54,19 @@ aperosRouter.post("/aperos/:aperoId", async (req, res, next) => {
           "writeKeyHash does not match the provided writeKey.",
         );
       }
+      if (safeEqualHex(receivedKeyHash, body.adminKeyHash)) {
+        throw new ApiError(
+          400,
+          "ADMIN_KEY_REUSES_WRITE_KEY",
+          "adminKeyHash must not reuse the shared write key.",
+        );
+      }
 
       const file: StoredAperoFile = {
         id: aperoId,
         version: body.encryptedPayload.version,
         writeKeyHash: receivedKeyHash,
+        adminKeyHash: body.adminKeyHash.toLowerCase(),
         encryption: body.encryptedPayload.encryption,
         createdAt: now,
         updatedAt: now,
@@ -61,11 +78,11 @@ aperosRouter.post("/aperos/:aperoId", async (req, res, next) => {
       return;
     }
 
-    // Cas 2 — mise à jour d'un fichier existant.
+    // Update of an existing file.
     const stored = storedAperoFileSchema.safeParse(existing.json);
 
     if (!stored.success) {
-      // Default deny : un fichier sans writeKeyHash vérifiable reste verrouillé.
+      // Default deny: a file without a verifiable writeKeyHash stays locked.
       throw new ApiError(403, "WRITE_NOT_ALLOWED", "Existing apero file cannot be verified.");
     }
 
@@ -85,6 +102,7 @@ aperosRouter.post("/aperos/:aperoId", async (req, res, next) => {
       id: aperoId,
       version: body.encryptedPayload.version,
       writeKeyHash: stored.data.writeKeyHash.toLowerCase(),
+      adminKeyHash: stored.data.adminKeyHash?.toLowerCase(),
       encryption: body.encryptedPayload.encryption,
       createdAt: stored.data.createdAt || now,
       updatedAt: now,
@@ -98,34 +116,74 @@ aperosRouter.post("/aperos/:aperoId", async (req, res, next) => {
   }
 });
 
-aperosRouter.delete("/aperos/:aperoId", async (req, res, next) => {
-  try {
-    const aperoId = validateAperoId(req.params.aperoId);
-    const body = parseDeleteAperoBody(req.body);
-    const receivedKeyHash = sha256Hex(body.writeKey);
+async function handleDeleteApero(req: Request, res: Response): Promise<void> {
+  const aperoId = validateAperoId(req.params.aperoId);
+  const body = parseDeleteAperoBody(req.body);
 
-    const existing = await getAperoFile(aperoId);
+  const existing = await getAperoFile(aperoId);
 
-    if (!existing) {
-      // Rien à supprimer : objectif déjà atteint (idempotence).
-      res.json({ ok: true, deleted: false, aperoId });
-      return;
+  if (!existing) {
+    // Already gone: the target state is reached.
+    res.json({ ok: true, deleted: false, aperoId });
+    return;
+  }
+
+  const stored = storedAperoFileSchema.safeParse(existing.json);
+
+  if (!stored.success) {
+    throw new ApiError(403, "WRITE_NOT_ALLOWED", "Existing apero file cannot be verified.");
+  }
+
+  if (stored.data.adminKeyHash) {
+    if (!body.adminKey) {
+      throw new ApiError(403, "ADMIN_KEY_REQUIRED", "Admin key is required to delete this apero.");
     }
 
-    const stored = storedAperoFileSchema.safeParse(existing.json);
-
-    if (!stored.success) {
-      // Default deny : un fichier sans writeKeyHash vérifiable reste verrouillé.
-      throw new ApiError(403, "WRITE_NOT_ALLOWED", "Existing apero file cannot be verified.");
+    const receivedAdminKeyHash = sha256Hex(body.adminKey);
+    if (!safeEqualHex(receivedAdminKeyHash, stored.data.adminKeyHash)) {
+      throw new ApiError(403, "INVALID_ADMIN_KEY", "Invalid admin key.");
+    }
+  } else {
+    if (!body.legacyWriteKey || !config.allowLegacyWriteKeyDelete) {
+      throw new ApiError(
+        403,
+        "LEGACY_DELETE_DISABLED",
+        "This legacy apero has no admin key. Legacy write-key deletion is disabled on the server.",
+      );
     }
 
-    if (!safeEqualHex(receivedKeyHash, stored.data.writeKeyHash)) {
+    const receivedLegacyHash = sha256Hex(body.legacyWriteKey);
+    if (!safeEqualHex(receivedLegacyHash, stored.data.writeKeyHash)) {
       throw new ApiError(403, "INVALID_WRITE_KEY", "Invalid write key.");
     }
+  }
 
-    await deleteAperoFile(aperoId, existing.sha);
-    logger.info(`Apero deleted: ${aperoId}`);
-    res.json({ ok: true, deleted: true, aperoId });
+  if (body.baseSha && body.baseSha.toLowerCase() !== existing.sha.toLowerCase()) {
+    throw new ApiError(
+      409,
+      "SHA_CONFLICT",
+      "The apero file changed since baseSha. Fetch the latest version and retry.",
+    );
+  }
+
+  await deleteAperoFile(aperoId, existing.sha);
+  logger.info(`Apero deleted: ${aperoId}`);
+  res.json({ ok: true, deleted: true, aperoId });
+}
+
+// POST avoids browser/Caddy deployments that forgot to allow DELETE in CORS.
+aperosRouter.post("/aperos/:aperoId/delete", async (req, res, next) => {
+  try {
+    await handleDeleteApero(req, res);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Keep the REST endpoint for API clients and older tooling.
+aperosRouter.delete("/aperos/:aperoId", async (req, res, next) => {
+  try {
+    await handleDeleteApero(req, res);
   } catch (error) {
     next(error);
   }

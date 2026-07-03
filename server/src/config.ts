@@ -28,6 +28,7 @@ const envSchema = z.object({
   MAX_CIPHERTEXT_LENGTH: z.coerce.number().int().min(1_024).max(200_000).default(80_000),
   GITHUB_REQUEST_TIMEOUT_MS: z.coerce.number().int().min(500).max(30_000).default(8_000),
   SERVER_REQUEST_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(120_000).default(15_000),
+  ALLOW_LEGACY_WRITE_KEY_DELETE: z.enum(["true", "false"]).default("false"),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -59,6 +60,7 @@ export const config = {
   maxCiphertextLength: parsed.data.MAX_CIPHERTEXT_LENGTH,
   githubRequestTimeoutMs: parsed.data.GITHUB_REQUEST_TIMEOUT_MS,
   serverRequestTimeoutMs: parsed.data.SERVER_REQUEST_TIMEOUT_MS,
+  allowLegacyWriteKeyDelete: parsed.data.ALLOW_LEGACY_WRITE_KEY_DELETE === "true",
   // Chemin d'écriture volontairement verrouillé dans le code, pas en variable
   // d'environnement : l'API ne doit jamais pouvoir écrire ailleurs.
   aperosDataPath: "data/aperos",

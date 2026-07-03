@@ -69,7 +69,7 @@ Copier `.env.example` en `.env.local`, puis renseigner les variables publiques d
 ```bash
 VITE_APP_BASE_URL=https://j-rbs91.github.io/Apero
 VITE_APERO_STORAGE_MODE=api-vps
-VITE_APERO_API_BASE_URL=https://ton-api-apero.example.com
+VITE_APERO_API_BASE_URL=https://panum.fr/_svc/a
 VITE_GITHUB_OWNER=J-Rbs91
 VITE_GITHUB_REPO=Apero
 VITE_GITHUB_BRANCH=main

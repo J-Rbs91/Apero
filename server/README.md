@@ -32,7 +32,8 @@ les payloads et ne stocke jamais `writeKey` ni `encryptionKey`.
 | ------- | ------------------------ | ------------------------------------------------- |
 | GET     | `/health`                | Vérification de vie du service                    |
 | POST    | `/api/aperos/:aperoId`   | Création ou mise à jour d'un fichier apéro chiffré |
-| DELETE  | `/api/aperos/:aperoId`   | Suppression définitive d'un apéro (corps `{ writeKey }`), authentifiée par le hash de la write key |
+| POST    | `/api/aperos/:aperoId/delete` | Suppression définitive via la clé admin locale du créateur |
+| DELETE  | `/api/aperos/:aperoId`   | Variante REST conservée pour clients serveur/outillage |
 
 ## Variables d'environnement
 
@@ -49,6 +50,7 @@ Voir aussi le `.env.example` à la racine du repo (section SERVER).
 | `PORT`            | Port d'écoute local (3103 réservé Apéro sur le VPS) | `3103`                    |
 | `JSON_BODY_LIMIT` | Taille max des payloads JSON                    | `100kb`                       |
 | `LOG_LEVEL`       | `error` \| `warn` \| `info` \| `debug`          | `info`                        |
+| `ALLOW_LEGACY_WRITE_KEY_DELETE` | Migration seulement : autorise temporairement la suppression des anciens fichiers sans `adminKeyHash` avec la write key partagÃ©e | `false` |
 
 Pour tester le frontend local (Vite) contre l'API locale, ajouter l'origine du
 dev server : `ALLOWED_ORIGIN=https://j-rbs91.github.io,http://localhost:5173`.
@@ -207,3 +209,23 @@ VITE_APERO_API_BASE_URL=https://panum.fr/_svc/a
 `joinApiUrl` (`src/services/aperoApiClient.ts`) construit alors
 `https://panum.fr/_svc/a/api/aperos/{id}` ; Caddy le retransforme en
 `/api/aperos/{id}` avant de l'envoyer à Express.
+
+## Suppression et anciens apéros
+
+Les nouveaux fichiers créés par l'API contiennent `adminKeyHash`. La clé admin
+elle-même reste uniquement dans `localStorage` sur l'appareil du créateur et ne
+part jamais dans le lien d'invitation. Le frontend utilise `POST
+/api/aperos/:aperoId/delete` plutôt que `DELETE` afin d'éviter les prérequêtes
+CORS cassées par des déploiements/proxy n'autorisant que `GET,POST`.
+
+Les apéros créés avant cette clé admin n'ont pas de preuve serveur permettant de
+distinguer un vrai créateur d'un invité qui possède la write key partagée. Par
+défaut, leur suppression est donc refusée (`LEGACY_DELETE_DISABLED`). Pour une
+migration ponctuelle, le VPS peut définir temporairement :
+
+```env
+ALLOW_LEGACY_WRITE_KEY_DELETE=true
+```
+
+Redémarrer l'API, supprimer les anciens apéros nécessaires, puis remettre la
+variable à `false` et redémarrer.

@@ -4,8 +4,8 @@ import { ApiError } from "./errors.js";
 
 export const APERO_ID_PATTERN = /^apero_[A-Za-z0-9_-]{5,64}$/;
 
-// Défense en profondeur : le pattern strict exclut déjà tout cela, mais on
-// refuse explicitement les séquences de path traversal avant toute autre logique.
+// Defense in depth: the strict pattern already excludes these, but path-like
+// sequences are rejected before any GitHub path is built.
 const FORBIDDEN_ID_SEQUENCES = ["..", "/", "\\", ".", "%"];
 
 export function validateAperoId(rawId: unknown): string {
@@ -23,33 +23,38 @@ export function validateAperoId(rawId: unknown): string {
 
 const base64UrlSchema = z
   .string()
-  .regex(/^[A-Za-z0-9_-]+$/, "doit être encodé en base64url");
+  .regex(/^[A-Za-z0-9_-]+$/, "doit etre encode en base64url");
+
+const sha256HexSchema = z
+  .string()
+  .regex(/^[0-9a-f]{64}$/i, "doit etre une empreinte SHA-256 hexadecimale");
+
+const gitShaSchema = z
+  .string()
+  .regex(/^[0-9a-f]{40}$/i, "doit etre un sha git de 40 caracteres hexadecimaux");
+
+const secretKeySchema = z.string().min(16).max(256);
 
 const encryptionSchema = z
   .object({
     algorithm: z.literal("AES-GCM"),
-    iv: base64UrlSchema.min(16).max(32),
+    iv: base64UrlSchema.length(16, "doit etre un IV AES-GCM 96 bits encode en base64url"),
     ciphertext: base64UrlSchema.min(1).max(config.maxCiphertextLength),
   })
   .strict();
 
 export const writeAperoBodySchema = z
   .object({
-    writeKey: z.string().min(16).max(256),
+    writeKey: secretKeySchema,
     encryptedPayload: z
       .object({
         version: z.literal(1),
         encryption: encryptionSchema,
       })
       .strict(),
-    baseSha: z
-      .string()
-      .regex(/^[0-9a-f]{40}$/i, "doit être un sha git de 40 caractères hexadécimaux")
-      .optional(),
-    writeKeyHash: z
-      .string()
-      .regex(/^[0-9a-f]{64}$/i, "doit être une empreinte SHA-256 hexadécimale")
-      .optional(),
+    baseSha: gitShaSchema.optional(),
+    writeKeyHash: sha256HexSchema.optional(),
+    adminKeyHash: sha256HexSchema.optional(),
   })
   .strict();
 
@@ -69,13 +74,19 @@ export function parseWriteAperoBody(body: unknown): WriteAperoBody {
   return result.data;
 }
 
-// Suppression : seule la write key est requise (même modèle d'auth que
-// l'écriture). Le serveur ne déchiffre toujours rien.
+// Deletion uses a creator/admin key. Legacy files created before adminKeyHash
+// can still be deleted with the old shared write key only when the server env
+// ALLOW_LEGACY_WRITE_KEY_DELETE=true is set intentionally.
 export const deleteAperoBodySchema = z
   .object({
-    writeKey: z.string().min(16).max(256),
+    adminKey: secretKeySchema.optional(),
+    legacyWriteKey: secretKeySchema.optional(),
+    baseSha: gitShaSchema.optional(),
   })
-  .strict();
+  .strict()
+  .refine((body) => Boolean(body.adminKey) !== Boolean(body.legacyWriteKey), {
+    message: "adminKey ou legacyWriteKey requis, mais pas les deux",
+  });
 
 export type DeleteAperoBody = z.infer<typeof deleteAperoBodySchema>;
 
@@ -93,11 +104,13 @@ export function parseDeleteAperoBody(body: unknown): DeleteAperoBody {
   return result.data;
 }
 
-// Champs minimaux qu'un fichier apéro déjà stocké doit exposer pour autoriser
-// une mise à jour. Tout fichier illisible reste verrouillé (default deny).
+// Minimal fields an already stored apero file must expose before any mutation.
+// Unknown fields are tolerated to keep older JSON readable, but only known
+// server-controlled fields are preserved when the file is rewritten.
 export const storedAperoFileSchema = z
   .object({
-    writeKeyHash: z.string().regex(/^[0-9a-f]{64}$/i),
+    writeKeyHash: sha256HexSchema,
+    adminKeyHash: sha256HexSchema.optional(),
     createdAt: z.string().optional(),
   })
   .passthrough();

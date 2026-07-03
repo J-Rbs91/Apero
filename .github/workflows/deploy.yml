@@ -27,9 +27,8 @@ jobs:
       VITE_APP_BASE_URL: https://j-rbs91.github.io/Apero
       # URL publique de la mini API VPS, injectee au build via une variable de
       # depot GitHub (Settings > Secrets and variables > Actions > Variables).
-      # Repli sur un secret du meme nom au cas ou la valeur aurait ete rangee
-      # dans l'onglet Secrets plutot que Variables (confusion frequente).
-      VITE_APERO_API_BASE_URL: ${{ vars.VITE_APERO_API_BASE_URL || secrets.VITE_APERO_API_BASE_URL }}
+      # Cette valeur est publique dans le bundle : ne pas utiliser un secret.
+      VITE_APERO_API_BASE_URL: ${{ vars.VITE_APERO_API_BASE_URL }}
 
     steps:
       - name: Checkout
@@ -38,10 +37,10 @@ jobs:
       - name: Verifier la configuration de l'API apero
         run: |
           if [ -z "$VITE_APERO_API_BASE_URL" ]; then
-            echo "::error title=VITE_APERO_API_BASE_URL absente::Ni la variable de depot ni le secret VITE_APERO_API_BASE_URL ne sont definis. Le site serait deploye avec le message 'comptoir numerique non raccorde' et ne pourrait pas sceller de convocation. Definir la variable dans Settings > Secrets and variables > Actions > onglet Variables (voir docs/RACCORDEMENT-VPS.md), puis relancer ce workflow."
+            echo "::error title=VITE_APERO_API_BASE_URL absente::La variable de depot VITE_APERO_API_BASE_URL n'est pas definie. Le site serait deploye avec le message 'comptoir numerique non raccorde' et ne pourrait pas sceller de convocation. Definir la variable dans Settings > Secrets and variables > Actions > onglet Variables (voir docs/RACCORDEMENT-VPS.md), puis relancer ce workflow."
             exit 1
           fi
-          echo "API apero raccordee : le build embarque une URL d'API."
+          echo "API apero raccordee : le build embarque une URL d'API publique."
 
       - name: Setup Node
         uses: actions/setup-node@v6

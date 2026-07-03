@@ -19,6 +19,7 @@ export type StoredEncryptedAperoFile = {
   id: string;
   version: number;
   writeKeyHash: string;
+  adminKeyHash?: string;
   encryption: AperoEncryptionBlock;
   createdAt: string;
   updatedAt: string;
@@ -32,6 +33,7 @@ export type LocalAperoEntry = {
   aperoId: string;
   encryptionKey: string;
   writeKey: string;
+  adminKey?: string;
   displayName?: string;
   role?: LocalAperoRole;
   joinedAt: string;

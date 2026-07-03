@@ -16,7 +16,7 @@ Le frontend est compilé au moment du déploiement GitHub Pages. L'URL de l'API
 (`VITE_APERO_API_BASE_URL`) est **figée dans le bundle au build** : elle est
 lue depuis une *variable de dépôt GitHub* par le workflow
 `.github/workflows/deploy.yml`. Si cette variable n'existe pas (ou a été créée
-dans l'onglet **Secrets** au lieu de l'onglet **Variables**, ou dans un autre
+absente de l'onglet **Variables**, vide, ou crÃ©Ã©e dans un autre
 dépôt), le site est déployé sans URL d'API et affiche le message ci-dessus.
 
 C'est exactement ce qui s'est produit : les logs du workflow montraient
@@ -102,7 +102,7 @@ Créer `/etc/apero-api.env`, lisible uniquement par root :
 
 ```bash
 sudo tee /etc/apero-api.env > /dev/null <<'EOF'
-GITHUB_TOKEN=github_pat_REMPLACER_PAR_LE_VRAI_TOKEN
+GITHUB_TOKEN=<GITHUB_FINE_GRAINED_TOKEN_SERVEUR>
 GITHUB_OWNER=J-Rbs91
 GITHUB_REPO=Apero
 GITHUB_BRANCH=main
@@ -224,12 +224,12 @@ C'est l'étape qui manquait et qui a causé le message d'erreur.
 1. Aller sur `https://github.com/J-Rbs91/Apero`.
 2. `Settings` (du **dépôt**) → `Secrets and variables` → `Actions`.
 3. **Bien choisir l'onglet `Variables`** (pas `Secrets` — c'est la confusion
-   classique ; le workflow tolère désormais un secret du même nom, mais la
-   variable reste l'endroit recommandé puisque cette URL n'a rien de secret).
+   classique : cette URL est publique dans le bundle, elle ne doit pas être
+   rangée dans `Secrets`).
 4. `New repository variable` :
    - **Name** : `VITE_APERO_API_BASE_URL`
    - **Value** : l'URL publique exposée par Caddy, **sans slash final**,
-     par exemple : `https://api-apero.mondomaine.fr`
+     par exemple : `https://panum.fr/_svc/a`
 5. Enregistrer.
 
 Points de vigilance :
@@ -293,3 +293,26 @@ npm ci
 npm run build
 sudo systemctl restart apero-api
 ```
+
+### Note Caddy sous-chemin `/_svc/a`
+
+Si l'API est exposée derrière `https://panum.fr/_svc/a`, utiliser `handle_path`
+pour retirer ce préfixe avant Express :
+
+```caddyfile
+handle_path /_svc/a/* {
+    reverse_proxy 127.0.0.1:3103 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+    }
+}
+```
+
+Dans ce cas, la variable publique frontend doit être exactement :
+
+```env
+VITE_APERO_API_BASE_URL=https://panum.fr/_svc/a
+```
+
+Le frontend appelle alors `https://panum.fr/_svc/a/api/aperos/...`, et Express
+reçoit `/api/aperos/...`.

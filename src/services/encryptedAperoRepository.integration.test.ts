@@ -116,24 +116,32 @@ describe("encryptedAperoRepository (round-trip fetch stubbé)", () => {
     expect(decrypted.options.some((option) => option.id === "option_2")).toBe(true);
   });
 
-  it("deleteEncryptedApero émet un DELETE authentifié par la write key", async () => {
+  it("deleteEncryptedApero passe par POST /delete avec la cle admin et baseSha", async () => {
     const aperoId = generateAperoId();
-    const writeKey = generateBase64UrlRandomKey(24);
+    const encryptionKey = generateBase64UrlRandomKey(ENCRYPTION_KEY_BYTE_LENGTH);
+    const adminKey = generateBase64UrlRandomKey(24);
+    const stored = await storedFileFor(baseEvent(aperoId), encryptionKey);
 
     const calls: Array<{ url: string; method: string; body: unknown }> = [];
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       const method = init?.method ?? "GET";
       calls.push({ url, method, body: init?.body ? JSON.parse(init.body as string) : undefined });
+
+      if (url.includes("api.github.com")) {
+        return new Response(JSON.stringify({ content: base64(stored), sha: FAKE_SHA }), { status: 200 });
+      }
+
       return new Response(JSON.stringify({ ok: true, deleted: true, aperoId }), { status: 200 });
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    await deleteEncryptedApero(aperoId, writeKey);
+    await deleteEncryptedApero(aperoId, { adminKey });
 
-    const deleteCall = calls.find((call) => call.method === "DELETE");
+    const deleteCall = calls.find((call) => call.method === "POST" && call.url.startsWith(API_BASE));
     expect(deleteCall).toBeTruthy();
-    expect(deleteCall!.url).toBe(`${API_BASE}/api/aperos/${aperoId}`);
-    expect((deleteCall!.body as { writeKey: string }).writeKey).toBe(writeKey);
+    expect(deleteCall!.url).toBe(`${API_BASE}/api/aperos/${aperoId}/delete`);
+    expect((deleteCall!.body as { adminKey: string; baseSha: string }).adminKey).toBe(adminKey);
+    expect((deleteCall!.body as { adminKey: string; baseSha: string }).baseSha).toBe(FAKE_SHA);
   });
 });

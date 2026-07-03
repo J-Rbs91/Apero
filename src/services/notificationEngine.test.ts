@@ -165,7 +165,7 @@ describe("notifications invités", () => {
 });
 
 describe("rappels peut-être", () => {
-  const startMs = Date.parse("2026-07-10T19:00:00.000Z");
+  const startMs = new Date("2026-07-10T19:00:00").getTime();
   const target = event({
     options: [option({ date: "2026-07-10", time: "19:00" })],
   });

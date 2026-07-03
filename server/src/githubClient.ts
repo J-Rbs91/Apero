@@ -14,6 +14,7 @@ export type StoredAperoFile = {
   id: string;
   version: number;
   writeKeyHash: string;
+  adminKeyHash?: string;
   encryption: AperoEncryption;
   createdAt: string;
   updatedAt: string;

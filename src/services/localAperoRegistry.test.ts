@@ -48,6 +48,7 @@ describe("localAperoRegistry", () => {
       aperoId: "apero_abc123",
       encryptionKey: "cle-chiffrement",
       writeKey: "cle-ecriture",
+      adminKey: "cle-admin",
       displayName: "Tonton Ricard",
       role: "creator",
     });
@@ -55,6 +56,7 @@ describe("localAperoRegistry", () => {
     const found = findLocalApero("apero_abc123");
     expect(found?.encryptionKey).toBe("cle-chiffrement");
     expect(found?.role).toBe("creator");
+    expect(found?.adminKey).toBe("cle-admin");
     expect(found?.joinedAt).toBeTruthy();
   });
 
@@ -90,6 +92,24 @@ describe("localAperoRegistry", () => {
     });
 
     expect(findLocalApero("apero_abc123")?.role).toBe("creator");
+  });
+
+  it("conserve la cle admin locale lors d'un upsert participant", () => {
+    saveLocalApero({
+      aperoId: "apero_abc123",
+      encryptionKey: "k",
+      writeKey: "w",
+      adminKey: "admin-secret",
+      role: "creator",
+    });
+    saveLocalApero({
+      aperoId: "apero_abc123",
+      encryptionKey: "k2",
+      writeKey: "w2",
+      role: "participant",
+    });
+
+    expect(findLocalApero("apero_abc123")?.adminKey).toBe("admin-secret");
   });
 
   it("supprime une entrée", () => {

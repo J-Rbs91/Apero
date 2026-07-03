@@ -30,7 +30,6 @@ import {
   TRAQUENARD_LEVEL_MAX,
 } from "../utils/calculateResults";
 import { formatOption } from "../utils/formatOption";
-import { normalizeMemberName } from "../utils/memberName";
 import { buildInviteUrl, maskInviteUrl, resolveInviteKeys } from "../utils/inviteLink";
 import { buildShareText, buildShareTitle } from "../utils/shareMessage";
 
@@ -57,7 +56,10 @@ function describeApiError(error: unknown): string {
       case "CONFLICT":
         return "Quelqu’un a répondu en même temps que toi. Recharge la page et réessaie, ça passe presque toujours du deuxième coup.";
       case "WRITE_FORBIDDEN":
-        return "Ce lien ne permet pas de répondre ici. Vérifie qu’il est complet.";
+        if (error.serverCode === "LEGACY_DELETE_DISABLED") {
+          return "Cette ancienne convocation n'a pas encore de clé d'annulation sécurisée. Active temporairement ALLOW_LEGACY_WRITE_KEY_DELETE côté API pour la supprimer, puis remets la variable à false.";
+        }
+        return "Ce lien ne permet pas de répondre ici. Vérifie qu'il est complet.";
       case "RATE_LIMITED":
         return "Le comptoir sature, doucement sur la cadence. Réessaie dans une minute.";
       default:
@@ -83,6 +85,7 @@ export function InvitePage() {
     return {
       encryptionKey: fromLink.encryptionKey ?? localEntry?.encryptionKey,
       writeKey: fromLink.writeKey ?? localEntry?.writeKey,
+      adminKey: localEntry?.adminKey,
     };
   }, [aperoId, location.search]);
 
@@ -216,7 +219,16 @@ export function InvitePage() {
   }
 
   async function handleDelete() {
-    if (!aperoId || !keys.writeKey) {
+    if (!aperoId) {
+      return;
+    }
+
+    const localEntry = findLocalApero(aperoId);
+    const adminKey = localEntry?.adminKey;
+    const legacyWriteKey = !adminKey && localEntry?.role === "creator" ? keys.writeKey : undefined;
+
+    if (!adminKey && !legacyWriteKey) {
+      setError("Cette annulation n'est disponible que depuis l'appareil qui a créé l'apéro.");
       return;
     }
 
@@ -224,7 +236,7 @@ export function InvitePage() {
 
     try {
       setIsDeleting(true);
-      await deleteEncryptedApero(aperoId, keys.writeKey);
+      await deleteEncryptedApero(aperoId, { adminKey, legacyWriteKey });
       // Nettoyage local : plus de notifications ni d'instantané pour un apéro
       // qui n'existe plus.
       removeNotificationsForApero(aperoId);
@@ -287,13 +299,9 @@ export function InvitePage() {
       })
     : "";
 
-  // L'organisateur : soit le rôle « creator » du registre local, soit un blaze
-  // qui correspond au nom de l'organisateur. Il garde le droit de supprimer.
+  // L'annulation n'est visible que depuis le registre local du créateur.
   const localEntry = aperoId ? findLocalApero(aperoId) : null;
-  const isOrganizer =
-    localEntry?.role === "creator" ||
-    (Boolean(comptoirName) &&
-      normalizeMemberName(comptoirName) === normalizeMemberName(event.organizerName));
+  const isOrganizer = localEntry?.role === "creator" && Boolean(localEntry.adminKey || keys.writeKey);
 
   return (
     <MobilePage className="event-mobile" overlay="deep">

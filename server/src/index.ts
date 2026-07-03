@@ -30,7 +30,7 @@ app.use(
 );
 
 app.use((req, _res, next) => {
-  if (["POST", "PUT", "PATCH"].includes(req.method) && !req.is("application/json")) {
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(req.method) && !req.is("application/json")) {
     next(new ApiError(415, "UNSUPPORTED_MEDIA_TYPE", "Content-Type must be application/json."));
     return;
   }
@@ -44,7 +44,7 @@ app.use(express.json({ limit: config.jsonBodyLimit, strict: true }));
 app.use((req, res, next) => {
   const startedAt = Date.now();
   res.on("finish", () => {
-    logger.info(`${req.method} ${req.originalUrl} ${res.statusCode} ${Date.now() - startedAt}ms`);
+    logger.info(`${req.method} ${req.path} ${res.statusCode} ${Date.now() - startedAt}ms`);
   });
   next();
 });

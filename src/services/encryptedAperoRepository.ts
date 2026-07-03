@@ -1,13 +1,14 @@
-// Repository frontend du nouveau flux chiffré (mode api-vps).
+// Repository frontend du nouveau flux chiffre (mode api-vps).
 // Fait le pont entre : chiffrement client (aperoEncryption), registre local
-// (localAperoRegistry), lecture publique du fichier apéro (GitHub Contents
-// API SANS token — le repo est public) et écriture via la mini API VPS
-// (aperoApiClient). Aucun appel GitHub authentifié ne part d'ici.
+// (localAperoRegistry), lecture publique du fichier apero (GitHub Contents
+// API SANS token) et ecriture via la mini API VPS (aperoApiClient).
+// Aucun appel GitHub authentifie ne part d'ici.
 
 import { githubConfig } from "../config/githubConfig";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
 import type { LocalAperoEntry, StoredEncryptedAperoFile } from "../types/encryptedApero";
-import { appendEventOption, upsertParticipant } from "../utils/eventNormalization";
+import { appendEventOption, normalizeEvent, upsertParticipant } from "../utils/eventNormalization";
+import { sanitizeAperoEvent } from "../utils/aperoValidation";
 import {
   AperoApiError,
   createOrUpdateEncryptedApero,
@@ -17,11 +18,11 @@ import { generateAperoId, generateBase64UrlRandomKey, isValidAperoId, sha256Hex 
 import { decryptAperoData, encryptAperoData, ENCRYPTION_KEY_BYTE_LENGTH } from "./aperoEncryption";
 import { findLocalApero, getLocalAperos, removeLocalApero, saveLocalApero } from "./localAperoRegistry";
 
-// Longueur du writeKey en octets (24 octets => 32 caractères base64url,
-// compatible avec la contrainte serveur de 8 à 256 caractères).
+// 24 octets => 32 caracteres base64url, compatible avec les contraintes API.
 const WRITE_KEY_BYTE_LENGTH = 24;
+const ADMIN_KEY_BYTE_LENGTH = 24;
 
-// Chemin public des fichiers chiffrés — miroir de server/src/config.ts.
+// Chemin public des fichiers chiffres, miroir de server/src/config.ts.
 const APEROS_DATA_PATH = "data/aperos";
 
 export type EncryptedAperoErrorCode = "NOT_FOUND" | "UNREADABLE_FILE";
@@ -43,7 +44,7 @@ function decodeBase64Content(value: string): string {
 }
 
 /**
- * Lecture publique du fichier chiffré via GitHub Contents API, SANS token :
+ * Lecture publique du fichier chiffre via GitHub Contents API, SANS token :
  * le repo est public et ce flux ne doit jamais transporter d'Authorization.
  * Retourne aussi le sha GitHub, indispensable comme baseSha anti-conflit.
  */
@@ -82,7 +83,7 @@ export async function readPublicAperoFile(
     const file = JSON.parse(decodeBase64Content(body.content)) as StoredEncryptedAperoFile;
     return { file, sha: body.sha };
   } catch {
-    throw new EncryptedAperoError("UNREADABLE_FILE", "Fichier apéro illisible.");
+    throw new EncryptedAperoError("UNREADABLE_FILE", "Fichier apero illisible.");
   }
 }
 
@@ -97,8 +98,8 @@ export type CreateEncryptedAperoResult = {
 };
 
 /**
- * Création complète : identifiant + clés générés ici, données chiffrées,
- * envoi à l'API VPS, puis mémorisation dans le registre local (rôle creator).
+ * Creation complete : identifiant + cles generes ici, donnees chiffrees,
+ * envoi a l'API VPS, puis memorisation dans le registre local (role creator).
  */
 export async function createEncryptedApero(
   input: CreateEncryptedAperoInput,
@@ -106,22 +107,28 @@ export async function createEncryptedApero(
   const aperoId = generateAperoId();
   const encryptionKey = generateBase64UrlRandomKey(ENCRYPTION_KEY_BYTE_LENGTH);
   const writeKey = generateBase64UrlRandomKey(WRITE_KEY_BYTE_LENGTH);
+  // Cette cle ne va jamais dans le lien d'invitation : elle reste sur l'appareil
+  // du createur et sert uniquement aux actions destructives.
+  const adminKey = generateBase64UrlRandomKey(ADMIN_KEY_BYTE_LENGTH);
 
-  const event: AperitifEvent = { ...input, id: aperoId };
+  const event = sanitizeAperoEvent({ ...input, id: aperoId }, aperoId);
   const encryptedPayload = await encryptAperoData(event, encryptionKey);
   const writeKeyHash = await sha256Hex(writeKey);
+  const adminKeyHash = await sha256Hex(adminKey);
 
   const result = await createOrUpdateEncryptedApero({
     aperoId,
     writeKey,
     encryptedPayload,
     writeKeyHash,
+    adminKeyHash,
   });
 
   saveLocalApero({
     aperoId,
     encryptionKey,
     writeKey,
+    adminKey,
     displayName: event.organizerName,
     role: "creator",
   });
@@ -130,8 +137,8 @@ export async function createEncryptedApero(
 }
 
 /**
- * Lecture + déchiffrement d'un apéro. Retourne null si le fichier n'existe
- * pas. Laisse remonter AperoCryptoError si la clé est invalide.
+ * Lecture + dechiffrement d'un apero. Retourne null si le fichier n'existe
+ * pas. Laisse remonter AperoCryptoError si la cle est invalide.
  */
 export async function getEncryptedAperoById(
   aperoId: string,
@@ -143,19 +150,19 @@ export async function getEncryptedAperoById(
     return null;
   }
 
-  const event = await decryptAperoData<AperitifEvent>(
+  const rawEvent = await decryptAperoData<unknown>(
     { version: 1, encryption: stored.file.encryption },
     encryptionKey,
   );
+  const event = normalizeEvent(rawEvent, aperoId);
 
   return { event, sha: stored.sha };
 }
 
 /**
- * Mise à jour : relit la dernière version publique, applique `updater`,
- * rechiffre, envoie avec baseSha. En cas de 409 (le fichier a bougé entre
- * temps), retente une fois sur la version fraîche — jamais d'écrasement
- * silencieux, c'est l'API qui arbitre via le sha.
+ * Mise a jour : relit la derniere version publique, applique `updater`,
+ * rechiffre, envoie avec baseSha. En cas de 409, retente une fois sur la
+ * version fraiche. Jamais d'ecrasement silencieux.
  */
 export async function updateEncryptedApero(
   aperoId: string,
@@ -169,14 +176,17 @@ export async function updateEncryptedApero(
     const current = await getEncryptedAperoById(aperoId, encryptionKey);
 
     if (!current) {
-      throw new EncryptedAperoError("NOT_FOUND", "Cet apéro n'existe pas ou plus.");
+      throw new EncryptedAperoError("NOT_FOUND", "Cet apero n'existe pas ou plus.");
     }
 
-    const updatedEvent: AperitifEvent = {
-      ...updater(current.event),
-      id: aperoId,
-      updatedAt: new Date().toISOString(),
-    };
+    const updatedEvent = sanitizeAperoEvent(
+      {
+        ...updater(current.event),
+        id: aperoId,
+        updatedAt: new Date().toISOString(),
+      },
+      aperoId,
+    );
 
     const encryptedPayload = await encryptAperoData(updatedEvent, encryptionKey);
 
@@ -198,14 +208,12 @@ export async function updateEncryptedApero(
     }
   }
 
-  // Jamais atteint (le dernier échec est relancé ci-dessus), mais TypeScript
-  // et la prudence aiment les fins explicites.
-  throw new AperoApiError("CONFLICT", "Conflit d'écriture persistant.");
+  throw new AperoApiError("CONFLICT", "Conflit d'ecriture persistant.");
 }
 
 /**
- * Rejoindre un apéro : ajoute/actualise la réponse du participant dans les
- * données chiffrées et mémorise l'apéro dans le registre local.
+ * Rejoindre un apero : ajoute/actualise la reponse du participant dans les
+ * donnees chiffrees et memorise l'apero dans le registre local.
  */
 export async function joinApero(
   aperoId: string,
@@ -213,8 +221,6 @@ export async function joinApero(
   encryptionKey: string,
   participant: ParticipantResponse,
 ): Promise<AperitifEvent> {
-  // Mémorisé avant l'écriture réseau : même si l'API est momentanément
-  // injoignable, l'invité garde le lien de l'apéro dans « Mes apéros ».
   saveLocalApero({
     aperoId,
     encryptionKey,
@@ -228,10 +234,7 @@ export async function joinApero(
   );
 }
 
-/**
- * Ajoute un créneau (proposition de date / horaire / lieu) à un apéro chiffré.
- * Ouvert à tous les porteurs de la write key : organisateur comme invités.
- */
+/** Ajoute un creneau propose par un porteur de la write key. */
 export async function addEncryptedAperoOption(
   aperoId: string,
   writeKey: string,
@@ -244,12 +247,22 @@ export async function addEncryptedAperoOption(
 }
 
 /**
- * Suppression définitive d'un apéro par l'organisateur (fausse manip, erreur
- * de création, annulation). Authentifiée par la write key côté serveur. On
- * nettoie ensuite tout ce qui reste localement (registre « Mes apéros »).
+ * Suppression definitive d'un apero par le createur. Les nouveaux aperos utilisent
+ * adminKey. Les anciens peuvent utiliser legacyWriteKey seulement si le serveur
+ * l'autorise explicitement, le temps de purger les anciens fichiers.
  */
-export async function deleteEncryptedApero(aperoId: string, writeKey: string): Promise<void> {
-  await deleteEncryptedAperoApi({ aperoId, writeKey });
+export async function deleteEncryptedApero(
+  aperoId: string,
+  credentials: { adminKey?: string; legacyWriteKey?: string },
+): Promise<void> {
+  const current = await readPublicAperoFile(aperoId);
+
+  await deleteEncryptedAperoApi({
+    aperoId,
+    adminKey: credentials.adminKey,
+    legacyWriteKey: credentials.legacyWriteKey,
+    baseSha: current?.sha,
+  });
   removeLocalApero(aperoId);
 }
 
@@ -258,11 +271,7 @@ export type MyAperoItem = {
   event: AperitifEvent | null;
 };
 
-/**
- * « Mes apéros » : uniquement les apéros du registre local, chargés via la
- * lecture publique puis déchiffrés. Un apéro illisible (supprimé, clé
- * invalide…) est renvoyé avec event: null — l'UI décide quoi en faire.
- */
+/** "Mes aperos" : uniquement les aperos du registre local. */
 export async function getMyAperos(): Promise<MyAperoItem[]> {
   const entries = getLocalAperos();
 

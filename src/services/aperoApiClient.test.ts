@@ -77,6 +77,7 @@ describe("createOrUpdateEncryptedApero", () => {
       writeKey: "une-cle-d-ecriture",
       encryptedPayload: PAYLOAD,
       writeKeyHash: "a".repeat(64),
+      adminKeyHash: "b".repeat(64),
     });
 
     expect(result.created).toBe(true);
@@ -88,6 +89,7 @@ describe("createOrUpdateEncryptedApero", () => {
 
     const sentBody = JSON.parse(init?.body as string);
     expect(sentBody.writeKeyHash).toBe("a".repeat(64));
+    expect(sentBody.adminKeyHash).toBe("b".repeat(64));
     expect(sentBody.baseSha).toBeUndefined();
     // Aucun header GitHub authentifié dans le nouveau flux.
     expect(JSON.stringify(init?.headers)).not.toContain("Authorization");

@@ -1,4 +1,5 @@
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
+import { sanitizeAperoEvent } from "./aperoValidation";
 
 type LegacyParticipant = ParticipantResponse & {
   name?: string;
@@ -26,7 +27,7 @@ function normalizeOrganizerOption(
   };
 }
 
-export function normalizeEvent(rawEvent: unknown): AperitifEvent {
+export function normalizeEvent(rawEvent: unknown, expectedId?: string): AperitifEvent {
   const event = rawEvent as LegacyEvent;
   const now = new Date().toISOString();
   const participants = event.participants ?? event.responses ?? [];
@@ -50,26 +51,29 @@ export function normalizeEvent(rawEvent: unknown): AperitifEvent {
     ) ??
     [];
 
-  return {
-    id: event.id ?? "apero_inconnu",
-    ceremonialName: event.ceremonialName ?? title ?? "Ap\u00e9ro sans nom",
-    title,
-    organizerName,
-    description: event.description || undefined,
-    beaufLevel: event.beaufLevel ?? "medium",
-    status: event.status ?? "active",
-    options,
-    participants: participants.map((participant) => ({
-      ...participant,
-      participantName: participant.participantName ?? participant.name ?? "Convive anonyme",
-      createdAt: participant.createdAt ?? participant.updatedAt ?? now,
-      updatedAt: participant.updatedAt ?? now,
-    })),
-    createdAt,
-    updatedAt: event.updatedAt ?? now,
-    closedAt: event.closedAt,
-    selectedOptionId: event.selectedOptionId,
-  };
+  return sanitizeAperoEvent(
+    {
+      id: event.id ?? "apero_inconnu",
+      ceremonialName: event.ceremonialName ?? title ?? "Ap\u00e9ro sans nom",
+      title,
+      organizerName,
+      description: event.description || undefined,
+      beaufLevel: event.beaufLevel ?? "medium",
+      status: event.status ?? "active",
+      options,
+      participants: participants.map((participant) => ({
+        ...participant,
+        participantName: participant.participantName ?? participant.name ?? "Convive anonyme",
+        createdAt: participant.createdAt ?? participant.updatedAt ?? now,
+        updatedAt: participant.updatedAt ?? now,
+      })),
+      createdAt,
+      updatedAt: event.updatedAt ?? now,
+      closedAt: event.closedAt,
+      selectedOptionId: event.selectedOptionId,
+    },
+    expectedId,
+  );
 }
 
 export function upsertParticipant(

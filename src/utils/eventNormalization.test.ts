@@ -19,7 +19,7 @@ function createEvent(id: string, option: AperitifOption): AperitifEvent {
 describe("event normalization", () => {
   it("marks legacy options as organizer options", () => {
     const event = normalizeEvent({
-      id: "apero_test",
+      id: "apero_test1",
       ceremonialName: "Le Concile du Saucisson",
       organizerName: "Jojo",
       options: [
