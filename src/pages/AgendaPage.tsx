@@ -176,16 +176,6 @@ export function AgendaPage() {
                 ))}
               </div>
 
-              <TraquenardGauge
-                level={calculateAverageTraquenardLevel(event)}
-                voteCount={
-                  event.participants.filter(
-                    (participant) => typeof participant.traquenardLevel === "number",
-                  ).length
-                }
-                orientation="horizontal"
-              />
-
               <Link
                 className="button button--ghost button--block"
                 to={
@@ -194,6 +184,15 @@ export function AgendaPage() {
               >
                 Voir l’apéro
               </Link>
+
+              <TraquenardGauge
+                level={calculateAverageTraquenardLevel(event)}
+                voteCount={
+                  event.participants.filter(
+                    (participant) => typeof participant.traquenardLevel === "number",
+                  ).length
+                }
+              />
             </section>
           ))}
         </div>

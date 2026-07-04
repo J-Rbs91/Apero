@@ -84,11 +84,7 @@ export function MobileResultsPanel({ event, result }: MobileResultsPanelProps) {
             address={highlightedOption.locationAddress}
           />
         )}
-      <TraquenardGauge
-        level={averageTraquenardLevel}
-        voteCount={traquenardVoteCount}
-        orientation="horizontal"
-      />
+      <TraquenardGauge level={averageTraquenardLevel} voteCount={traquenardVoteCount} />
     </div>
   );
 }
