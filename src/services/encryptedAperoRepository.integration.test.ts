@@ -10,6 +10,9 @@ import {
   getMyAperos,
 } from "./encryptedAperoRepository";
 import { findLocalApero, saveLocalApero } from "./localAperoRegistry";
+import { getSnapshot, saveSnapshot } from "./notificationSnapshots";
+import { addNotifications, getNotifications } from "./notificationStore";
+import { snapshotApero } from "./notificationEngine";
 
 const API_BASE = "https://api.example.test";
 const FAKE_SHA = "a".repeat(40);
@@ -255,5 +258,103 @@ describe("encryptedAperoRepository (round-trip fetch stubbé)", () => {
     expect(mine[0].event?.id).toBe(aperoId);
     expect(mine[0].event?.ceremonialName).toBe(cachedEvent.ceremonialName);
     expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
+  it("getMyAperos memorise le sha public apres une lecture reussie", async () => {
+    const aperoId = generateAperoId();
+    const encryptionKey = generateBase64UrlRandomKey(ENCRYPTION_KEY_BYTE_LENGTH);
+    const stored = await storedFileFor(baseEvent(aperoId), encryptionKey);
+
+    vi.stubGlobal("window", { localStorage: createStorageStub() });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response(JSON.stringify({ content: base64(stored), sha: FAKE_SHA }), { status: 200 })),
+    );
+
+    saveLocalApero({
+      aperoId,
+      encryptionKey,
+      writeKey: "cle-ecriture",
+      role: "participant",
+    });
+
+    await getMyAperos();
+
+    expect(findLocalApero(aperoId)?.lastSeenPublicSha).toBe(FAKE_SHA);
+  });
+
+  it("getMyAperos purge un apero deja vu publiquement qui a ete supprime", async () => {
+    const aperoId = generateAperoId();
+    const cachedEvent = baseEvent(aperoId);
+
+    // dispatchEvent : le store de notifications émet un événement de
+    // changement à chaque écriture.
+    vi.stubGlobal("window", { localStorage: createStorageStub(), dispatchEvent: () => true });
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 404 })));
+
+    // Un invité qui a déjà lu l'apéro publiquement (sha connu), avec des
+    // notifications et un instantané associés.
+    saveLocalApero({
+      aperoId,
+      encryptionKey: "cle-chiffrement",
+      writeKey: "cle-ecriture",
+      lastKnownEvent: cachedEvent,
+      role: "participant",
+      lastSeenPublicSha: FAKE_SHA,
+    });
+    saveSnapshot(aperoId, snapshotApero(cachedEvent));
+    addNotifications([
+      {
+        id: "notif_1",
+        aperoId,
+        aperoName: cachedEvent.ceremonialName,
+        type: "new-option",
+        title: "Nouvelle proposition de créneau",
+        body: "Quelqu'un propose un créneau.",
+        dedupeKey: `${aperoId}:option:option_1`,
+        createdAt: "2026-07-01T00:00:00.000Z",
+        read: false,
+      },
+    ]);
+
+    const mine = await getMyAperos();
+
+    // L'apéro supprimé ne réapparaît plus via le cache local…
+    expect(mine).toHaveLength(1);
+    expect(mine[0].event).toBeNull();
+    // …ses traces locales sont purgées (registre, instantané, anciennes
+    // notifications)…
+    expect(findLocalApero(aperoId)).toBeNull();
+    expect(getSnapshot(aperoId).initialized).toBe(false);
+    // …remplacées par une unique notification d'annulation qui explique la
+    // disparition à l'invité.
+    const remaining = getNotifications().filter((notification) => notification.aperoId === aperoId);
+    expect(remaining).toHaveLength(1);
+    expect(remaining[0].type).toBe("apero-deleted");
+    expect(remaining[0].body).toContain(cachedEvent.ceremonialName);
+    expect(remaining[0].body).toContain("annulé par la personne qui l'organisait");
+  });
+
+  it("getMyAperos ne purge pas un apero jamais vu publiquement (retard de propagation)", async () => {
+    const aperoId = generateAperoId();
+    const cachedEvent = baseEvent(aperoId);
+
+    vi.stubGlobal("window", { localStorage: createStorageStub() });
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 404 })));
+
+    // Création toute fraîche : aucune lecture publique réussie encore.
+    saveLocalApero({
+      aperoId,
+      encryptionKey: "cle-chiffrement",
+      writeKey: "cle-ecriture",
+      adminKey: "cle-admin",
+      lastKnownEvent: cachedEvent,
+      role: "creator",
+    });
+
+    const mine = await getMyAperos();
+
+    expect(mine[0].event?.id).toBe(aperoId);
+    expect(findLocalApero(aperoId)).not.toBeNull();
   });
 });

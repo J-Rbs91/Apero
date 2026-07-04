@@ -16,6 +16,7 @@ export type SaveLocalAperoInput = {
   lastKnownEvent?: LocalAperoEntry["lastKnownEvent"];
   displayName?: string;
   role?: LocalAperoEntry["role"];
+  lastSeenPublicSha?: string;
 };
 
 function getStorage(): Storage | null {
@@ -38,6 +39,7 @@ function isValidEntry(value: unknown): value is LocalAperoEntry {
       typeof entry.writeKey === "string" &&
       entry.writeKey.length > 0 &&
       (entry.adminKey === undefined || typeof entry.adminKey === "string") &&
+      (entry.lastSeenPublicSha === undefined || typeof entry.lastSeenPublicSha === "string") &&
       (entry.lastKnownEvent === undefined ||
         (typeof entry.lastKnownEvent === "object" && entry.lastKnownEvent !== null)) &&
       typeof entry.joinedAt === "string" &&
@@ -127,6 +129,7 @@ export function saveLocalApero(input: SaveLocalAperoInput): LocalAperoEntry {
     role: existing?.role === "creator" ? "creator" : (input.role ?? existing?.role),
     joinedAt: existing?.joinedAt ?? now,
     updatedAt: now,
+    lastSeenPublicSha: input.lastSeenPublicSha ?? existing?.lastSeenPublicSha,
   };
 
   writeEntries([...entries.filter((entry) => entry.aperoId !== input.aperoId), saved]);

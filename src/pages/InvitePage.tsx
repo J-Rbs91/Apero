@@ -18,11 +18,15 @@ import {
   deleteEncryptedApero,
   getEncryptedAperoById,
   joinApero,
+  purgeDeletedApero,
 } from "../services/encryptedAperoRepository";
 import { findLocalApero } from "../services/localAperoRegistry";
 import { syncAperoNotificationsFromRegistry } from "../services/notificationSync";
 import { removeSnapshot } from "../services/notificationSnapshots";
-import { removeNotificationsForApero } from "../services/notificationStore";
+import {
+  hasAperoDeletedNotification,
+  removeNotificationsForApero,
+} from "../services/notificationStore";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
 import { calculateBestOptions } from "../utils/calculateResults";
 import { formatOption } from "../utils/formatOption";
@@ -38,6 +42,9 @@ type LoadState =
   | { status: "invalid-id" }
   | { status: "missing-key" }
   | { status: "not-found" }
+  // L'apéro était connu sur cet appareil et a disparu du stockage public :
+  // annulé par la personne qui l'organisait (traces locales purgées).
+  | { status: "deleted" }
   | { status: "bad-key" }
   | { status: "error"; message: string }
   | { status: "ready"; event: AperitifEvent };
@@ -130,7 +137,19 @@ export function InvitePage() {
 
         if (!loaded) {
           if (!initialEvent) {
-            setState({ status: "not-found" });
+            // Apéro supprimé par son organisateur : il disparaît aussi de cet
+            // appareil (registre local, notifications, instantané) — sans
+            // toucher aux apéros jamais encore vus publiquement, dont la
+            // lecture peut simplement être en retard sur l'écriture. Quand la
+            // purge a lieu (ou a déjà eu lieu : la notification d'annulation
+            // en garde la trace), on l'explique clairement au lieu d'un
+            // simple « introuvable ».
+            if (purgeDeletedApero(aperoId) || hasAperoDeletedNotification(aperoId)) {
+              setHasLocalEntry(false);
+              setState({ status: "deleted" });
+            } else {
+              setState({ status: "not-found" });
+            }
           }
           // Sinon : on vient de créer cet apéro, la lecture publique GitHub
           // peut être en retard sur l'écriture — on garde la version fraîche
@@ -261,15 +280,19 @@ export function InvitePage() {
           ? "Ce lien d’invitation est incomplet : il lui manque sa clé de lecture. Demande le lien complet à la personne qui t’a invité·e."
           : state.status === "not-found"
             ? "Cet apéro reste introuvable : soit ce lien ne mène nulle part, soit l’apéro a déjà eu lieu."
-            : state.status === "bad-key"
-              ? "Cette clé n’ouvre pas cet apéro : lien tronqué ou périmé. Demande une invitation fraîche."
-              : state.message;
+            : state.status === "deleted"
+              ? "Cet apéro a été annulé par la personne qui l’organisait : créneaux, votes et registre, tout a été effacé. Il a aussi été retiré de ton agenda sur cet appareil."
+              : state.status === "bad-key"
+                ? "Cette clé n’ouvre pas cet apéro : lien tronqué ou périmé. Demande une invitation fraîche."
+                : state.message;
 
     return (
       <MobilePage className="event-mobile" overlay="deep">
         <MobileHeader eyebrow="Invitation" />
         <section className="sheet">
-          <h1 className="h1 h1--sm">Aïe, ce lien coince</h1>
+          <h1 className="h1 h1--sm">
+            {state.status === "deleted" ? "Apéro annulé" : "Aïe, ce lien coince"}
+          </h1>
           <p className="lede">{message}</p>
           <Link className="button button--ghost button--block" to="/">
             Retour au comptoir

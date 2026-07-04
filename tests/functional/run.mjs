@@ -680,6 +680,19 @@ await scenario("7. Isolation : seuls l'organisateur et les invités voient l'ap�
 });
 
 await scenario("8. Suppression définitive par l'organisateur", async () => {
+  // Bob et Chantal rejoignent d'abord l'apéro 1 : on vérifiera qu'il
+  // disparaît aussi chez eux, avec un message d'annulation.
+  await voteOnInvite(pageBob, invite1.fullUrl, { votes: [VOTE_YES] });
+  await pageBob.getByText("Réponse bien reçue, merci d’avoir répondu !").waitFor({ state: "visible" });
+  await voteOnInvite(pageChantal, invite1.fullUrl, { votes: [VOTE_YES] });
+  await pageChantal.getByText("Réponse bien reçue, merci d’avoir répondu !").waitFor({ state: "visible" });
+  await pageBob.goto(`${APP_URL}/#/agenda`);
+  await waitVisible(
+    pageBob,
+    pageBob.getByRole("heading", { name: APERO_1_NAME }),
+    "Avant suppression, l'invité voit l'apéro dans son agenda",
+  );
+
   const page = pageOrganizer;
   await page.goto(invite1.fullUrl);
   const deleteButton = page.getByRole("button", { name: "Supprimer cet évènement" });
@@ -719,6 +732,64 @@ await scenario("8. Suppression définitive par l'organisateur", async () => {
     pageStranger.getByText("Cet apéro reste introuvable", { exact: false }),
     "Le lien d'un apéro supprimé aboutit sur « introuvable »",
   );
+
+  // Chez l'invité aussi, l'apéro supprimé disparaît : l'agenda le purge du
+  // registre local au premier rechargement (404 définitif sur un fichier
+  // déjà vu publiquement). Bob étant déjà sur l'agenda, on force un vrai
+  // rechargement plutôt qu'une navigation à hash identique (sans effet).
+  await pageBob.goto(`${APP_URL}/#/agenda`);
+  await pageBob.reload();
+  await waitVisible(
+    pageBob,
+    pageBob.getByRole("heading", { name: APERO_2_NAME }),
+    "L'agenda de l'invité continue d'afficher ses autres apéros",
+  );
+  const bobStillSeesDeleted = await pageBob.getByRole("heading", { name: APERO_1_NAME }).count();
+  check("L'apéro supprimé disparaît aussi de l'agenda de l'invité", bobStillSeesDeleted === 0);
+  const bobRegistryPurged = await pageBob.evaluate(
+    (id) => !(window.localStorage.getItem("apero_local_registry_v1") ?? "").includes(id),
+    invite1.aperoId,
+  );
+  check("Le registre local de l'invité est purgé de l'apéro supprimé", bobRegistryPurged);
+
+  // La purge s'accompagne d'un message : badge + notification « Apéro annulé »
+  // dans le carnet de l'invité.
+  await pageBob.goto(`${APP_URL}/`);
+  await waitVisible(pageBob, pageBob.locator(".notif-badge"), "L'invité reçoit un badge après l'annulation");
+  await pageBob.locator(".notif-bell").click();
+  await pageBob.locator(".notif-list").waitFor({ state: "visible" });
+  const bobNotifText = await pageBob.locator(".notif-list").innerText();
+  check(
+    "Le carnet de l'invité explique que l'organisateur a annulé l'apéro",
+    bobNotifText.includes("Apéro annulé") &&
+      bobNotifText.includes(APERO_1_NAME) &&
+      bobNotifText.includes("annulé par la personne qui l'organisait"),
+    bobNotifText,
+  );
+  await snap(pageBob, "notification-apero-annule");
+
+  // Chantal, elle, ouvre directement le lien de l'apéro disparu : la page
+  // d'invitation explique l'annulation et purge ses traces locales. Elle est
+  // déjà sur ce même lien (vote du début de scénario) : on force un vrai
+  // rechargement, une navigation à hash identique serait sans effet.
+  await pageChantal.goto(invite1.fullUrl);
+  await pageChantal.reload();
+  await waitVisible(
+    pageChantal,
+    pageChantal.getByRole("heading", { name: "Apéro annulé" }),
+    "La page d'invitation d'un apéro supprimé annonce l'annulation à l'invité",
+  );
+  await waitVisible(
+    pageChantal,
+    pageChantal.getByText("annulé par la personne qui l’organisait", { exact: false }),
+    "Le message précise que c'est l'organisateur qui a annulé",
+  );
+  const chantalRegistryPurged = await pageChantal.evaluate(
+    (id) => !(window.localStorage.getItem("apero_local_registry_v1") ?? "").includes(id),
+    invite1.aperoId,
+  );
+  check("Le registre local de Chantal est purgé à l'ouverture du lien mort", chantalRegistryPurged);
+  await snap(pageChantal, "invitation-apero-annule");
   await snap(page, "apres-suppression");
 });
 

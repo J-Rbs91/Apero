@@ -137,3 +137,15 @@ export function removeNotificationsForApero(aperoId: string): void {
     write(next);
   }
 }
+
+/**
+ * Vrai si cet appareil garde la trace d'une annulation pour cet apéro.
+ * Permet d'afficher « annulé par l'organisateur » plutôt qu'« introuvable »
+ * même une fois le registre local purgé (relecture du lien mort, effets
+ * React rejoués en StrictMode…).
+ */
+export function hasAperoDeletedNotification(aperoId: string): boolean {
+  return read().some(
+    (notification) => notification.aperoId === aperoId && notification.type === "apero-deleted",
+  );
+}

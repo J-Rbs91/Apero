@@ -40,7 +40,11 @@ export type NotificationEventType =
   // Destinés aux invités « peut-être » (section 3).
   | "reminder-48h"
   | "reminder-24h"
-  | "reminder-2h";
+  | "reminder-2h"
+  // L'apéro a disparu du stockage public : annulé par la personne qui
+  // l'organisait. Émise localement au moment où l'appareil purge ses traces
+  // (registre, notifications, instantané), pour expliquer la disparition.
+  | "apero-deleted";
 
 // Canal de diffusion (section 7). Le badge interne est toujours honoré ; le
 // canal système n'est utilisé que si l'utilisateur a donné son autorisation.

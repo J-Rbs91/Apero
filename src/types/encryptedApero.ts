@@ -41,4 +41,9 @@ export type LocalAperoEntry = {
   role?: LocalAperoRole;
   joinedAt: string;
   updatedAt: string;
+  // Sha GitHub du fichier lors de sa dernière lecture publique réussie.
+  // Absent tant que le fichier n'a jamais été vu publiquement depuis cet
+  // appareil : un 404 est alors un retard de propagation (création toute
+  // fraîche), pas une suppression — on ne purge jamais dans ce cas.
+  lastSeenPublicSha?: string;
 };

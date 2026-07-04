@@ -16,7 +16,11 @@ import {
 } from "./aperoApiClient";
 import { generateAperoId, generateBase64UrlRandomKey, isValidAperoId, sha256Hex } from "./aperoCryptoKeys";
 import { decryptAperoData, encryptAperoData, ENCRYPTION_KEY_BYTE_LENGTH } from "./aperoEncryption";
+import { createId } from "../utils/createId";
 import { findLocalApero, getLocalAperos, removeLocalApero, saveLocalApero } from "./localAperoRegistry";
+import { removeSnapshot } from "./notificationSnapshots";
+import { addNotifications, removeNotificationsForApero } from "./notificationStore";
+import { showSystemNotifications } from "./systemNotifications";
 
 // 24 octets => 32 caracteres base64url, compatible avec les contraintes API.
 const WRITE_KEY_BYTE_LENGTH = 24;
@@ -99,7 +103,7 @@ function getCachedEvent(entry: LocalAperoEntry): AperitifEvent | null {
   }
 }
 
-function cacheLocalAperoEvent(aperoId: string, event: AperitifEvent): void {
+function cacheLocalAperoEvent(aperoId: string, event: AperitifEvent, seenPublicSha?: string): void {
   const entry = findLocalApero(aperoId);
 
   if (!entry) {
@@ -114,7 +118,55 @@ function cacheLocalAperoEvent(aperoId: string, event: AperitifEvent): void {
     lastKnownEvent: event,
     displayName: entry.displayName,
     role: entry.role,
+    lastSeenPublicSha: seenPublicSha,
   });
+}
+
+/**
+ * Purge locale d'un apéro disparu du stockage public (supprimé par son
+ * organisateur) : registre local, notifications et instantané « déjà vu »,
+ * remplacés par une unique notification d'annulation qui explique la
+ * disparition à l'invité.
+ * Ne purge que si le fichier a déjà été vu publiquement depuis cet appareil
+ * (`lastSeenPublicSha`), pour ne pas confondre une vraie suppression avec le
+ * délai de propagation d'une création toute fraîche.
+ * Retourne true si la purge a eu lieu.
+ */
+export function purgeDeletedApero(aperoId: string): boolean {
+  const entry = findLocalApero(aperoId);
+
+  if (!entry?.lastSeenPublicSha) {
+    return false;
+  }
+
+  const aperoName = entry.lastKnownEvent?.ceremonialName ?? "";
+
+  removeLocalApero(aperoId);
+  removeNotificationsForApero(aperoId);
+  removeSnapshot(aperoId);
+
+  const now = new Date().toISOString();
+  const fresh = addNotifications([
+    {
+      id: createId("notif"),
+      aperoId,
+      aperoName,
+      type: "apero-deleted",
+      title: "Apéro annulé",
+      body: aperoName
+        ? `« ${aperoName} » a été annulé par la personne qui l'organisait. Il a été retiré de ton agenda.`
+        : "Un apéro auquel tu participais a été annulé par la personne qui l'organisait. Il a été retiré de ton agenda.",
+      createdAt: now,
+      read: false,
+      dedupeKey: `${aperoId}:deleted`,
+    },
+  ]);
+
+  if (fresh.length > 0) {
+    void showSystemNotifications(fresh);
+  }
+
+  return true;
 }
 
 function isAdminKeyHashUnsupported(error: unknown): error is AperoApiError {
@@ -251,13 +303,15 @@ export async function updateEncryptedApero(
     const encryptedPayload = await encryptAperoData(updatedEvent, encryptionKey);
 
     try {
-      await createOrUpdateEncryptedApero({
+      const written = await createOrUpdateEncryptedApero({
         aperoId,
         writeKey,
         encryptedPayload,
         baseSha: current.sha,
       });
-      cacheLocalAperoEvent(aperoId, updatedEvent);
+      // Le fichier vient d'être lu publiquement puis réécrit : son existence
+      // publique est confirmée, un futur 404 signifiera une vraie suppression.
+      cacheLocalAperoEvent(aperoId, updatedEvent, written.sha);
       return updatedEvent;
     } catch (error) {
       const isRetryableConflict =
@@ -344,8 +398,18 @@ export async function getMyAperos(): Promise<MyAperoItem[]> {
         const loaded = await getEncryptedAperoById(entry.aperoId, entry.encryptionKey);
 
         if (loaded?.event) {
-          cacheLocalAperoEvent(entry.aperoId, loaded.event);
+          cacheLocalAperoEvent(entry.aperoId, loaded.event, loaded.sha);
           return { entry: findLocalApero(entry.aperoId) ?? entry, event: loaded.event };
+        }
+
+        // 404 définitif (les erreurs réseau, elles, passent par le catch) :
+        // si l'apéro avait déjà été vu publiquement, il a été supprimé par
+        // son organisateur — il doit aussi disparaître de cet appareil.
+        // Second garde-fou : si l'entrée n'est plus dans le registre (purgée
+        // par un getMyAperos concurrent — sync de notifications et agenda
+        // chargent en parallèle), ne surtout pas ressusciter le cache.
+        if (purgeDeletedApero(entry.aperoId) || !findLocalApero(entry.aperoId)) {
+          return { entry, event: null };
         }
 
         return { entry, event: cachedEvent };

@@ -44,7 +44,11 @@ Chromium (Playwright)                     ← vrai frontend (Vite dev server)
    écriture/suppression refusées côté API avec de mauvaises clés,
    cloisonnement entre deux organisateurs.
 8. **Suppression** — bouton réservé à l'organisateur, confirmation, fichier
-   effacé du stockage, agenda nettoyé, lien mort pour les invités.
+   effacé du stockage, agenda nettoyé, lien mort pour les inconnus, et purge
+   locale chez les invités : l'apéro supprimé disparaît de leur agenda et de
+   leur registre local, remplacé par une notification « Apéro annulé » ; le
+   lien d'invitation affiche « annulé par la personne qui l'organisait » au
+   lieu d'un simple « introuvable ».
 9. **Contrat API** — `/health`, id invalide, création sans hashes, conflit de
    `baseSha`, Content-Type non JSON, suppression idempotente.
 
