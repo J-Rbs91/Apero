@@ -7,7 +7,10 @@ import {
   useComptoirName,
 } from "./hooks/useComptoirName";
 import { useNotificationPermission } from "./hooks/useNotificationPermission";
+import { updateAppBadge } from "./services/appBadge";
+import { getUnreadCount } from "./services/notificationStore";
 import { syncAllMyAperos } from "./services/notificationSync";
+import { registerNotificationServiceWorker } from "./services/systemNotifications";
 import { AppRouter } from "./routes/AppRouter";
 
 const appShellStyle = {
@@ -27,6 +30,14 @@ export function App() {
 
     window.addEventListener(COMPTOIR_NAME_EDIT_EVENT, handleEditRequest);
     return () => window.removeEventListener(COMPTOIR_NAME_EDIT_EVENT, handleEditRequest);
+  }, []);
+
+  // Au démarrage : enregistre le service worker (installabilité PWA +
+  // réouverture au clic sur notification) et restaure le badge de l'icône à
+  // partir des notifications non lues laissées à la dernière session.
+  useEffect(() => {
+    void registerNotificationServiceWorker();
+    void updateAppBadge(getUnreadCount());
   }, []);
 
   const shouldShowNameOnboarding = !comptoirName || isEditingComptoirName;

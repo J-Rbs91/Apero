@@ -4,6 +4,7 @@
 // alimenté, indépendamment de l'API Notification.
 
 import type { AppNotification } from "../types/notifications";
+import { updateAppBadge } from "./appBadge";
 
 export const NOTIFICATIONS_STORAGE_KEY = "apero_notifications_v1";
 export const NOTIFICATIONS_CHANGE_EVENT = "apero:notifications-change";
@@ -66,6 +67,9 @@ function write(notifications: AppNotification[]): void {
     // localStorage plein ou bloqué : on ne casse pas le flux appelant.
   }
   emitChange();
+  // Reflète le compteur non-lu sur l'icône de l'app (PWA installée).
+  const unread = notifications.reduce((count, notification) => count + (notification.read ? 0 : 1), 0);
+  void updateAppBadge(unread);
 }
 
 /** Notifications, de la plus récente à la plus ancienne. */
