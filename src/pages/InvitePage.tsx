@@ -323,7 +323,7 @@ export function InvitePage() {
             isSaving={isSaving}
             onSubmit={handleVoteSubmit}
             leadingOptionId={winnerId}
-            sideSlot={
+            extraFields={
               <TraquenardSlider value={traquenardVote} onChange={setTraquenardVote} />
             }
           />

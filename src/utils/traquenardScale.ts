@@ -2,8 +2,7 @@ import { TRAQUENARD_LEVEL_MAX } from "./calculateResults";
 
 // Échelle partagée du Traquenard-O-mètre : une même valeur (0 → 10) doit
 // produire partout la même couleur et le même intitulé, que la jauge soit
-// verticale et interactive (carte d'action) ou horizontale et récapitulative
-// (carte de synthèse).
+// interactive (carte de réponse) ou récapitulative (cartes de synthèse).
 
 type Rgb = { r: number; g: number; b: number };
 

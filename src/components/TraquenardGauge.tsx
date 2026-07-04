@@ -7,7 +7,7 @@ import {
 } from "../utils/traquenardScale";
 
 // Variables CSS pilotant le remplissage et la couleur de la jauge : la même
-// valeur donne le même rendu, quelle que soit l'orientation.
+// valeur donne le même rendu, qu'elle soit récapitulative ou interactive.
 function gaugeStyle(ratio: number): CSSProperties {
   return {
     "--traq-ratio": ratio,
@@ -18,21 +18,16 @@ function gaugeStyle(ratio: number): CSSProperties {
 type TraquenardGaugeProps = {
   level: number | null;
   voteCount: number;
-  orientation?: "horizontal" | "vertical";
 };
 
 // Jauge récapitulative (lecture seule) : synthétise le niveau moyen de
-// traquenard autour de l'évènement. Horizontale dans la carte de synthèse.
-export function TraquenardGauge({
-  level,
-  voteCount,
-  orientation = "horizontal",
-}: TraquenardGaugeProps) {
+// traquenard autour de l'évènement. Horizontale, en pied de carte.
+export function TraquenardGauge({ level, voteCount }: TraquenardGaugeProps) {
   const hasLevel = level != null;
   const ratio = hasLevel ? traquenardRatioFromLevel(level) : 0;
 
   return (
-    <div className={`traq traq--${orientation} traq--summary`} style={gaugeStyle(ratio)}>
+    <div className="traq traq--summary" style={gaugeStyle(ratio)}>
       <div className="traq__head">
         <p className="traq__title">Traquenard-O-mètre</p>
         <p className="traq__value">
@@ -66,14 +61,20 @@ type TraquenardSliderProps = {
   onChange: (value: number) => void;
 };
 
-// Jauge verticale interactive : accompagne la réponse de l'utilisateur, qui
-// déplace le curseur pour indiquer son engagement. La couleur suit la valeur.
+// Jauge horizontale interactive : accompagne la réponse de l'utilisateur, qui
+// déplace le curseur pour indiquer son pronostic. La couleur suit la valeur.
 export function TraquenardSlider({ value, onChange }: TraquenardSliderProps) {
   const ratio = traquenardRatioFromLevel(value);
 
   return (
-    <div className="traq traq--vertical traq--interactive" style={gaugeStyle(ratio)}>
-      <div className="traq__scale">
+    <div className="traq traq--interactive" style={gaugeStyle(ratio)}>
+      <div className="traq__head">
+        <p className="traq__title">Traquenard-O-mètre</p>
+        <p className="traq__value">
+          {value}/{TRAQUENARD_LEVEL_MAX} · {describeTraquenardLevel(value)}
+        </p>
+      </div>
+      <div className="traq__gauge">
         <div className="traq__track" aria-hidden="true">
           <div className="traq__fill" />
         </div>
@@ -89,12 +90,6 @@ export function TraquenardSlider({ value, onChange }: TraquenardSliderProps) {
           aria-label="Traquenard-O-mètre : ton pronostic"
           aria-valuetext={`${value} sur ${TRAQUENARD_LEVEL_MAX}, ${describeTraquenardLevel(value)}`}
         />
-      </div>
-      <div className="traq__head">
-        <p className="traq__title">Traquenard-O-mètre</p>
-        <p className="traq__value">
-          {value}/{TRAQUENARD_LEVEL_MAX} · {describeTraquenardLevel(value)}
-        </p>
       </div>
     </div>
   );

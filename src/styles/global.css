@@ -1147,25 +1147,16 @@ textarea:focus-visible {
 }
 
 /* ===== Traquenard-O-mètre ===== */
-.minimap-with-gauge {
-  display: flex;
-  align-items: stretch;
-  gap: 10px;
-}
-
-.minimap-with-gauge .minimap {
-  flex: 1;
-  min-width: 0;
-}
-
 /* ===== Traquenard-O-mètre : jauge intégrée =====
-   Une même échelle (--traq-ratio 0→1, --traq-color) pilote deux formes :
-   verticale interactive dans les cartes d'action, horizontale récapitulative
-   dans les cartes de synthèse. */
+   Une même échelle (--traq-ratio 0→1, --traq-color) pilote deux formes
+   horizontales, pour garder les cartes compactes : récapitulative en pied
+   des cartes de synthèse, interactive dans la carte de réponse. */
 .traq {
   --traq-track: rgba(255, 247, 230, 0.14);
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
 }
 
 .traq__title {
@@ -1217,39 +1208,32 @@ textarea:focus-visible {
     border-color 0.18s ease;
 }
 
-/* --- Horizontale, récapitulative --- */
-.traq--horizontal {
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
-
-.traq--horizontal .traq__head {
+.traq__head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 10px;
 }
 
-.traq--horizontal .traq__gauge {
+.traq__gauge {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.traq--horizontal .traq__track {
+.traq__track {
   width: 100%;
   height: 10px;
 }
 
-.traq--horizontal .traq__fill {
+.traq__fill {
   top: 0;
   bottom: 0;
   left: 0;
   width: calc(var(--traq-ratio) * 100%);
 }
 
-.traq--horizontal .traq__thumb {
+.traq__thumb {
   width: 16px;
   height: 16px;
   border-width: 3px;
@@ -1257,81 +1241,31 @@ textarea:focus-visible {
   transform: translateX(-50%);
 }
 
-/* --- Verticale, interactive --- */
-.traq--vertical {
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  width: 66px;
+/* --- Interactive : piste et curseur élargis pour le doigt, curseur natif
+   invisible superposé qui capte le glissement. --- */
+.traq--interactive .traq__gauge {
+  height: 34px;
 }
 
-.traq__scale {
-  position: relative;
-  width: 34px;
-  height: 168px;
-  display: flex;
-  justify-content: center;
+.traq--interactive .traq__track {
+  height: 12px;
 }
 
-.traq--vertical .traq__track {
-  width: 12px;
-  height: 100%;
-}
-
-.traq--vertical .traq__fill {
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: calc(var(--traq-ratio) * 100%);
-}
-
-.traq--vertical .traq__thumb {
-  left: 50%;
-  bottom: calc(var(--traq-ratio) * 100%);
-  transform: translate(-50%, 50%);
+.traq--interactive .traq__thumb {
+  width: 22px;
+  height: 22px;
+  border-width: 4px;
   pointer-events: none;
 }
 
-/* Curseur natif rendu invisible mais pleinement fonctionnel : l'écriture
-   verticale mappe le glissement du bas (0) vers le haut (max). */
 .traq__input {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   margin: 0;
-  writing-mode: vertical-lr;
-  direction: rtl;
   opacity: 0;
   cursor: pointer;
-}
-
-.traq--vertical .traq__head {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  text-align: center;
-}
-
-/* --- Carte d'action portant la jauge sur son bord --- */
-.sheet--with-gauge {
-  display: flex;
-  align-items: stretch;
-  gap: 16px;
-}
-
-.sheet--with-gauge .sheet__body {
-  flex: 1;
-  min-width: 0;
-}
-
-.sheet__gauge {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 4px;
 }
 
 /* ===== Ouvrir dans une appli GPS ===== */
