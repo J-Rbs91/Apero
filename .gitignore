@@ -10,3 +10,4 @@ vite.config.d.ts
 !.env.example
 *.local
 
+tests/functional/output/
