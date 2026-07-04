@@ -1,5 +1,6 @@
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
 import { sanitizeAperoEvent } from "./aperoValidation";
+import { createId } from "./createId";
 
 type LegacyParticipant = ParticipantResponse & {
   name?: string;
@@ -108,9 +109,56 @@ export function appendEventOption(
   event: AperitifEvent,
   option: AperitifOption,
 ): AperitifEvent {
-  return {
+  const withOption: AperitifEvent = {
     ...event,
     options: [...event.options, option],
     updatedAt: new Date().toISOString(),
   };
+
+  // Proposer un créneau, c'est déjà s'engager à y être : celui qui le crée est
+  // automatiquement noté partant (« oui ») sur son propre créneau.
+  const proposerName = option.createdByName?.trim().replace(/\s+/g, " ");
+  if (!proposerName) {
+    return withOption;
+  }
+
+  return markProposerAvailableForOption(withOption, proposerName, option.id);
+}
+
+/**
+ * Note le proposeur d'un créneau comme partant (« oui ») sur ce créneau.
+ * S'il vote déjà sur l'apéro, on complète ses votes sans écraser les autres ;
+ * sinon on crée sa réponse de participant.
+ */
+function markProposerAvailableForOption(
+  event: AperitifEvent,
+  proposerName: string,
+  optionId: string,
+): AperitifEvent {
+  const normalizedName = proposerName.toLowerCase();
+  const existingIndex = event.participants.findIndex(
+    (participant) =>
+      participant.participantName.trim().toLowerCase() === normalizedName,
+  );
+  const now = new Date().toISOString();
+  const participants = [...event.participants];
+
+  if (existingIndex >= 0) {
+    const existing = participants[existingIndex];
+    participants[existingIndex] = {
+      ...existing,
+      votes: { ...existing.votes, [optionId]: "yes" },
+      updatedAt: now,
+    };
+  } else {
+    participants.push({
+      id: createId("participant"),
+      participantName: proposerName,
+      votes: { [optionId]: "yes" },
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
+  return { ...event, participants };
 }
