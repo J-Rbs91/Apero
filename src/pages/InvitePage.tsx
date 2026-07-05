@@ -63,6 +63,11 @@ function describeApiError(error: unknown): string {
           return "Cette ancienne convocation n'a pas encore de clé d'annulation sécurisée. Active temporairement ALLOW_LEGACY_WRITE_KEY_DELETE côté API pour la supprimer, puis remets la variable à false.";
         }
         return "Ce lien ne permet pas de répondre ici. Vérifie qu'il est complet.";
+      case "NOT_FOUND":
+        if (error.serverCode === "DELETE_ENDPOINT_MISSING") {
+          return "La suppression n'est pas encore disponible côté serveur : l'API du VPS doit être mise à jour. Rien n'a été supprimé.";
+        }
+        return "Un souci technique est survenu, réessaie dans un instant.";
       case "RATE_LIMITED":
         return "Le comptoir sature, doucement sur la cadence. Réessaie dans une minute.";
       default:

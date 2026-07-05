@@ -182,13 +182,12 @@ export async function deleteEncryptedApero(
     );
   }
 
-  const encodedId = encodeURIComponent(params.aperoId);
-  const modernUrl = joinApiUrl(baseUrl, `api/aperos/${encodedId}/delete`);
+  const url = joinApiUrl(baseUrl, `api/aperos/${encodeURIComponent(params.aperoId)}/delete`);
 
   let response: Response;
 
   try {
-    response = await fetch(modernUrl, {
+    response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -204,24 +203,20 @@ export async function deleteEncryptedApero(
     );
   }
 
-  // Compat : un serveur VPS anterieur a l'endpoint POST /delete repond 404 sur
-  // cette route (route inexistante ; un apero absent renverrait 200 deleted:false).
-  // On retombe alors sur l'ancienne route REST DELETE /aperos/:id, dont le corps
-  // strict n'accepte que { writeKey }. Elle n'est utilisable qu'avec la write key
-  // partagee (les aperos crees sur ces anciens serveurs n'ont pas d'adminKey).
-  if (response.status === 404 && params.legacyWriteKey) {
-    try {
-      response = await fetch(joinApiUrl(baseUrl, `api/aperos/${encodedId}`), {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ writeKey: params.legacyWriteKey }),
-      });
-    } catch {
-      throw new AperoApiError(
-        "NETWORK_ERROR",
-        "L'API apero est injoignable (reseau, CORS ou serveur arrete).",
-      );
-    }
+  // Un serveur VPS anterieur a l'endpoint POST /delete repond 404 sur cette
+  // route (route inexistante). Ce n'est jamais « apero introuvable » : un apero
+  // absent renvoie 200 { deleted: false }. On le distingue par un serverCode
+  // dedie pour afficher un message clair (« mettre a jour l'API ») plutot qu'un
+  // vague « souci technique ». On NE retombe PAS sur DELETE /aperos/:id : cette
+  // methode declenche une prevol CORS que les proxys GET,POST bloquent — c'est
+  // justement pourquoi l'API expose la suppression en POST.
+  if (response.status === 404) {
+    throw new AperoApiError(
+      "NOT_FOUND",
+      "L'endpoint de suppression est absent de l'API deployee.",
+      404,
+      "DELETE_ENDPOINT_MISSING",
+    );
   }
 
   if (!response.ok) {
