@@ -365,18 +365,24 @@ export async function addEncryptedAperoOption(
  * Suppression definitive d'un apero par le createur. Les nouveaux aperos utilisent
  * adminKey. Les anciens peuvent utiliser legacyWriteKey seulement si le serveur
  * l'autorise explicitement, le temps de purger les anciens fichiers.
+ *
+ * On n'envoie volontairement PAS de baseSha : c'est une action destructive et
+ * definitive, deja confirmee par l'organisateur, sans concurrence a arbitrer
+ * (on efface tout, peu importe les votes en cours). Aller chercher un baseSha
+ * imposerait une lecture publique GitHub non authentifiee — limitee a 60 req/h
+ * par IP et servie via CDN — qui peut echouer (403 rate limit) ou renvoyer un
+ * sha perime, faisant capoter une suppression pourtant legitime. Le serveur
+ * relit de toute facon son propre sha frais et authentifie pour effacer le
+ * fichier, donc ce garde anti-conflit cote client n'apporte rien ici.
  */
 export async function deleteEncryptedApero(
   aperoId: string,
   credentials: { adminKey?: string; legacyWriteKey?: string },
 ): Promise<void> {
-  const current = await readPublicAperoFile(aperoId);
-
   await deleteEncryptedAperoApi({
     aperoId,
     adminKey: credentials.adminKey,
     legacyWriteKey: credentials.legacyWriteKey,
-    baseSha: current?.sha,
   });
   removeLocalApero(aperoId);
 }

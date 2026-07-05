@@ -144,11 +144,9 @@ describe("encryptedAperoRepository (round-trip fetch stubbé)", () => {
     expect(decrypted.options.some((option) => option.id === "option_2")).toBe(true);
   });
 
-  it("deleteEncryptedApero passe par POST /delete avec la cle admin et baseSha", async () => {
+  it("deleteEncryptedApero passe par POST /delete avec la cle admin, sans lecture publique GitHub", async () => {
     const aperoId = generateAperoId();
-    const encryptionKey = generateBase64UrlRandomKey(ENCRYPTION_KEY_BYTE_LENGTH);
     const adminKey = generateBase64UrlRandomKey(24);
-    const stored = await storedFileFor(baseEvent(aperoId), encryptionKey);
 
     const calls: Array<{ url: string; method: string; body: unknown }> = [];
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -156,21 +154,44 @@ describe("encryptedAperoRepository (round-trip fetch stubbé)", () => {
       const method = init?.method ?? "GET";
       calls.push({ url, method, body: init?.body ? JSON.parse(init.body as string) : undefined });
 
-      if (url.includes("api.github.com")) {
-        return new Response(JSON.stringify({ content: base64(stored), sha: FAKE_SHA }), { status: 200 });
-      }
-
       return new Response(JSON.stringify({ ok: true, deleted: true, aperoId }), { status: 200 });
     });
     vi.stubGlobal("fetch", fetchMock);
 
     await deleteEncryptedApero(aperoId, { adminKey });
 
+    // Aucune lecture publique GitHub : la suppression ne doit pas dépendre de
+    // l'API GitHub non authentifiée (rate limit 60 req/h, CDN), qui la faisait
+    // échouer avec un « souci technique » générique.
+    expect(calls.some((call) => call.url.includes("api.github.com"))).toBe(false);
+
     const deleteCall = calls.find((call) => call.method === "POST" && call.url.startsWith(API_BASE));
     expect(deleteCall).toBeTruthy();
     expect(deleteCall!.url).toBe(`${API_BASE}/api/aperos/${aperoId}/delete`);
-    expect((deleteCall!.body as { adminKey: string; baseSha: string }).adminKey).toBe(adminKey);
-    expect((deleteCall!.body as { adminKey: string; baseSha: string }).baseSha).toBe(FAKE_SHA);
+    expect((deleteCall!.body as { adminKey: string }).adminKey).toBe(adminKey);
+    // Pas de baseSha : le serveur relit son propre sha frais pour effacer.
+    expect((deleteCall!.body as { baseSha?: string }).baseSha).toBeUndefined();
+  });
+
+  it("deleteEncryptedApero aboutit même si l'API GitHub publique est en panne (rate limit)", async () => {
+    const aperoId = generateAperoId();
+    const adminKey = generateBase64UrlRandomKey(24);
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      // Toute lecture publique GitHub échoue (403 rate limit non authentifié) :
+      // elle ne doit surtout pas être sur le chemin critique de la suppression.
+      if (url.includes("api.github.com")) {
+        return new Response("rate limited", { status: 403 });
+      }
+
+      return new Response(JSON.stringify({ ok: true, deleted: true, aperoId }), { status: 200 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    // Ne doit pas jeter : la suppression aboutit sans dépendre du 403 GitHub.
+    await expect(deleteEncryptedApero(aperoId, { adminKey })).resolves.toBeUndefined();
   });
 
   it("createEncryptedApero memorise l'evenement cree dans le registre local", async () => {
