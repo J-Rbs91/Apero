@@ -51,6 +51,20 @@ export function MobileResultsPanel({ event, result }: MobileResultsPanelProps) {
     (participant) => typeof participant.traquenardLevel === "number",
   ).length;
 
+  // Créneau à cartographier : celui en tête s'il est localisé, sinon l'unique
+  // créneau localisé de l'apéro (pas encore de votes ≠ pas de carte). Avec
+  // plusieurs lieux distincts et aucun vainqueur, on s'abstient : afficher un
+  // lieu arbitraire serait trompeur.
+  const optionsWithCoords = event.options.filter(
+    (option) => option.locationLat != null && option.locationLng != null,
+  );
+  const mapOption =
+    highlightedOption?.locationLat != null && highlightedOption.locationLng != null
+      ? highlightedOption
+      : optionsWithCoords.length === 1
+        ? optionsWithCoords[0]
+        : undefined;
+
   return (
     <div className="verdict">
       <p className="eyebrow">{describeEyebrow(result)}</p>
@@ -74,16 +88,14 @@ export function MobileResultsPanel({ event, result }: MobileResultsPanelProps) {
           </div>
         </div>
       )}
-      {highlightedOption &&
-        highlightedOption.locationLat != null &&
-        highlightedOption.locationLng != null && (
-          <MiniMap
-            lat={highlightedOption.locationLat}
-            lng={highlightedOption.locationLng}
-            label={highlightedOption.location}
-            address={highlightedOption.locationAddress}
-          />
-        )}
+      {mapOption && mapOption.locationLat != null && mapOption.locationLng != null && (
+        <MiniMap
+          lat={mapOption.locationLat}
+          lng={mapOption.locationLng}
+          label={mapOption.location}
+          address={mapOption.locationAddress}
+        />
+      )}
       <TraquenardGauge level={averageTraquenardLevel} voteCount={traquenardVoteCount} />
     </div>
   );

@@ -6,6 +6,7 @@ import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { MobileResultsPanel } from "../components/MobileResultsPanel";
 import { MobileShareBox } from "../components/MobileShareBox";
+import { OpenInMapsButton } from "../components/OpenInMapsButton";
 import { ParticipantList } from "../components/ParticipantList";
 import { TraquenardSlider } from "../components/TraquenardGauge";
 import { VoteForm } from "../components/VoteForm";
@@ -380,6 +381,16 @@ export function InvitePage() {
                 <div className="slot__top">
                   <div>
                     <div className="slot__d">{formatOption(option)}</div>
+                    {(option.locationAddress ||
+                      (option.locationLat != null && option.locationLng != null)) && (
+                      <OpenInMapsButton
+                        className="slot__maplink"
+                        label={option.location}
+                        address={option.locationAddress}
+                        lat={option.locationLat}
+                        lng={option.locationLng}
+                      />
+                    )}
                   </div>
                   {option.id === winnerId && <span className="agenda-lead">En tête</span>}
                 </div>

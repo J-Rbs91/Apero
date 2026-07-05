@@ -111,6 +111,9 @@ export function LocationField({
       locationLat: place.lat,
       locationLng: place.lng,
     });
+    // Montre immédiatement le point sur la carte : confirmation visuelle du
+    // lieu choisi, et possibilité de l'ajuster dans la foulée.
+    setIsPickerOpen(true);
   }
 
   async function handleMapPick(lat: number, lng: number) {
