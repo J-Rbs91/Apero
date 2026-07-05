@@ -182,12 +182,13 @@ export async function deleteEncryptedApero(
     );
   }
 
-  const url = joinApiUrl(baseUrl, `api/aperos/${encodeURIComponent(params.aperoId)}/delete`);
+  const encodedId = encodeURIComponent(params.aperoId);
+  const modernUrl = joinApiUrl(baseUrl, `api/aperos/${encodedId}/delete`);
 
   let response: Response;
 
   try {
-    response = await fetch(url, {
+    response = await fetch(modernUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -201,6 +202,26 @@ export async function deleteEncryptedApero(
       "NETWORK_ERROR",
       "L'API apero est injoignable (reseau, CORS ou serveur arrete).",
     );
+  }
+
+  // Compat : un serveur VPS anterieur a l'endpoint POST /delete repond 404 sur
+  // cette route (route inexistante ; un apero absent renverrait 200 deleted:false).
+  // On retombe alors sur l'ancienne route REST DELETE /aperos/:id, dont le corps
+  // strict n'accepte que { writeKey }. Elle n'est utilisable qu'avec la write key
+  // partagee (les aperos crees sur ces anciens serveurs n'ont pas d'adminKey).
+  if (response.status === 404 && params.legacyWriteKey) {
+    try {
+      response = await fetch(joinApiUrl(baseUrl, `api/aperos/${encodedId}`), {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ writeKey: params.legacyWriteKey }),
+      });
+    } catch {
+      throw new AperoApiError(
+        "NETWORK_ERROR",
+        "L'API apero est injoignable (reseau, CORS ou serveur arrete).",
+      );
+    }
   }
 
   if (!response.ok) {

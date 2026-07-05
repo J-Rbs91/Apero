@@ -3,6 +3,7 @@ import type { EncryptedAperoPayload } from "../types/encryptedApero";
 import {
   AperoApiError,
   createOrUpdateEncryptedApero,
+  deleteEncryptedApero,
   joinApiUrl,
   mapStatusToErrorCode,
 } from "./aperoApiClient";
@@ -134,5 +135,80 @@ describe("createOrUpdateEncryptedApero", () => {
         encryptedPayload: PAYLOAD,
       }),
     ).rejects.toMatchObject({ code: "NETWORK_ERROR" });
+  });
+});
+
+describe("deleteEncryptedApero", () => {
+  beforeEach(() => {
+    vi.stubEnv("VITE_APERO_API_BASE_URL", "http://127.0.0.1:3103");
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("supprime via POST /delete quand le serveur récent répond", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ ok: true, deleted: true, aperoId: "apero_test1234" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await deleteEncryptedApero({
+      aperoId: "apero_test1234",
+      adminKey: "une-cle-admin",
+    });
+
+    expect(result.deleted).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("http://127.0.0.1:3103/api/aperos/apero_test1234/delete");
+    expect(init?.method).toBe("POST");
+  });
+
+  it("retombe sur DELETE /aperos/:id quand POST /delete est absent (404) sur un ancien serveur", async () => {
+    const fetchMock = vi
+      .fn()
+      // 1er appel : POST /delete inexistant sur l'ancien serveur VPS.
+      .mockResolvedValueOnce(new Response("Cannot POST", { status: 404 }))
+      // 2e appel : ancienne route REST DELETE, qui supprime via la write key.
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ ok: true, deleted: true, aperoId: "apero_test1234" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await deleteEncryptedApero({
+      aperoId: "apero_test1234",
+      legacyWriteKey: "la-write-key-partagee",
+    });
+
+    expect(result.deleted).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    const [modernUrl, modernInit] = fetchMock.mock.calls[0];
+    expect(modernUrl).toBe("http://127.0.0.1:3103/api/aperos/apero_test1234/delete");
+    expect(modernInit?.method).toBe("POST");
+
+    const [legacyUrl, legacyInit] = fetchMock.mock.calls[1];
+    expect(legacyUrl).toBe("http://127.0.0.1:3103/api/aperos/apero_test1234");
+    expect(legacyInit?.method).toBe("DELETE");
+    // L'ancien schéma strict n'accepte QUE { writeKey }.
+    expect(JSON.parse(legacyInit?.body as string)).toEqual({ writeKey: "la-write-key-partagee" });
+  });
+
+  it("ne tente pas le repli DELETE sans write key partagée (adminKey seul)", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response("Cannot POST", { status: 404 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      deleteEncryptedApero({ aperoId: "apero_test1234", adminKey: "une-cle-admin" }),
+    ).rejects.toMatchObject({ code: "NOT_FOUND" });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
