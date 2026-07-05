@@ -4,17 +4,6 @@ import { useComptoirName } from "../hooks/useComptoirName";
 import { createId } from "../utils/createId";
 import { EventOptionMobileCard } from "./EventOptionMobileCard";
 
-const bringOptions = [
-  "Chips",
-  "Saucisson",
-  "Cacahuètes",
-  "Un pack",
-  "Du soft de compétition",
-  "Un Perrier, par conviction personnelle",
-  "Des glaçons, parce que quelqu’un doit être adulte",
-  "Changer l’eau des olives",
-];
-
 type DraftVotes = Record<string, VoteStatus | "">;
 
 type VoteFormProps = {
@@ -45,7 +34,6 @@ export function VoteForm({
   );
   const [participantName, setParticipantName] = useState(comptoirName);
   const [votes, setVotes] = useState<DraftVotes>(emptyVotes);
-  const [brings, setBrings] = useState("");
   const [comment, setComment] = useState("");
   const [feedback, setFeedback] = useState("");
   // Évite qu'une soumission qu'on vient de faire soi-même ne déclenche le
@@ -83,7 +71,6 @@ export function VoteForm({
     }
 
     setVotes({ ...emptyVotes, ...existingParticipant.votes });
-    setBrings(existingParticipant.brings ?? "");
     setComment(existingParticipant.comment ?? "");
 
     if (justSubmittedRef.current) {
@@ -127,7 +114,9 @@ export function VoteForm({
       id: existingParticipant?.id ?? createId("participant"),
       participantName: trimmedName,
       votes: votes as Record<string, VoteStatus>,
-      brings: brings.trim() || undefined,
+      // Le champ « Ce que tu ramènes » a été retiré du formulaire : on
+      // conserve tel quel ce qu'une réponse précédente avait déclaré.
+      brings: existingParticipant?.brings,
       comment: comment.trim() || undefined,
       createdAt: existingParticipant?.createdAt ?? now,
       updatedAt: now,
@@ -163,21 +152,6 @@ export function VoteForm({
             />
           ))}
         </div>
-
-        <label className="field">
-          <span>Ce que tu ramènes</span>
-          <input
-            list="bring-options"
-            value={brings}
-            onChange={(eventChange) => setBrings(eventChange.target.value)}
-            placeholder="Olives, soft, pain, dignité approximative…"
-          />
-          <datalist id="bring-options">
-            {bringOptions.map((option) => (
-              <option value={option} key={option} />
-            ))}
-          </datalist>
-        </label>
 
         <label className="field">
           <span>Un petit mot pour la troupe</span>

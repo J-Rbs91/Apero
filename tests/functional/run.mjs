@@ -323,7 +323,7 @@ async function waitForSnapshot(page, aperoId) {
   );
 }
 
-async function voteOnInvite(page, inviteUrl, { blaze, votes, brings, comment }) {
+async function voteOnInvite(page, inviteUrl, { blaze, votes, comment }) {
   await page.goto(inviteUrl);
   const nameInput = page.getByPlaceholder("Jojo, Nadine, Éminence Chips…");
   await nameInput.waitFor({ state: "visible", timeout: 15_000 });
@@ -333,9 +333,6 @@ async function voteOnInvite(page, inviteUrl, { blaze, votes, brings, comment }) 
   const cards = page.locator(".vote-form .slot");
   for (let index = 0; index < votes.length; index += 1) {
     await cards.nth(index).getByText(votes[index], { exact: true }).click();
-  }
-  if (brings) {
-    await page.getByPlaceholder("Olives, soft, pain, dignité approximative…").fill(brings);
   }
   if (comment) {
     await page
@@ -456,7 +453,6 @@ await scenario("3. Vote d'un invité, puis modification de son vote", async () =
   const page = pageBob;
   await voteOnInvite(page, invite2.fullUrl, {
     votes: [VOTE_YES, VOTE_NO, VOTE_MAYBE],
-    brings: "Chips",
     comment: "Je ramène ma bonne humeur",
   });
   await waitVisible(
@@ -514,7 +510,6 @@ await scenario("5. Vote d'un second invité sur tous les créneaux (dont le nouv
   const page = pageChantal;
   await voteOnInvite(page, invite2.fullUrl, {
     votes: [VOTE_YES, VOTE_YES, VOTE_NO, VOTE_YES],
-    brings: "Un pack",
   });
   await waitVisible(
     page,
