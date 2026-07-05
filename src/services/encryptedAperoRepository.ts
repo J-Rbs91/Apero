@@ -48,9 +48,65 @@ function decodeBase64Content(value: string): string {
 }
 
 /**
+ * Sha git d'un blob : sha1("blob <taille>\0<contenu>"). C'est exactement le
+ * sha que renvoie la Contents API pour un fichier — le recalculer permet de
+ * garder un baseSha anti-conflit valide même quand on lit le fichier via
+ * raw.githubusercontent.com, qui ne fournit aucun sha.
+ */
+async function computeGitBlobSha(bytes: Uint8Array): Promise<string> {
+  const header = new TextEncoder().encode(`blob ${bytes.byteLength}\0`);
+  const blob = new Uint8Array(header.byteLength + bytes.byteLength);
+  blob.set(header, 0);
+  blob.set(bytes, header.byteLength);
+  const digest = await crypto.subtle.digest("SHA-1", blob);
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+/**
+ * Lecture de secours via raw.githubusercontent.com : servi par CDN, sans la
+ * limite de 60 requetes/heure de l'API anonyme. Contrepartie : cache CDN de
+ * quelques minutes (donnee potentiellement un peu perimee — un baseSha
+ * perime se solde par un 409 cote serveur, jamais par un ecrasement) et pas
+ * de sha fourni, d'ou le recalcul du blob sha ci-dessus.
+ */
+async function readPublicAperoFileViaRaw(
+  aperoId: string,
+): Promise<{ file: StoredEncryptedAperoFile; sha: string } | null> {
+  const url =
+    `https://raw.githubusercontent.com/${githubConfig.owner}/${githubConfig.repo}` +
+    `/${githubConfig.branch}/${APEROS_DATA_PATH}/${aperoId}.json`;
+
+  const response = await fetch(url, { cache: "no-store" });
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new EncryptedAperoError(
+      "UNREADABLE_FILE",
+      `Lecture publique impossible (HTTP ${response.status}).`,
+    );
+  }
+
+  const bytes = new Uint8Array(await response.arrayBuffer());
+
+  try {
+    const file = JSON.parse(new TextDecoder().decode(bytes)) as StoredEncryptedAperoFile;
+    return { file, sha: await computeGitBlobSha(bytes) };
+  } catch {
+    throw new EncryptedAperoError("UNREADABLE_FILE", "Fichier apero illisible.");
+  }
+}
+
+/**
  * Lecture publique du fichier chiffre via GitHub Contents API, SANS token :
  * le repo est public et ce flux ne doit jamais transporter d'Authorization.
  * Retourne aussi le sha GitHub, indispensable comme baseSha anti-conflit.
+ * L'API anonyme est plafonnee a 60 requetes/heure par IP : quota epuise
+ * (403/429), on bascule sur raw.githubusercontent.com qui n'a pas ce plafond.
  */
 export async function readPublicAperoFile(
   aperoId: string,
@@ -73,6 +129,10 @@ export async function readPublicAperoFile(
 
   if (response.status === 404) {
     return null;
+  }
+
+  if (response.status === 403 || response.status === 429) {
+    return readPublicAperoFileViaRaw(aperoId);
   }
 
   if (!response.ok) {
@@ -428,4 +488,14 @@ export async function getMyAperos(): Promise<MyAperoItem[]> {
 
 export function findLocalAperoEntry(aperoId: string): LocalAperoEntry | null {
   return findLocalApero(aperoId);
+}
+
+/**
+ * Derniere version de l'apero connue sur cet appareil (registre local).
+ * Sert de repli d'affichage quand la lecture publique GitHub echoue
+ * (quota anonyme epuise, reseau), comme le fait deja l'agenda.
+ */
+export function getCachedAperoEvent(aperoId: string): AperitifEvent | null {
+  const entry = findLocalApero(aperoId);
+  return entry ? getCachedEvent(entry) : null;
 }

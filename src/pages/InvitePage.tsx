@@ -16,6 +16,7 @@ import { AperoCryptoError } from "../services/aperoEncryption";
 import {
   addEncryptedAperoOption,
   deleteEncryptedApero,
+  getCachedAperoEvent,
   getEncryptedAperoById,
   joinApero,
   purgeDeletedApero,
@@ -173,6 +174,19 @@ export function InvitePage() {
 
         if (loadError instanceof AperoCryptoError) {
           setState({ status: "bad-key" });
+          return;
+        }
+
+        // Lecture publique en panne (quota GitHub anonyme épuisé, réseau) :
+        // comme l'agenda, on retombe sur la dernière version connue de cet
+        // apéro sur cet appareil plutôt que de bloquer l'accès — l'organisateur
+        // garde notamment la main pour le supprimer.
+        const cachedEvent = getCachedAperoEvent(aperoId);
+        if (cachedEvent) {
+          setState({ status: "ready", event: cachedEvent });
+          setError(
+            "Impossible de rafraîchir cet apéro pour le moment : voici sa dernière version connue sur cet appareil.",
+          );
           return;
         }
 

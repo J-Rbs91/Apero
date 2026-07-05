@@ -7,7 +7,9 @@ import {
   addEncryptedAperoOption,
   createEncryptedApero,
   deleteEncryptedApero,
+  getCachedAperoEvent,
   getMyAperos,
+  readPublicAperoFile,
 } from "./encryptedAperoRepository";
 import { findLocalApero, saveLocalApero } from "./localAperoRegistry";
 import { getSnapshot, saveSnapshot } from "./notificationSnapshots";
@@ -354,6 +356,61 @@ describe("encryptedAperoRepository (round-trip fetch stubbé)", () => {
     expect(remaining[0].type).toBe("apero-deleted");
     expect(remaining[0].body).toContain(cachedEvent.ceremonialName);
     expect(remaining[0].body).toContain("annulé par la personne qui l'organisait");
+  });
+
+  it("readPublicAperoFile bascule sur raw.githubusercontent quand l'API anonyme est rate-limitee (403)", async () => {
+    const aperoId = "apero_test1234";
+    // Contenu fixe dont le sha de blob git est précalculé avec l'implémentation
+    // de référence (`git hash-object --stdin`) : vérifie que le recalcul
+    // navigateur (SubtleCrypto) produit exactement le sha que GitHub attend.
+    const rawBody = '{"id":"apero_test1234","version":1,"writeKeyHash":"abc"}';
+    const expectedSha = "07852dc7dde39998b82ab5cc444566a7195b4590";
+
+    const calls: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        calls.push(url);
+
+        // Quota anonyme épuisé sur l'API Contents.
+        if (url.includes("api.github.com")) {
+          return new Response("rate limited", { status: 403 });
+        }
+
+        // Lecture de secours via le CDN raw.
+        if (url.includes("raw.githubusercontent.com")) {
+          return new Response(rawBody, { status: 200 });
+        }
+
+        throw new Error(`URL inattendue : ${url}`);
+      }),
+    );
+
+    const result = await readPublicAperoFile(aperoId);
+
+    expect(result).not.toBeNull();
+    expect(result!.file.id).toBe(aperoId);
+    expect(result!.sha).toBe(expectedSha);
+    expect(calls.some((url) => url.includes("raw.githubusercontent.com"))).toBe(true);
+  });
+
+  it("getCachedAperoEvent rend la derniere version locale d'un apero connu", async () => {
+    const aperoId = generateAperoId();
+    const cachedEvent = baseEvent(aperoId);
+
+    vi.stubGlobal("window", { localStorage: createStorageStub() });
+
+    saveLocalApero({
+      aperoId,
+      encryptionKey: "cle-chiffrement",
+      writeKey: "cle-ecriture",
+      lastKnownEvent: cachedEvent,
+      role: "creator",
+    });
+
+    expect(getCachedAperoEvent(aperoId)?.ceremonialName).toBe(cachedEvent.ceremonialName);
+    expect(getCachedAperoEvent("apero_inconnu42")).toBeNull();
   });
 
   it("getMyAperos ne purge pas un apero jamais vu publiquement (retard de propagation)", async () => {
