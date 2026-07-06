@@ -1,19 +1,21 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { WineGlassMark } from "./WineGlassMark";
 
 type SplashScreenProps = {
   onDone: () => void;
 };
 
-// Combien de temps le rideau reste levé avant de s'effacer, et durée du fondu.
-const HOLD_MS = 2600;
+// Le rideau s'efface après trois tours du verre animé, pas une seconde de plus.
+const MAX_LOOPS = 3;
 const FADE_MS = 560;
+// Filet de sécurité : si le Lottie ne charge pas (donc jamais de boucle), on
+// s'efface quand même. 3 boucles ≈ 5,4 s ; on laisse une marge de chargement.
+const SAFETY_MS = 8500;
 
 // La punchline de l'écran d'ouverture. Modifiable d'un mot.
 const TAGLINE = "Nul n’est tenu d’avoir soif pour venir perdre son temps avec un certain panache.";
-// Le clin d'œil excédé : oui, le verre est rouge et le nom parle de jaune,
-// on nous le fait remarquer à chaque tournée et on n'en peut plus.
-const ASIDE = "Oui, le verre est rouge, le nom parle de jaune. On sait. On nous la sort à chaque tournée, et non, ça ne nous fait plus rire.";
+// Le clin d'œil excédé : oui, le verre est rouge et le nom parle de jaune.
+const ASIDE = "Le rouge, le jaune… oui, la cohérence de la charte graphique a le cul entre deux chaises.";
 
 // Taille du verre : ~1/5 de la longueur de l'écran (le grand côté), bornée
 // pour rester élégante sur les très petits comme sur les très grands écrans.
@@ -28,34 +30,41 @@ function glassSize(): number {
 export function SplashScreen({ onDone }: SplashScreenProps) {
   const [leaving, setLeaving] = useState(false);
   const [size] = useState(glassSize);
+  const loopsRef = useRef(0);
+  const dismissedRef = useRef(false);
 
-  useEffect(() => {
-    const toLeave = window.setTimeout(() => setLeaving(true), HOLD_MS);
-    const toDone = window.setTimeout(onDone, HOLD_MS + FADE_MS);
-    return () => {
-      window.clearTimeout(toLeave);
-      window.clearTimeout(toDone);
-    };
-  }, [onDone]);
-
-  function skip() {
-    if (leaving) {
+  // Lance le fondu de sortie puis rend la main (une seule fois).
+  const dismiss = useCallback(() => {
+    if (dismissedRef.current) {
       return;
     }
+    dismissedRef.current = true;
     setLeaving(true);
     window.setTimeout(onDone, FADE_MS);
+  }, [onDone]);
+
+  useEffect(() => {
+    const safety = window.setTimeout(dismiss, SAFETY_MS);
+    return () => window.clearTimeout(safety);
+  }, [dismiss]);
+
+  function handleLoopComplete() {
+    loopsRef.current += 1;
+    if (loopsRef.current >= MAX_LOOPS) {
+      dismiss();
+    }
   }
 
   return (
     <div
       className={`splash ${leaving ? "splash--leaving" : ""}`.trim()}
       role="presentation"
-      onClick={skip}
+      onClick={dismiss}
     >
       <div className="screen-overlay screen-overlay--deep" aria-hidden />
       <div className="splash__inner">
         <span className="splash__glass">
-          <WineGlassMark size={size} />
+          <WineGlassMark size={size} onLoopComplete={handleLoopComplete} />
         </span>
         <p className="splash__eyebrow">Institution officieuse du comptoir</p>
         <h1 className="splash__name">La Confrérie du Petit Jaune</h1>

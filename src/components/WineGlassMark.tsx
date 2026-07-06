@@ -4,10 +4,15 @@ import type { AnimationItem } from "lottie-web";
 type WineGlassMarkProps = {
   size?: number;
   className?: string;
+  // Appelé à chaque fois que l'animation boucle (fin d'un tour du SVG).
+  onLoopComplete?: () => void;
 };
 
-export function WineGlassMark({ size = 28, className = "" }: WineGlassMarkProps) {
+export function WineGlassMark({ size = 28, className = "", onLoopComplete }: WineGlassMarkProps) {
   const ref = useRef<HTMLSpanElement>(null);
+  // Ref sur le dernier callback : évite de recharger l'animation quand il change.
+  const onLoopRef = useRef(onLoopComplete);
+  onLoopRef.current = onLoopComplete;
 
   useEffect(() => {
     let animation: AnimationItem | undefined;
@@ -29,6 +34,10 @@ export function WineGlassMark({ size = 28, className = "" }: WineGlassMarkProps)
         loop: true,
         autoplay: true,
         animationData: animationModule.default,
+      });
+
+      animation.addEventListener("loopComplete", () => {
+        onLoopRef.current?.();
       });
     });
 
