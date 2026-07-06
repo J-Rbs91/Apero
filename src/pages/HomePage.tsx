@@ -26,8 +26,9 @@ export function HomePage() {
           n'y paraît.
         </p>
         <p className="hint">
-          Pastaga, pinard, soft, Perrier ou juste des cacahuètes : la tablée s'équipe comme elle
-          veut, mais personne n'a le droit de se défiler, figure-toi.
+          Nous ne saurions présumer de ce que tu porteras à tes lèvres, ni sous quelle toiture, ou
+          pas, tu le porteras. Ces détails demeurent ta souveraine affaire. En revanche nul ne
+          saurait se dérober à la question qui vient, ça, jamais.
         </p>
         <Link className="button button--primary button--block" to="/create">
           Organiser un apéro
