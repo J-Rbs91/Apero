@@ -2,6 +2,7 @@ import { useEffect, useState, type CSSProperties } from "react";
 import comptoirBackground from "./assets/art/Le-zinc.jpg";
 import { ComptoirNameOnboarding } from "./components/onboarding/ComptoirNameOnboarding";
 import { NotificationPermissionOnboarding } from "./components/onboarding/NotificationPermissionOnboarding";
+import { SplashScreen } from "./components/SplashScreen";
 import {
   COMPTOIR_NAME_EDIT_EVENT,
   useComptoirName,
@@ -19,6 +20,7 @@ const appShellStyle = {
 
 export function App() {
   const { comptoirName, setComptoirName } = useComptoirName();
+  const [showSplash, setShowSplash] = useState(true);
   const [isEditingComptoirName, setIsEditingComptoirName] = useState(false);
   const { isSupported, seenOnboarding, request, dismissOnboarding } = useNotificationPermission();
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);
@@ -85,6 +87,7 @@ export function App() {
   return (
     <div className="app-shell" style={appShellStyle}>
       <div className="app-shell__content">
+        {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
         {shouldShowNameOnboarding ? (
           <ComptoirNameOnboarding
             initialName={comptoirName}
