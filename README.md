@@ -4,9 +4,9 @@
 
 La Confrérie du Petit Jaune est un mini Doodle de comptoir : une personne convoque une assemblée, propose plusieurs combinaisons date + heure + lieu, puis partage un lien unique. La tablée invitée vote uniquement sur cette assemblée.
 
-Le contraste est volontaire : un nom pompeux, presque chevaleresque, pour une mission absolument essentielle et moyennement distinguée : se mettre d’accord pour boire un coup. Chaque convive vient avec son carburant — pastaga, pinard, soft, Perrier ou cacahuètes — mais tout le monde passe par le registre.
+Le contraste est volontaire : un nom pompeux, presque chevaleresque, pour une mission absolument essentielle et moyennement distinguée : se mettre d’accord pour se retrouver quelque part. On ne présume rien, ni de l’endroit — terrasse, zinc ou trottoir — ni du contenu du verre : chacun s’abreuve selon sa conscience et sa constitution, mais tout le monde passe par le registre.
 
-Ligne éditoriale : *une app d’apéro de comptoir, absurde, alcool-compatible et pleine de gouaille, ouverte à toute la tablée — pas seulement aux gentlemen du pastaga.*
+Ligne éditoriale : *une app de comptoir, absurde et pleine de gouaille, ouverte à toute la tablée — car derrière le pastaga du nom, ce qu’on porte à ses lèvres demeure la souveraine affaire de chacun.*
 
 ## Principe multi-aperos
 
