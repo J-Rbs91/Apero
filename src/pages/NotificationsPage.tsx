@@ -20,7 +20,7 @@ function formatWhen(iso: string): string {
   }
   const diffMinutes = Math.round((Date.now() - then) / 60000);
   if (diffMinutes < 1) {
-    return "à l'instant";
+    return "à l’instant";
   }
   if (diffMinutes < 60) {
     return `il y a ${diffMinutes} min`;
@@ -88,7 +88,7 @@ export function NotificationsPage() {
         <section className="sheet">
           <p className="lbl">Notifications du téléphone</p>
           <p className="lede">
-            Pour être prévenu même quand l'app est fermée, autorise les notifications système. Sinon,
+            Pour être prévenu même quand l’app est fermée, autorise les notifications système. Sinon,
             pas de panique : le badge rouge reste là dès que tu ouvres la Confrérie.
           </p>
           <button
@@ -106,11 +106,11 @@ export function NotificationsPage() {
       {!hasNotifications ? (
         <section className="sheet">
           <p className="lede">
-            Le carnet est vide, silencieux, presque zen. Dès qu'un convive bouge une olive, tu le
+            Le carnet est vide, silencieux, presque zen. Dès qu’un convive bouge une olive, tu le
             sauras ici.
           </p>
           <Link className="button button--ghost button--block" to="/agenda">
-            Voir l'agenda du comptoir
+            Voir l’agenda du comptoir
           </Link>
         </section>
       ) : (

@@ -214,8 +214,8 @@ export function purgeDeletedApero(aperoId: string): boolean {
       type: "apero-deleted",
       title: "Apéro annulé",
       body: aperoName
-        ? `« ${aperoName} » a été annulé par la personne qui l'organisait. Il a été retiré de ton agenda.`
-        : "Un apéro auquel tu participais a été annulé par la personne qui l'organisait. Il a été retiré de ton agenda.",
+        ? `« ${aperoName} » a été annulé par la personne qui l’organisait. Il a été retiré de ton agenda.`
+        : "Un apéro auquel tu participais a été annulé par la personne qui l’organisait. Il a été retiré de ton agenda.",
       createdAt: now,
       read: false,
       dedupeKey: `${aperoId}:deleted`,

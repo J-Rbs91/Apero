@@ -14,7 +14,7 @@ const REASONS = [
   "Recevoir les réponses des invités",
   "Être informé des nouvelles propositions",
   "Ne pas oublier de confirmer ta présence",
-  "Recevoir les rappels importants avant l'apéro",
+  "Recevoir les rappels importants avant l’apéro",
 ];
 
 export function NotificationPermissionOnboarding({
@@ -39,8 +39,8 @@ export function NotificationPermissionOnboarding({
             On te prévient quand ça bouge au comptoir ?
           </h1>
           <p className="lede">
-            Autorise les notifications pour ne rien rater de tes apéros, même quand l'app est fermée.
-            Tu gardes la main : tu peux refuser, le badge rouge dans l'app fera le guet quand même.
+            Autorise les notifications pour ne rien rater de tes apéros, même quand l’app est fermée.
+            Tu gardes la main : tu peux refuser, le badge rouge dans l’app fera le guet quand même.
           </p>
 
           <ul className="notif-reasons">

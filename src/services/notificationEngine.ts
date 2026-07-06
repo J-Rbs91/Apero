@@ -133,13 +133,13 @@ function buildNotifications(
         drafts.push({
           type: "guest-responded",
           title: "Nouvelle réponse au registre",
-          body: `${participant.participantName} vient d'émarger à « ${event.ceremonialName} ».`,
+          body: `${participant.participantName} vient d’émarger à « ${event.ceremonialName} ».`,
           dedupeKey: `${event.id}:responded:${key}`,
         });
       } else if (previousSignature !== signature) {
         drafts.push({
           type: "guest-changed-response",
-          title: "Un convive a changé d'avis",
+          title: "Un convive a changé d’avis",
           body: `${participant.participantName} a modifié sa réponse à « ${event.ceremonialName} ».`,
           // La signature entre dans la clé : chaque modification distincte
           // produit sa propre notification.
@@ -201,7 +201,7 @@ function buildNotifications(
     const wasAlreadySet = Boolean(previous.selectedOptionId);
     drafts.push({
       type: wasAlreadySet ? "important-change" : "final-confirmation",
-      title: wasAlreadySet ? "Changement important" : "C'est confirmé !",
+      title: wasAlreadySet ? "Changement important" : "C’est confirmé !",
       body: selected
         ? `« ${event.ceremonialName} » est calé : ${selected.date} à ${selected.time}, ${selected.location}.`
         : `Le créneau retenu de « ${event.ceremonialName} » a changé.`,

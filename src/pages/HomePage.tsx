@@ -22,8 +22,8 @@ export function HomePage() {
         <hr className="accent" />
         <h1 className="h1">La Confrérie du Petit Jaune</h1>
         <p className="lede">
-          Le zinc décide, pour toute la tablée. Choisir une date d'apéro, c'est plus sérieux qu'il
-          n'y paraît.
+          Le zinc décide, pour toute la tablée. Choisir une date d’apéro, c’est plus sérieux qu’il
+          n’y paraît.
         </p>
         <p className="hint">
           Nous ne saurions présumer de ce que tu porteras à tes lèvres, ni sous quelle toiture, ou

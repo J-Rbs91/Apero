@@ -67,7 +67,7 @@ export function CreateEventPage() {
       cleanedOptions.some((option) => !option.date || !option.time || !option.location)
     ) {
       setFeedback(
-        "Chaque créneau réclame un jour, une heure et un établissement, parce qu'un apéro sans lieu ni horaire, ce n'est plus un apéro, c'est un concept — et ici, on n'organise pas de concepts.",
+        "Chaque créneau réclame un jour, une heure et un établissement, parce qu’un apéro sans lieu ni horaire, ce n’est plus un apéro, c’est un concept — et ici, on n’organise pas de concepts.",
       );
       return;
     }
@@ -96,7 +96,7 @@ export function CreateEventPage() {
 
       if (trimmedCeremonialName && storageMode !== "api-vps" && isCeremonialNameTaken(trimmedCeremonialName, activeEvents)) {
         setFeedback(
-          "Ce nom d'apéro est déjà pris par un événement en cours. Trouve-en un autre, ou laisse le champ vide pour un tirage au sort.",
+          "Ce nom d’apéro est déjà pris par un événement en cours. Trouve-en un autre, ou laisse le champ vide pour un tirage au sort.",
         );
         return;
       }
@@ -176,9 +176,9 @@ export function CreateEventPage() {
     } catch (error) {
       setFeedback(
         error instanceof AperoApiError && error.code === "API_NOT_CONFIGURED"
-          ? "Le comptoir numérique n'est pas encore raccordé (API non configurée) : impossible de créer l'apéro dans ce mode. Repasse en mode classique ou configure VITE_APERO_API_BASE_URL."
+          ? "Le comptoir numérique n’est pas encore raccordé (API non configurée) : impossible de créer l’apéro dans ce mode. Repasse en mode classique ou configure VITE_APERO_API_BASE_URL."
           : error instanceof AperoApiError && error.code === "NETWORK_ERROR"
-            ? "Impossible de joindre le comptoir numérique. Vérifie la connexion (ou que l'API tourne bien) et réessaie."
+            ? "Impossible de joindre le comptoir numérique. Vérifie la connexion (ou que l’API tourne bien) et réessaie."
             : error instanceof Error && error.message === "NO_CEREMONIAL_NAME_AVAILABLE"
               ? "La Confrérie est complète, archi-complète même : trop d’apéros tournent déjà en coulisses dans une magouille généralisée que plus personne ne maîtrise vraiment. Clôture un apéro avant d’en lancer un nouveau, sinon c’est le chaos total."
               : error instanceof Error
