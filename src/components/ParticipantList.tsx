@@ -93,7 +93,7 @@ export function ParticipantList({ participants }: ParticipantListProps) {
                 <div id="reponses-autres" className="event-stack">
                   {waveringParticipants.length > 0 && (
                     <>
-                      <p className="lbl">Pas encore sûrs</p>
+                      <p className="lbl">Le cul entre deux chaises</p>
                       <div className="people">
                         {waveringParticipants.map((participant) => (
                           <ParticipantRow key={participant.id} participant={participant} />
