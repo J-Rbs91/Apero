@@ -6,7 +6,6 @@ export type BadgeId =
   | "SUPER_ORGANIZER"
   | "FAITHFUL_MEMBER"
   | "SERIAL_VOTER"
-  | "BANQUET_PROVIDER"
   | "LAST_MINUTE_MINISTER"
   | "ZINC_DIPLOMAT"
   | "FIRST_SHOT_CONSENSUS";
@@ -21,7 +20,6 @@ export type BadgeIconName =
   | "crown"
   | "member"
   | "ballot"
-  | "banquet"
   | "minister"
   | "diplomat";
 
@@ -86,13 +84,6 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
       "A déposé un nombre de réponses qui frise l’acharnement dans les apéros de la Confrérie.",
     rarity: "common",
     iconName: "ballot",
-  },
-  {
-    id: "BANQUET_PROVIDER",
-    name: "Providence du Banquet",
-    description: "A régulièrement indiqué une contribution au banquet. Chips, saucisson ou gloire éternelle.",
-    rarity: "common",
-    iconName: "banquet",
   },
   {
     id: "LAST_MINUTE_MINISTER",

@@ -134,7 +134,6 @@ La procédure complète (mise en service de l’API sur le VPS + raccordement Gi
 - Page publique par lien unique basé sur l’`id` technique.
 - Vote par pseudo : j’y serai, j’me tâte, sans moi.
 - Modification du vote si le même pseudo revient.
-- Contributions au banquet et déclarations au comptoir.
 - Registre du comptoir groupé : les présences en tête, les désertions et les culs entre deux chaises dans un menu dépliant.
 - Lieu avec autocomplétion OpenStreetMap (API publique Photon, sans clé) : nom de l’établissement → adresse + coordonnées, saisie libre conservée pour « chez Dédé ».
 - Mini-carte Leaflet sous le verdict quand le créneau en tête a des coordonnées, avec lien vers OpenStreetMap.

@@ -195,10 +195,6 @@ export function getMemberBadgeIds(context: MemberBadgeContext): BadgeId[] {
     badgeIds.push("SERIAL_VOTER");
   }
 
-  if (stats.contributionCount >= 3) {
-    badgeIds.push("BANQUET_PROVIDER");
-  }
-
   if (stats.maybeVoteCount >= 3) {
     badgeIds.push("LAST_MINUTE_MINISTER");
   }

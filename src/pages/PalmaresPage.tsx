@@ -174,7 +174,7 @@ export function PalmaresPage() {
         <section className="sheet">
           <p className="lede">
             Le tableau est encore vierge, d’une blancheur presque suspecte. Organise, réponds,
-            ramène le saucisson : les breloques, elles, suivront — elles suivent toujours.
+            ramène surtout ta bobine : les breloques, elles, suivront — elles suivent toujours.
           </p>
         </section>
       ) : (

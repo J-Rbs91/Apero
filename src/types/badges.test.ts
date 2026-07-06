@@ -9,7 +9,6 @@ const validIconNames: BadgeIconName[] = [
   "crown",
   "member",
   "ballot",
-  "banquet",
   "minister",
   "diplomat",
 ];
