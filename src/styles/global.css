@@ -947,6 +947,17 @@ input[type="range"] {
   animation: splash-fade 760ms ease 460ms both;
 }
 
+.splash__aside {
+  margin: 14px 0 0;
+  max-width: 320px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--pastis) 34%, transparent);
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--cream) 58%, transparent);
+  animation: splash-fade 820ms ease 620ms both;
+}
+
 @keyframes splash-rise {
   from {
     opacity: 0;

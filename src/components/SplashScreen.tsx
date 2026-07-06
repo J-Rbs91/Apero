@@ -10,7 +10,9 @@ const HOLD_MS = 2600;
 const FADE_MS = 560;
 
 // La punchline de l'écran d'ouverture. Modifiable d'un mot.
-const TAGLINE = "Ici, l’indécision collective finit toujours par accoucher d’une date. C’est laborieux, c’est glorieux.";
+const TAGLINE = "Nul n’est tenu d’avoir soif pour venir perdre son temps avec un certain panache.";
+// Le clin d'œil : logo verre de rouge, nom qui tire sur le jaune (pastaga).
+const ASIDE = "Un logo rouge, un nom qui vire au jaune : même notre charte graphique a le cul entre deux chaises.";
 
 // Taille du verre : ~1/5 de la longueur de l'écran (le grand côté), bornée
 // pour rester élégante sur les très petits comme sur les très grands écrans.
@@ -57,6 +59,7 @@ export function SplashScreen({ onDone }: SplashScreenProps) {
         <p className="splash__eyebrow">Institution officieuse du comptoir</p>
         <h1 className="splash__name">La Confrérie du Petit Jaune</h1>
         <p className="splash__tagline">{TAGLINE}</p>
+        <p className="splash__aside">{ASIDE}</p>
       </div>
     </div>
   );
