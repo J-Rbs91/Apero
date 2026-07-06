@@ -100,16 +100,18 @@ export function ComptoirNameOnboarding({
               {confirmedName}
               {" »"}
             </span>
-            <button className="button button--primary button--block" type="button" onClick={handleConfirm}>
-              {"Oui, grave ça dans le zinc"}
-            </button>
-            <button
-              className="button button--ghost button--block"
-              type="button"
-              onClick={() => setConfirmedName("")}
-            >
-              Non, je change de blaze
-            </button>
+            <div className="button-row">
+              <button className="button button--primary" type="button" onClick={handleConfirm}>
+                {"Oui, grave ça dans le zinc"}
+              </button>
+              <button
+                className="button button--ghost"
+                type="button"
+                onClick={() => setConfirmedName("")}
+              >
+                Non, je change de blaze
+              </button>
+            </div>
           </section>
         </div>
       )}

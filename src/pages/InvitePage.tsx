@@ -448,22 +448,24 @@ export function InvitePage() {
               Cette action est définitive : créneaux, réponses, votes et contre-propositions, tout
               disparaît pour de bon. Pas de retour en arrière possible.
             </p>
-            <button
-              type="button"
-              className="button button--danger button--block"
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? "Suppression…" : "Oui, supprimer définitivement"}
-            </button>
-            <button
-              type="button"
-              className="button button--ghost button--block"
-              onClick={() => setShowDeleteConfirm(false)}
-              disabled={isDeleting}
-            >
-              Non, je le garde
-            </button>
+            <div className="button-row">
+              <button
+                type="button"
+                className="button button--ghost"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+              >
+                Non, je le garde
+              </button>
+              <button
+                type="button"
+                className="button button--danger"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Suppression…" : "Oui, supprimer définitivement"}
+              </button>
+            </div>
             {error && <p className="feedback">{error}</p>}
           </section>
         </div>

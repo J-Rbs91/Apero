@@ -113,11 +113,11 @@ export function AlternativeOptionForm({
           </div>
         </div>
 
-        <div className="vote-form">
-          <button className="button button--primary button--block" disabled={isSaving} type="submit">
+        <div className="button-row">
+          <button className="button button--primary" disabled={isSaving} type="submit">
             {isSaving ? "Envoi…" : "Proposer cette date"}
           </button>
-          <button className="button button--ghost button--block" type="button" onClick={onClose}>
+          <button className="button button--ghost" type="button" onClick={onClose}>
             Annuler
           </button>
         </div>
