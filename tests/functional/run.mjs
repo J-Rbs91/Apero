@@ -306,7 +306,7 @@ async function createApero(page, { name, description, slots }) {
     }
     await fillCreateSlot(page, index, slots[index]);
   }
-  await page.getByRole("button", { name: "Envoyer l’invitation" }).click();
+  await page.getByRole("button", { name: "Créer l’apéro" }).click();
   await page.waitForURL(/#\/invite\/apero_/, { timeout: 20_000 });
   return parseInviteUrl(page.url());
 }

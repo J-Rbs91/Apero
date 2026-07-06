@@ -371,6 +371,15 @@ a {
   transform: translateY(-1px);
 }
 
+.button:active {
+  transform: translateY(1px);
+}
+
+.button:disabled,
+.button:disabled:hover {
+  transform: none;
+}
+
 .button--primary {
   color: var(--ink);
   background: var(--pastis);

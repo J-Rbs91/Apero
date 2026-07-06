@@ -176,7 +176,7 @@ export function CreateEventPage() {
     } catch (error) {
       setFeedback(
         error instanceof AperoApiError && error.code === "API_NOT_CONFIGURED"
-          ? "Le comptoir numérique n'est pas encore raccordé (API non configurée) : impossible d'envoyer l'invitation dans ce mode. Repasse en mode classique ou configure VITE_APERO_API_BASE_URL."
+          ? "Le comptoir numérique n'est pas encore raccordé (API non configurée) : impossible de créer l'apéro dans ce mode. Repasse en mode classique ou configure VITE_APERO_API_BASE_URL."
           : error instanceof AperoApiError && error.code === "NETWORK_ERROR"
             ? "Impossible de joindre le comptoir numérique. Vérifie la connexion (ou que l'API tourne bien) et réessaie."
             : error instanceof Error && error.message === "NO_CEREMONIAL_NAME_AVAILABLE"
@@ -276,7 +276,7 @@ export function CreateEventPage() {
         </button>
 
         <button className="button button--primary button--block" disabled={isSubmitting}>
-          {isSubmitting ? "Envoi de l’invitation…" : "Envoyer l’invitation"}
+          {isSubmitting ? "Création de l’apéro…" : "Créer l’apéro"}
         </button>
         {feedback && (
           <p className="feedback" role="alert">
