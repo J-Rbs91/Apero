@@ -103,7 +103,7 @@ export function ParticipantList({ participants }: ParticipantListProps) {
                   )}
                   {decliningParticipants.length > 0 && (
                     <>
-                      <p className="lbl">Ne viendront pas</p>
+                      <p className="lbl">Les déserteurs</p>
                       <div className="people">
                         {decliningParticipants.map((participant) => (
                           <ParticipantRow key={participant.id} participant={participant} />
