@@ -14,6 +14,11 @@ type VoteFormProps = {
   extraFields?: React.ReactNode;
   /** Créneau actuellement en tête, mis en évidence dans la liste des cartes. */
   leadingOptionId?: string;
+  /**
+   * Ouvre le formulaire de contre-proposition. Fourni → un bouton « Proposer un
+   * autre créneau » s'affiche à côté du bouton d'envoi, sur la même ligne.
+   */
+  onProposeSlot?: () => void;
 };
 
 export function VoteForm({
@@ -22,6 +27,7 @@ export function VoteForm({
   onSubmit,
   extraFields,
   leadingOptionId,
+  onProposeSlot,
 }: VoteFormProps) {
   const { comptoirName } = useComptoirName();
   const emptyVotes = useMemo(
@@ -165,9 +171,20 @@ export function VoteForm({
 
         {extraFields}
 
-        <button className="button button--primary button--block" type="submit" disabled={isSaving}>
-          {isSaving ? "Envoi de ta réponse…" : "Répondre à l’invitation"}
-        </button>
+        {onProposeSlot ? (
+          <div className="button-row">
+            <button className="button button--primary" type="submit" disabled={isSaving}>
+              {isSaving ? "Envoi…" : "Répondre à l’invitation"}
+            </button>
+            <button className="button button--ghost" type="button" onClick={onProposeSlot}>
+              Proposer un autre créneau
+            </button>
+          </div>
+        ) : (
+          <button className="button button--primary button--block" type="submit" disabled={isSaving}>
+            {isSaving ? "Envoi de ta réponse…" : "Répondre à l’invitation"}
+          </button>
+        )}
         {feedback && (
           <p className="feedback" role="status">
             {feedback}

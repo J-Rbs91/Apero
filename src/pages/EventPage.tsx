@@ -28,6 +28,7 @@ export function EventPage() {
   const [isPurged, setIsPurged] = useState(false);
   const [isLoading, setIsLoading] = useState(!initialEvent);
   const [isSaving, setIsSaving] = useState(false);
+  const [isProposingSlot, setIsProposingSlot] = useState(false);
   const [isAddingOption, setIsAddingOption] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -233,8 +234,14 @@ export function EventPage() {
           isSaving={isSaving}
           onSubmit={handleVoteSubmit}
           leadingOptionId={result?.type === "winner" ? result.optionId : undefined}
+          onProposeSlot={() => setIsProposingSlot(true)}
         />
-        <AlternativeOptionForm isSaving={isAddingOption} onSubmit={handleOptionSubmit} />
+        <AlternativeOptionForm
+          isSaving={isAddingOption}
+          isOpen={isProposingSlot}
+          onClose={() => setIsProposingSlot(false)}
+          onSubmit={handleOptionSubmit}
+        />
 
         <ParticipantList participants={event.participants} />
 

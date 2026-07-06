@@ -405,6 +405,17 @@ a {
   width: 100%;
 }
 
+/* Deux boutons côte à côte, même largeur, même hauteur. */
+.button-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.button-row .button {
+  width: 100%;
+}
+
 .ghost-link {
   align-self: center;
   margin-top: 2px;

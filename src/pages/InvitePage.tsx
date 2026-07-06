@@ -110,6 +110,7 @@ export function InvitePage() {
   );
   const [traquenardVote, setTraquenardVote] = useState(5);
   const [isSaving, setIsSaving] = useState(false);
+  const [isProposingSlot, setIsProposingSlot] = useState(false);
   const [isAddingOption, setIsAddingOption] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -366,11 +367,17 @@ export function InvitePage() {
             isSaving={isSaving}
             onSubmit={handleVoteSubmit}
             leadingOptionId={winnerId}
+            onProposeSlot={() => setIsProposingSlot(true)}
             extraFields={
               <TraquenardSlider value={traquenardVote} onChange={setTraquenardVote} />
             }
           />
-          <AlternativeOptionForm isSaving={isAddingOption} onSubmit={handleOptionSubmit} />
+          <AlternativeOptionForm
+            isSaving={isAddingOption}
+            isOpen={isProposingSlot}
+            onClose={() => setIsProposingSlot(false)}
+            onSubmit={handleOptionSubmit}
+          />
         </>
       ) : (
         <section className="sheet">
