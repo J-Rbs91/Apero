@@ -11,8 +11,9 @@ const FADE_MS = 560;
 
 // La punchline de l'écran d'ouverture. Modifiable d'un mot.
 const TAGLINE = "Nul n’est tenu d’avoir soif pour venir perdre son temps avec un certain panache.";
-// Le clin d'œil : logo verre de rouge, nom qui tire sur le jaune (pastaga).
-const ASIDE = "Un logo rouge, un nom qui vire au jaune : même notre charte graphique a le cul entre deux chaises.";
+// Le clin d'œil excédé : oui, le verre est rouge et le nom parle de jaune,
+// on nous le fait remarquer à chaque tournée et on n'en peut plus.
+const ASIDE = "Oui, le verre est rouge, le nom parle de jaune. On sait. On nous la sort à chaque tournée, et non, ça ne nous fait plus rire.";
 
 // Taille du verre : ~1/5 de la longueur de l'écran (le grand côté), bornée
 // pour rester élégante sur les très petits comme sur les très grands écrans.
