@@ -11,6 +11,20 @@ export function HomePage() {
     });
   }, []);
 
+  // L’accueil est un écran d’atterrissage tenu sur une seule vue : on verrouille
+  // le défilement du document le temps qu’on y reste, pour couper le petit
+  // débordement vertical (barre d’adresse mobile : 100vh > 100dvh).
+  useEffect(() => {
+    const root = document.documentElement;
+    const { body } = document;
+    root.classList.add("is-locked");
+    body.classList.add("is-locked");
+    return () => {
+      root.classList.remove("is-locked");
+      body.classList.remove("is-locked");
+    };
+  }, []);
+
   return (
     <MobilePage className="home-mobile" overlay="scene">
       <BrandMenu />

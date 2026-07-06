@@ -49,6 +49,18 @@ body {
   background: var(--green-900);
 }
 
+/* Verrou de défilement des écrans tenus sur une seule vue (accueil). Posé sur
+   <html> et <body> pour couper le défilement du document quel que soit
+   l’élément qui défile selon le navigateur. */
+.is-locked {
+  overflow: hidden;
+}
+
+html.is-locked,
+body.is-locked {
+  height: 100dvh;
+}
+
 button,
 input,
 textarea {
