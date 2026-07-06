@@ -110,7 +110,7 @@ export function NotificationsPage() {
             sauras ici.
           </p>
           <Link className="button button--ghost button--block" to="/agenda">
-            Voir l’agenda du comptoir
+            Voir l’ardoise du comptoir
           </Link>
         </section>
       ) : (

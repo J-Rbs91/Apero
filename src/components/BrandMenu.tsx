@@ -87,7 +87,7 @@ export function BrandMenu() {
             to="/agenda"
             onClick={() => setIsOpen(false)}
           >
-            Agenda
+            Ardoise
           </Link>
           <Link
             className="brand-menu__item"

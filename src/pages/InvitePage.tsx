@@ -302,7 +302,7 @@ export function InvitePage() {
           : state.status === "not-found"
             ? "Cet apéro reste introuvable : soit ce lien ne mène nulle part, soit l’apéro a déjà eu lieu."
             : state.status === "deleted"
-              ? "Cet apéro a été annulé par la personne qui l’organisait : créneaux, votes et registre, tout a été effacé. Il a aussi été retiré de ton agenda sur cet appareil."
+              ? "Cet apéro a été annulé par la personne qui l’organisait : créneaux, votes et registre, tout a été effacé. Il a aussi été retiré de ton ardoise sur cet appareil."
               : state.status === "bad-key"
                 ? "Cette clé n’ouvre pas cet apéro : lien tronqué ou périmé. Demande une invitation fraîche."
                 : state.message;
@@ -348,7 +348,7 @@ export function InvitePage() {
         <h1 className="h1 h1--sm">{event.ceremonialName}</h1>
         {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
         {hasLocalEntry && (
-          <p className="meta">C’est noté : tu retrouveras cet apéro dans ton agenda sur cet appareil.</p>
+          <p className="meta">C’est noté : tu retrouveras cet apéro dans ton ardoise sur cet appareil.</p>
         )}
       </section>
 

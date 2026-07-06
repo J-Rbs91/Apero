@@ -118,7 +118,7 @@ export function AgendaPage() {
   if (isLoading) {
     return (
       <MobilePage className="agenda-mobile" overlay="deep">
-        <MobileHeader eyebrow="L’agenda du comptoir" />
+        <MobileHeader eyebrow="L’ardoise du comptoir" />
         <LoadingScreen title="On feuillette l’ardoise" subtitle="La Confrérie sort les apéros à venir…" />
       </MobilePage>
     );
@@ -126,7 +126,7 @@ export function AgendaPage() {
 
   return (
     <MobilePage className="agenda-mobile" overlay="deep">
-      <MobileHeader eyebrow="L’agenda du comptoir" />
+      <MobileHeader eyebrow="L’ardoise du comptoir" />
 
       <section className="sheet">
         <h1 className="h1 h1--sm">Les apéros à venir</h1>
