@@ -19,7 +19,7 @@ export function buildShareText(event: AperitifEvent): string {
   }
   lines.push("");
   lines.push(
-    "Petite mousse, pinard, soft ou cacahuètes : chaque convive vient avec son carburant, mais personne, sous aucun prétexte, ne répond à sa place.",
+    "Nous ne présumons rien, ni l’endroit, ni le contenu du verre. Qu’il s’agisse d’une terrasse, d’un zinc ou d’un trottoir, chacun s’abreuve selon sa conscience et sa constitution. La nature exacte de ton breuvage relève d’une intimité que nous nous garderons bien de sonder. L’essentiel se résume à ceci : ta présence n’engage que toi, et il serait fort malvenu qu’un tiers en dispose à ta place.",
   );
   lines.push("Réponds ici :");
 
