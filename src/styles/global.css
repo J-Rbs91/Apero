@@ -10,6 +10,11 @@
   --green-800: #11342a;
   --green-700: #14543b;
   --green-600: #1d704d;
+  /* Vert d'ouverture : la teinte du haut du mur (mur-vert.jpg) sous le voile du
+     dégradé de légibilité. Sert de fond continu du démarrage — splash natif
+     (manifest) → premier paint du body → repli du splash web — pour que
+     l'enchaînement jusqu'à la texture du mur se fasse sans rupture de couleur. */
+  --comptoir-open: #182c1f;
   --pastis: #f4c542;
   --pastis-soft: #ffe39a;
   --bar-red: #b8322b;
@@ -46,7 +51,7 @@ body {
   margin: 0;
   overflow-x: hidden;
   color: var(--cream);
-  background: var(--green-900);
+  background: var(--comptoir-open);
 }
 
 /* Verrou de défilement des écrans tenus sur une seule vue (accueil). Posé sur
@@ -892,8 +897,8 @@ input[type="range"] {
   /* Fond de l'écran d'ouverture : le mur vert du décor (Le-zinc.jpg), cropé sur
      le mur seul, en vraie texture — pas un aplat. Le vert plat reste en repli si
      l'image n'a pas encore chargé. */
-  background: var(--green-900) url("../assets/art/mur-vert.jpg") center / cover
-    no-repeat;
+  background: var(--comptoir-open) url("../assets/art/mur-vert.jpg") center /
+    cover no-repeat;
   opacity: 1;
   transition: opacity 560ms ease;
 }
