@@ -38,7 +38,7 @@ export function AlternativeOptionForm({
     const trimmedLocation = locationValue.location.trim();
 
     if (!date || !time || !trimmedLocation) {
-      setFeedback("Il manque un jour, une heure ou un lieu pour cette proposition.");
+      setFeedback("Quitte à imposer cette contradiction, il s’agirait au moins d’avoir l’élégance d’être précis : un jour, une heure ou un lieu, par exemple, histoire que cette proposition ait meilleure mine que la tienne.");
       return;
     }
 
