@@ -43,7 +43,7 @@ export function AlternativeOptionForm({
     }
 
     if (!trimmedName) {
-      setFeedback("Indique ton prénom, pour qu’on sache qui propose ce créneau.");
+      setFeedback("Indique ton blaze, qu’on sache au moins l’intitulé du fauteur de troubles.");
       return;
     }
 
