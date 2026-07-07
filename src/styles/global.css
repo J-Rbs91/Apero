@@ -889,7 +889,11 @@ input[type="range"] {
   display: grid;
   place-items: center;
   padding: 24px;
-  background: var(--green-900);
+  /* Fond de l'écran d'ouverture : le mur vert du décor (Le-zinc.jpg), cropé sur
+     le mur seul, en vraie texture — pas un aplat. Le vert plat reste en repli si
+     l'image n'a pas encore chargé. */
+  background: var(--green-900) url("../assets/art/mur-vert.jpg") center / cover
+    no-repeat;
   opacity: 1;
   transition: opacity 560ms ease;
 }
