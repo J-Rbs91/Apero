@@ -10,7 +10,12 @@ type VoteFormProps = {
   event: AperitifEvent;
   isSaving: boolean;
   onSubmit: (response: ParticipantResponse) => Promise<void>;
-  /** Champs additionnels affichés avant le bouton d'envoi (ex. pronostic ludique). */
+  /**
+   * Champs additionnels insérés juste après les créneaux, avant le mot libre
+   * (ex. pronostic ludique du Traquenard-O-mètre). Regroupés avec les votes
+   * (même geste, même famille « mon ressenti sur cet apéro »), ils laissent le
+   * commentaire fermer le formulaire juste avant le bouton d'envoi.
+   */
   extraFields?: React.ReactNode;
   /** Créneau actuellement en tête, mis en évidence dans la liste des cartes. */
   leadingOptionId?: string;
@@ -159,6 +164,8 @@ export function VoteForm({
           ))}
         </div>
 
+        {extraFields}
+
         <label className="field">
           <span>Un petit mot pour la troupe</span>
           <textarea
@@ -168,8 +175,6 @@ export function VoteForm({
             placeholder="Je viendrai si le monde ne s’est pas arrêté de tourner d’ici là."
           />
         </label>
-
-        {extraFields}
 
         {onProposeSlot ? (
           <div className="button-row">
