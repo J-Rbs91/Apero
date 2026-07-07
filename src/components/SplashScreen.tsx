@@ -13,7 +13,7 @@ const FADE_MS = 560;
 const SAFETY_MS = 8500;
 
 // La punchline de l'écran d'ouverture. Modifiable d'un mot.
-const TAGLINE = "Nul n’est tenu d’avoir soif pour venir perdre son temps avec un certain panache.";
+const TAGLINE = "Nul n’est tenu d’avoir soif pour venir perdre son temps avec panache.";
 // Le clin d'œil excédé : oui, le verre est rouge et le nom parle de jaune.
 const ASIDE = "Le rouge, le jaune… oui, la cohérence de la charte graphique a le cul entre deux chaises.";
 
