@@ -37,13 +37,13 @@ export function AlternativeOptionForm({
     const trimmedName = createdByName.trim().replace(/\s+/g, " ");
     const trimmedLocation = locationValue.location.trim();
 
-    if (!trimmedName) {
-      setFeedback("Indique ton prénom, pour qu’on sache qui propose ce créneau.");
+    if (!date || !time || !trimmedLocation) {
+      setFeedback("Il manque un jour, une heure ou un lieu pour cette proposition.");
       return;
     }
 
-    if (!date || !time || !trimmedLocation) {
-      setFeedback("Il manque un jour, une heure ou un lieu pour cette proposition.");
+    if (!trimmedName) {
+      setFeedback("Indique ton prénom, pour qu’on sache qui propose ce créneau.");
       return;
     }
 
@@ -77,15 +77,6 @@ export function AlternativeOptionForm({
       <p className="eyebrow">Proposer une autre date</p>
 
       <form className="vote-form" onSubmit={handleSubmit}>
-        <label className="field">
-          <span>Ton prénom</span>
-          <input
-            value={createdByName}
-            onChange={(eventChange) => setCreatedByName(eventChange.target.value)}
-            placeholder="Nadine Diabolo, Jean-Mi Pastaga…"
-          />
-        </label>
-
         <div className="slot">
           <div className="slot__fields">
             <label className="field">
@@ -112,6 +103,18 @@ export function AlternativeOptionForm({
             />
           </div>
         </div>
+
+        {/* Le créneau mène le formulaire (l'intention du clic « Proposer un
+            autre créneau »). Le prénom, déjà connu via le blaze mémorisé,
+            ferme en confirmation plutôt que de rejouer une saisie d'identité. */}
+        <label className="field">
+          <span>Proposé par</span>
+          <input
+            value={createdByName}
+            onChange={(eventChange) => setCreatedByName(eventChange.target.value)}
+            placeholder="Nadine Diabolo, Jean-Mi Pastaga…"
+          />
+        </label>
 
         <div className="button-row">
           <button className="button button--primary" disabled={isSaving} type="submit">
