@@ -1,0 +1,13 @@
+{
+  "id": "apero_1RVKMBHE4u",
+  "version": 1,
+  "writeKeyHash": "7c7cbeb59d83f4a0de7a9d00f1e257c907d36637ef16d3c705c136075832ed22",
+  "adminKeyHash": "354615545e662d41739c1737884b3caafbb2a0a70bcac7c8430e66c3ec11ee4c",
+  "encryption": {
+    "algorithm": "AES-GCM",
+    "iv": "dhFNJtbtxAhs_eYt",
+    "ciphertext": "7ehup-dvY93dYb-7II6x0Xggr3go_9N8ioJKzrkfEvRHVnWMsnY55yVg1N3NyB6zDFdO8m-fY6RTh46dmdI0e-0y0-I0mzULR10cSy94oQ8_hNXDZ6AYeUFSZxKwn5xMgXjV4FTm8EbMo1j6uvtg4LjOuhL-t_F1R1EwBhYSXFNaZEWAxzZSQiTRRpyqJCOqZiWPIedi3oUQ7vuWEPJgBsRHQWkc0l-Y0SOV5565gjByd4SqLsM3gnHHuESOmN0kg3ab8vC5sWpUg7a-l7Y-u7D1EMRYF-i2l2kblx4rjhTuLjfDeNrIKqkXnbckeVm1mt5z4LIdCthjMiL1-yfLLarPjHSsuGC8QxKM2Y_pJKa8FuFWj2hK3cFJS1ydvt5Y7alLnjSnS8IutbT59Cyp-fQ_dk2wC8I4KYlh9kPhMm7m6BxeskFnEf0eQ5zp9OSLKKJZ9ONX6ptg9l-pn-UQcJ9qneU_1Kvnw3_jMBoumSzkkXnyEN6XZEXMpMLgrIuIhpRFNa66RZAMxGzhZsqKSvrtZKEYmtThTPg7EDQxn-CuaAbk9ubU7acGxYpVas1-a1ERb8K-CU1u1eiUW80pP4ybp8rzXFZq9z-juxULiFqIi9uno4G8Ge4UBUZvwxuJeA3Qq1XwqZMWIOxj6-EzEu5SNSDvE92cAuBJoYbrZtMXv9fb7j03nzBJ_THRj1AF3B5PKwZqL4zv91u_CIx481zzVPYSjqYBma6UJ9cy5OdCIUEsJD6ePKEoXc1V53ZwHMDqnJP_ASIwLY0xR41nE81Q5kUSKYRYXErn3-kKfo3g05OMK_pjLWBXuceGMobXh93bCY4"
+  },
+  "createdAt": "2026-07-08T12:54:52.440Z",
+  "updatedAt": "2026-07-08T12:54:52.440Z"
+}
