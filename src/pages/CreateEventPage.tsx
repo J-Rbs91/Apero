@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BinaryChoice } from "../components/BinaryChoice";
 import { LocationField } from "../components/LocationField";
+import { ToggleSwitch } from "../components/ToggleSwitch";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { getAperoStorageMode } from "../config/aperoApiConfig";
@@ -219,19 +219,25 @@ export function CreateEventPage() {
           />
         </label>
 
-        <div className="field">
-          <span>Les mioches, on en fait quoi ?</span>
-          <BinaryChoice
-            name="Les mioches sont-ils conviés ?"
-            value={childrenAllowed}
-            onChange={setChildrenAllowed}
-            yesLabel="Marmaille admise"
-            noLabel="Entre grandes personnes"
-          />
-          <p className="person__sub">
-            À trancher tout de suite : soit les chiards cavalent entre les tabourets et
-            renversent le sirop, soit c’est réunion d’adultes vaccinés sans un seul goûter
-            en vue. Autant que ce soit dit avant que quelqu’un débarque avec toute sa portée.
+        <div className="setting">
+          <div className="switchrow">
+            <label className="switchrow__label" htmlFor="children-allowed">
+              <span className="switchrow__title">Les mioches sont-ils conviés ?</span>
+              <span className="switchrow__state">
+                {childrenAllowed ? "Marmaille admise" : "Entre grandes personnes"}
+              </span>
+            </label>
+            <ToggleSwitch
+              id="children-allowed"
+              checked={childrenAllowed}
+              onChange={setChildrenAllowed}
+              label="Les mioches sont-ils conviés ?"
+            />
+          </div>
+          <p className="hint">
+            Coché, la marmaille cavale entre les tabourets ; sinon, c’est apéro entre
+            grandes personnes. Autant que ce soit dit avant que quelqu’un débarque avec
+            toute sa portée.
           </p>
         </div>
 

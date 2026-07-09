@@ -1,4 +1,4 @@
-import { BinaryChoice } from "./BinaryChoice";
+import { ToggleSwitch } from "./ToggleSwitch";
 import { MAX_COMPANIONS } from "../utils/aperoValidation";
 
 type CompanionsFieldProps = {
@@ -10,8 +10,9 @@ type CompanionsFieldProps = {
 };
 
 /**
- * Bloc « tu ramènes du monde ? » de la réponse à l'invitation : on coche d'abord
- * solo/escorté, puis, si escorté, on compte les pièces rapportées au +/-.
+ * Bloc « tu ramènes du monde ? » de la réponse : réglage secondaire, donc
+ * interrupteur discret plutôt que grosses pastilles. Coché, on révèle le
+ * compteur de pièces rapportées au +/-.
  */
 export function CompanionsField({
   companions,
@@ -22,7 +23,7 @@ export function CompanionsField({
   const count = companions ?? 1;
 
   function setAccompanied(next: boolean) {
-    // « Escorté » démarre à un renfort ; « solo » efface le compteur.
+    // « Accompagné » démarre à un renfort ; « solo » efface le compteur.
     onChange(next ? Math.min(Math.max(count, 1), MAX_COMPANIONS) : undefined);
   }
 
@@ -32,24 +33,30 @@ export function CompanionsField({
   }
 
   const miocheNote = childrenAllowed
-    ? " Les mioches comptent dans le lot : ils carburent au diabolo mais grignotent comme quatre."
+    ? " Les mioches comptent dans le lot."
     : childrenAllowed === false
-      ? " Petit rappel : c’est sans les mioches ce coup-ci, donc on parle bien de renforts en âge de trinquer."
+      ? " C’est sans les mioches ce coup-ci : on parle de renforts en âge de trinquer."
       : "";
 
   return (
-    <div className="field">
-      <span>Tu débarques seul·e ou en escadron ?</span>
-      <BinaryChoice
-        name="Tu débarques seul ou accompagné ?"
-        value={accompanied}
-        onChange={setAccompanied}
-        yesLabel="En escadron"
-        noLabel="Peinard, en solo"
-      />
+    <div className="setting">
+      <div className="switchrow">
+        <label className="switchrow__label" htmlFor="companions-toggle">
+          <span className="switchrow__title">Tu débarques accompagné·e ?</span>
+          <span className="switchrow__state">
+            {accompanied ? "En escadron" : "Peinard, en solo"}
+          </span>
+        </label>
+        <ToggleSwitch
+          id="companions-toggle"
+          checked={accompanied}
+          onChange={setAccompanied}
+          label="Tu débarques accompagné·e ?"
+        />
+      </div>
+
       {accompanied && (
         <div className="companions">
-          <p className="lbl">Combien de renforts ?</p>
           <div className="stepper" role="group" aria-label="Nombre de renforts">
             <button
               type="button"
@@ -72,10 +79,12 @@ export function CompanionsField({
             >
               +
             </button>
+            <span className="stepper__unit">
+              {count > 1 ? "renforts" : "renfort"}
+            </span>
           </div>
-          <p className="person__sub">
-            Annonce le nombre de bouches en plus, qu’on prévoie assez de cacahuètes
-            et qu’on n’ait pas à couper les olives en quatre.{miocheNote}
+          <p className="hint">
+            Le nombre de bouches en plus, qu’on prévoie assez de cacahuètes.{miocheNote}
           </p>
         </div>
       )}

@@ -658,9 +658,72 @@ input[type="range"] {
   color: #ffd9d4;
 }
 
-/* Deux pastilles (oui/non) : mioches conviés, débarquer accompagné… */
-.seg--duo {
-  grid-template-columns: repeat(2, 1fr);
+/* ===== Réglage secondaire : interrupteur discret ===== */
+.setting {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.switchrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.switchrow__label {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  cursor: pointer;
+}
+
+.switchrow__title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--cream);
+}
+
+.switchrow__state {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 247, 230, 0.55);
+}
+
+.switch {
+  flex: 0 0 auto;
+  position: relative;
+  width: 46px;
+  height: 27px;
+  min-height: 0;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 247, 230, 0.26);
+  background: rgba(255, 247, 230, 0.1);
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+
+.switch__knob {
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: rgba(255, 247, 230, 0.72);
+  transform: translateY(-50%);
+  transition: transform 0.16s ease, background 0.16s ease;
+}
+
+.switch--on {
+  background: var(--pastis);
+  border-color: var(--pastis);
+}
+
+.switch--on .switch__knob {
+  transform: translate(19px, -50%);
+  background: var(--ink);
 }
 
 /* ===== Compteur de renforts (+/-) ===== */
@@ -668,7 +731,7 @@ input[type="range"] {
   display: flex;
   flex-direction: column;
   gap: 7px;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .stepper {
@@ -705,6 +768,13 @@ input[type="range"] {
   font-weight: 800;
   color: var(--cream);
   font-variant-numeric: tabular-nums;
+}
+
+.stepper__unit {
+  margin-left: 2px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgba(255, 247, 230, 0.55);
 }
 
 /* ===== Verdict ===== */
@@ -1226,6 +1296,8 @@ input[type="range"] {
 .seg__opt:focus-within,
 .share .cp:focus-visible,
 .slot__x:focus-visible,
+.switch:focus-visible,
+.stepper__btn:focus-visible,
 input:focus-visible,
 textarea:focus-visible {
   outline: 3px solid var(--pastis);
