@@ -63,4 +63,69 @@ describe("sanitizeAperoEvent", () => {
     const event = validEvent({ organizerName: "x".repeat(81) });
     expect(() => sanitizeAperoEvent(event)).toThrow(AperoValidationError);
   });
+
+  it("conserve la politique mioches (true comme false)", () => {
+    const admise = sanitizeAperoEvent(validEvent({ childrenAllowed: true }));
+    expect(admise.childrenAllowed).toBe(true);
+
+    const sansMioches = sanitizeAperoEvent(validEvent({ childrenAllowed: false }));
+    expect(sansMioches.childrenAllowed).toBe(false);
+
+    const nonPrecise = sanitizeAperoEvent(validEvent());
+    expect(nonPrecise.childrenAllowed).toBeUndefined();
+  });
+
+  it("rejette une politique mioches non booleenne", () => {
+    const event = validEvent({ childrenAllowed: "oui" as unknown as boolean });
+    expect(() => sanitizeAperoEvent(event)).toThrow(AperoValidationError);
+  });
+
+  it("conserve le nombre de renforts d'un convive", () => {
+    const event = sanitizeAperoEvent(
+      validEvent({
+        participants: [
+          {
+            id: "participant_1",
+            participantName: "Nadine",
+            votes: { option_1: "yes" },
+            companions: 3,
+            createdAt: "2026-07-01T00:00:00.000Z",
+            updatedAt: "2026-07-01T00:00:00.000Z",
+          },
+        ],
+      }),
+    );
+
+    expect(event.participants[0].companions).toBe(3);
+  });
+
+  it("rejette un nombre de renforts hors bornes ou non entier", () => {
+    const tropDeMonde = validEvent({
+      participants: [
+        {
+          id: "participant_1",
+          participantName: "Nadine",
+          votes: { option_1: "yes" },
+          companions: 999,
+          createdAt: "2026-07-01T00:00:00.000Z",
+          updatedAt: "2026-07-01T00:00:00.000Z",
+        },
+      ],
+    });
+    expect(() => sanitizeAperoEvent(tropDeMonde)).toThrow(AperoValidationError);
+
+    const demiConvive = validEvent({
+      participants: [
+        {
+          id: "participant_1",
+          participantName: "Nadine",
+          votes: { option_1: "yes" },
+          companions: 1.5,
+          createdAt: "2026-07-01T00:00:00.000Z",
+          updatedAt: "2026-07-01T00:00:00.000Z",
+        },
+      ],
+    });
+    expect(() => sanitizeAperoEvent(demiConvive)).toThrow(AperoValidationError);
+  });
 });

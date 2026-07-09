@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { BinaryChoice } from "../components/BinaryChoice";
 import { LocationField } from "../components/LocationField";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
@@ -31,6 +32,7 @@ export function CreateEventPage() {
   const { comptoirName } = useComptoirName();
   const [ceremonialNameInput, setCeremonialNameInput] = useState("");
   const [title, setTitle] = useState("");
+  const [childrenAllowed, setChildrenAllowed] = useState(false);
   const [options, setOptions] = useState<AperitifOption[]>([createEmptyOption()]);
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -132,6 +134,7 @@ export function CreateEventPage() {
           organizerName: trimmedOrganizerName,
           beaufLevel: "medium",
           status: "active",
+          childrenAllowed,
           options: cleanedOptions.map((option) => ({
             ...option,
             createdByRole: "organizer",
@@ -160,6 +163,7 @@ export function CreateEventPage() {
         organizerName: trimmedOrganizerName,
         beaufLevel: "medium",
         status: "active",
+        childrenAllowed,
         options: cleanedOptions.map((option) => ({
           ...option,
           createdByRole: "organizer",
@@ -214,6 +218,22 @@ export function CreateEventPage() {
             placeholder="Apéro fin de chantier"
           />
         </label>
+
+        <div className="field">
+          <span>Les mioches, on en fait quoi ?</span>
+          <BinaryChoice
+            name="Les mioches sont-ils conviés ?"
+            value={childrenAllowed}
+            onChange={setChildrenAllowed}
+            yesLabel="Marmaille admise"
+            noLabel="Entre grandes personnes"
+          />
+          <p className="person__sub">
+            À trancher tout de suite : soit les chiards cavalent entre les tabourets et
+            renversent le sirop, soit c’est réunion d’adultes vaccinés sans un seul goûter
+            en vue. Autant que ce soit dit avant que quelqu’un débarque avec toute sa portée.
+          </p>
+        </div>
 
         <hr className="accent accent--wide" />
 

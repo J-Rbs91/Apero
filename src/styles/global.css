@@ -658,6 +658,55 @@ input[type="range"] {
   color: #ffd9d4;
 }
 
+/* Deux pastilles (oui/non) : mioches conviés, débarquer accompagné… */
+.seg--duo {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* ===== Compteur de renforts (+/-) ===== */
+.companions {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 4px;
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stepper__btn {
+  width: 42px;
+  min-height: 42px;
+  height: 42px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 247, 230, 0.28);
+  background: rgba(255, 247, 230, 0.08);
+  color: var(--cream);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.stepper__btn:disabled {
+  opacity: 0.35;
+}
+
+.stepper__val {
+  min-width: 34px;
+  text-align: center;
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--cream);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ===== Verdict ===== */
 .verdict {
   display: flex;
@@ -1125,6 +1174,46 @@ input[type="range"] {
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+/* Étiquette politique mioches, sous le titre de l'invitation. */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  margin-top: 9px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 247, 230, 0.22);
+  background: rgba(255, 247, 230, 0.08);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: rgba(255, 247, 230, 0.88);
+}
+
+.tag--yes {
+  border-color: rgba(244, 197, 66, 0.55);
+  background: rgba(244, 197, 66, 0.16);
+  color: var(--pastis-soft);
+}
+
+.tag--no {
+  border-color: rgba(184, 50, 43, 0.5);
+  background: rgba(184, 50, 43, 0.2);
+  color: #ffd9d4;
+}
+
+/* Renforts d'un convive, accolés à son blaze dans la liste. */
+.person__tag {
+  margin-left: 7px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(244, 197, 66, 0.18);
+  color: var(--pastis-soft);
+  font-size: 10.5px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 /* ===== Focus ===== */

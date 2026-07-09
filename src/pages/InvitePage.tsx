@@ -347,6 +347,13 @@ export function InvitePage() {
         <p className="eyebrow">Une invitation de {event.organizerName}</p>
         <h1 className="h1 h1--sm">{event.ceremonialName}</h1>
         {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
+        {event.childrenAllowed != null && (
+          <span className={`tag ${event.childrenAllowed ? "tag--yes" : "tag--no"}`}>
+            {event.childrenAllowed
+              ? "👶 Marmaille admise — les mioches sont conviés"
+              : "🚫 Sans les mioches — apéro entre grandes personnes"}
+          </span>
+        )}
         {hasLocalEntry && (
           <p className="meta">C’est noté : tu retrouveras cet apéro dans ton ardoise sur cet appareil.</p>
         )}
@@ -368,6 +375,7 @@ export function InvitePage() {
             onSubmit={handleVoteSubmit}
             leadingOptionId={winnerId}
             onProposeSlot={() => setIsProposingSlot(true)}
+            childrenAllowed={event.childrenAllowed}
             extraFields={
               <TraquenardSlider value={traquenardVote} onChange={setTraquenardVote} />
             }

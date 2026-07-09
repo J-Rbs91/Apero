@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { AperitifEvent, ParticipantResponse, VoteStatus } from "../types/apero";
 import { useComptoirName } from "../hooks/useComptoirName";
 import { createId } from "../utils/createId";
+import { CompanionsField } from "./CompanionsField";
 import { EventOptionMobileCard } from "./EventOptionMobileCard";
 
 type DraftVotes = Record<string, VoteStatus | "">;
@@ -24,6 +25,8 @@ type VoteFormProps = {
    * autre créneau » s'affiche à côté du bouton d'envoi, sur la même ligne.
    */
   onProposeSlot?: () => void;
+  /** Politique mioches de l'apéro, relayée au bloc « renforts ». */
+  childrenAllowed?: boolean;
 };
 
 export function VoteForm({
@@ -33,6 +36,7 @@ export function VoteForm({
   extraFields,
   leadingOptionId,
   onProposeSlot,
+  childrenAllowed,
 }: VoteFormProps) {
   const { comptoirName } = useComptoirName();
   const emptyVotes = useMemo(
@@ -46,6 +50,7 @@ export function VoteForm({
   const [participantName, setParticipantName] = useState(comptoirName);
   const [votes, setVotes] = useState<DraftVotes>(emptyVotes);
   const [comment, setComment] = useState("");
+  const [companions, setCompanions] = useState<number | undefined>(undefined);
   const [feedback, setFeedback] = useState("");
   // Évite qu'une soumission qu'on vient de faire soi-même ne déclenche le
   // message « réponse retrouvée » quand l'event mis à jour redescend en prop.
@@ -83,6 +88,7 @@ export function VoteForm({
 
     setVotes({ ...emptyVotes, ...existingParticipant.votes });
     setComment(existingParticipant.comment ?? "");
+    setCompanions(existingParticipant.companions);
 
     if (justSubmittedRef.current) {
       // C'est notre propre envoi qui vient de faire apparaître cette entrée :
@@ -129,6 +135,7 @@ export function VoteForm({
       // conserve tel quel ce qu'une réponse précédente avait déclaré.
       brings: existingParticipant?.brings,
       comment: comment.trim() || undefined,
+      companions,
       createdAt: existingParticipant?.createdAt ?? now,
       updatedAt: now,
     };
@@ -163,6 +170,12 @@ export function VoteForm({
             />
           ))}
         </div>
+
+        <CompanionsField
+          companions={companions}
+          onChange={setCompanions}
+          childrenAllowed={childrenAllowed}
+        />
 
         {extraFields}
 

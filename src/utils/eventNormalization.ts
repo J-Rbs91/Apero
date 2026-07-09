@@ -60,6 +60,7 @@ export function normalizeEvent(rawEvent: unknown, expectedId?: string): Aperitif
       description: event.description || undefined,
       beaufLevel: event.beaufLevel ?? "medium",
       status: event.status ?? "active",
+      childrenAllowed: event.childrenAllowed,
       options,
       participants: participants.map((participant) => ({
         ...participant,

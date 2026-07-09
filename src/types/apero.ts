@@ -16,6 +16,9 @@ export type AperitifEvent = {
   status: AperitifEventStatus;
   options: AperitifOption[];
   participants: ParticipantResponse[];
+  // Les mioches sont-ils conviés ? Réglé à la création de l'apéro. Absent sur
+  // les apéros d'avant cette option (on ne présume alors rien).
+  childrenAllowed?: boolean;
   createdAt: string;
   updatedAt: string;
   closedAt?: string;
@@ -42,6 +45,9 @@ export type ParticipantResponse = {
   votes: Record<string, VoteStatus>;
   brings?: string;
   comment?: string;
+  // Renforts amenés par le convive (les « pièces rapportées »). Renseigné lors
+  // de la réponse à l'invitation. Absent/0 = le convive débarque en solo.
+  companions?: number;
   // Traquenard-O-mètre : 0 (petite soirée sage) à 10 (traquenard total).
   traquenardLevel?: number;
   createdAt: string;

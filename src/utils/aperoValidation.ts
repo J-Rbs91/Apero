@@ -24,6 +24,9 @@ const MAX_ADDRESS_LENGTH = 240;
 const MAX_NOTE_LENGTH = 280;
 const MAX_BRINGS_LENGTH = 120;
 const MAX_COMMENT_LENGTH = 500;
+// Plafond volontairement large : personne ne débarque avec une colonie, mais on
+// laisse de la marge aux tribus. Reste sous MAX_PARTICIPANTS pour la cohérence.
+export const MAX_COMPANIONS = 20;
 
 const BEAUF_LEVELS = new Set(["soft", "medium", "legendary"]);
 const EVENT_STATUSES = new Set(["active", "closed", "archived"]);
@@ -159,6 +162,18 @@ function cleanOptionalNumber(
   return value;
 }
 
+function cleanOptionalBoolean(value: unknown, field: string): boolean | undefined {
+  if (value == null) {
+    return undefined;
+  }
+
+  if (typeof value !== "boolean") {
+    fail(field, "doit etre un booleen");
+  }
+
+  return value;
+}
+
 function cleanEnum<T extends string>(
   value: unknown,
   field: string,
@@ -258,6 +273,13 @@ function cleanParticipant(
 
   const brings = cleanText(rawParticipant.brings, `participants[${index}].brings`, MAX_BRINGS_LENGTH);
   const comment = cleanText(rawParticipant.comment, `participants[${index}].comment`, MAX_COMMENT_LENGTH);
+  const companions = cleanOptionalNumber(
+    rawParticipant.companions,
+    `participants[${index}].companions`,
+    1,
+    MAX_COMPANIONS,
+    { integer: true },
+  );
   const traquenardLevel = cleanOptionalNumber(
     rawParticipant.traquenardLevel,
     `participants[${index}].traquenardLevel`,
@@ -274,6 +296,7 @@ function cleanParticipant(
     votes,
     ...(brings ? { brings } : {}),
     ...(comment ? { comment } : {}),
+    ...(companions != null ? { companions } : {}),
     ...(traquenardLevel != null ? { traquenardLevel } : {}),
     createdAt: cleanIsoDate(rawParticipant.createdAt, `participants[${index}].createdAt`),
     updatedAt: cleanIsoDate(rawParticipant.updatedAt, `participants[${index}].updatedAt`),
@@ -319,6 +342,7 @@ export function sanitizeAperoEvent(rawEvent: unknown, expectedId?: string): Aper
 
   const title = cleanText(rawEvent.title, "event.title", MAX_TITLE_LENGTH);
   const description = cleanText(rawEvent.description, "event.description", MAX_DESCRIPTION_LENGTH);
+  const childrenAllowed = cleanOptionalBoolean(rawEvent.childrenAllowed, "event.childrenAllowed");
   const closedAt = cleanOptionalIsoDate(rawEvent.closedAt, "event.closedAt");
 
   return {
@@ -335,6 +359,7 @@ export function sanitizeAperoEvent(rawEvent: unknown, expectedId?: string): Aper
     status: cleanEnum<AperitifEventStatus>(rawEvent.status, "event.status", EVENT_STATUSES, "active"),
     options,
     participants,
+    ...(childrenAllowed != null ? { childrenAllowed } : {}),
     createdAt: cleanIsoDate(rawEvent.createdAt, "event.createdAt"),
     updatedAt: cleanIsoDate(rawEvent.updatedAt, "event.updatedAt"),
     ...(closedAt ? { closedAt } : {}),
