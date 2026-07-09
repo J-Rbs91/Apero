@@ -26,12 +26,21 @@ function getInitials(name: string): string {
     .join("");
 }
 
+function describeCompanions(count: number): string {
+  return count > 1 ? `+${count} pièces rapportées` : "+1 pièce rapportée";
+}
+
 function ParticipantRow({ participant }: { participant: ParticipantResponse }) {
   return (
     <div className="person">
       <i>{getInitials(participant.participantName)}</i>
       <div className="person__body">
-        <div className="person__name">{participant.participantName}</div>
+        <div className="person__name">
+          {participant.participantName}
+          {participant.companions != null && participant.companions > 0 && (
+            <span className="person__tag">{describeCompanions(participant.companions)}</span>
+          )}
+        </div>
         {participant.brings && <div className="person__sub">{participant.brings}</div>}
         {participant.comment && (
           <div className="person__sub person__sub--quote">{"« "}{participant.comment}{" »"}</div>
