@@ -18,6 +18,14 @@ export function buildShareText(event: AperitifEvent): string {
     lines.push(`• ${formatOption(option)}`);
   }
   lines.push("");
+  if (event.childrenAllowed != null) {
+    lines.push(
+      event.childrenAllowed
+        ? "Les chiards sont de la partie — ramène la portée, y’a du sirop pour tout le monde."
+        : "Pas de mioches ce coup-ci : on trinque entre adultes vaccinés.",
+    );
+    lines.push("");
+  }
   lines.push(
     "Nous ne présumons rien, ni l’endroit, ni le contenu du verre. Qu’il s’agisse d’une terrasse, d’un zinc ou d’un trottoir, chacun s’abreuve selon sa conscience et sa constitution. La nature exacte de ton breuvage relève d’une intimité que nous nous garderons bien de sonder. L’essentiel se résume à ceci : ta présence n’engage que toi, et il serait fort malvenu qu’un tiers en dispose à ta place.",
   );
