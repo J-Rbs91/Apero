@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { AperitifEvent, AperitifOption } from "../types/apero";
-import { appendEventOption, normalizeEvent } from "./eventNormalization";
+import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
+import { appendEventOption, normalizeEvent, upsertParticipant } from "./eventNormalization";
+import { AperoValidationError } from "./aperoValidation";
 
 function createEvent(id: string, option: AperitifOption): AperitifEvent {
   return {
@@ -63,5 +64,44 @@ describe("event normalization", () => {
       "option_c",
     ]);
     expect(secondEvent.options.map((option) => option.id)).toEqual(["option_b"]);
+  });
+
+  it("merges a re-vote that differs only by accents or casing", () => {
+    const event = createEvent("apero_test_dedup", {
+      id: "option_a",
+      date: "2026-07-03",
+      time: "19:00",
+      location: "Bar A",
+    });
+
+    const base: Omit<ParticipantResponse, "participantName"> = {
+      id: "participant_1",
+      votes: { option_a: "yes" },
+      createdAt: "2026-06-30T19:00:00.000Z",
+      updatedAt: "2026-06-30T19:00:00.000Z",
+    };
+
+    const withJose = upsertParticipant(event, { ...base, participantName: "José" });
+    const withJoseAgain = upsertParticipant(withJose, {
+      ...base,
+      id: "participant_2",
+      participantName: "jose",
+      votes: { option_a: "no" },
+    });
+
+    expect(withJoseAgain.participants).toHaveLength(1);
+    // L'identité d'origine est conservée, mais le vote est bien mis à jour.
+    expect(withJoseAgain.participants[0].id).toBe("participant_1");
+    expect(withJoseAgain.participants[0].votes.option_a).toBe("no");
+  });
+
+  it("rejects hostile decrypted content with a validation error, not a TypeError", () => {
+    expect(() => normalizeEvent("not an object")).toThrow(AperoValidationError);
+    expect(() => normalizeEvent(42)).toThrow(AperoValidationError);
+    // options/participants qui ne sont pas des tableaux : ne doit pas lancer
+    // de TypeError brute sur .map, mais une AperoValidationError propre.
+    expect(() =>
+      normalizeEvent({ id: "apero_hostile", options: { foo: 1 }, participants: "nope" }),
+    ).toThrow(AperoValidationError);
   });
 });

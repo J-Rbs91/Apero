@@ -149,4 +149,34 @@ describe("event purge", () => {
     expect(secondLedger.purgedEvents).toHaveLength(1);
     expect(secondLedger.members.jojo.participatedEventCount).toBe(1);
   });
+
+  it("handles member names colliding with Object prototype keys without NaN or pollution", () => {
+    const now = new Date("2026-07-05T10:00:00.000Z");
+    const event = createEvent({
+      organizerName: "constructor",
+      participants: [
+        {
+          id: "participant_proto",
+          participantName: "__proto__",
+          votes: { option_1: "yes", option_2: "no" },
+          createdAt: "2026-06-30T18:00:00.000Z",
+          updatedAt: "2026-06-30T18:00:00.000Z",
+        },
+      ],
+    });
+    const record = buildPurgedEventRecord(event, now);
+    const ledger = updateRewardsLedger(createEmptyRewardsLedger(now), event, record);
+
+    const organizer = ledger.members["constructor"];
+    expect(organizer.organizedEventCount).toBe(1);
+    expect(Number.isNaN(organizer.organizedEventCount)).toBe(false);
+
+    const guest = ledger.members["__proto__"];
+    expect(guest.participatedEventCount).toBe(1);
+    expect(guest.totalVoteCount).toBe(2);
+    expect(Number.isNaN(guest.totalVoteCount)).toBe(false);
+
+    // Aucune fuite vers le prototype des objets ordinaires.
+    expect(({} as Record<string, unknown>).participatedEventCount).toBeUndefined();
+  });
 });

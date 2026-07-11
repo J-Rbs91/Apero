@@ -144,13 +144,23 @@ function addActiveEventToStats(stats: MemberRewardStats, event: AperitifEvent, m
   ).length;
 }
 
+// Lecture sûre d'un index membre : les noms de comptoir sont des données libres,
+// donc « constructor » ou « __proto__ » ne doivent jamais renvoyer une propriété
+// héritée d'Object.prototype (sinon stats fantômes copiées en NaN).
+function readMemberStats(
+  members: Record<string, MemberRewardStats>,
+  memberKey: string,
+): MemberRewardStats | undefined {
+  return Object.prototype.hasOwnProperty.call(members, memberKey) ? members[memberKey] : undefined;
+}
+
 export function getMemberRewardStats({
   activeEvents,
   ledger,
   memberName,
 }: MemberBadgeContext): MemberRewardStats {
   const memberKey = normalizeMemberName(memberName);
-  const ledgerStats = ledger.members[memberKey];
+  const ledgerStats = readMemberStats(ledger.members, memberKey);
   const stats: MemberRewardStats = ledgerStats
     ? { ...ledgerStats }
     : createEmptyStats(memberName, memberKey);
