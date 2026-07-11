@@ -9,7 +9,7 @@
 
 import type { LocalAperoEntry } from "../types/encryptedApero";
 import { COMPTOIR_NAME_STORAGE_KEY } from "../hooks/useComptoirName";
-import { fromBase64Url, toBase64Url } from "./aperoCryptoKeys";
+import { fromBase64Url, isValidAperoId, toBase64Url } from "./aperoCryptoKeys";
 import { getLocalAperos, saveLocalApero } from "./localAperoRegistry";
 
 const VAULT_FORMAT = "apero-vault";
@@ -212,6 +212,17 @@ export type VaultImportResult = {
   restoredExtraStores: number;
 };
 
+// Bornes défensives à l'import : un coffre reste un fichier fourni par
+// l'utilisateur — potentiellement forgé — et ne doit pouvoir ni injecter des
+// identifiants exotiques, ni gonfler le localStorage sans limite.
+const MAX_IMPORTED_KEY_LENGTH = 256;
+const MAX_IMPORTED_NAME_LENGTH = 80;
+const MAX_EXTRA_STORE_VALUE_LENGTH = 512 * 1024;
+
+function isImportableKey(value: unknown): value is string {
+  return typeof value === "string" && value.length >= 16 && value.length <= MAX_IMPORTED_KEY_LENGTH;
+}
+
 /**
  * Fusionne un contenu de coffre dans l'appareil : upsert de chaque apéro
  * (une entrée existante garde son rôle de créateur et sa clé admin), blaze
@@ -224,24 +235,33 @@ export function mergeVaultPayload(payload: VaultPayload): VaultImportResult {
     if (
       !entry ||
       typeof entry.aperoId !== "string" ||
-      typeof entry.encryptionKey !== "string" ||
-      typeof entry.writeKey !== "string" ||
-      !entry.aperoId ||
-      !entry.encryptionKey ||
-      !entry.writeKey
+      !isValidAperoId(entry.aperoId) ||
+      !isImportableKey(entry.encryptionKey) ||
+      !isImportableKey(entry.writeKey) ||
+      (entry.adminKey !== undefined && !isImportableKey(entry.adminKey))
     ) {
       continue;
     }
+
+    const displayName =
+      typeof entry.displayName === "string"
+        ? entry.displayName.slice(0, MAX_IMPORTED_NAME_LENGTH)
+        : undefined;
 
     saveLocalApero({
       aperoId: entry.aperoId,
       encryptionKey: entry.encryptionKey,
       writeKey: entry.writeKey,
       adminKey: entry.adminKey,
+      // Le cache d'événement est réévalué par normalizeEvent/sanitize à chaque
+      // lecture : un contenu forgé sera rejeté à l'usage, pas ici.
       lastKnownEvent: entry.lastKnownEvent,
-      displayName: entry.displayName,
-      role: entry.role,
-      lastSeenPublicSha: entry.lastSeenPublicSha,
+      displayName,
+      role: entry.role === "creator" || entry.role === "participant" ? entry.role : undefined,
+      lastSeenPublicSha:
+        typeof entry.lastSeenPublicSha === "string" && /^[0-9a-f]{40}$/i.test(entry.lastSeenPublicSha)
+          ? entry.lastSeenPublicSha
+          : undefined,
     });
     importedAperoCount += 1;
   }
@@ -251,15 +271,22 @@ export function mergeVaultPayload(payload: VaultPayload): VaultImportResult {
 
   if (typeof window !== "undefined" && window.localStorage) {
     const currentName = window.localStorage.getItem(COMPTOIR_NAME_STORAGE_KEY);
-    if (!currentName && payload.comptoirName?.trim()) {
-      window.localStorage.setItem(COMPTOIR_NAME_STORAGE_KEY, payload.comptoirName.trim());
-      importedComptoirName = payload.comptoirName.trim();
+    const importedName = payload.comptoirName?.trim().slice(0, MAX_IMPORTED_NAME_LENGTH);
+    if (!currentName && importedName) {
+      window.localStorage.setItem(COMPTOIR_NAME_STORAGE_KEY, importedName);
+      importedComptoirName = importedName;
     }
 
     for (const [key, value] of Object.entries(payload.extraStores ?? {})) {
-      // Seules les clés connues sont restaurées : un coffre forgé ne doit pas
-      // pouvoir écrire n'importe où dans le localStorage.
-      if (!EXTRA_STORE_KEYS.includes(key) || window.localStorage.getItem(key)) {
+      // Seules les clés connues sont restaurées (un coffre forgé ne doit pas
+      // pouvoir écrire n'importe où dans le localStorage), avec une taille
+      // bornée pour ne pas saturer le stockage de l'appareil.
+      if (
+        !EXTRA_STORE_KEYS.includes(key) ||
+        window.localStorage.getItem(key) ||
+        typeof value !== "string" ||
+        value.length > MAX_EXTRA_STORE_VALUE_LENGTH
+      ) {
         continue;
       }
       window.localStorage.setItem(key, value);

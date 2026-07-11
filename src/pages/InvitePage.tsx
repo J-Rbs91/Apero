@@ -482,24 +482,23 @@ export function InvitePage() {
             Le verdict est tombé : grave-le dans ton calendrier avant qu’il ne s’évapore
             entre deux tournées, ou affiche-le fièrement en image dans la conversation.
           </p>
-          <div className="button-row">
-            <button
-              type="button"
-              className="button button--ghost"
-              onClick={() =>
-                downloadAperoIcs({
-                  event,
-                  option: winnerOption,
-                  inviteUrl: canShare ? inviteUrl : undefined,
-                })
-              }
-            >
-              Ajouter à mon calendrier
-            </button>
-            <button
-              type="button"
-              className="button button--ghost"
-              onClick={async () => {
+          <button
+            type="button"
+            className="button button--ghost button--block"
+            onClick={() =>
+              downloadAperoIcs({
+                event,
+                option: winnerOption,
+                inviteUrl: canShare ? inviteUrl : undefined,
+              })
+            }
+          >
+            Ajouter à mon calendrier
+          </button>
+          <button
+            type="button"
+            className="button button--ghost button--block"
+            onClick={async () => {
                 setVerdictShareFeedback("");
                 const winnerCounts = result.results.find(
                   (item) => item.optionId === winnerOption.id,
@@ -524,11 +523,10 @@ export function InvitePage() {
                       ? "Tableau de chasse téléchargé : il n’attend plus que la conversation."
                       : "",
                 );
-              }}
-            >
-              Partager le tableau de chasse
-            </button>
-          </div>
+            }}
+          >
+            Partager le tableau de chasse
+          </button>
           {verdictShareFeedback && (
             <p className="meta" role="status">
               {verdictShareFeedback}

@@ -1885,3 +1885,104 @@ textarea:focus-visible {
   border-radius: 999px;
   background: var(--pastis);
 }
+
+/* ===== Micro-animations (la patine du comptoir) =====
+   Discrètes, GPU-friendly (opacité + transform uniquement), et coupées net
+   pour qui préfère les interfaces immobiles. */
+@media (prefers-reduced-motion: no-preference) {
+  /* Entrée en scène : les feuilles montent au comptoir l'une après l'autre. */
+  .mobile-page__inner > * {
+    animation: rise-in 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .mobile-page__inner > *:nth-child(2) {
+    animation-delay: 50ms;
+  }
+
+  .mobile-page__inner > *:nth-child(3) {
+    animation-delay: 100ms;
+  }
+
+  .mobile-page__inner > *:nth-child(4) {
+    animation-delay: 150ms;
+  }
+
+  .mobile-page__inner > *:nth-child(5) {
+    animation-delay: 200ms;
+  }
+
+  .mobile-page__inner > *:nth-child(n + 6) {
+    animation-delay: 240ms;
+  }
+
+  /* Un mot posé sur le mur du comptoir arrive en douceur. */
+  .wall-item {
+    animation: rise-in 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Trinquer : le verre se lève avec un petit rebond. */
+  .cheer-btn--on {
+    animation: cheer-pop 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Le sceau (modale) tombe sur le registre au lieu d'apparaître sec. */
+  .modal-backdrop {
+    animation: fade-in 200ms ease both;
+  }
+
+  .modal-backdrop .modal-sheet {
+    animation: pop-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+.cheer-btn {
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease,
+    color 160ms ease;
+}
+
+.cheer-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cheer-pop {
+  0% {
+    transform: scale(0.9);
+  }
+  60% {
+    transform: scale(1.07);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

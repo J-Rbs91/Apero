@@ -10,6 +10,7 @@ export type SaveLocalTableeInput = {
   tableeId: string;
   encryptionKey: string;
   writeKey: string;
+  adminKey?: string;
   name?: string;
   role?: LocalTableeEntry["role"];
 };
@@ -108,6 +109,7 @@ export function saveLocalTablee(input: SaveLocalTableeInput): LocalTableeEntry {
     tableeId: input.tableeId,
     encryptionKey: input.encryptionKey,
     writeKey: input.writeKey,
+    adminKey: input.adminKey ?? existing?.adminKey,
     name: input.name ?? existing?.name,
     role: existing?.role === "founder" ? "founder" : (input.role ?? existing?.role),
     joinedAt: existing?.joinedAt ?? now,

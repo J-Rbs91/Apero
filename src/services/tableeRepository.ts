@@ -8,6 +8,7 @@
 import type { AperitifEvent } from "../types/apero";
 import type { Tablee, TableeAperoRef } from "../types/tablee";
 import { AperoApiError, createOrUpdateEncryptedApero } from "./aperoApiClient";
+import { isAdminKeyHashUnsupported } from "./encryptedAperoRepository";
 import {
   generateAperoId,
   generateBase64UrlRandomKey,
@@ -20,6 +21,7 @@ import { getLocalTablees, saveLocalTablee } from "./localTableeRegistry";
 import { addTableeAperoRef, addTableeMember, sanitizeTablee } from "../utils/tableeValidation";
 
 const WRITE_KEY_BYTE_LENGTH = 24;
+const ADMIN_KEY_BYTE_LENGTH = 24;
 
 export type CreateTableeInput = {
   name: string;
@@ -43,6 +45,9 @@ export async function createTablee(input: CreateTableeInput): Promise<CreateTabl
   const tableeId = generateAperoId();
   const encryptionKey = generateBase64UrlRandomKey(ENCRYPTION_KEY_BYTE_LENGTH);
   const writeKey = generateBase64UrlRandomKey(WRITE_KEY_BYTE_LENGTH);
+  // Clé de dissolution : reste sur l'appareil de la personne qui fonde,
+  // jamais dans le lien de partage — même contrat que pour les apéros.
+  const adminKey = generateBase64UrlRandomKey(ADMIN_KEY_BYTE_LENGTH);
   const now = new Date();
   const nowIso = now.toISOString();
 
@@ -70,18 +75,37 @@ export async function createTablee(input: CreateTableeInput): Promise<CreateTabl
 
   const encryptedPayload = await encryptAperoData(tablee, encryptionKey);
   const writeKeyHash = await sha256Hex(writeKey);
+  const adminKeyHash = await sha256Hex(adminKey);
 
-  await createOrUpdateEncryptedApero({
-    aperoId: tableeId,
-    writeKey,
-    encryptedPayload,
-    writeKeyHash,
-  });
+  let adminKeyForLocalStorage: string | undefined = adminKey;
+
+  try {
+    await createOrUpdateEncryptedApero({
+      aperoId: tableeId,
+      writeKey,
+      encryptedPayload,
+      writeKeyHash,
+      adminKeyHash,
+    });
+  } catch (error) {
+    if (!isAdminKeyHashUnsupported(error)) {
+      throw error;
+    }
+    // API VPS antérieure à adminKeyHash : on crée sans, comme pour les apéros.
+    await createOrUpdateEncryptedApero({
+      aperoId: tableeId,
+      writeKey,
+      encryptedPayload,
+      writeKeyHash,
+    });
+    adminKeyForLocalStorage = undefined;
+  }
 
   saveLocalTablee({
     tableeId,
     encryptionKey,
     writeKey,
+    adminKey: adminKeyForLocalStorage,
     name: tablee.name,
     role: "founder",
   });

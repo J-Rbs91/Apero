@@ -81,6 +81,13 @@ export function CoffrePage() {
       return;
     }
 
+    // Un coffre légitime pèse quelques dizaines de kilo-octets : au-delà de
+    // 5 Mo, c'est un fichier forgé ou une erreur de manipulation.
+    if (file.size > 5 * 1024 * 1024) {
+      setImportFeedback("Ce fichier est bien trop lourd pour être un coffre de la Confrérie.");
+      return;
+    }
+
     try {
       setIsImporting(true);
       const rawText = await file.text();

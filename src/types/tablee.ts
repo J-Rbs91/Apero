@@ -44,6 +44,9 @@ export type LocalTableeEntry = {
   tableeId: string;
   encryptionKey: string;
   writeKey: string;
+  // Clé de dissolution : reste sur l'appareil de la personne qui a fondé la
+  // tablée, jamais dans le lien de partage.
+  adminKey?: string;
   name?: string;
   role?: "founder" | "member";
   joinedAt: string;
