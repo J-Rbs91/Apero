@@ -282,11 +282,6 @@ export function CreateEventPage() {
               label="Les mioches sont-ils conviés ?"
             />
           </div>
-          <p className="hint">
-            Coché, la marmaille cavale entre les tabourets ; sinon, c’est apéro entre
-            grandes personnes. Autant que ce soit dit avant que quelqu’un débarque avec
-            toute sa portée.
-          </p>
         </div>
 
         <label className="field">
