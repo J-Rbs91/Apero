@@ -118,6 +118,9 @@ export function InvitePage() {
   const [hasLocalEntry, setHasLocalEntry] = useState(
     () => Boolean(aperoId && findLocalApero(aperoId)),
   );
+  // Vrai juste après l'envoi d'une réponse : c'est LE moment où l'on propose
+  // au convive de convoquer à son tour sa propre assemblée (boucle vertueuse).
+  const [hasJustVoted, setHasJustVoted] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -223,6 +226,7 @@ export function InvitePage() {
       const updatedEvent = await joinApero(aperoId, keys.writeKey, keys.encryptionKey, finalResponse);
       setState({ status: "ready", event: updatedEvent });
       setHasLocalEntry(true);
+      setHasJustVoted(true);
       syncAperoNotificationsFromRegistry(updatedEvent);
     } catch (submitError) {
       setError(describeApiError(submitError));
@@ -416,6 +420,20 @@ export function InvitePage() {
             Ce lien permet de consulter l’apéro, mais pas d’y répondre : il manque la clé
             d’écriture. Demande le lien complet à la personne qui t’a invité·e.
           </p>
+        </section>
+      )}
+
+      {hasJustVoted && !isOrganizer && (
+        <section className="sheet">
+          <p className="eyebrow">À ton tour</p>
+          <h2 className="h2">Tu as émargé. Reste à convoquer.</h2>
+          <p className="lede">
+            Tu sais désormais comment on rameute une tablée : une assemblée, deux ou trois
+            créneaux, un lien. La Confrérie n’attend plus que ta convocation.
+          </p>
+          <Link className="button button--primary button--block" to="/create">
+            Organiser mon propre apéro
+          </Link>
         </section>
       )}
 

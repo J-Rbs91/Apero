@@ -8,7 +8,8 @@ export type BadgeId =
   | "SERIAL_VOTER"
   | "LAST_MINUTE_MINISTER"
   | "ZINC_DIPLOMAT"
-  | "FIRST_SHOT_CONSENSUS";
+  | "FIRST_SHOT_CONSENSUS"
+  | "AFFRANCHI";
 
 export type BadgeRarity = "common" | "rare" | "legendary" | "shame";
 
@@ -21,7 +22,8 @@ export type BadgeIconName =
   | "member"
   | "ballot"
   | "minister"
-  | "diplomat";
+  | "diplomat"
+  | "torch";
 
 export type BadgeDefinition = {
   id: BadgeId;
@@ -107,5 +109,13 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     description: "A participé à plusieurs apéros sans jamais foutre le bazar dans les réponses.",
     rarity: "rare",
     iconName: "diplomat",
+  },
+  {
+    id: "AFFRANCHI",
+    name: "L’Affranchi",
+    description:
+      "A d’abord été convié comme simple convive, puis a retourné la situation en convoquant sa propre assemblée. Le zinc appelle ça une élévation, et il n’en voit pas si souvent.",
+    rarity: "rare",
+    iconName: "torch",
   },
 ];
