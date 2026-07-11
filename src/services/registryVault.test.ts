@@ -45,7 +45,7 @@ function makeEntry(aperoId: string, overrides: Partial<LocalAperoEntry> = {}): L
 
 const payload: VaultPayload = {
   comptoirName: "Éminence Chips",
-  aperos: [makeEntry("apero_un"), makeEntry("apero_deux", { role: "creator", adminKey: "a".repeat(32) })],
+  aperos: [makeEntry("apero_un123"), makeEntry("apero_deux1", { role: "creator", adminKey: "a".repeat(32) })],
 };
 
 describe("encryptVault / decryptVault", () => {
@@ -91,7 +91,7 @@ describe("collectVaultPayload / mergeVaultPayload", () => {
     window.localStorage.setItem(COMPTOIR_NAME_STORAGE_KEY, "Éminence Chips");
     window.localStorage.setItem(
       LOCAL_APERO_REGISTRY_STORAGE_KEY,
-      JSON.stringify([makeEntry("apero_un")]),
+      JSON.stringify([makeEntry("apero_un123")]),
     );
 
     const collected = collectVaultPayload();
@@ -124,10 +124,10 @@ describe("collectVaultPayload / mergeVaultPayload", () => {
   it("garde le rôle de créateur local lors d'une fusion", () => {
     window.localStorage.setItem(
       LOCAL_APERO_REGISTRY_STORAGE_KEY,
-      JSON.stringify([makeEntry("apero_un", { role: "creator", adminKey: "local-admin-key-0000" })]),
+      JSON.stringify([makeEntry("apero_un123", { role: "creator", adminKey: "local-admin-key-0000" })]),
     );
 
-    mergeVaultPayload({ aperos: [makeEntry("apero_un", { role: "participant" })] });
+    mergeVaultPayload({ aperos: [makeEntry("apero_un123", { role: "participant" })] });
 
     const registry = JSON.parse(
       window.localStorage.getItem(LOCAL_APERO_REGISTRY_STORAGE_KEY) ?? "[]",

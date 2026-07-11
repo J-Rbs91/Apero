@@ -235,7 +235,9 @@ export function purgeDeletedApero(aperoId: string): boolean {
   return true;
 }
 
-function isAdminKeyHashUnsupported(error: unknown): error is AperoApiError {
+// Compatibilité avec une API VPS antérieure à adminKeyHash : elle rejette le
+// champ comme « unrecognized key ». Partagé avec le repository des tablées.
+export function isAdminKeyHashUnsupported(error: unknown): error is AperoApiError {
   return Boolean(
     error instanceof AperoApiError &&
       error.code === "INVALID_REQUEST" &&
