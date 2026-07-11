@@ -28,7 +28,9 @@ export function TableesPage() {
   const seed = (location.state as { seedFromApero?: SeedFromApero } | null)?.seedFromApero;
 
   const [items, setItems] = useState<MyTableeItem[] | null>(null);
-  const [name, setName] = useState(seed ? `La Tablée de ${seed.ceremonialName}` : "");
+  // Le nom d'une tablée est plafonné à 80 caractères (sanitizeTablee) : le
+  // pré-remplissage depuis un nom cérémoniel long est tronqué d'office.
+  const [name, setName] = useState(seed ? `La Tablée de ${seed.ceremonialName}`.slice(0, 80) : "");
   const [motto, setMotto] = useState("");
   const [feedback, setFeedback] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -63,6 +65,10 @@ export function TableesPage() {
 
     if (!trimmedName) {
       setFeedback("Une tablée sans nom, c’est juste des gens debout. Trouve-lui un blaze.");
+      return;
+    }
+    if (trimmedName.length > 80) {
+      setFeedback("Ce nom déborde de la table (80 caractères maximum). Fais plus court, ça claque mieux.");
       return;
     }
     if (!founderName) {
