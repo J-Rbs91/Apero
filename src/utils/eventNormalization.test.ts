@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
-import { appendEventOption, normalizeEvent, upsertParticipant } from "./eventNormalization";
+import { appendEventOption, normalizeEvent, toggleOptionCheer, upsertParticipant } from "./eventNormalization";
 import { AperoValidationError } from "./aperoValidation";
 
 function createEvent(id: string, option: AperitifOption): AperitifEvent {
@@ -103,5 +103,43 @@ describe("event normalization", () => {
     expect(() =>
       normalizeEvent({ id: "apero_hostile", options: { foo: 1 }, participants: "nope" }),
     ).toThrow(AperoValidationError);
+  });
+});
+
+describe("toggleOptionCheer", () => {
+  const cheerEvent = createEvent("apero_cheer", {
+    id: "option_a",
+    date: "2026-07-03",
+    time: "19:00",
+    location: "Bar A",
+  });
+
+  it("lève puis repose le verre d'un convive", () => {
+    const cheered = toggleOptionCheer(cheerEvent, "option_a", "Nadine");
+    expect(cheered.options[0].cheers).toEqual(["Nadine"]);
+
+    const uncheered = toggleOptionCheer(cheered, "option_a", "Nadine");
+    expect(uncheered.options[0].cheers).toBeUndefined();
+  });
+
+  it("déduplique par nom normalisé (accents, casse, espaces)", () => {
+    const cheered = toggleOptionCheer(cheerEvent, "option_a", "José");
+    const toggledBack = toggleOptionCheer(cheered, "option_a", "  jose ");
+    expect(toggledBack.options[0].cheers).toBeUndefined();
+  });
+
+  it("ne touche pas aux autres créneaux ni aux noms vides", () => {
+    const twoOptions = {
+      ...cheerEvent,
+      options: [
+        ...cheerEvent.options,
+        { id: "option_b", date: "2026-07-04", time: "20:00", location: "Bar B" },
+      ],
+    };
+    const cheered = toggleOptionCheer(twoOptions, "option_b", "Nadine");
+    expect(cheered.options[0].cheers).toBeUndefined();
+    expect(cheered.options[1].cheers).toEqual(["Nadine"]);
+
+    expect(toggleOptionCheer(twoOptions, "option_a", "   ")).toBe(twoOptions);
   });
 });

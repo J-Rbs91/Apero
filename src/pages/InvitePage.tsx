@@ -21,6 +21,7 @@ import {
   getEncryptedAperoById,
   joinApero,
   purgeDeletedApero,
+  toggleEncryptedAperoCheer,
 } from "../services/encryptedAperoRepository";
 import { findLocalApero } from "../services/localAperoRegistry";
 import { syncAperoNotificationsFromRegistry } from "../services/notificationSync";
@@ -34,6 +35,7 @@ import { isEventExpired } from "../services/eventPurge";
 import { calculateBestOptions } from "../utils/calculateResults";
 import { downloadAperoIcs } from "../utils/calendarExport";
 import { formatOption } from "../utils/formatOption";
+import { normalizeMemberName } from "../utils/memberName";
 import { buildNextRoundPrefill, describeRecurrence } from "../utils/nextRound";
 import { buildInviteUrl, maskInviteUrl, resolveInviteKeys } from "../utils/inviteLink";
 import { buildReminderText, buildShareText, buildShareTitle } from "../utils/shareMessage";
@@ -115,6 +117,7 @@ export function InvitePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isProposingSlot, setIsProposingSlot] = useState(false);
   const [isAddingOption, setIsAddingOption] = useState(false);
+  const [isCheerSaving, setIsCheerSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState("");
@@ -258,6 +261,31 @@ export function InvitePage() {
       setError(describeApiError(submitError));
     } finally {
       setIsAddingOption(false);
+    }
+  }
+
+  async function handleToggleCheer(optionId: string) {
+    const cheerName = comptoirName.trim();
+    if (state.status !== "ready" || !aperoId || !keys.writeKey || !keys.encryptionKey || !cheerName) {
+      return;
+    }
+
+    try {
+      setIsCheerSaving(true);
+      setError("");
+      const updatedEvent = await toggleEncryptedAperoCheer(
+        aperoId,
+        keys.writeKey,
+        keys.encryptionKey,
+        optionId,
+        cheerName,
+      );
+      setState({ status: "ready", event: updatedEvent });
+      syncAperoNotificationsFromRegistry(updatedEvent);
+    } catch (submitError) {
+      setError(describeApiError(submitError));
+    } finally {
+      setIsCheerSaving(false);
     }
   }
 
@@ -416,6 +444,16 @@ export function InvitePage() {
             leadingOptionId={winnerId}
             onProposeSlot={() => setIsProposingSlot(true)}
             childrenAllowed={event.childrenAllowed}
+            onToggleCheer={comptoirName.trim() ? handleToggleCheer : undefined}
+            hasCheeredOption={(optionId) => {
+              const cheerKey = normalizeMemberName(comptoirName);
+              const option = event.options.find((candidate) => candidate.id === optionId);
+              return Boolean(
+                cheerKey &&
+                  option?.cheers?.some((name) => normalizeMemberName(name) === cheerKey),
+              );
+            }}
+            isCheerSaving={isCheerSaving}
             extraFields={
               <TraquenardSlider value={traquenardVote} onChange={setTraquenardVote} />
             }
@@ -449,6 +487,12 @@ export function InvitePage() {
                   </div>
                   {option.id === winnerId && <span className="agenda-lead">En tête</span>}
                 </div>
+                {(option.cheers?.length ?? 0) > 0 && (
+                  <span className="cheer-count">
+                    {option.cheers?.length} verre{(option.cheers?.length ?? 0) > 1 ? "s" : ""} levé
+                    {(option.cheers?.length ?? 0) > 1 ? "s" : ""}
+                  </span>
+                )}
               </div>
             ))}
           </div>

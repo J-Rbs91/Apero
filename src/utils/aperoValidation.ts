@@ -9,6 +9,7 @@ import type {
   VoteStatus,
 } from "../types/apero";
 import { APERO_ID_PATTERN } from "../services/aperoCryptoKeys";
+import { normalizeMemberName } from "./memberName";
 
 const GENERIC_ID_PATTERN = /^[A-Za-z0-9_-]{3,80}$/;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -196,6 +197,39 @@ function cleanEnum<T extends string>(
   return value as T;
 }
 
+// Les blazes qui trinquent à un créneau : textes nettoyés, dédupliqués par nom
+// normalisé, plafonnés comme les participants.
+function cleanCheers(value: unknown, field: string): string[] | undefined {
+  if (value == null) {
+    return undefined;
+  }
+
+  if (!Array.isArray(value)) {
+    fail(field, "doit etre un tableau");
+  }
+
+  if (value.length > MAX_PARTICIPANTS) {
+    fail(field, `depasse ${MAX_PARTICIPANTS} entrees`);
+  }
+
+  const seen = new Set<string>();
+  const cheers: string[] = [];
+  value.forEach((rawName, cheerIndex) => {
+    const name = cleanText(rawName, `${field}[${cheerIndex}]`, MAX_NAME_LENGTH);
+    if (!name) {
+      return;
+    }
+    const key = normalizeMemberName(name);
+    if (!key || seen.has(key)) {
+      return;
+    }
+    seen.add(key);
+    cheers.push(name);
+  });
+
+  return cheers.length > 0 ? cheers : undefined;
+}
+
 function cleanOption(rawOption: unknown, index: number, optionIds: Set<string>): AperitifOption {
   if (!isRecord(rawOption)) {
     fail(`options[${index}]`, "doit etre un objet");
@@ -229,6 +263,7 @@ function cleanOption(rawOption: unknown, index: number, optionIds: Set<string>):
   const createdByRole = rawOption.createdByRole == null
     ? undefined
     : cleanEnum<OptionCreatorRole>(rawOption.createdByRole, `options[${index}].createdByRole`, CREATOR_ROLES);
+  const cheers = cleanCheers(rawOption.cheers, `options[${index}].cheers`);
 
   return {
     ...option,
@@ -238,6 +273,7 @@ function cleanOption(rawOption: unknown, index: number, optionIds: Set<string>):
     ...(createdByRole ? { createdByRole } : {}),
     ...(createdByName ? { createdByName } : {}),
     ...(createdAt ? { createdAt } : {}),
+    ...(cheers ? { cheers } : {}),
   };
 }
 

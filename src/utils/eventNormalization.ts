@@ -134,3 +134,40 @@ export function appendEventOption(
     updatedAt: new Date().toISOString(),
   };
 }
+
+/**
+ * Lève ou repose le verre d'un convive sur un créneau (« trinquer ») :
+ * micro-approbation d'ambiance, dédupliquée par nom normalisé comme partout.
+ */
+export function toggleOptionCheer(
+  event: AperitifEvent,
+  optionId: string,
+  participantName: string,
+): AperitifEvent {
+  const cheerKey = normalizeMemberName(participantName);
+
+  if (!cheerKey) {
+    return event;
+  }
+
+  const options = event.options.map((option) => {
+    if (option.id !== optionId) {
+      return option;
+    }
+
+    const cheers = option.cheers ?? [];
+    const alreadyCheered = cheers.some((name) => normalizeMemberName(name) === cheerKey);
+    const nextCheers = alreadyCheered
+      ? cheers.filter((name) => normalizeMemberName(name) !== cheerKey)
+      : [...cheers, participantName];
+
+    const { cheers: _dropped, ...rest } = option;
+    return nextCheers.length > 0 ? { ...rest, cheers: nextCheers } : rest;
+  });
+
+  return {
+    ...event,
+    options,
+    updatedAt: new Date().toISOString(),
+  };
+}

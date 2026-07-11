@@ -7,7 +7,12 @@
 import { githubConfig } from "../config/githubConfig";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
 import type { LocalAperoEntry, StoredEncryptedAperoFile } from "../types/encryptedApero";
-import { appendEventOption, normalizeEvent, upsertParticipant } from "../utils/eventNormalization";
+import {
+  appendEventOption,
+  normalizeEvent,
+  toggleOptionCheer,
+  upsertParticipant,
+} from "../utils/eventNormalization";
 import { sanitizeAperoEvent } from "../utils/aperoValidation";
 import {
   AperoApiError,
@@ -406,6 +411,19 @@ export async function joinApero(
 
   return updateEncryptedApero(aperoId, writeKey, encryptionKey, (event) =>
     upsertParticipant(event, participant),
+  );
+}
+
+/** Lève ou repose le verre d'un convive sur un créneau (« trinquer »). */
+export async function toggleEncryptedAperoCheer(
+  aperoId: string,
+  writeKey: string,
+  encryptionKey: string,
+  optionId: string,
+  participantName: string,
+): Promise<AperitifEvent> {
+  return updateEncryptedApero(aperoId, writeKey, encryptionKey, (event) =>
+    toggleOptionCheer(event, optionId, participantName),
   );
 }
 

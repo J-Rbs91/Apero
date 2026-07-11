@@ -43,6 +43,10 @@ export type AperitifOption = {
   createdByRole?: OptionCreatorRole;
   createdByName?: string;
   createdAt?: string;
+  // Les blazes qui « trinquent » à ce créneau : micro-approbation d'ambiance,
+  // sans valeur de vote. Dédupliqués par nom normalisé, absents si personne
+  // n'a levé son verre.
+  cheers?: string[];
 };
 
 export type ParticipantResponse = {

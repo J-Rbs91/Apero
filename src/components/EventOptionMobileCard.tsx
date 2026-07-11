@@ -8,7 +8,17 @@ type EventOptionMobileCardProps = {
   onChange: (status: VoteStatus) => void;
   /** Créneau actuellement en tête (le plus de présences confirmées). */
   isLeading?: boolean;
+  /** Vrai si le convive courant a déjà trinqué à ce créneau. */
+  hasCheered?: boolean;
+  /** Lève/repose le verre du convive courant. Absent = pas de trinquette ici. */
+  onToggleCheer?: () => void;
+  /** Désactive le bouton pendant l'envoi. */
+  isCheerSaving?: boolean;
 };
+
+function formatCheerCount(count: number): string {
+  return `${count} verre${count > 1 ? "s" : ""} levé${count > 1 ? "s" : ""}`;
+}
 
 function formatDateTime(option: AperitifOption): string {
   const dateLabel = option.date
@@ -27,7 +37,11 @@ export function EventOptionMobileCard({
   value,
   onChange,
   isLeading,
+  hasCheered,
+  onToggleCheer,
+  isCheerSaving,
 }: EventOptionMobileCardProps) {
+  const cheerCount = option.cheers?.length ?? 0;
   const subtitle =
     option.createdByRole === "participant" && option.createdByName
       ? `${option.location} · proposé par ${option.createdByName}`
@@ -57,6 +71,22 @@ export function EventOptionMobileCard({
         value={value}
         onChange={onChange}
       />
+      {(onToggleCheer || cheerCount > 0) && (
+        <div className="cheer-row">
+          {onToggleCheer && (
+            <button
+              type="button"
+              className={`cheer-btn${hasCheered ? " cheer-btn--on" : ""}`}
+              onClick={onToggleCheer}
+              disabled={isCheerSaving}
+              title={option.cheers?.join(", ")}
+            >
+              {hasCheered ? "Verre levé" : "Trinquer à ce créneau"}
+            </button>
+          )}
+          {cheerCount > 0 && <span className="cheer-count">{formatCheerCount(cheerCount)}</span>}
+        </div>
+      )}
     </div>
   );
 }
