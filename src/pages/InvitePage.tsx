@@ -34,7 +34,7 @@ import { calculateBestOptions } from "../utils/calculateResults";
 import { downloadAperoIcs } from "../utils/calendarExport";
 import { formatOption } from "../utils/formatOption";
 import { buildInviteUrl, maskInviteUrl, resolveInviteKeys } from "../utils/inviteLink";
-import { buildShareText, buildShareTitle } from "../utils/shareMessage";
+import { buildReminderText, buildShareText, buildShareTitle } from "../utils/shareMessage";
 
 // Page d'invitation du nouveau flux chiffré (mode api-vps).
 // Route : #/invite/:aperoId?k=ENCRYPTION_KEY&w=WRITE_KEY — les clés restent
@@ -473,6 +473,15 @@ export function InvitePage() {
           displayUrl={maskInviteUrl(inviteUrl)}
           title={buildShareTitle(event)}
           text={buildShareText(event)}
+          reminder={
+            isOrganizer
+              ? {
+                  label: "Sonner le rappel",
+                  title: buildShareTitle(event),
+                  text: buildReminderText(event),
+                }
+              : undefined
+          }
         />
       )}
 
