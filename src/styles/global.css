@@ -502,7 +502,8 @@ a {
 }
 
 input,
-textarea {
+textarea,
+select {
   width: 100%;
   min-height: 44px;
   border: 1px solid rgba(255, 247, 230, 0.28);
@@ -511,6 +512,13 @@ textarea {
   color: var(--cream);
   background: rgba(255, 247, 230, 0.08);
   font-size: 16px;
+}
+
+/* Les options du menu natif s'affichent sur fond clair du système : encre
+   sombre pour rester lisible. */
+select option {
+  color: var(--ink);
+  background: var(--cream);
 }
 
 textarea {

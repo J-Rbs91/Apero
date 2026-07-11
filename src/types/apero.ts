@@ -6,6 +6,9 @@ export type AperitifEventStatus = "active" | "closed" | "archived";
 
 export type OptionCreatorRole = "organizer" | "participant";
 
+// Cadence d'une assemblée qui se répète : le rituel est l'âme de la Confrérie.
+export type AperoRecurrence = "weekly" | "biweekly" | "monthly";
+
 export type AperitifEvent = {
   id: string;
   ceremonialName: string;
@@ -19,6 +22,9 @@ export type AperitifEvent = {
   // Les mioches sont-ils conviés ? Réglé à la création de l'apéro. Absent sur
   // les apéros d'avant cette option (on ne présume alors rien).
   childrenAllowed?: boolean;
+  // Cadence de répétition. Absente = assemblée d'un soir. Une fois l'apéro
+  // passé, l'app propose de convoquer la tournée suivante sur cette cadence.
+  recurrence?: AperoRecurrence;
   createdAt: string;
   updatedAt: string;
   closedAt?: string;

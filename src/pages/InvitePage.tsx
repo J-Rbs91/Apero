@@ -30,9 +30,11 @@ import {
   removeNotificationsForApero,
 } from "../services/notificationStore";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
+import { isEventExpired } from "../services/eventPurge";
 import { calculateBestOptions } from "../utils/calculateResults";
 import { downloadAperoIcs } from "../utils/calendarExport";
 import { formatOption } from "../utils/formatOption";
+import { buildNextRoundPrefill, describeRecurrence } from "../utils/nextRound";
 import { buildInviteUrl, maskInviteUrl, resolveInviteKeys } from "../utils/inviteLink";
 import { buildReminderText, buildShareText, buildShareTitle } from "../utils/shareMessage";
 
@@ -335,6 +337,9 @@ export function InvitePage() {
     ? event.options.find((option) => option.id === winnerId)
     : undefined;
   const canExportToCalendar = Boolean(winnerOption?.date && winnerOption.time);
+  // Apéro passé : place à la tournée suivante — n'importe quel membre de la
+  // tablée peut la convoquer, c'est ainsi que le rôle tourne.
+  const isPastEvent = isEventExpired(event, new Date());
   const canShare = Boolean(aperoId && keys.encryptionKey);
   const inviteUrl = canShare
     ? buildInviteUrl({
@@ -362,6 +367,9 @@ export function InvitePage() {
               ? "👶 Marmaille admise — les mioches sont conviés"
               : "🚫 Sans les mioches — apéro entre grandes personnes"}
           </span>
+        )}
+        {event.recurrence && (
+          <p className="meta">Assemblée récurrente : {describeRecurrence(event.recurrence)}.</p>
         )}
         {hasLocalEntry && (
           <p className="meta">C’est noté : tu retrouveras cet apéro dans ton ardoise sur cet appareil.</p>
@@ -448,6 +456,31 @@ export function InvitePage() {
             Ce lien permet de consulter l’apéro, mais pas d’y répondre : il manque la clé
             d’écriture. Demande le lien complet à la personne qui t’a invité·e.
           </p>
+        </section>
+      )}
+
+      {isPastEvent && (
+        <section className="sheet">
+          <p className="eyebrow">{event.recurrence ? "La tournée suivante" : "Remettre ça"}</p>
+          <h2 className="h2">
+            {event.recurrence
+              ? "Cette assemblée se répète, le rituel n’attend pas."
+              : "Cet apéro est derrière nous."}
+          </h2>
+          <p className="lede">
+            {event.recurrence
+              ? `La cadence est gravée : ${describeRecurrence(event.recurrence)}. Convoque la prochaine tournée, mêmes lieu et heure, date décalée d’autant.`
+              : "Les verres sont secs, le zinc est rangé. La suite logique : la même chose, un peu plus tard — et n’importe quel membre de la tablée peut convoquer la prochaine."}
+          </p>
+          <button
+            type="button"
+            className="button button--primary button--block"
+            onClick={() =>
+              navigate("/create", { state: { prefill: buildNextRoundPrefill(event) } })
+            }
+          >
+            {event.recurrence ? "Convoquer la prochaine tournée" : "Remettre ça"}
+          </button>
         </section>
       )}
 

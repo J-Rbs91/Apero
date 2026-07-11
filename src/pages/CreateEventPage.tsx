@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { LocationField } from "../components/LocationField";
 import { ToggleSwitch } from "../components/ToggleSwitch";
 import { MobileHeader } from "../components/MobileHeader";
@@ -9,8 +9,15 @@ import { eventStorage } from "../services";
 import { AperoApiError } from "../services/aperoApiClient";
 import { createEncryptedApero } from "../services/encryptedAperoRepository";
 import { useComptoirName } from "../hooks/useComptoirName";
-import type { AperitifEvent, AperitifOption, ParticipantResponse, VoteStatus } from "../types/apero";
+import type {
+  AperitifEvent,
+  AperitifOption,
+  AperoRecurrence,
+  ParticipantResponse,
+  VoteStatus,
+} from "../types/apero";
 import { createId } from "../utils/createId";
+import type { CreateEventPrefill } from "../utils/nextRound";
 import {
   generateUniqueCeremonialName,
   isCeremonialNameTaken,
@@ -29,11 +36,22 @@ function createEmptyOption(): AperitifOption {
 
 export function CreateEventPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { comptoirName } = useComptoirName();
-  const [ceremonialNameInput, setCeremonialNameInput] = useState("");
-  const [title, setTitle] = useState("");
-  const [childrenAllowed, setChildrenAllowed] = useState(false);
-  const [options, setOptions] = useState<AperitifOption[]>([createEmptyOption()]);
+
+  // Pré-remplissage « Remettre ça » / tournée récurrente : lieu, heure et
+  // cadence de l'assemblée écoulée, transmis par la page d'invitation.
+  const prefill = (location.state as { prefill?: CreateEventPrefill } | null)?.prefill;
+
+  const [ceremonialNameInput, setCeremonialNameInput] = useState(prefill?.ceremonialName ?? "");
+  const [title, setTitle] = useState(prefill?.title ?? "");
+  const [childrenAllowed, setChildrenAllowed] = useState(prefill?.childrenAllowed ?? false);
+  const [recurrence, setRecurrence] = useState<AperoRecurrence | "">(prefill?.recurrence ?? "");
+  const [options, setOptions] = useState<AperitifOption[]>(() =>
+    prefill?.options?.length
+      ? prefill.options.map((option) => ({ ...option, id: createId("option") }))
+      : [createEmptyOption()],
+  );
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -135,6 +153,7 @@ export function CreateEventPage() {
           beaufLevel: "medium",
           status: "active",
           childrenAllowed,
+          recurrence: recurrence || undefined,
           options: cleanedOptions.map((option) => ({
             ...option,
             createdByRole: "organizer",
@@ -164,6 +183,7 @@ export function CreateEventPage() {
         beaufLevel: "medium",
         status: "active",
         childrenAllowed,
+        recurrence: recurrence || undefined,
         options: cleanedOptions.map((option) => ({
           ...option,
           createdByRole: "organizer",
@@ -240,6 +260,28 @@ export function CreateEventPage() {
             toute sa portée.
           </p>
         </div>
+
+        <label className="field">
+          <span>Ça se reproduit ?</span>
+          <select
+            value={recurrence}
+            onChange={(eventChange) =>
+              setRecurrence(eventChange.target.value as AperoRecurrence | "")
+            }
+          >
+            <option value="">Une fois, on verra après</option>
+            <option value="weekly">Chaque semaine</option>
+            <option value="biweekly">Toutes les deux semaines</option>
+            <option value="monthly">Chaque mois</option>
+          </select>
+        </label>
+        {recurrence && (
+          <p className="hint">
+            Une assemblée qui se répète devient un rituel : une fois celle-ci passée, la
+            Confrérie proposera de convoquer la suivante dans la foulée, mêmes lieu et
+            heure, date décalée d’autant.
+          </p>
+        )}
 
         <hr className="accent accent--wide" />
 

@@ -2,6 +2,7 @@ import type {
   AperitifEvent,
   AperitifEventStatus,
   AperitifOption,
+  AperoRecurrence,
   BeaufLevel,
   OptionCreatorRole,
   ParticipantResponse,
@@ -30,6 +31,7 @@ export const MAX_COMPANIONS = 20;
 
 const BEAUF_LEVELS = new Set(["soft", "medium", "legendary"]);
 const EVENT_STATUSES = new Set(["active", "closed", "archived"]);
+const RECURRENCES = new Set(["weekly", "biweekly", "monthly"]);
 const CREATOR_ROLES = new Set(["organizer", "participant"]);
 const VOTE_STATUSES = new Set(["yes", "maybe", "no"]);
 
@@ -343,6 +345,10 @@ export function sanitizeAperoEvent(rawEvent: unknown, expectedId?: string): Aper
   const title = cleanText(rawEvent.title, "event.title", MAX_TITLE_LENGTH);
   const description = cleanText(rawEvent.description, "event.description", MAX_DESCRIPTION_LENGTH);
   const childrenAllowed = cleanOptionalBoolean(rawEvent.childrenAllowed, "event.childrenAllowed");
+  const recurrence =
+    rawEvent.recurrence == null
+      ? undefined
+      : cleanEnum<AperoRecurrence>(rawEvent.recurrence, "event.recurrence", RECURRENCES);
   const closedAt = cleanOptionalIsoDate(rawEvent.closedAt, "event.closedAt");
 
   return {
@@ -360,6 +366,7 @@ export function sanitizeAperoEvent(rawEvent: unknown, expectedId?: string): Aper
     options,
     participants,
     ...(childrenAllowed != null ? { childrenAllowed } : {}),
+    ...(recurrence ? { recurrence } : {}),
     createdAt: cleanIsoDate(rawEvent.createdAt, "event.createdAt"),
     updatedAt: cleanIsoDate(rawEvent.updatedAt, "event.updatedAt"),
     ...(closedAt ? { closedAt } : {}),

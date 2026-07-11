@@ -76,6 +76,7 @@ export function normalizeEvent(rawEvent: unknown, expectedId?: string): Aperitif
       beaufLevel: event.beaufLevel ?? "medium",
       status: event.status ?? "active",
       childrenAllowed: event.childrenAllowed,
+      recurrence: event.recurrence,
       options,
       participants: rawParticipants.map((participant) => ({
         ...participant,
