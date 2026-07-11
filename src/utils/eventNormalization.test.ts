@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
-import { appendEventOption, normalizeEvent, upsertParticipant } from "./eventNormalization";
+import { appendEventMessage, appendEventOption, normalizeEvent, toggleOptionCheer, upsertParticipant } from "./eventNormalization";
 import { AperoValidationError } from "./aperoValidation";
 
 function createEvent(id: string, option: AperitifOption): AperitifEvent {
@@ -103,5 +103,84 @@ describe("event normalization", () => {
     expect(() =>
       normalizeEvent({ id: "apero_hostile", options: { foo: 1 }, participants: "nope" }),
     ).toThrow(AperoValidationError);
+  });
+});
+
+describe("toggleOptionCheer", () => {
+  const cheerEvent = createEvent("apero_cheer", {
+    id: "option_a",
+    date: "2026-07-03",
+    time: "19:00",
+    location: "Bar A",
+  });
+
+  it("lève puis repose le verre d'un convive", () => {
+    const cheered = toggleOptionCheer(cheerEvent, "option_a", "Nadine");
+    expect(cheered.options[0].cheers).toEqual(["Nadine"]);
+
+    const uncheered = toggleOptionCheer(cheered, "option_a", "Nadine");
+    expect(uncheered.options[0].cheers).toBeUndefined();
+  });
+
+  it("déduplique par nom normalisé (accents, casse, espaces)", () => {
+    const cheered = toggleOptionCheer(cheerEvent, "option_a", "José");
+    const toggledBack = toggleOptionCheer(cheered, "option_a", "  jose ");
+    expect(toggledBack.options[0].cheers).toBeUndefined();
+  });
+
+  it("ne touche pas aux autres créneaux ni aux noms vides", () => {
+    const twoOptions = {
+      ...cheerEvent,
+      options: [
+        ...cheerEvent.options,
+        { id: "option_b", date: "2026-07-04", time: "20:00", location: "Bar B" },
+      ],
+    };
+    const cheered = toggleOptionCheer(twoOptions, "option_b", "Nadine");
+    expect(cheered.options[0].cheers).toBeUndefined();
+    expect(cheered.options[1].cheers).toEqual(["Nadine"]);
+
+    expect(toggleOptionCheer(twoOptions, "option_a", "   ")).toBe(twoOptions);
+  });
+});
+
+describe("appendEventMessage", () => {
+  const wallEvent = createEvent("apero_wall", {
+    id: "option_a",
+    date: "2026-07-03",
+    time: "19:00",
+    location: "Bar A",
+  });
+
+  it("ajoute le mot au bout du fil", () => {
+    const updated = appendEventMessage(wallEvent, {
+      id: "message_1",
+      authorName: "Nadine",
+      body: "J'amène les olives.",
+      createdAt: "2026-07-01T10:00:00.000Z",
+    });
+    expect(updated.messages).toHaveLength(1);
+    expect(updated.messages?.[0].body).toBe("J'amène les olives.");
+  });
+
+  it("fait tomber les plus vieux mots au-delà du plafond", () => {
+    const crowded = {
+      ...wallEvent,
+      messages: Array.from({ length: 200 }, (_, index) => ({
+        id: `message_${index}`,
+        authorName: "Nadine",
+        body: `Mot ${index}`,
+        createdAt: "2026-07-01T10:00:00.000Z",
+      })),
+    };
+    const updated = appendEventMessage(crowded, {
+      id: "message_new",
+      authorName: "Jojo",
+      body: "Le dernier mot.",
+      createdAt: "2026-07-01T11:00:00.000Z",
+    });
+    expect(updated.messages).toHaveLength(200);
+    expect(updated.messages?.[0].id).toBe("message_1");
+    expect(updated.messages?.at(-1)?.id).toBe("message_new");
   });
 });

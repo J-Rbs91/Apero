@@ -5,9 +5,15 @@
 // Aucun appel GitHub authentifie ne part d'ici.
 
 import { githubConfig } from "../config/githubConfig";
-import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
+import type { AperitifEvent, AperitifOption, AperoMessage, ParticipantResponse } from "../types/apero";
 import type { LocalAperoEntry, StoredEncryptedAperoFile } from "../types/encryptedApero";
-import { appendEventOption, normalizeEvent, upsertParticipant } from "../utils/eventNormalization";
+import {
+  appendEventMessage,
+  appendEventOption,
+  normalizeEvent,
+  toggleOptionCheer,
+  upsertParticipant,
+} from "../utils/eventNormalization";
 import { sanitizeAperoEvent } from "../utils/aperoValidation";
 import {
   AperoApiError,
@@ -406,6 +412,31 @@ export async function joinApero(
 
   return updateEncryptedApero(aperoId, writeKey, encryptionKey, (event) =>
     upsertParticipant(event, participant),
+  );
+}
+
+/** Laisse un mot sur le mur du comptoir de l'apéro. */
+export async function addEncryptedAperoMessage(
+  aperoId: string,
+  writeKey: string,
+  encryptionKey: string,
+  message: AperoMessage,
+): Promise<AperitifEvent> {
+  return updateEncryptedApero(aperoId, writeKey, encryptionKey, (event) =>
+    appendEventMessage(event, message),
+  );
+}
+
+/** Lève ou repose le verre d'un convive sur un créneau (« trinquer »). */
+export async function toggleEncryptedAperoCheer(
+  aperoId: string,
+  writeKey: string,
+  encryptionKey: string,
+  optionId: string,
+  participantName: string,
+): Promise<AperitifEvent> {
+  return updateEncryptedApero(aperoId, writeKey, encryptionKey, (event) =>
+    toggleOptionCheer(event, optionId, participantName),
   );
 }
 

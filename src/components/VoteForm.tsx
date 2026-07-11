@@ -27,6 +27,15 @@ type VoteFormProps = {
   onProposeSlot?: () => void;
   /** Politique mioches de l'apéro, relayée au bloc « renforts ». */
   childrenAllowed?: boolean;
+  /**
+   * Trinquer à un créneau (micro-approbation immédiate, hors vote). Fourni →
+   * chaque carte de créneau affiche son bouton « Trinquer ».
+   */
+  onToggleCheer?: (optionId: string) => void;
+  /** Vrai si le convive courant a trinqué à ce créneau. */
+  hasCheeredOption?: (optionId: string) => boolean;
+  /** Désactive les boutons trinquer pendant un envoi. */
+  isCheerSaving?: boolean;
 };
 
 export function VoteForm({
@@ -37,6 +46,9 @@ export function VoteForm({
   leadingOptionId,
   onProposeSlot,
   childrenAllowed,
+  onToggleCheer,
+  hasCheeredOption,
+  isCheerSaving,
 }: VoteFormProps) {
   const { comptoirName } = useComptoirName();
   const emptyVotes = useMemo(
@@ -167,6 +179,9 @@ export function VoteForm({
               value={votes[option.id]}
               onChange={(status) => updateVote(option.id, status)}
               isLeading={option.id === leadingOptionId}
+              hasCheered={hasCheeredOption?.(option.id)}
+              onToggleCheer={onToggleCheer ? () => onToggleCheer(option.id) : undefined}
+              isCheerSaving={isCheerSaving}
             />
           ))}
         </div>

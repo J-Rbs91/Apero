@@ -2,12 +2,15 @@ import type {
   AperitifEvent,
   AperitifEventStatus,
   AperitifOption,
+  AperoMessage,
+  AperoRecurrence,
   BeaufLevel,
   OptionCreatorRole,
   ParticipantResponse,
   VoteStatus,
 } from "../types/apero";
 import { APERO_ID_PATTERN } from "../services/aperoCryptoKeys";
+import { normalizeMemberName } from "./memberName";
 
 const GENERIC_ID_PATTERN = /^[A-Za-z0-9_-]{3,80}$/;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -16,6 +19,10 @@ const ISO_DATE_MAX_LENGTH = 40;
 
 const MAX_OPTIONS = 20;
 const MAX_PARTICIPANTS = 120;
+// Le mur du comptoir reste un fil léger : au-delà, les plus vieux mots tombent
+// (voir appendEventMessage), le fichier chiffré ne gonfle jamais sans limite.
+export const MAX_MESSAGES = 200;
+const MAX_MESSAGE_LENGTH = 500;
 const MAX_NAME_LENGTH = 80;
 const MAX_TITLE_LENGTH = 160;
 const MAX_DESCRIPTION_LENGTH = 1000;
@@ -30,6 +37,7 @@ export const MAX_COMPANIONS = 20;
 
 const BEAUF_LEVELS = new Set(["soft", "medium", "legendary"]);
 const EVENT_STATUSES = new Set(["active", "closed", "archived"]);
+const RECURRENCES = new Set(["weekly", "biweekly", "monthly"]);
 const CREATOR_ROLES = new Set(["organizer", "participant"]);
 const VOTE_STATUSES = new Set(["yes", "maybe", "no"]);
 
@@ -194,6 +202,39 @@ function cleanEnum<T extends string>(
   return value as T;
 }
 
+// Les blazes qui trinquent à un créneau : textes nettoyés, dédupliqués par nom
+// normalisé, plafonnés comme les participants.
+function cleanCheers(value: unknown, field: string): string[] | undefined {
+  if (value == null) {
+    return undefined;
+  }
+
+  if (!Array.isArray(value)) {
+    fail(field, "doit etre un tableau");
+  }
+
+  if (value.length > MAX_PARTICIPANTS) {
+    fail(field, `depasse ${MAX_PARTICIPANTS} entrees`);
+  }
+
+  const seen = new Set<string>();
+  const cheers: string[] = [];
+  value.forEach((rawName, cheerIndex) => {
+    const name = cleanText(rawName, `${field}[${cheerIndex}]`, MAX_NAME_LENGTH);
+    if (!name) {
+      return;
+    }
+    const key = normalizeMemberName(name);
+    if (!key || seen.has(key)) {
+      return;
+    }
+    seen.add(key);
+    cheers.push(name);
+  });
+
+  return cheers.length > 0 ? cheers : undefined;
+}
+
 function cleanOption(rawOption: unknown, index: number, optionIds: Set<string>): AperitifOption {
   if (!isRecord(rawOption)) {
     fail(`options[${index}]`, "doit etre un objet");
@@ -227,6 +268,7 @@ function cleanOption(rawOption: unknown, index: number, optionIds: Set<string>):
   const createdByRole = rawOption.createdByRole == null
     ? undefined
     : cleanEnum<OptionCreatorRole>(rawOption.createdByRole, `options[${index}].createdByRole`, CREATOR_ROLES);
+  const cheers = cleanCheers(rawOption.cheers, `options[${index}].cheers`);
 
   return {
     ...option,
@@ -236,6 +278,7 @@ function cleanOption(rawOption: unknown, index: number, optionIds: Set<string>):
     ...(createdByRole ? { createdByRole } : {}),
     ...(createdByName ? { createdByName } : {}),
     ...(createdAt ? { createdAt } : {}),
+    ...(cheers ? { cheers } : {}),
   };
 }
 
@@ -303,6 +346,51 @@ function cleanParticipant(
   };
 }
 
+function cleanMessage(
+  rawMessage: unknown,
+  index: number,
+  messageIds: Set<string>,
+): AperoMessage {
+  if (!isRecord(rawMessage)) {
+    fail(`messages[${index}]`, "doit etre un objet");
+  }
+
+  const id = cleanId(rawMessage.id, `messages[${index}].id`);
+  if (messageIds.has(id)) {
+    fail(`messages[${index}].id`, "identifiant duplique");
+  }
+  messageIds.add(id);
+
+  return {
+    id,
+    authorName: cleanText(rawMessage.authorName, `messages[${index}].authorName`, MAX_NAME_LENGTH, {
+      required: true,
+    }) as string,
+    body: cleanText(rawMessage.body, `messages[${index}].body`, MAX_MESSAGE_LENGTH, {
+      required: true,
+    }) as string,
+    createdAt: cleanIsoDate(rawMessage.createdAt, `messages[${index}].createdAt`),
+  };
+}
+
+function cleanMessages(value: unknown): AperoMessage[] | undefined {
+  if (value == null) {
+    return undefined;
+  }
+
+  if (!Array.isArray(value)) {
+    fail("event.messages", "doit etre un tableau");
+  }
+
+  if (value.length > MAX_MESSAGES) {
+    fail("event.messages", `depasse ${MAX_MESSAGES} messages`);
+  }
+
+  const messageIds = new Set<string>();
+  const messages = value.map((message, index) => cleanMessage(message, index, messageIds));
+  return messages.length > 0 ? messages : undefined;
+}
+
 export function sanitizeAperoEvent(rawEvent: unknown, expectedId?: string): AperitifEvent {
   if (!isRecord(rawEvent)) {
     fail("event", "doit etre un objet");
@@ -343,6 +431,11 @@ export function sanitizeAperoEvent(rawEvent: unknown, expectedId?: string): Aper
   const title = cleanText(rawEvent.title, "event.title", MAX_TITLE_LENGTH);
   const description = cleanText(rawEvent.description, "event.description", MAX_DESCRIPTION_LENGTH);
   const childrenAllowed = cleanOptionalBoolean(rawEvent.childrenAllowed, "event.childrenAllowed");
+  const recurrence =
+    rawEvent.recurrence == null
+      ? undefined
+      : cleanEnum<AperoRecurrence>(rawEvent.recurrence, "event.recurrence", RECURRENCES);
+  const messages = cleanMessages(rawEvent.messages);
   const closedAt = cleanOptionalIsoDate(rawEvent.closedAt, "event.closedAt");
 
   return {
@@ -360,6 +453,8 @@ export function sanitizeAperoEvent(rawEvent: unknown, expectedId?: string): Aper
     options,
     participants,
     ...(childrenAllowed != null ? { childrenAllowed } : {}),
+    ...(recurrence ? { recurrence } : {}),
+    ...(messages ? { messages } : {}),
     createdAt: cleanIsoDate(rawEvent.createdAt, "event.createdAt"),
     updatedAt: cleanIsoDate(rawEvent.updatedAt, "event.updatedAt"),
     ...(closedAt ? { closedAt } : {}),

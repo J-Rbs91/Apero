@@ -491,9 +491,12 @@ await scenario("4. Contre-proposition : un invité ajoute un créneau", async ()
   await form.locator(".field--wide input").fill("La Buvette Clandestine");
   await page.getByRole("button", { name: "Proposer cette date" }).click();
 
+  // Le formulaire se referme sans message depuis que le bouton déclencheur vit
+  // dans la barre d'action : la preuve d'acceptation, c'est le créneau qui
+  // apparaît dans la liste de vote.
   await waitVisible(
     page,
-    page.getByText("Nouvelle date proposée, elle apparaît maintenant dans la liste."),
+    page.locator(".vote-form .slot", { hasText: "La Buvette Clandestine" }),
     "La contre-proposition est acceptée",
   );
   const slotCount = await page.locator(".vote-form .slot").count();
@@ -758,7 +761,8 @@ await scenario("8. Suppression définitive par l'organisateur", async () => {
     "Le carnet de l'invité explique que l'organisateur a annulé l'apéro",
     bobNotifText.includes("Apéro annulé") &&
       bobNotifText.includes(APERO_1_NAME) &&
-      bobNotifText.includes("annulé par la personne qui l'organisait"),
+      // Apostrophe typographique : c'est celle du texte réel de l'app.
+      bobNotifText.includes("annulé par la personne qui l’organisait"),
     bobNotifText,
   );
   await snap(pageBob, "notification-apero-annule");

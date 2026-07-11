@@ -92,10 +92,34 @@ export function BrandMenu() {
           <Link
             className="brand-menu__item"
             role="menuitem"
+            to="/tablees"
+            onClick={() => setIsOpen(false)}
+          >
+            Tablées
+          </Link>
+          <Link
+            className="brand-menu__item"
+            role="menuitem"
             to="/palmares"
             onClick={() => setIsOpen(false)}
           >
             Palmarès
+          </Link>
+          <Link
+            className="brand-menu__item"
+            role="menuitem"
+            to="/comptes"
+            onClick={() => setIsOpen(false)}
+          >
+            Les Comptes
+          </Link>
+          <Link
+            className="brand-menu__item"
+            role="menuitem"
+            to="/coffre"
+            onClick={() => setIsOpen(false)}
+          >
+            Le Coffre
           </Link>
           <button
             type="button"

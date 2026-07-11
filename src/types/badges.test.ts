@@ -11,6 +11,7 @@ const validIconNames: BadgeIconName[] = [
   "ballot",
   "minister",
   "diplomat",
+  "torch",
 ];
 
 describe("badge definitions", () => {

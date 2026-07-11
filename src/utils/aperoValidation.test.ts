@@ -129,3 +129,43 @@ describe("sanitizeAperoEvent", () => {
     expect(() => sanitizeAperoEvent(demiConvive)).toThrow(AperoValidationError);
   });
 });
+
+describe("cheers (trinquer)", () => {
+  it("nettoie, déduplique et conserve les verres levés", () => {
+    const event = sanitizeAperoEvent(
+      validEvent({
+        options: [
+          {
+            id: "option_1",
+            date: "2026-07-10",
+            time: "19:00",
+            location: "Bar des Sports",
+            cheers: ["  Nadine ", "nadine", "José", ""],
+          },
+        ],
+      }),
+      "apero_test1",
+    );
+
+    expect(event.options[0].cheers).toEqual(["Nadine", "José"]);
+  });
+
+  it("omet le champ quand personne ne trinque", () => {
+    const event = sanitizeAperoEvent(
+      validEvent({
+        options: [
+          { id: "option_1", date: "2026-07-10", time: "19:00", location: "Bar des Sports", cheers: [] },
+        ],
+      }),
+      "apero_test1",
+    );
+
+    expect(event.options[0].cheers).toBeUndefined();
+  });
+
+  it("rejette un format inattendu", () => {
+    const malformed = validEvent();
+    (malformed.options[0] as unknown as Record<string, unknown>).cheers = "Nadine";
+    expect(() => sanitizeAperoEvent(malformed, "apero_test1")).toThrowError();
+  });
+});

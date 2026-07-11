@@ -41,6 +41,11 @@ export type NotificationEventType =
   | "reminder-48h"
   | "reminder-24h"
   | "reminder-2h"
+  // L'apéro est passé : on souffle à la tablée de convoquer le suivant
+  // (boucle invité → organisateur, ou tournée récurrente).
+  | "next-round-nudge"
+  // Un mot a été laissé sur le mur du comptoir de l'apéro.
+  | "new-message"
   // L'apéro a disparu du stockage public : annulé par la personne qui
   // l'organisait. Émise localement au moment où l'appareil purge ses traces
   // (registre, notifications, instantané), pour expliquer la disparition.

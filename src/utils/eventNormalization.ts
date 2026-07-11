@@ -1,4 +1,5 @@
-import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
+import type { AperitifEvent, AperitifOption, AperoMessage, ParticipantResponse } from "../types/apero";
+import { MAX_MESSAGES } from "./aperoValidation";
 import { sanitizeAperoEvent } from "./aperoValidation";
 import { normalizeMemberName } from "./memberName";
 
@@ -76,6 +77,8 @@ export function normalizeEvent(rawEvent: unknown, expectedId?: string): Aperitif
       beaufLevel: event.beaufLevel ?? "medium",
       status: event.status ?? "active",
       childrenAllowed: event.childrenAllowed,
+      recurrence: event.recurrence,
+      messages: event.messages,
       options,
       participants: rawParticipants.map((participant) => ({
         ...participant,
@@ -130,6 +133,60 @@ export function appendEventOption(
   return {
     ...event,
     options: [...event.options, option],
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * Ajoute un mot au mur du comptoir. Le fil reste léger : au-delà de
+ * MAX_MESSAGES, les plus anciens mots tombent du mur.
+ */
+export function appendEventMessage(
+  event: AperitifEvent,
+  message: AperoMessage,
+): AperitifEvent {
+  const messages = [...(event.messages ?? []), message].slice(-MAX_MESSAGES);
+
+  return {
+    ...event,
+    messages,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * Lève ou repose le verre d'un convive sur un créneau (« trinquer ») :
+ * micro-approbation d'ambiance, dédupliquée par nom normalisé comme partout.
+ */
+export function toggleOptionCheer(
+  event: AperitifEvent,
+  optionId: string,
+  participantName: string,
+): AperitifEvent {
+  const cheerKey = normalizeMemberName(participantName);
+
+  if (!cheerKey) {
+    return event;
+  }
+
+  const options = event.options.map((option) => {
+    if (option.id !== optionId) {
+      return option;
+    }
+
+    const cheers = option.cheers ?? [];
+    const alreadyCheered = cheers.some((name) => normalizeMemberName(name) === cheerKey);
+    const nextCheers = alreadyCheered
+      ? cheers.filter((name) => normalizeMemberName(name) !== cheerKey)
+      : [...cheers, participantName];
+
+    const { cheers: _dropped, ...rest } = option;
+    return nextCheers.length > 0 ? { ...rest, cheers: nextCheers } : rest;
+  });
+
+  return {
+    ...event,
+    options,
     updatedAt: new Date().toISOString(),
   };
 }

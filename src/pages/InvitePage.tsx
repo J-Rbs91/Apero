@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AlternativeOptionForm } from "../components/AlternativeOptionForm";
+import { ComptoirWall } from "../components/ComptoirWall";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
@@ -15,14 +16,18 @@ import { AperoApiError } from "../services/aperoApiClient";
 import { isValidAperoId } from "../services/aperoCryptoKeys";
 import { AperoCryptoError } from "../services/aperoEncryption";
 import {
+  addEncryptedAperoMessage,
   addEncryptedAperoOption,
   deleteEncryptedApero,
   getCachedAperoEvent,
   getEncryptedAperoById,
   joinApero,
   purgeDeletedApero,
+  toggleEncryptedAperoCheer,
 } from "../services/encryptedAperoRepository";
 import { findLocalApero } from "../services/localAperoRegistry";
+import { getLocalTablees } from "../services/localTableeRegistry";
+import { addAperoToTablee } from "../services/tableeRepository";
 import { syncAperoNotificationsFromRegistry } from "../services/notificationSync";
 import { removeSnapshot } from "../services/notificationSnapshots";
 import {
@@ -30,10 +35,16 @@ import {
   removeNotificationsForApero,
 } from "../services/notificationStore";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
-import { calculateBestOptions } from "../utils/calculateResults";
+import { createId } from "../utils/createId";
+import { isEventExpired } from "../services/eventPurge";
+import { calculateAverageTraquenardLevel, calculateBestOptions } from "../utils/calculateResults";
+import { downloadAperoIcs } from "../utils/calendarExport";
+import { shareOrDownloadVerdictImage } from "../utils/verdictImage";
 import { formatOption } from "../utils/formatOption";
+import { normalizeMemberName } from "../utils/memberName";
+import { buildNextRoundPrefill, describeRecurrence } from "../utils/nextRound";
 import { buildInviteUrl, maskInviteUrl, resolveInviteKeys } from "../utils/inviteLink";
-import { buildShareText, buildShareTitle } from "../utils/shareMessage";
+import { buildReminderText, buildShareText, buildShareTitle } from "../utils/shareMessage";
 
 // Page d'invitation du nouveau flux chiffré (mode api-vps).
 // Route : #/invite/:aperoId?k=ENCRYPTION_KEY&w=WRITE_KEY — les clés restent
@@ -112,12 +123,23 @@ export function InvitePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isProposingSlot, setIsProposingSlot] = useState(false);
   const [isAddingOption, setIsAddingOption] = useState(false);
+  const [isCheerSaving, setIsCheerSaving] = useState(false);
+  const [isPostingMessage, setIsPostingMessage] = useState(false);
+  const [verdictShareFeedback, setVerdictShareFeedback] = useState("");
+  // Tablées connues de cet appareil, pour rattacher l'apéro à une bande.
+  const [localTablees] = useState(() => getLocalTablees());
+  const [selectedTableeId, setSelectedTableeId] = useState("");
+  const [tableeFeedback, setTableeFeedback] = useState("");
+  const [isAttachingTablee, setIsAttachingTablee] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState("");
   const [hasLocalEntry, setHasLocalEntry] = useState(
     () => Boolean(aperoId && findLocalApero(aperoId)),
   );
+  // Vrai juste après l'envoi d'une réponse : c'est LE moment où l'on propose
+  // au convive de convoquer à son tour sa propre assemblée (boucle vertueuse).
+  const [hasJustVoted, setHasJustVoted] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -223,6 +245,7 @@ export function InvitePage() {
       const updatedEvent = await joinApero(aperoId, keys.writeKey, keys.encryptionKey, finalResponse);
       setState({ status: "ready", event: updatedEvent });
       setHasLocalEntry(true);
+      setHasJustVoted(true);
       syncAperoNotificationsFromRegistry(updatedEvent);
     } catch (submitError) {
       setError(describeApiError(submitError));
@@ -251,6 +274,81 @@ export function InvitePage() {
       setError(describeApiError(submitError));
     } finally {
       setIsAddingOption(false);
+    }
+  }
+
+  async function handleToggleCheer(optionId: string) {
+    const cheerName = comptoirName.trim();
+    if (state.status !== "ready" || !aperoId || !keys.writeKey || !keys.encryptionKey || !cheerName) {
+      return;
+    }
+
+    try {
+      setIsCheerSaving(true);
+      setError("");
+      const updatedEvent = await toggleEncryptedAperoCheer(
+        aperoId,
+        keys.writeKey,
+        keys.encryptionKey,
+        optionId,
+        cheerName,
+      );
+      setState({ status: "ready", event: updatedEvent });
+      syncAperoNotificationsFromRegistry(updatedEvent);
+    } catch (submitError) {
+      setError(describeApiError(submitError));
+    } finally {
+      setIsCheerSaving(false);
+    }
+  }
+
+  async function handlePostMessage(body: string) {
+    const authorName = comptoirName.trim();
+    if (state.status !== "ready" || !aperoId || !keys.writeKey || !keys.encryptionKey || !authorName) {
+      return;
+    }
+
+    try {
+      setIsPostingMessage(true);
+      const updatedEvent = await addEncryptedAperoMessage(aperoId, keys.writeKey, keys.encryptionKey, {
+        id: createId("message"),
+        authorName,
+        body,
+        createdAt: new Date().toISOString(),
+      });
+      setState({ status: "ready", event: updatedEvent });
+      syncAperoNotificationsFromRegistry(updatedEvent);
+    } finally {
+      setIsPostingMessage(false);
+    }
+  }
+
+  async function handleAttachToTablee() {
+    if (state.status !== "ready" || !aperoId || !keys.encryptionKey || !selectedTableeId) {
+      return;
+    }
+    const tableeEntry = localTablees.find((entry) => entry.tableeId === selectedTableeId);
+    if (!tableeEntry) {
+      return;
+    }
+
+    try {
+      setIsAttachingTablee(true);
+      setTableeFeedback("");
+      await addAperoToTablee(tableeEntry.tableeId, tableeEntry.writeKey, tableeEntry.encryptionKey, {
+        aperoId,
+        encryptionKey: keys.encryptionKey,
+        writeKey: keys.writeKey,
+        ceremonialName: state.event.ceremonialName,
+        addedBy: comptoirName.trim() || undefined,
+      });
+      setTableeFeedback(
+        `C’est gravé : cet apéro rejoint les annales de « ${tableeEntry.name ?? "la tablée"} ».`,
+      );
+    } catch {
+      setTableeFeedback("Le rattachement a capoté. Réessaie dans un instant.");
+    } finally {
+      setIsAttachingTablee(false);
     }
   }
 
@@ -326,6 +424,13 @@ export function InvitePage() {
   const { event } = state;
   const result = calculateBestOptions(event);
   const winnerId = result.type === "winner" ? result.optionId : undefined;
+  const winnerOption = winnerId
+    ? event.options.find((option) => option.id === winnerId)
+    : undefined;
+  const canExportToCalendar = Boolean(winnerOption?.date && winnerOption.time);
+  // Apéro passé : place à la tournée suivante — n'importe quel membre de la
+  // tablée peut la convoquer, c'est ainsi que le rôle tourne.
+  const isPastEvent = isEventExpired(event, new Date());
   const canShare = Boolean(aperoId && keys.encryptionKey);
   const inviteUrl = canShare
     ? buildInviteUrl({
@@ -354,6 +459,9 @@ export function InvitePage() {
               : "🚫 Sans les mioches — apéro entre grandes personnes"}
           </span>
         )}
+        {event.recurrence && (
+          <p className="meta">Assemblée récurrente : {describeRecurrence(event.recurrence)}.</p>
+        )}
         {hasLocalEntry && (
           <p className="meta">C’est noté : tu retrouveras cet apéro dans ton ardoise sur cet appareil.</p>
         )}
@@ -367,6 +475,68 @@ export function InvitePage() {
 
       <MobileResultsPanel event={event} result={result} />
 
+      {canExportToCalendar && winnerOption && (
+        <section className="sheet">
+          <p className="eyebrow">Graver au registre</p>
+          <p className="lede">
+            Le verdict est tombé : grave-le dans ton calendrier avant qu’il ne s’évapore
+            entre deux tournées, ou affiche-le fièrement en image dans la conversation.
+          </p>
+          <div className="button-row">
+            <button
+              type="button"
+              className="button button--ghost"
+              onClick={() =>
+                downloadAperoIcs({
+                  event,
+                  option: winnerOption,
+                  inviteUrl: canShare ? inviteUrl : undefined,
+                })
+              }
+            >
+              Ajouter à mon calendrier
+            </button>
+            <button
+              type="button"
+              className="button button--ghost"
+              onClick={async () => {
+                setVerdictShareFeedback("");
+                const winnerCounts = result.results.find(
+                  (item) => item.optionId === winnerOption.id,
+                );
+                const outcome = await shareOrDownloadVerdictImage(
+                  {
+                    event,
+                    option: winnerOption,
+                    counts: {
+                      yes: winnerCounts?.yesCount ?? 0,
+                      maybe: winnerCounts?.maybeCount ?? 0,
+                      no: winnerCounts?.noCount ?? 0,
+                    },
+                    traquenardAverage: calculateAverageTraquenardLevel(event),
+                  },
+                  "tableau-de-chasse.png",
+                );
+                setVerdictShareFeedback(
+                  outcome === "failed"
+                    ? "L’image n’a pas voulu sortir du cadre. Réessaie dans un instant."
+                    : outcome === "downloaded"
+                      ? "Tableau de chasse téléchargé : il n’attend plus que la conversation."
+                      : "",
+                );
+              }}
+            >
+              Partager le tableau de chasse
+            </button>
+          </div>
+          {verdictShareFeedback && (
+            <p className="meta" role="status">
+              {verdictShareFeedback}
+            </p>
+          )}
+        </section>
+      )}
+
       {keys.writeKey ? (
         <>
           <VoteForm
@@ -376,6 +546,16 @@ export function InvitePage() {
             leadingOptionId={winnerId}
             onProposeSlot={() => setIsProposingSlot(true)}
             childrenAllowed={event.childrenAllowed}
+            onToggleCheer={comptoirName.trim() ? handleToggleCheer : undefined}
+            hasCheeredOption={(optionId) => {
+              const cheerKey = normalizeMemberName(comptoirName);
+              const option = event.options.find((candidate) => candidate.id === optionId);
+              return Boolean(
+                cheerKey &&
+                  option?.cheers?.some((name) => normalizeMemberName(name) === cheerKey),
+              );
+            }}
+            isCheerSaving={isCheerSaving}
             extraFields={
               <TraquenardSlider value={traquenardVote} onChange={setTraquenardVote} />
             }
@@ -409,6 +589,12 @@ export function InvitePage() {
                   </div>
                   {option.id === winnerId && <span className="agenda-lead">En tête</span>}
                 </div>
+                {(option.cheers?.length ?? 0) > 0 && (
+                  <span className="cheer-count">
+                    {option.cheers?.length} verre{(option.cheers?.length ?? 0) > 1 ? "s" : ""} levé
+                    {(option.cheers?.length ?? 0) > 1 ? "s" : ""}
+                  </span>
+                )}
               </div>
             ))}
           </div>
@@ -419,7 +605,122 @@ export function InvitePage() {
         </section>
       )}
 
+      {isPastEvent && (
+        <section className="sheet">
+          <p className="eyebrow">{event.recurrence ? "La tournée suivante" : "Remettre ça"}</p>
+          <h2 className="h2">
+            {event.recurrence
+              ? "Cette assemblée se répète, le rituel n’attend pas."
+              : "Cet apéro est derrière nous."}
+          </h2>
+          <p className="lede">
+            {event.recurrence
+              ? `La cadence est gravée : ${describeRecurrence(event.recurrence)}. Convoque la prochaine tournée, mêmes lieu et heure, date décalée d’autant.`
+              : "Les verres sont secs, le zinc est rangé. La suite logique : la même chose, un peu plus tard — et n’importe quel membre de la tablée peut convoquer la prochaine."}
+          </p>
+          <button
+            type="button"
+            className="button button--primary button--block"
+            onClick={() =>
+              navigate("/create", { state: { prefill: buildNextRoundPrefill(event) } })
+            }
+          >
+            {event.recurrence ? "Convoquer la prochaine tournée" : "Remettre ça"}
+          </button>
+        </section>
+      )}
+
+      {hasJustVoted && !isOrganizer && (
+        <section className="sheet">
+          <p className="eyebrow">À ton tour</p>
+          <h2 className="h2">Tu as émargé. Reste à convoquer.</h2>
+          <p className="lede">
+            Tu sais désormais comment on rameute une tablée : une assemblée, deux ou trois
+            créneaux, un lien. La Confrérie n’attend plus que ta convocation.
+          </p>
+          <Link className="button button--primary button--block" to="/create">
+            Organiser mon propre apéro
+          </Link>
+        </section>
+      )}
+
       <ParticipantList participants={event.participants} />
+
+      <ComptoirWall
+        messages={event.messages ?? []}
+        authorName={comptoirName}
+        onPost={keys.writeKey ? handlePostMessage : undefined}
+        isSaving={isPostingMessage}
+      />
+
+      {keys.encryptionKey && (
+        <section className="sheet">
+          <p className="eyebrow">La Tablée</p>
+          {localTablees.length > 0 ? (
+            <>
+              <p className="lede">
+                Rattache cet apéro aux annales d’une de tes tablées : la bande le
+                retrouvera avec le reste de son histoire.
+              </p>
+              <label className="field">
+                <span>Choisir la tablée</span>
+                <select
+                  value={selectedTableeId}
+                  onChange={(eventChange) => setSelectedTableeId(eventChange.target.value)}
+                >
+                  <option value="">— Choisir —</option>
+                  {localTablees.map((entry) => (
+                    <option value={entry.tableeId} key={entry.tableeId}>
+                      {entry.name ?? entry.tableeId}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                className="button button--ghost button--block"
+                onClick={handleAttachToTablee}
+                disabled={!selectedTableeId || isAttachingTablee}
+              >
+                {isAttachingTablee ? "On grave aux annales…" : "Rattacher à cette tablée"}
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="lede">
+                Cette bande mérite mieux qu’un apéro sans lendemain : fonde une tablée,
+                la troupe du registre sera attablée d’office.
+              </p>
+              <button
+                type="button"
+                className="button button--ghost button--block"
+                onClick={() =>
+                  navigate("/tablees", {
+                    state: {
+                      seedFromApero: {
+                        aperoId,
+                        encryptionKey: keys.encryptionKey,
+                        writeKey: keys.writeKey,
+                        ceremonialName: event.ceremonialName,
+                        memberNames: event.participants.map(
+                          (participant) => participant.participantName,
+                        ),
+                      },
+                    },
+                  })
+                }
+              >
+                Fonder une tablée avec cette bande
+              </button>
+            </>
+          )}
+          {tableeFeedback && (
+            <p className="meta" role="status">
+              {tableeFeedback}
+            </p>
+          )}
+        </section>
+      )}
 
       {canShare && (
         <MobileShareBox
@@ -427,6 +728,15 @@ export function InvitePage() {
           displayUrl={maskInviteUrl(inviteUrl)}
           title={buildShareTitle(event)}
           text={buildShareText(event)}
+          reminder={
+            isOrganizer
+              ? {
+                  label: "Sonner le rappel",
+                  title: buildShareTitle(event),
+                  text: buildReminderText(event),
+                }
+              : undefined
+          }
         />
       )}
 
