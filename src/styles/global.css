@@ -539,6 +539,52 @@ input[type="range"] {
   accent-color: var(--pastis);
 }
 
+/* ===== Mur du comptoir (fil de mots d'un apéro) ===== */
+.wall-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.wall-item {
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 247, 230, 0.14);
+  border-radius: 13px;
+  background: rgba(255, 247, 230, 0.05);
+}
+
+.wall-item__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.wall-item__author {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--pastis-soft);
+}
+
+.wall-item__when {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.wall-item__body {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.wall-form {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 11px;
+}
+
 /* ===== Trinquer (micro-approbation d'un créneau) ===== */
 .cheer-row {
   display: flex;

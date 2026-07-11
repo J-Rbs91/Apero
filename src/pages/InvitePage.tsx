@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AlternativeOptionForm } from "../components/AlternativeOptionForm";
+import { ComptoirWall } from "../components/ComptoirWall";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
@@ -15,6 +16,7 @@ import { AperoApiError } from "../services/aperoApiClient";
 import { isValidAperoId } from "../services/aperoCryptoKeys";
 import { AperoCryptoError } from "../services/aperoEncryption";
 import {
+  addEncryptedAperoMessage,
   addEncryptedAperoOption,
   deleteEncryptedApero,
   getCachedAperoEvent,
@@ -31,6 +33,7 @@ import {
   removeNotificationsForApero,
 } from "../services/notificationStore";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
+import { createId } from "../utils/createId";
 import { isEventExpired } from "../services/eventPurge";
 import { calculateBestOptions } from "../utils/calculateResults";
 import { downloadAperoIcs } from "../utils/calendarExport";
@@ -118,6 +121,7 @@ export function InvitePage() {
   const [isProposingSlot, setIsProposingSlot] = useState(false);
   const [isAddingOption, setIsAddingOption] = useState(false);
   const [isCheerSaving, setIsCheerSaving] = useState(false);
+  const [isPostingMessage, setIsPostingMessage] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState("");
@@ -286,6 +290,27 @@ export function InvitePage() {
       setError(describeApiError(submitError));
     } finally {
       setIsCheerSaving(false);
+    }
+  }
+
+  async function handlePostMessage(body: string) {
+    const authorName = comptoirName.trim();
+    if (state.status !== "ready" || !aperoId || !keys.writeKey || !keys.encryptionKey || !authorName) {
+      return;
+    }
+
+    try {
+      setIsPostingMessage(true);
+      const updatedEvent = await addEncryptedAperoMessage(aperoId, keys.writeKey, keys.encryptionKey, {
+        id: createId("message"),
+        authorName,
+        body,
+        createdAt: new Date().toISOString(),
+      });
+      setState({ status: "ready", event: updatedEvent });
+      syncAperoNotificationsFromRegistry(updatedEvent);
+    } finally {
+      setIsPostingMessage(false);
     }
   }
 
@@ -543,6 +568,13 @@ export function InvitePage() {
       )}
 
       <ParticipantList participants={event.participants} />
+
+      <ComptoirWall
+        messages={event.messages ?? []}
+        authorName={comptoirName}
+        onPost={keys.writeKey ? handlePostMessage : undefined}
+        isSaving={isPostingMessage}
+      />
 
       {canShare && (
         <MobileShareBox

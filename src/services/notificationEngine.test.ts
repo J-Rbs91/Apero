@@ -297,3 +297,49 @@ describe("coup de coude post-apéro", () => {
     expect(result.snapshot.firedNextRoundNudge).toBe(true);
   });
 });
+
+describe("mur du comptoir", () => {
+  function withMessage(id: string, authorName: string, body = "Qui gère la glace ?") {
+    return event({
+      messages: [{ id, authorName, body, createdAt: NOW_ISO }],
+    });
+  }
+
+  it("notifie le créateur et les invités engagés d'un nouveau mot", () => {
+    const before = snapshotApero(event());
+    const after = withMessage("message_1", "Jean-Mi");
+
+    const forCreator = diffAperoNotifications(after, before, creator, Date.parse(NOW_ISO), makeId, NOW_ISO);
+    expect(forCreator.notifications.map((n) => n.type)).toEqual(["new-message"]);
+    expect(forCreator.notifications[0].body).toContain("Jean-Mi");
+
+    const forGuest = diffAperoNotifications(after, before, yesGuest, Date.parse(NOW_ISO), makeId, NOW_ISO);
+    expect(forGuest.notifications.map((n) => n.type)).toEqual(["new-message"]);
+  });
+
+  it("ne notifie jamais l'auteur du mot ni les déserteurs", () => {
+    const before = snapshotApero(event());
+    const after = withMessage("message_1", "Organisateur");
+
+    const forAuthor = diffAperoNotifications(after, before, creator, Date.parse(NOW_ISO), makeId, NOW_ISO);
+    expect(forAuthor.notifications).toHaveLength(0);
+
+    const afterOther = withMessage("message_2", "Jean-Mi");
+    const forNoGuest = diffAperoNotifications(afterOther, before, noGuest, Date.parse(NOW_ISO), makeId, NOW_ISO);
+    expect(forNoGuest.notifications).toHaveLength(0);
+  });
+
+  it("ne renotifie pas un mot déjà vu et tronque les pavés", () => {
+    const seen = withMessage("message_1", "Jean-Mi");
+    const before = snapshotApero(seen);
+    const again = diffAperoNotifications(seen, before, creator, Date.parse(NOW_ISO), makeId, NOW_ISO);
+    expect(again.notifications).toHaveLength(0);
+
+    const longBody = "x".repeat(200);
+    const after = withMessage("message_2", "Jean-Mi", longBody);
+    const result = diffAperoNotifications(after, before, creator, Date.parse(NOW_ISO), makeId, NOW_ISO);
+    expect(result.notifications[0].body.length).toBeLessThan(160);
+    expect(result.notifications[0].body).toContain("…");
+    expect(result.snapshot.messageIds).toContain("message_2");
+  });
+});

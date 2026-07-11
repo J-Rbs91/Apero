@@ -19,6 +19,9 @@ export type AperitifEvent = {
   status: AperitifEventStatus;
   options: AperitifOption[];
   participants: ParticipantResponse[];
+  // Le mur du comptoir : mots laissés par la tablée, du plus ancien au plus
+  // récent. Absent sur les apéros d'avant cette fonctionnalité.
+  messages?: AperoMessage[];
   // Les mioches sont-ils conviés ? Réglé à la création de l'apéro. Absent sur
   // les apéros d'avant cette option (on ne présume alors rien).
   childrenAllowed?: boolean;
@@ -47,6 +50,15 @@ export type AperitifOption = {
   // sans valeur de vote. Dédupliqués par nom normalisé, absents si personne
   // n'a levé son verre.
   cheers?: string[];
+};
+
+// Un mot lâché au comptoir : le fil de discussion léger d'un apéro. Pas une
+// messagerie — des mots courts, signés d'un blaze, dans le payload chiffré.
+export type AperoMessage = {
+  id: string;
+  authorName: string;
+  body: string;
+  createdAt: string;
 };
 
 export type ParticipantResponse = {

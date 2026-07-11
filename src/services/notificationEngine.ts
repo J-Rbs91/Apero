@@ -22,6 +22,9 @@ export type AperoSnapshot = {
   participantVotes: Record<string, string>;
   // Créneau confirmé au moment du dernier sync.
   selectedOptionId?: string;
+  // Mots du mur du comptoir déjà vus. Optionnel : les instantanés d'avant la
+  // fonctionnalité n'ont pas le champ (aucun message n'existait alors).
+  messageIds?: string[];
   // Rappels « peut-être » déjà déclenchés ("48h", "24h", "2h").
   firedReminders: string[];
   // Coup de coude « à qui le tour ? » déjà envoyé une fois l'apéro passé.
@@ -38,6 +41,7 @@ export function createEmptySnapshot(): AperoSnapshot {
     optionSignatures: {},
     participantVotes: {},
     selectedOptionId: undefined,
+    messageIds: [],
     firedReminders: [],
     firedNextRoundNudge: false,
     initialized: false,
@@ -95,6 +99,7 @@ export function snapshotApero(event: AperitifEvent): AperoSnapshot {
     optionSignatures,
     participantVotes,
     selectedOptionId: event.selectedOptionId,
+    messageIds: (event.messages ?? []).map((message) => message.id),
     firedReminders: [],
     initialized: true,
   };
@@ -195,7 +200,29 @@ function buildNotifications(
     }
   }
 
-  // 3) Confirmation finale : le créneau retenu vient d'être fixé ou changé.
+  // 3) Mots laissés sur le mur du comptoir : créateur et invités engagés sont
+  // prévenus, jamais l'auteur du mot lui-même.
+  const knownMessageIds = new Set(previous.messageIds ?? []);
+  for (const message of event.messages ?? []) {
+    if (knownMessageIds.has(message.id)) {
+      continue;
+    }
+    if (normalizeMemberName(message.authorName) === viewer.normalizedName) {
+      continue;
+    }
+    if (isCreator || guestFollowsUpdates(viewer.vote)) {
+      const excerpt =
+        message.body.length > 90 ? `${message.body.slice(0, 89)}…` : message.body;
+      drafts.push({
+        type: "new-message",
+        title: "Un mot au comptoir",
+        body: `${message.authorName}, à propos de « ${event.ceremonialName} » : ${excerpt}`,
+        dedupeKey: `${event.id}:message:${message.id}`,
+      });
+    }
+  }
+
+  // 4) Confirmation finale : le créneau retenu vient d'être fixé ou changé.
   if (
     event.selectedOptionId &&
     event.selectedOptionId !== previous.selectedOptionId &&

@@ -1,4 +1,5 @@
-import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
+import type { AperitifEvent, AperitifOption, AperoMessage, ParticipantResponse } from "../types/apero";
+import { MAX_MESSAGES } from "./aperoValidation";
 import { sanitizeAperoEvent } from "./aperoValidation";
 import { normalizeMemberName } from "./memberName";
 
@@ -77,6 +78,7 @@ export function normalizeEvent(rawEvent: unknown, expectedId?: string): Aperitif
       status: event.status ?? "active",
       childrenAllowed: event.childrenAllowed,
       recurrence: event.recurrence,
+      messages: event.messages,
       options,
       participants: rawParticipants.map((participant) => ({
         ...participant,
@@ -131,6 +133,23 @@ export function appendEventOption(
   return {
     ...event,
     options: [...event.options, option],
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * Ajoute un mot au mur du comptoir. Le fil reste léger : au-delà de
+ * MAX_MESSAGES, les plus anciens mots tombent du mur.
+ */
+export function appendEventMessage(
+  event: AperitifEvent,
+  message: AperoMessage,
+): AperitifEvent {
+  const messages = [...(event.messages ?? []), message].slice(-MAX_MESSAGES);
+
+  return {
+    ...event,
+    messages,
     updatedAt: new Date().toISOString(),
   };
 }

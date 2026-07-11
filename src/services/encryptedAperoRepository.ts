@@ -5,9 +5,10 @@
 // Aucun appel GitHub authentifie ne part d'ici.
 
 import { githubConfig } from "../config/githubConfig";
-import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
+import type { AperitifEvent, AperitifOption, AperoMessage, ParticipantResponse } from "../types/apero";
 import type { LocalAperoEntry, StoredEncryptedAperoFile } from "../types/encryptedApero";
 import {
+  appendEventMessage,
   appendEventOption,
   normalizeEvent,
   toggleOptionCheer,
@@ -411,6 +412,18 @@ export async function joinApero(
 
   return updateEncryptedApero(aperoId, writeKey, encryptionKey, (event) =>
     upsertParticipant(event, participant),
+  );
+}
+
+/** Laisse un mot sur le mur du comptoir de l'apéro. */
+export async function addEncryptedAperoMessage(
+  aperoId: string,
+  writeKey: string,
+  encryptionKey: string,
+  message: AperoMessage,
+): Promise<AperitifEvent> {
+  return updateEncryptedApero(aperoId, writeKey, encryptionKey, (event) =>
+    appendEventMessage(event, message),
   );
 }
 
