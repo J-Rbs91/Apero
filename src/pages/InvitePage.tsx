@@ -35,8 +35,9 @@ import {
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
 import { createId } from "../utils/createId";
 import { isEventExpired } from "../services/eventPurge";
-import { calculateBestOptions } from "../utils/calculateResults";
+import { calculateAverageTraquenardLevel, calculateBestOptions } from "../utils/calculateResults";
 import { downloadAperoIcs } from "../utils/calendarExport";
+import { shareOrDownloadVerdictImage } from "../utils/verdictImage";
 import { formatOption } from "../utils/formatOption";
 import { normalizeMemberName } from "../utils/memberName";
 import { buildNextRoundPrefill, describeRecurrence } from "../utils/nextRound";
@@ -122,6 +123,7 @@ export function InvitePage() {
   const [isAddingOption, setIsAddingOption] = useState(false);
   const [isCheerSaving, setIsCheerSaving] = useState(false);
   const [isPostingMessage, setIsPostingMessage] = useState(false);
+  const [verdictShareFeedback, setVerdictShareFeedback] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState("");
@@ -442,21 +444,60 @@ export function InvitePage() {
           <p className="eyebrow">Graver au registre</p>
           <p className="lede">
             Le verdict est tombé : grave-le dans ton calendrier avant qu’il ne s’évapore
-            entre deux tournées.
+            entre deux tournées, ou affiche-le fièrement en image dans la conversation.
           </p>
-          <button
-            type="button"
-            className="button button--ghost button--block"
-            onClick={() =>
-              downloadAperoIcs({
-                event,
-                option: winnerOption,
-                inviteUrl: canShare ? inviteUrl : undefined,
-              })
-            }
-          >
-            Ajouter à mon calendrier
-          </button>
+          <div className="button-row">
+            <button
+              type="button"
+              className="button button--ghost"
+              onClick={() =>
+                downloadAperoIcs({
+                  event,
+                  option: winnerOption,
+                  inviteUrl: canShare ? inviteUrl : undefined,
+                })
+              }
+            >
+              Ajouter à mon calendrier
+            </button>
+            <button
+              type="button"
+              className="button button--ghost"
+              onClick={async () => {
+                setVerdictShareFeedback("");
+                const winnerCounts = result.results.find(
+                  (item) => item.optionId === winnerOption.id,
+                );
+                const outcome = await shareOrDownloadVerdictImage(
+                  {
+                    event,
+                    option: winnerOption,
+                    counts: {
+                      yes: winnerCounts?.yesCount ?? 0,
+                      maybe: winnerCounts?.maybeCount ?? 0,
+                      no: winnerCounts?.noCount ?? 0,
+                    },
+                    traquenardAverage: calculateAverageTraquenardLevel(event),
+                  },
+                  "tableau-de-chasse.png",
+                );
+                setVerdictShareFeedback(
+                  outcome === "failed"
+                    ? "L’image n’a pas voulu sortir du cadre. Réessaie dans un instant."
+                    : outcome === "downloaded"
+                      ? "Tableau de chasse téléchargé : il n’attend plus que la conversation."
+                      : "",
+                );
+              }}
+            >
+              Partager le tableau de chasse
+            </button>
+          </div>
+          {verdictShareFeedback && (
+            <p className="meta" role="status">
+              {verdictShareFeedback}
+            </p>
+          )}
         </section>
       )}
 
