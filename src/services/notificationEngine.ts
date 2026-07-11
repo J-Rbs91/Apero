@@ -24,6 +24,10 @@ export type AperoSnapshot = {
   selectedOptionId?: string;
   // Rappels « peut-être » déjà déclenchés ("48h", "24h", "2h").
   firedReminders: string[];
+  // Coup de coude « à qui le tour ? » déjà envoyé une fois l'apéro passé.
+  // Optionnel : les instantanés persistés avant cette fonctionnalité n'ont pas
+  // le champ, ce qui vaut « pas encore envoyé ».
+  firedNextRoundNudge?: boolean;
   // Faux tant qu'on n'a jamais synchronisé cet apéro : le tout premier passage
   // ne fait qu'enregistrer l'état, sans notifier l'historique déjà présent.
   initialized: boolean;
@@ -35,6 +39,7 @@ export function createEmptySnapshot(): AperoSnapshot {
     participantVotes: {},
     selectedOptionId: undefined,
     firedReminders: [],
+    firedNextRoundNudge: false,
     initialized: false,
   };
 }
@@ -295,6 +300,75 @@ export function computeReminders(
   return { drafts: [draft], firedReminders: Array.from(fired) };
 }
 
+// ---- Coup de coude post-apéro (« à qui le tour ? ») --------------------------
+
+// On laisse l'apéro se finir tranquillement (12 h après l'heure du créneau),
+// puis on souffle l'idée de la tournée suivante. Au-delà de 7 jours, on ne
+// déterre plus rien : la fenêtre d'envie est passée.
+const NEXT_ROUND_NUDGE_DELAY_MS = 12 * HOUR_MS;
+const NEXT_ROUND_NUDGE_CUTOFF_MS = 7 * 24 * HOUR_MS;
+
+// Date de référence d'un apéro passé : le créneau confirmé, sinon le dernier
+// créneau daté (même logique que la purge).
+function resolveAperoEndMs(event: AperitifEvent): number {
+  if (event.selectedOptionId) {
+    const selected = event.options.find((option) => option.id === event.selectedOptionId);
+    const selectedMs = selected ? optionStartMs(selected) : Number.NaN;
+    if (!Number.isNaN(selectedMs)) {
+      return selectedMs;
+    }
+  }
+  const dated = event.options.map(optionStartMs).filter((ms) => !Number.isNaN(ms));
+  return dated.length ? Math.max(...dated) : Number.NaN;
+}
+
+// Le coup de coude s'adresse à ceux qui ont fait vivre l'apéro : le créateur
+// (tournée récurrente à relancer) et les invités qui étaient partants (à eux
+// de convoquer la prochaine). Les « peut-être » et « non » sont laissés en paix.
+export function computeNextRoundNudge(
+  event: AperitifEvent,
+  viewer: NotificationViewer,
+  previous: AperoSnapshot,
+  nowMs: number,
+): { drafts: DraftNotification[]; firedNextRoundNudge: boolean } {
+  const alreadyFired = Boolean(previous.firedNextRoundNudge);
+
+  if (alreadyFired) {
+    return { drafts: [], firedNextRoundNudge: true };
+  }
+
+  const eligible = viewer.role === "creator" || viewer.vote === "yes";
+  const endMs = resolveAperoEndMs(event);
+
+  if (
+    !eligible ||
+    Number.isNaN(endMs) ||
+    nowMs < endMs + NEXT_ROUND_NUDGE_DELAY_MS ||
+    nowMs > endMs + NEXT_ROUND_NUDGE_CUTOFF_MS
+  ) {
+    // Fenêtre dépassée sans envoi : on grave le drapeau pour ne jamais
+    // notifier un apéro préhistorique lors d'une future synchronisation.
+    const expired = !Number.isNaN(endMs) && nowMs > endMs + NEXT_ROUND_NUDGE_CUTOFF_MS;
+    return { drafts: [], firedNextRoundNudge: expired };
+  }
+
+  const draft: DraftNotification = event.recurrence
+    ? {
+        type: "next-round-nudge",
+        title: "La tournée suivante attend",
+        body: `« ${event.ceremonialName} » est passé, et cette assemblée se répète. Convoque la prochaine tournée, le zinc garde la cadence.`,
+        dedupeKey: `${event.id}:next-round`,
+      }
+    : {
+        type: "next-round-nudge",
+        title: "L’assemblée est levée",
+        body: `« ${event.ceremonialName} » est derrière nous. À qui le tour de convoquer ? Un lien, deux créneaux, et ça repart.`,
+        dedupeKey: `${event.id}:next-round`,
+      };
+
+  return { drafts: [draft], firedNextRoundNudge: true };
+}
+
 // ---- Entrée principale du moteur --------------------------------------------
 
 export type EngineResult = {
@@ -326,11 +400,18 @@ export function diffAperoNotifications(
     previous,
     nowMs,
   );
+  const { drafts: nudgeDrafts, firedNextRoundNudge } = computeNextRoundNudge(
+    event,
+    viewer,
+    previous,
+    nowMs,
+  );
 
   const nextSnapshot = snapshotApero(event);
   nextSnapshot.firedReminders = firedReminders;
+  nextSnapshot.firedNextRoundNudge = firedNextRoundNudge;
 
-  const notifications: AppNotification[] = [...eventDrafts, ...reminderDrafts].map((draft) => ({
+  const notifications: AppNotification[] = [...eventDrafts, ...reminderDrafts, ...nudgeDrafts].map((draft) => ({
     id: makeId(draft.dedupeKey),
     aperoId: event.id,
     aperoName: event.ceremonialName,
