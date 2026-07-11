@@ -105,6 +105,14 @@ export function BrandMenu() {
           >
             Les Comptes
           </Link>
+          <Link
+            className="brand-menu__item"
+            role="menuitem"
+            to="/coffre"
+            onClick={() => setIsOpen(false)}
+          >
+            Le Coffre
+          </Link>
           <button
             type="button"
             className="brand-menu__item"
