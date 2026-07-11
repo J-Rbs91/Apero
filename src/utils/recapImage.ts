@@ -7,7 +7,6 @@ import { shareOrDownloadPng, type ImageShareOutcome } from "./imageShare";
 import { CANVAS_COLORS, CANVAS_FONT, wrapCanvasText } from "./verdictImage";
 
 const WIDTH = 1080;
-const HEIGHT = 1350;
 
 export type RecapImageInput = {
   recap: YearRecap;
@@ -58,22 +57,75 @@ export async function renderRecapImage({ recap, memberName }: RecapImageInput): 
 
   const canvas = document.createElement("canvas");
   canvas.width = WIDTH;
-  canvas.height = HEIGHT;
   const context = canvas.getContext("2d");
   if (!context) {
     return null;
   }
 
-  const background = context.createLinearGradient(0, 0, 0, HEIGHT);
+  const margin = 84;
+  const maxTextWidth = WIDTH - margin * 2;
+
+  // Passe de mesure : chaque bloc « libellé + valeur » consomme une hauteur
+  // qui dépend de l'enveloppement de sa valeur. Le canvas est taillé après,
+  // pour que le flux n'écrase jamais le pied de page.
+  context.font = `800 72px ${CANVAS_FONT}`;
+  const nameLines = wrapCanvasText(context, memberName, maxTextWidth).slice(0, 2);
+
+  const plural = (count: number) => (count > 1 ? "s" : "");
+  const lineBlocks: Array<{ label: string; value: string }> = [
+    {
+      label: "Au registre",
+      value:
+        `${recap.yesCount} présence${plural(recap.yesCount)}, ` +
+        `${recap.maybeCount} hésitation${plural(recap.maybeCount)}, ` +
+        `${recap.noCount} désertion${plural(recap.noCount)}`,
+    },
+  ];
+  if (recap.favoriteLocation) {
+    lineBlocks.push({ label: "Quartier général", value: recap.favoriteLocation });
+  }
+  if (recap.biggestTableName) {
+    lineBlocks.push({
+      label: "La plus grande tablée",
+      value: `${recap.biggestTableName} (${recap.biggestTableSize} convives)`,
+    });
+  }
+  lineBlocks.push({
+    label: "Traquenard-O-mètre personnel",
+    value:
+      recap.averageTraquenard != null
+        ? `${recap.averageTraquenard.toFixed(1)} / 10 de pronostic moyen`
+        : "Aucun pronostic déposé, prudence de sioux",
+  });
+
+  context.font = `700 40px ${CANVAS_FONT}`;
+  const blockHeights = lineBlocks.map(
+    (block) => 52 + wrapCanvasText(context, block.value, maxTextWidth).slice(0, 2).length * 50 + 34,
+  );
+
+  const panelHeight = 210;
+  const fluxHeight =
+    170 + // première ligne (enseigne)
+    46 + 100 + // sous-titre + respiration
+    nameLines.length * 84 +
+    10 + 6 + 90 + // trait pastis
+    panelHeight + 92 + // panneau des trois grands chiffres
+    blockHeights.reduce((total, blockHeight) => total + blockHeight, 0) +
+    92; // pied de page
+  const height = Math.max(1350, fluxHeight);
+
+  // Changer la hauteur réinitialise l'état du contexte : à faire avant tout.
+  canvas.height = height;
+
+  const background = context.createLinearGradient(0, 0, 0, height);
   background.addColorStop(0, CANVAS_COLORS.backgroundTop);
   background.addColorStop(1, CANVAS_COLORS.backgroundBottom);
   context.fillStyle = background;
-  context.fillRect(0, 0, WIDTH, HEIGHT);
+  context.fillRect(0, 0, WIDTH, height);
 
   context.fillStyle = CANVAS_COLORS.barRed;
   context.fillRect(0, 0, WIDTH, 14);
 
-  const margin = 84;
   let y = 170;
 
   context.textAlign = "left";
@@ -88,7 +140,7 @@ export async function renderRecapImage({ recap, memberName }: RecapImageInput): 
 
   context.fillStyle = CANVAS_COLORS.cream;
   context.font = `800 72px ${CANVAS_FONT}`;
-  for (const line of wrapCanvasText(context, memberName, WIDTH - margin * 2).slice(0, 2)) {
+  for (const line of nameLines) {
     context.fillText(line, margin, y);
     y += 84;
   }
@@ -99,7 +151,6 @@ export async function renderRecapImage({ recap, memberName }: RecapImageInput): 
   y += 90;
 
   // Panneau des trois grands chiffres.
-  const panelHeight = 210;
   context.fillStyle = CANVAS_COLORS.panel;
   context.strokeStyle = CANVAS_COLORS.panelBorder;
   context.lineWidth = 2;
@@ -115,42 +166,14 @@ export async function renderRecapImage({ recap, memberName }: RecapImageInput): 
   drawStat(context, margin + columnWidth * 2.5, statsY, String(recap.fellowCount), "Blazes croisés");
   y += panelHeight + 92;
 
-  y = drawLine(
-    context,
-    margin,
-    y,
-    "Au registre",
-    `${recap.yesCount} présences, ${recap.maybeCount} hésitations, ${recap.noCount} désertions`,
-  );
-
-  if (recap.favoriteLocation) {
-    y = drawLine(context, margin, y, "Quartier général", recap.favoriteLocation);
+  for (const block of lineBlocks) {
+    y = drawLine(context, margin, y, block.label, block.value);
   }
-
-  if (recap.biggestTableName) {
-    y = drawLine(
-      context,
-      margin,
-      y,
-      "La plus grande tablée",
-      `${recap.biggestTableName} (${recap.biggestTableSize} convives)`,
-    );
-  }
-
-  y = drawLine(
-    context,
-    margin,
-    y,
-    "Traquenard-O-mètre personnel",
-    recap.averageTraquenard != null
-      ? `${recap.averageTraquenard.toFixed(1)} / 10 de pronostic moyen`
-      : "Aucun pronostic déposé, prudence de sioux",
-  );
 
   context.textAlign = "left";
   context.fillStyle = CANVAS_COLORS.muted;
   context.font = `600 26px ${CANVAS_FONT}`;
-  context.fillText("Le registre fait foi. Le reste est légende.", margin, HEIGHT - 52);
+  context.fillText("Le registre fait foi. Le reste est légende.", margin, height - 52);
 
   return new Promise((resolve) => {
     canvas.toBlob((blob) => resolve(blob), "image/png");

@@ -10,7 +10,10 @@ import type { AperitifEvent, AperitifOption } from "../types/apero";
 import { shareOrDownloadPng, type ImageShareOutcome } from "./imageShare";
 
 const WIDTH = 1080;
-const HEIGHT = 1350;
+// Hauteur minimale (format portrait 4:5). La hauteur réelle est calculée
+// après une passe de mesure : un nom cérémoniel sur trois lignes ne doit
+// jamais faire chevaucher la jauge et le pied de page.
+const MIN_HEIGHT = 1350;
 
 // Palette miroir de src/styles/global.css, partagée avec le bilan annuel.
 export const CANVAS_COLORS = {
@@ -99,24 +102,56 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
 
   const canvas = document.createElement("canvas");
   canvas.width = WIDTH;
-  canvas.height = HEIGHT;
   const context = canvas.getContext("2d");
   if (!context) {
     return null;
   }
 
+  const margin = 84;
+  const maxTextWidth = WIDTH - margin * 2;
+
+  // Passe de mesure : les lignes une fois enveloppées, avant tout dessin, pour
+  // dimensionner le canvas — le flux et le pied ne se chevauchent jamais.
+  context.font = `800 76px ${FONT}`;
+  const nameLines = wrapText(context, input.event.ceremonialName, maxTextWidth).slice(0, 3);
+  context.font = `italic 600 36px ${FONT}`;
+  const titleLines = input.event.title
+    ? wrapText(context, `« ${input.event.title} »`, maxTextWidth).slice(0, 2)
+    : [];
+  context.font = `600 30px ${FONT}`;
+  const addressLines = input.option.locationAddress
+    ? wrapText(context, input.option.locationAddress, maxTextWidth).slice(0, 2)
+    : [];
+
+  const panelHeight = 220;
+  const gaugeHeight = 26;
+  const fluxHeight =
+    170 + // première ligne de texte (enseigne)
+    46 + 96 + // sous-titre + respiration
+    nameLines.length * 88 +
+    titleLines.length * 48 +
+    30 + 6 + 84 + // trait pastis
+    62 + 66 + 54 + // LE VERDICT + date + heure/lieu
+    addressLines.length * 40 +
+    46 + panelHeight + 92 + // panneau des comptes
+    44 + gaugeHeight + 48 + // Traquenard-O-mètre
+    96 + 44; // pied de page (signature + devise)
+  const height = Math.max(MIN_HEIGHT, fluxHeight + 52);
+
+  // Changer la hauteur réinitialise l'état du contexte : à faire avant tout.
+  canvas.height = height;
+
   // Fond : dégradé du mur vert.
-  const background = context.createLinearGradient(0, 0, 0, HEIGHT);
+  const background = context.createLinearGradient(0, 0, 0, height);
   background.addColorStop(0, CANVAS_COLORS.backgroundTop);
   background.addColorStop(1, CANVAS_COLORS.backgroundBottom);
   context.fillStyle = background;
-  context.fillRect(0, 0, WIDTH, HEIGHT);
+  context.fillRect(0, 0, WIDTH, height);
 
   // Liseré rouge de comptoir en haut.
   context.fillStyle = CANVAS_COLORS.barRed;
   context.fillRect(0, 0, WIDTH, 14);
 
-  const margin = 84;
   let y = 170;
 
   // Enseigne.
@@ -124,7 +159,7 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
   context.fillStyle = CANVAS_COLORS.pastis;
   context.font = `800 34px ${FONT}`;
   const brand = "LA CONFRÉRIE DU PETIT JAUNE";
-  context.fillText(brand.split("").join(" "), margin, y);
+  context.fillText(brand.split("").join(" "), margin, y);
   y += 46;
   context.fillStyle = CANVAS_COLORS.muted;
   context.font = `600 28px ${FONT}`;
@@ -134,14 +169,14 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
   // Nom cérémoniel.
   context.fillStyle = CANVAS_COLORS.cream;
   context.font = `800 76px ${FONT}`;
-  for (const line of wrapText(context, input.event.ceremonialName, WIDTH - margin * 2).slice(0, 3)) {
+  for (const line of nameLines) {
     context.fillText(line, margin, y);
     y += 88;
   }
-  if (input.event.title) {
+  if (titleLines.length > 0) {
     context.fillStyle = CANVAS_COLORS.pastisSoft;
     context.font = `italic 600 36px ${FONT}`;
-    for (const line of wrapText(context, `« ${input.event.title} »`, WIDTH - margin * 2).slice(0, 2)) {
+    for (const line of titleLines) {
       context.fillText(line, margin, y);
       y += 48;
     }
@@ -165,10 +200,10 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
   context.font = `700 44px ${FONT}`;
   context.fillText(`${input.option.time || "Heure mystère"} — ${input.option.location}`, margin, y);
   y += 54;
-  if (input.option.locationAddress) {
+  if (addressLines.length > 0) {
     context.fillStyle = CANVAS_COLORS.muted;
     context.font = `600 30px ${FONT}`;
-    for (const line of wrapText(context, input.option.locationAddress, WIDTH - margin * 2).slice(0, 2)) {
+    for (const line of addressLines) {
       context.fillText(line, margin, y);
       y += 40;
     }
@@ -176,7 +211,6 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
   y += 46;
 
   // Panneau des comptes.
-  const panelHeight = 220;
   context.fillStyle = CANVAS_COLORS.panel;
   context.strokeStyle = CANVAS_COLORS.panelBorder;
   context.lineWidth = 2;
@@ -200,7 +234,6 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
   y += 44;
 
   const gaugeWidth = WIDTH - margin * 2;
-  const gaugeHeight = 26;
   context.fillStyle = CANVAS_COLORS.panel;
   context.beginPath();
   context.roundRect(margin, y, gaugeWidth, gaugeHeight, 13);
@@ -224,13 +257,14 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
     y,
   );
 
-  // Pied : l'organisateur signe.
+  // Pied : l'organisateur signe, ancré au bas d'un canvas désormais taillé
+  // pour que le flux ne l'atteigne jamais.
   context.fillStyle = CANVAS_COLORS.cream;
   context.font = `700 32px ${FONT}`;
-  context.fillText(`Assemblée convoquée par ${input.event.organizerName}`, margin, HEIGHT - 96);
+  context.fillText(`Assemblée convoquée par ${input.event.organizerName}`, margin, height - 96);
   context.fillStyle = CANVAS_COLORS.muted;
   context.font = `600 26px ${FONT}`;
-  context.fillText("Chacun s’abreuve selon sa conscience et sa constitution.", margin, HEIGHT - 52);
+  context.fillText("Chacun s’abreuve selon sa conscience et sa constitution.", margin, height - 52);
 
   return new Promise((resolve) => {
     canvas.toBlob((blob) => resolve(blob), "image/png");

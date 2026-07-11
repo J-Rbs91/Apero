@@ -20,6 +20,24 @@ export type SeedFromApero = {
   memberNames: string[];
 };
 
+// « La Tablée de Le Concile » écorche l'oreille : on contracte l'article du
+// nom cérémoniel (du / de la / des / de l'), comme au comptoir.
+function suggestTableeName(ceremonialName: string): string {
+  const name = ceremonialName.trim();
+  const contracted = /^le\s+/i.test(name)
+    ? `du ${name.replace(/^le\s+/i, "")}`
+    : /^la\s+/i.test(name)
+      ? `de la ${name.replace(/^la\s+/i, "")}`
+      : /^les\s+/i.test(name)
+        ? `des ${name.replace(/^les\s+/i, "")}`
+        : /^l[’']\s*/i.test(name)
+          ? `de l’${name.replace(/^l[’']\s*/i, "")}`
+          : `de ${name}`;
+
+  // Le nom d'une tablée est plafonné à 80 caractères (sanitizeTablee).
+  return `La Tablée ${contracted}`.slice(0, 80);
+}
+
 export function TableesPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,9 +46,7 @@ export function TableesPage() {
   const seed = (location.state as { seedFromApero?: SeedFromApero } | null)?.seedFromApero;
 
   const [items, setItems] = useState<MyTableeItem[] | null>(null);
-  // Le nom d'une tablée est plafonné à 80 caractères (sanitizeTablee) : le
-  // pré-remplissage depuis un nom cérémoniel long est tronqué d'office.
-  const [name, setName] = useState(seed ? `La Tablée de ${seed.ceremonialName}`.slice(0, 80) : "");
+  const [name, setName] = useState(seed ? suggestTableeName(seed.ceremonialName) : "");
   const [motto, setMotto] = useState("");
   const [feedback, setFeedback] = useState("");
   const [isCreating, setIsCreating] = useState(false);
