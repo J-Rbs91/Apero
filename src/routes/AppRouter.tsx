@@ -1,5 +1,6 @@
 import { HashRouter, Route, Routes } from "react-router-dom";
 import { AgendaPage } from "../pages/AgendaPage";
+import { ComptesPage } from "../pages/ComptesPage";
 import { CreateEventPage } from "../pages/CreateEventPage";
 import { EventPage } from "../pages/EventPage";
 import { HomePage } from "../pages/HomePage";
@@ -20,6 +21,7 @@ export function AppRouter() {
         <Route path="/agenda" element={<AgendaPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/palmares" element={<PalmaresPage />} />
+        <Route path="/comptes" element={<ComptesPage />} />
       </Routes>
     </HashRouter>
   );

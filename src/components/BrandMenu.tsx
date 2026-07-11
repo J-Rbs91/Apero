@@ -97,6 +97,14 @@ export function BrandMenu() {
           >
             Palmarès
           </Link>
+          <Link
+            className="brand-menu__item"
+            role="menuitem"
+            to="/comptes"
+            onClick={() => setIsOpen(false)}
+          >
+            Les Comptes
+          </Link>
           <button
             type="button"
             className="brand-menu__item"

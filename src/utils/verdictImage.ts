@@ -7,12 +7,13 @@
 // côté, en texte.
 
 import type { AperitifEvent, AperitifOption } from "../types/apero";
+import { shareOrDownloadPng, type ImageShareOutcome } from "./imageShare";
 
 const WIDTH = 1080;
 const HEIGHT = 1350;
 
-// Palette miroir de src/styles/global.css.
-const COLORS = {
+// Palette miroir de src/styles/global.css, partagée avec le bilan annuel.
+export const CANVAS_COLORS = {
   backgroundTop: "#11342a",
   backgroundBottom: "#0a241b",
   pastis: "#f4c542",
@@ -24,30 +25,11 @@ const COLORS = {
   panelBorder: "rgba(255, 247, 230, 0.2)",
 };
 
-const FONT = '"Manrope", system-ui, "Segoe UI", Arial, sans-serif';
-
-export type VerdictImageInput = {
-  event: AperitifEvent;
-  option: AperitifOption;
-  counts: { yes: number; maybe: number; no: number };
-  traquenardAverage: number | null;
-};
-
-function formatVerdictDate(option: AperitifOption): string {
-  if (!option.date) {
-    return "Date mystère";
-  }
-  const label = new Intl.DateTimeFormat("fr-FR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(new Date(`${option.date}T00:00:00`));
-  return label.charAt(0).toUpperCase() + label.slice(1);
-}
+export const CANVAS_FONT = '"Manrope", system-ui, "Segoe UI", Arial, sans-serif';
+const FONT = CANVAS_FONT;
 
 // Découpe un texte en lignes qui tiennent dans maxWidth (mesure canvas).
-function wrapText(
+export function wrapCanvasText(
   context: CanvasRenderingContext2D,
   text: string,
   maxWidth: number,
@@ -71,6 +53,28 @@ function wrapText(
   return lines;
 }
 
+export type VerdictImageInput = {
+  event: AperitifEvent;
+  option: AperitifOption;
+  counts: { yes: number; maybe: number; no: number };
+  traquenardAverage: number | null;
+};
+
+function formatVerdictDate(option: AperitifOption): string {
+  if (!option.date) {
+    return "Date mystère";
+  }
+  const label = new Intl.DateTimeFormat("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(`${option.date}T00:00:00`));
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+const wrapText = wrapCanvasText;
+
 function drawCount(
   context: CanvasRenderingContext2D,
   centerX: number,
@@ -79,10 +83,10 @@ function drawCount(
   label: string,
 ) {
   context.textAlign = "center";
-  context.fillStyle = COLORS.cream;
+  context.fillStyle = CANVAS_COLORS.cream;
   context.font = `800 92px ${FONT}`;
   context.fillText(String(value), centerX, y);
-  context.fillStyle = COLORS.muted;
+  context.fillStyle = CANVAS_COLORS.muted;
   context.font = `700 30px ${FONT}`;
   context.fillText(label, centerX, y + 52);
 }
@@ -103,13 +107,13 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
 
   // Fond : dégradé du mur vert.
   const background = context.createLinearGradient(0, 0, 0, HEIGHT);
-  background.addColorStop(0, COLORS.backgroundTop);
-  background.addColorStop(1, COLORS.backgroundBottom);
+  background.addColorStop(0, CANVAS_COLORS.backgroundTop);
+  background.addColorStop(1, CANVAS_COLORS.backgroundBottom);
   context.fillStyle = background;
   context.fillRect(0, 0, WIDTH, HEIGHT);
 
   // Liseré rouge de comptoir en haut.
-  context.fillStyle = COLORS.barRed;
+  context.fillStyle = CANVAS_COLORS.barRed;
   context.fillRect(0, 0, WIDTH, 14);
 
   const margin = 84;
@@ -117,25 +121,25 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
 
   // Enseigne.
   context.textAlign = "left";
-  context.fillStyle = COLORS.pastis;
+  context.fillStyle = CANVAS_COLORS.pastis;
   context.font = `800 34px ${FONT}`;
   const brand = "LA CONFRÉRIE DU PETIT JAUNE";
   context.fillText(brand.split("").join(" "), margin, y);
   y += 46;
-  context.fillStyle = COLORS.muted;
+  context.fillStyle = CANVAS_COLORS.muted;
   context.font = `600 28px ${FONT}`;
   context.fillText("Tableau de chasse — le registre fait foi", margin, y);
   y += 96;
 
   // Nom cérémoniel.
-  context.fillStyle = COLORS.cream;
+  context.fillStyle = CANVAS_COLORS.cream;
   context.font = `800 76px ${FONT}`;
   for (const line of wrapText(context, input.event.ceremonialName, WIDTH - margin * 2).slice(0, 3)) {
     context.fillText(line, margin, y);
     y += 88;
   }
   if (input.event.title) {
-    context.fillStyle = COLORS.pastisSoft;
+    context.fillStyle = CANVAS_COLORS.pastisSoft;
     context.font = `italic 600 36px ${FONT}`;
     for (const line of wrapText(context, `« ${input.event.title} »`, WIDTH - margin * 2).slice(0, 2)) {
       context.fillText(line, margin, y);
@@ -145,16 +149,16 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
   y += 30;
 
   // Trait pastis.
-  context.fillStyle = COLORS.pastis;
+  context.fillStyle = CANVAS_COLORS.pastis;
   context.fillRect(margin, y, 180, 6);
   y += 84;
 
   // Le verdict.
-  context.fillStyle = COLORS.pastis;
+  context.fillStyle = CANVAS_COLORS.pastis;
   context.font = `800 30px ${FONT}`;
   context.fillText("LE VERDICT", margin, y);
   y += 62;
-  context.fillStyle = COLORS.cream;
+  context.fillStyle = CANVAS_COLORS.cream;
   context.font = `800 52px ${FONT}`;
   context.fillText(formatVerdictDate(input.option), margin, y);
   y += 66;
@@ -162,7 +166,7 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
   context.fillText(`${input.option.time || "Heure mystère"} — ${input.option.location}`, margin, y);
   y += 54;
   if (input.option.locationAddress) {
-    context.fillStyle = COLORS.muted;
+    context.fillStyle = CANVAS_COLORS.muted;
     context.font = `600 30px ${FONT}`;
     for (const line of wrapText(context, input.option.locationAddress, WIDTH - margin * 2).slice(0, 2)) {
       context.fillText(line, margin, y);
@@ -173,8 +177,8 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
 
   // Panneau des comptes.
   const panelHeight = 220;
-  context.fillStyle = COLORS.panel;
-  context.strokeStyle = COLORS.panelBorder;
+  context.fillStyle = CANVAS_COLORS.panel;
+  context.strokeStyle = CANVAS_COLORS.panelBorder;
   context.lineWidth = 2;
   context.beginPath();
   context.roundRect(margin, y, WIDTH - margin * 2, panelHeight, 26);
@@ -190,27 +194,27 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
 
   // Traquenard-O-mètre.
   context.textAlign = "left";
-  context.fillStyle = COLORS.pastis;
+  context.fillStyle = CANVAS_COLORS.pastis;
   context.font = `800 30px ${FONT}`;
   context.fillText("TRAQUENARD-O-MÈTRE", margin, y);
   y += 44;
 
   const gaugeWidth = WIDTH - margin * 2;
   const gaugeHeight = 26;
-  context.fillStyle = COLORS.panel;
+  context.fillStyle = CANVAS_COLORS.panel;
   context.beginPath();
   context.roundRect(margin, y, gaugeWidth, gaugeHeight, 13);
   context.fill();
 
   if (input.traquenardAverage != null) {
     const ratio = Math.max(0, Math.min(1, input.traquenardAverage / 10));
-    context.fillStyle = ratio >= 0.7 ? COLORS.barRed : COLORS.pastis;
+    context.fillStyle = ratio >= 0.7 ? CANVAS_COLORS.barRed : CANVAS_COLORS.pastis;
     context.beginPath();
     context.roundRect(margin, y, Math.max(gaugeHeight, gaugeWidth * ratio), gaugeHeight, 13);
     context.fill();
   }
   y += gaugeHeight + 48;
-  context.fillStyle = COLORS.muted;
+  context.fillStyle = CANVAS_COLORS.muted;
   context.font = `600 30px ${FONT}`;
   context.fillText(
     input.traquenardAverage != null
@@ -221,10 +225,10 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
   );
 
   // Pied : l'organisateur signe.
-  context.fillStyle = COLORS.cream;
+  context.fillStyle = CANVAS_COLORS.cream;
   context.font = `700 32px ${FONT}`;
   context.fillText(`Assemblée convoquée par ${input.event.organizerName}`, margin, HEIGHT - 96);
-  context.fillStyle = COLORS.muted;
+  context.fillStyle = CANVAS_COLORS.muted;
   context.font = `600 26px ${FONT}`;
   context.fillText("Chacun s’abreuve selon sa conscience et sa constitution.", margin, HEIGHT - 52);
 
@@ -233,7 +237,7 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
   });
 }
 
-export type VerdictImageOutcome = "shared" | "downloaded" | "failed";
+export type VerdictImageOutcome = ImageShareOutcome;
 
 /**
  * Partage l'image via la feuille de partage native quand elle accepte les
@@ -243,32 +247,5 @@ export async function shareOrDownloadVerdictImage(
   input: VerdictImageInput,
   fileName: string,
 ): Promise<VerdictImageOutcome> {
-  const blob = await renderVerdictImage(input);
-  if (!blob) {
-    return "failed";
-  }
-
-  const file = new File([blob], fileName, { type: "image/png" });
-
-  if (typeof navigator !== "undefined" && navigator.canShare?.({ files: [file] })) {
-    try {
-      await navigator.share({ files: [file] });
-      return "shared";
-    } catch (shareError) {
-      if (shareError instanceof DOMException && shareError.name === "AbortError") {
-        return "shared";
-      }
-      // Feuille de partage indisponible : on retombe sur le téléchargement.
-    }
-  }
-
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = fileName;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  URL.revokeObjectURL(url);
-  return "downloaded";
+  return shareOrDownloadPng(await renderVerdictImage(input), fileName);
 }

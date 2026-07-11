@@ -4,7 +4,9 @@ import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { useComptoirName } from "../hooks/useComptoirName";
+import { getAperoStorageMode } from "../config/aperoApiConfig";
 import { eventStorage } from "../services";
+import { getMyAperos } from "../services/encryptedAperoRepository";
 import type { AperitifEvent } from "../types/apero";
 import type { BadgeDefinition } from "../types/badges";
 import { BADGE_DEFINITIONS } from "../types/badges";
@@ -75,7 +77,17 @@ export function PalmaresPage() {
         const loadedLedger = await eventStorage.readRewardsLedger();
         let loadedEvents: AperitifEvent[] = [];
         try {
-          loadedEvents = await eventStorage.listActiveEvents();
+          if (getAperoStorageMode() === "api-vps") {
+            // Flux chiffré : le palmarès se juge sur les apéros connus de cet
+            // appareil (créés ou rejoints), passés compris — c'est la seule
+            // source de vérité déchiffrable ici.
+            const mine = await getMyAperos();
+            loadedEvents = mine
+              .map((item) => item.event)
+              .filter((event): event is AperitifEvent => Boolean(event));
+          } else {
+            loadedEvents = await eventStorage.listActiveEvents();
+          }
         } catch {
           // Les apéros en cours sont un bonus : le palmarès tient déjà
           // debout avec le seul grand livre des récompenses.
