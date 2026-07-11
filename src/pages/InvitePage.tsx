@@ -31,6 +31,7 @@ import {
 } from "../services/notificationStore";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
 import { calculateBestOptions } from "../utils/calculateResults";
+import { downloadAperoIcs } from "../utils/calendarExport";
 import { formatOption } from "../utils/formatOption";
 import { buildInviteUrl, maskInviteUrl, resolveInviteKeys } from "../utils/inviteLink";
 import { buildShareText, buildShareTitle } from "../utils/shareMessage";
@@ -330,6 +331,10 @@ export function InvitePage() {
   const { event } = state;
   const result = calculateBestOptions(event);
   const winnerId = result.type === "winner" ? result.optionId : undefined;
+  const winnerOption = winnerId
+    ? event.options.find((option) => option.id === winnerId)
+    : undefined;
+  const canExportToCalendar = Boolean(winnerOption?.date && winnerOption.time);
   const canShare = Boolean(aperoId && keys.encryptionKey);
   const inviteUrl = canShare
     ? buildInviteUrl({
@@ -370,6 +375,29 @@ export function InvitePage() {
       )}
 
       <MobileResultsPanel event={event} result={result} />
+
+      {canExportToCalendar && winnerOption && (
+        <section className="sheet">
+          <p className="eyebrow">Graver au registre</p>
+          <p className="lede">
+            Le verdict est tombé : grave-le dans ton calendrier avant qu’il ne s’évapore
+            entre deux tournées.
+          </p>
+          <button
+            type="button"
+            className="button button--ghost button--block"
+            onClick={() =>
+              downloadAperoIcs({
+                event,
+                option: winnerOption,
+                inviteUrl: canShare ? inviteUrl : undefined,
+              })
+            }
+          >
+            Ajouter à mon calendrier
+          </button>
+        </section>
+      )}
 
       {keys.writeKey ? (
         <>
