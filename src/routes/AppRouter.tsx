@@ -8,6 +8,8 @@ import { HomePage } from "../pages/HomePage";
 import { InvitePage } from "../pages/InvitePage";
 import { NotificationsPage } from "../pages/NotificationsPage";
 import { PalmaresPage } from "../pages/PalmaresPage";
+import { TableePage } from "../pages/TableePage";
+import { TableesPage } from "../pages/TableesPage";
 
 export function AppRouter() {
   return (
@@ -24,6 +26,10 @@ export function AppRouter() {
         <Route path="/palmares" element={<PalmaresPage />} />
         <Route path="/comptes" element={<ComptesPage />} />
         <Route path="/coffre" element={<CoffrePage />} />
+        {/* Les Tablées : mêmes règles que les invitations, clés dans le
+            fragment (#/tablee/:tableeId?k=…&w=…), jamais vers un serveur. */}
+        <Route path="/tablees" element={<TableesPage />} />
+        <Route path="/tablee/:tableeId" element={<TableePage />} />
       </Routes>
     </HashRouter>
   );

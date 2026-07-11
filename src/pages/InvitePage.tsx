@@ -26,6 +26,8 @@ import {
   toggleEncryptedAperoCheer,
 } from "../services/encryptedAperoRepository";
 import { findLocalApero } from "../services/localAperoRegistry";
+import { getLocalTablees } from "../services/localTableeRegistry";
+import { addAperoToTablee } from "../services/tableeRepository";
 import { syncAperoNotificationsFromRegistry } from "../services/notificationSync";
 import { removeSnapshot } from "../services/notificationSnapshots";
 import {
@@ -124,6 +126,11 @@ export function InvitePage() {
   const [isCheerSaving, setIsCheerSaving] = useState(false);
   const [isPostingMessage, setIsPostingMessage] = useState(false);
   const [verdictShareFeedback, setVerdictShareFeedback] = useState("");
+  // Tablées connues de cet appareil, pour rattacher l'apéro à une bande.
+  const [localTablees] = useState(() => getLocalTablees());
+  const [selectedTableeId, setSelectedTableeId] = useState("");
+  const [tableeFeedback, setTableeFeedback] = useState("");
+  const [isAttachingTablee, setIsAttachingTablee] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState("");
@@ -313,6 +320,35 @@ export function InvitePage() {
       syncAperoNotificationsFromRegistry(updatedEvent);
     } finally {
       setIsPostingMessage(false);
+    }
+  }
+
+  async function handleAttachToTablee() {
+    if (state.status !== "ready" || !aperoId || !keys.encryptionKey || !selectedTableeId) {
+      return;
+    }
+    const tableeEntry = localTablees.find((entry) => entry.tableeId === selectedTableeId);
+    if (!tableeEntry) {
+      return;
+    }
+
+    try {
+      setIsAttachingTablee(true);
+      setTableeFeedback("");
+      await addAperoToTablee(tableeEntry.tableeId, tableeEntry.writeKey, tableeEntry.encryptionKey, {
+        aperoId,
+        encryptionKey: keys.encryptionKey,
+        writeKey: keys.writeKey,
+        ceremonialName: state.event.ceremonialName,
+        addedBy: comptoirName.trim() || undefined,
+      });
+      setTableeFeedback(
+        `C’est gravé : cet apéro rejoint les annales de « ${tableeEntry.name ?? "la tablée"} ».`,
+      );
+    } catch {
+      setTableeFeedback("Le rattachement a capoté. Réessaie dans un instant.");
+    } finally {
+      setIsAttachingTablee(false);
     }
   }
 
@@ -616,6 +652,75 @@ export function InvitePage() {
         onPost={keys.writeKey ? handlePostMessage : undefined}
         isSaving={isPostingMessage}
       />
+
+      {keys.encryptionKey && (
+        <section className="sheet">
+          <p className="eyebrow">La Tablée</p>
+          {localTablees.length > 0 ? (
+            <>
+              <p className="lede">
+                Rattache cet apéro aux annales d’une de tes tablées : la bande le
+                retrouvera avec le reste de son histoire.
+              </p>
+              <label className="field">
+                <span>Choisir la tablée</span>
+                <select
+                  value={selectedTableeId}
+                  onChange={(eventChange) => setSelectedTableeId(eventChange.target.value)}
+                >
+                  <option value="">— Choisir —</option>
+                  {localTablees.map((entry) => (
+                    <option value={entry.tableeId} key={entry.tableeId}>
+                      {entry.name ?? entry.tableeId}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                className="button button--ghost button--block"
+                onClick={handleAttachToTablee}
+                disabled={!selectedTableeId || isAttachingTablee}
+              >
+                {isAttachingTablee ? "On grave aux annales…" : "Rattacher à cette tablée"}
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="lede">
+                Cette bande mérite mieux qu’un apéro sans lendemain : fonde une tablée,
+                la troupe du registre sera attablée d’office.
+              </p>
+              <button
+                type="button"
+                className="button button--ghost button--block"
+                onClick={() =>
+                  navigate("/tablees", {
+                    state: {
+                      seedFromApero: {
+                        aperoId,
+                        encryptionKey: keys.encryptionKey,
+                        writeKey: keys.writeKey,
+                        ceremonialName: event.ceremonialName,
+                        memberNames: event.participants.map(
+                          (participant) => participant.participantName,
+                        ),
+                      },
+                    },
+                  })
+                }
+              >
+                Fonder une tablée avec cette bande
+              </button>
+            </>
+          )}
+          {tableeFeedback && (
+            <p className="meta" role="status">
+              {tableeFeedback}
+            </p>
+          )}
+        </section>
+      )}
 
       {canShare && (
         <MobileShareBox

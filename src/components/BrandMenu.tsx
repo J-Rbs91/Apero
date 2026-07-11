@@ -92,6 +92,14 @@ export function BrandMenu() {
           <Link
             className="brand-menu__item"
             role="menuitem"
+            to="/tablees"
+            onClick={() => setIsOpen(false)}
+          >
+            Tablées
+          </Link>
+          <Link
+            className="brand-menu__item"
+            role="menuitem"
             to="/palmares"
             onClick={() => setIsOpen(false)}
           >

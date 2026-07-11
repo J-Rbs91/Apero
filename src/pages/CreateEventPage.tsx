@@ -8,6 +8,7 @@ import { getAperoStorageMode } from "../config/aperoApiConfig";
 import { eventStorage } from "../services";
 import { AperoApiError } from "../services/aperoApiClient";
 import { createEncryptedApero } from "../services/encryptedAperoRepository";
+import { addAperoToTablee } from "../services/tableeRepository";
 import { useComptoirName } from "../hooks/useComptoirName";
 import type {
   AperitifEvent,
@@ -41,7 +42,13 @@ export function CreateEventPage() {
 
   // Pré-remplissage « Remettre ça » / tournée récurrente : lieu, heure et
   // cadence de l'assemblée écoulée, transmis par la page d'invitation.
-  const prefill = (location.state as { prefill?: CreateEventPrefill } | null)?.prefill;
+  const navigationState = location.state as {
+    prefill?: CreateEventPrefill;
+    // « Convoquer la tablée » : l'apéro créé rejoint d'office ses annales.
+    linkToTablee?: { tableeId: string; encryptionKey?: string; writeKey?: string };
+  } | null;
+  const prefill = navigationState?.prefill;
+  const linkToTablee = navigationState?.linkToTablee;
 
   const [ceremonialNameInput, setCeremonialNameInput] = useState(prefill?.ceremonialName ?? "");
   const [title, setTitle] = useState(prefill?.title ?? "");
@@ -164,6 +171,27 @@ export function CreateEventPage() {
           createdAt: now,
           updatedAt: now,
         });
+
+        // Convocation depuis une tablée : on grave l'apéro à ses annales.
+        // Meilleur effort — un échec ici ne doit pas gâcher la création.
+        if (linkToTablee?.writeKey && linkToTablee.encryptionKey) {
+          try {
+            await addAperoToTablee(
+              linkToTablee.tableeId,
+              linkToTablee.writeKey,
+              linkToTablee.encryptionKey,
+              {
+                aperoId: created.aperoId,
+                encryptionKey: created.encryptionKey,
+                writeKey: created.writeKey,
+                ceremonialName,
+                addedBy: trimmedOrganizerName || undefined,
+              },
+            );
+          } catch {
+            // L'apéro existe et reste rattachable plus tard depuis sa page.
+          }
+        }
 
         navigate(
           buildInvitePath(created.aperoId, {
