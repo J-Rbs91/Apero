@@ -48,18 +48,29 @@ export function AlternativeOptionForm({
     }
 
     const now = new Date().toISOString();
-    await onSubmit({
-      id: createId("option"),
-      date,
-      time,
-      location: trimmedLocation,
-      locationAddress: locationValue.locationAddress,
-      locationLat: locationValue.locationLat,
-      locationLng: locationValue.locationLng,
-      createdByRole: "participant",
-      createdByName: trimmedName,
-      createdAt: now,
-    });
+    try {
+      await onSubmit({
+        id: createId("option"),
+        date,
+        time,
+        location: trimmedLocation,
+        locationAddress: locationValue.locationAddress,
+        locationLat: locationValue.locationLat,
+        locationLng: locationValue.locationLng,
+        createdByRole: "participant",
+        createdByName: trimmedName,
+        createdAt: now,
+      });
+    } catch (submitError) {
+      // Envoi raté : la saisie reste en place, l'explication s'affiche ici.
+      // On ne vide jamais un formulaire dont le contenu n'est pas arrivé.
+      setFeedback(
+        submitError instanceof Error && submitError.message
+          ? submitError.message
+          : "La contre-proposition n’est pas arrivée au registre. Ta saisie reste là, réessaie.",
+      );
+      return;
+    }
 
     setDate("");
     setTime("");

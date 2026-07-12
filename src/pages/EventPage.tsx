@@ -285,7 +285,7 @@ export function EventPage() {
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={isDeleting}
               >
-                Non, je la garde
+                Non, je le garde
               </button>
               <button
                 type="button"

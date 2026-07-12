@@ -1024,6 +1024,16 @@ input[type="range"] {
   line-height: 1.4;
 }
 
+/* Le rose-rouge est réservé aux problèmes : un succès se dit en vert,
+   une simple information en crème. */
+.feedback--ok {
+  color: #bfe8c0;
+}
+
+.feedback--info {
+  color: rgba(255, 247, 230, 0.82);
+}
+
 .page-message {
   margin: 0;
   padding: 10px 14px;

@@ -64,6 +64,7 @@ export function VoteForm({
   const [comment, setComment] = useState("");
   const [companions, setCompanions] = useState<number | undefined>(undefined);
   const [feedback, setFeedback] = useState("");
+  const [feedbackTone, setFeedbackTone] = useState<"ok" | "error" | "info">("info");
   // Évite qu'une soumission qu'on vient de faire soi-même ne déclenche le
   // message « réponse retrouvée » quand l'event mis à jour redescend en prop.
   const justSubmittedRef = useRef(false);
@@ -107,7 +108,8 @@ export function VoteForm({
       // le message de succès de handleSubmit prime, pas celui-ci.
       justSubmittedRef.current = false;
     } else {
-      setFeedback("On a retrouvé ta réponse, tu peux la modifier.");
+      setFeedbackTone("info");
+      setFeedback("Le registre se souvient de toi. Retouche, si le cœur t’en dit.");
     }
   }, [emptyVotes, existingParticipant]);
 
@@ -125,16 +127,16 @@ export function VoteForm({
     const trimmedName = participantName.trim();
 
     if (!trimmedName) {
-      setFeedback("Il faut un petit nom pour savoir qui vient — même un pseudo fera l’affaire.");
+      setFeedbackTone("error");
+      setFeedback("Sans blaze, pas d’émargement. Même « Jojo » fera l’affaire.");
       return;
     }
 
     const missingVote = event.options.some((option) => !votes[option.id]);
 
     if (missingVote) {
-      setFeedback(
-        "Réponds à chaque créneau proposé (dispo, pas dispo, ou pas sûr), histoire d’y voir clair.",
-      );
+      setFeedbackTone("error");
+      setFeedback("Chaque créneau attend son verdict, même un « Sans moi ». Le registre a horreur du vide.");
       return;
     }
 
@@ -153,8 +155,25 @@ export function VoteForm({
     };
 
     justSubmittedRef.current = true;
-    await onSubmit(response);
-    setFeedback(existingParticipant ? "Réponse mise à jour, merci !" : "Réponse bien reçue, merci d’avoir répondu !");
+    try {
+      await onSubmit(response);
+      setFeedbackTone("ok");
+      setFeedback(
+        existingParticipant
+          ? "Le registre est corrigé. On ne dira rien."
+          : "C’est émargé. Le registre te remercie.",
+      );
+    } catch (submitError) {
+      // Jamais de « merci » sur un envoi raté : la saisie reste en place,
+      // l'explication s'affiche ici, sous le pouce.
+      justSubmittedRef.current = false;
+      setFeedbackTone("error");
+      setFeedback(
+        submitError instanceof Error && submitError.message
+          ? submitError.message
+          : "L’envoi a raté. Ta réponse reste sous le coude, réessaie.",
+      );
+    }
   }
 
   return (
@@ -219,7 +238,10 @@ export function VoteForm({
           </button>
         )}
         {feedback && (
-          <p className="feedback" role="status">
+          <p
+            className={`feedback${feedbackTone === "ok" ? " feedback--ok" : ""}${feedbackTone === "info" ? " feedback--info" : ""}`}
+            role={feedbackTone === "error" ? "alert" : "status"}
+          >
             {feedback}
           </p>
         )}

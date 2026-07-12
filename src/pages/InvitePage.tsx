@@ -150,6 +150,14 @@ export function InvitePage() {
         return;
       }
 
+      // Apéro annulé dont les traces locales ont déjà été purgées (clés
+      // comprises) : le dire clairement AVANT de conclure à un lien incomplet,
+      // sinon on pousse l'invité à réclamer un lien vers un apéro disparu.
+      if (hasAperoDeletedNotification(aperoId)) {
+        setState({ status: "deleted" });
+        return;
+      }
+
       if (!keys.encryptionKey) {
         setState({ status: "missing-key" });
         return;
@@ -248,7 +256,9 @@ export function InvitePage() {
       setHasJustVoted(true);
       syncAperoNotificationsFromRegistry(updatedEvent);
     } catch (submitError) {
-      setError(describeApiError(submitError));
+      // L'échec remonte au formulaire : c'est lui qui parle à hauteur d'yeux
+      // et qui garde la saisie. Jamais de « merci » sur un vote qui a raté.
+      throw new Error(describeApiError(submitError));
     } finally {
       setIsSaving(false);
     }
@@ -271,7 +281,9 @@ export function InvitePage() {
       setState({ status: "ready", event: updatedEvent });
       syncAperoNotificationsFromRegistry(updatedEvent);
     } catch (submitError) {
-      setError(describeApiError(submitError));
+      // Même contrat que le vote : l'échec remonte au formulaire de
+      // contre-proposition, qui garde la saisie au lieu de se vider.
+      throw new Error(describeApiError(submitError));
     } finally {
       setIsAddingOption(false);
     }
