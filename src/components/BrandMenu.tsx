@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import { requestComptoirNameEdit } from "../hooks/useComptoirName";
+import { ConfrerieMenuPanel } from "./ConfrerieMenuPanel";
 import { NotificationBell } from "./NotificationBell";
 import { WineGlassMark } from "./WineGlassMark";
 
@@ -72,67 +71,10 @@ export function BrandMenu() {
       </button>
 
       {isOpen && (
-        <div className="brand-menu__panel" role="menu">
-          <Link
-            className="brand-menu__item"
-            role="menuitem"
-            to="/notifications"
-            onClick={() => setIsOpen(false)}
-          >
-            Le Carnet
-          </Link>
-          <Link
-            className="brand-menu__item"
-            role="menuitem"
-            to="/agenda"
-            onClick={() => setIsOpen(false)}
-          >
-            Ardoise
-          </Link>
-          <Link
-            className="brand-menu__item"
-            role="menuitem"
-            to="/tablees"
-            onClick={() => setIsOpen(false)}
-          >
-            Tablées
-          </Link>
-          <Link
-            className="brand-menu__item"
-            role="menuitem"
-            to="/palmares"
-            onClick={() => setIsOpen(false)}
-          >
-            Palmarès
-          </Link>
-          <Link
-            className="brand-menu__item"
-            role="menuitem"
-            to="/comptes"
-            onClick={() => setIsOpen(false)}
-          >
-            Les Comptes
-          </Link>
-          <Link
-            className="brand-menu__item"
-            role="menuitem"
-            to="/coffre"
-            onClick={() => setIsOpen(false)}
-          >
-            Le Coffre
-          </Link>
-          <button
-            type="button"
-            className="brand-menu__item"
-            role="menuitem"
-            onClick={() => {
-              setIsOpen(false);
-              requestComptoirNameEdit();
-            }}
-          >
-            Changer de blaze
-          </button>
-        </div>
+        <>
+          <div className="brand-menu__overlay" aria-hidden="true" onClick={() => setIsOpen(false)} />
+          <ConfrerieMenuPanel onClose={() => setIsOpen(false)} />
+        </>
       )}
       </div>
       <NotificationBell />
