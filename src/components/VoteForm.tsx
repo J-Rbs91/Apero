@@ -34,8 +34,8 @@ type VoteFormProps = {
   onToggleCheer?: (optionId: string) => void;
   /** Vrai si le convive courant a trinqué à ce créneau. */
   hasCheeredOption?: (optionId: string) => boolean;
-  /** Désactive les boutons trinquer pendant un envoi. */
-  isCheerSaving?: boolean;
+  /** Créneau dont le trinquer est en cours d'envoi (les autres restent vifs). */
+  cheerPendingOptionId?: string | null;
 };
 
 export function VoteForm({
@@ -48,7 +48,7 @@ export function VoteForm({
   childrenAllowed,
   onToggleCheer,
   hasCheeredOption,
-  isCheerSaving,
+  cheerPendingOptionId,
 }: VoteFormProps) {
   const { comptoirName } = useComptoirName();
   const emptyVotes = useMemo(
@@ -300,7 +300,7 @@ export function VoteForm({
               isLeading={option.id === leadingOptionId}
               hasCheered={hasCheeredOption?.(option.id)}
               onToggleCheer={onToggleCheer ? () => onToggleCheer(option.id) : undefined}
-              isCheerSaving={isCheerSaving}
+              isCheerSaving={cheerPendingOptionId === option.id}
             />
           ))}
         </div>

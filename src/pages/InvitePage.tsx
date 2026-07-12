@@ -41,6 +41,7 @@ import { calculateAverageTraquenardLevel, calculateBestOptions } from "../utils/
 import { downloadAperoIcs } from "../utils/calendarExport";
 import { shareOrDownloadVerdictImage } from "../utils/verdictImage";
 import { formatOption } from "../utils/formatOption";
+import { toggleOptionCheer } from "../utils/eventNormalization";
 import { normalizeMemberName } from "../utils/memberName";
 import { buildNextRoundPrefill, describeRecurrence } from "../utils/nextRound";
 import { buildInviteUrl, maskInviteUrl, resolveInviteKeys } from "../utils/inviteLink";
@@ -125,7 +126,9 @@ export function InvitePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isProposingSlot, setIsProposingSlot] = useState(false);
   const [isAddingOption, setIsAddingOption] = useState(false);
-  const [isCheerSaving, setIsCheerSaving] = useState(false);
+  // Créneau dont le trinquer est en cours d'envoi. L'UI, elle, a déjà levé
+  // le verre : l'application locale est optimiste, le réseau suit.
+  const [cheerPendingId, setCheerPendingId] = useState<string | null>(null);
   const [isPostingMessage, setIsPostingMessage] = useState(false);
   const [verdictShareFeedback, setVerdictShareFeedback] = useState("");
   // Tablées connues de cet appareil, pour rattacher l'apéro à une bande.
@@ -296,13 +299,25 @@ export function InvitePage() {
 
   async function handleToggleCheer(optionId: string) {
     const cheerName = comptoirName.trim();
-    if (state.status !== "ready" || !aperoId || !keys.writeKey || !keys.encryptionKey || !cheerName) {
+    if (
+      state.status !== "ready" ||
+      !aperoId ||
+      !keys.writeKey ||
+      !keys.encryptionKey ||
+      !cheerName ||
+      cheerPendingId
+    ) {
       return;
     }
 
+    // Optimiste : le verre se lève à l'instant du tap ; le réseau confirme
+    // derrière, et en cas de raté on repose le verre tel qu'il était.
+    const previousEvent = state.event;
+    setState({ status: "ready", event: toggleOptionCheer(previousEvent, optionId, cheerName) });
+    setCheerPendingId(optionId);
+    setError("");
+
     try {
-      setIsCheerSaving(true);
-      setError("");
       const updatedEvent = await toggleEncryptedAperoCheer(
         aperoId,
         keys.writeKey,
@@ -313,9 +328,10 @@ export function InvitePage() {
       setState({ status: "ready", event: updatedEvent });
       syncAperoNotificationsFromRegistry(updatedEvent);
     } catch (submitError) {
+      setState({ status: "ready", event: previousEvent });
       setError(describeApiError(submitError));
     } finally {
-      setIsCheerSaving(false);
+      setCheerPendingId(null);
     }
   }
 
@@ -519,7 +535,7 @@ export function InvitePage() {
               option?.cheers?.some((name) => normalizeMemberName(name) === cheerKey),
           );
         }}
-        isCheerSaving={isCheerSaving}
+        cheerPendingOptionId={cheerPendingId}
         extraFields={
           <TraquenardSlider value={traquenardVote} onChange={setTraquenardVote} />
         }

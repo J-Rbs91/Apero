@@ -2152,3 +2152,18 @@ textarea:focus-visible {
 .sheet--past {
   opacity: 0.85;
 }
+
+/* ===== Navigation d'en-tête (cloche + menu, sur toutes les pages) ===== */
+.header-nav {
+  position: relative;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 30;
+}
+
+.header-nav__panel {
+  right: 0;
+  left: auto;
+}
