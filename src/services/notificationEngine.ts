@@ -192,8 +192,8 @@ function buildNotifications(
       if (!isCreator && guestFollowsUpdates(viewer.vote)) {
         drafts.push({
           type: "option-modified",
-          title: "Un créneau a été modifié",
-          body: `Un créneau de « ${event.ceremonialName} » a changé.`,
+          title: "Un créneau a bougé",
+          body: `Un créneau de « ${event.ceremonialName} » a bougé. Va voir lequel.`,
           dedupeKey: `${event.id}:option-modified:${option.id}:${signature}`,
         });
       }
@@ -320,7 +320,7 @@ export function computeReminders(
   const draft: DraftNotification = {
     type: mostUrgent.type,
     title: "Tu te tâtes encore ?",
-    body: `« ${event.ceremonialName} » approche (${mostUrgent.id}). Confirme ta présence, la tablée compte sur toi.`,
+    body: `« ${event.ceremonialName} » approche : plus que ${mostUrgent.id} pour trancher. Le registre attend.`,
     dedupeKey: `${event.id}:reminder:${mostUrgent.id}`,
   };
 

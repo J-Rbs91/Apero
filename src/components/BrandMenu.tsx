@@ -79,7 +79,7 @@ export function BrandMenu() {
             to="/notifications"
             onClick={() => setIsOpen(false)}
           >
-            Notifications
+            Le Carnet
           </Link>
           <Link
             className="brand-menu__item"

@@ -18,6 +18,7 @@ import type {
   VoteStatus,
 } from "../types/apero";
 import { createId } from "../utils/createId";
+import { hapticError, hapticSuccess } from "../utils/haptics";
 import type { CreateEventPrefill } from "../utils/nextRound";
 import {
   generateUniqueCeremonialName,
@@ -93,8 +94,9 @@ export function CreateEventPage() {
       cleanedOptions.length === 0 ||
       cleanedOptions.some((option) => !option.date || !option.time || !option.location)
     ) {
+      hapticError();
       setFeedback(
-        "Chaque créneau réclame un jour, une heure et un établissement, parce qu’un apéro sans lieu ni horaire, ce n’est plus un apéro, c’est un concept — et ici, on n’organise pas de concepts.",
+        "Un jour, une heure, un établissement. Sans ça, ce n’est plus un apéro, c’est un concept — et ici, on n’organise pas de concepts.",
       );
       return;
     }
@@ -106,8 +108,9 @@ export function CreateEventPage() {
     });
 
     if (!hasFutureSlot) {
+      hapticError();
       setFeedback(
-        "Tous tes créneaux sont déjà dans le passé, ce qui est un joli exploit temporel mais totalement inutile pour inviter qui que ce soit. Propose une date à venir, la machine à remonter le temps est encore en réparation.",
+        "Tous tes créneaux sont déjà passés. Joli exploit temporel, zéro convive. La machine à remonter le temps est en réparation : vise l’avenir.",
       );
       return;
     }
@@ -122,6 +125,7 @@ export function CreateEventPage() {
       const trimmedCeremonialName = ceremonialNameInput.trim();
 
       if (trimmedCeremonialName && storageMode !== "api-vps" && isCeremonialNameTaken(trimmedCeremonialName, activeEvents)) {
+        hapticError();
         setFeedback(
           "Ce nom d’apéro est déjà pris par un événement en cours. Trouve-en un autre, ou laisse le champ vide pour un tirage au sort.",
         );
@@ -193,6 +197,7 @@ export function CreateEventPage() {
           }
         }
 
+        hapticSuccess();
         navigate(
           buildInvitePath(created.aperoId, {
             encryptionKey: created.encryptionKey,
@@ -224,8 +229,10 @@ export function CreateEventPage() {
       };
 
       await eventStorage.createEvent(event);
+      hapticSuccess();
       navigate(`/event/${event.id}`, { state: { createdEvent: event } });
     } catch (error) {
+      hapticError();
       setFeedback(
         error instanceof AperoApiError && error.code === "API_NOT_CONFIGURED"
           ? "Le comptoir numérique n’est pas encore raccordé (API non configurée) : impossible de créer l’apéro dans ce mode. Repasse en mode classique ou configure VITE_APERO_API_BASE_URL."
@@ -235,7 +242,7 @@ export function CreateEventPage() {
               ? "La Confrérie est complète, archi-complète même : trop d’apéros tournent déjà en coulisses dans une magouille généralisée que plus personne ne maîtrise vraiment. Clôture un apéro avant d’en lancer un nouveau, sinon c’est le chaos total."
               : error instanceof Error
                 ? error.message
-                : "Le service a fait une bêtise, on ne sait pas comment, et franchement personne ne veut savoir comment. Réessaie dans deux secondes, ça se répare presque toujours tout seul.",
+                : "Le service a fait une bêtise. On ne veut pas savoir laquelle. Deux secondes, ça se répare tout seul.",
       );
     } finally {
       setIsSubmitting(false);
@@ -259,7 +266,7 @@ export function CreateEventPage() {
         </label>
 
         <label className="field">
-          <span>Description</span>
+          <span>Le prétexte</span>
           <input
             value={title}
             onChange={(eventChange) => setTitle(eventChange.target.value)}

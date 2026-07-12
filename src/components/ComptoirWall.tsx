@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { AperoMessage } from "../types/apero";
+import { hapticError, hapticTap } from "../utils/haptics";
 
 // Le mur du comptoir : les mots lâchés par la tablée autour de l'apéro.
 // Pas une messagerie — un fil court, signé au blaze, gravé dans le payload
@@ -52,8 +53,10 @@ export function ComptoirWall({ messages, authorName, onPost, isSaving }: Comptoi
     try {
       setFeedback("");
       await onPost(body);
+      hapticTap();
       setDraft("");
     } catch {
+      hapticError();
       setFeedback("Le mot n’est pas arrivé jusqu’au mur. Réessaie dans un instant.");
     }
   }

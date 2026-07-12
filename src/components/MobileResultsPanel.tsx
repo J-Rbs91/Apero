@@ -6,6 +6,13 @@ import { TraquenardGauge } from "./TraquenardGauge";
 type MobileResultsPanelProps = {
   event: AperitifEvent;
   result: ResultState;
+  /**
+   * Vrai tant que seul l'organisateur figure au registre : son auto-vote ne
+   * fait pas un verdict. Le panneau attend la tablée au lieu de proclamer.
+   */
+  awaitingGuests?: boolean;
+  /** Apéro passé : le verdict se grise et porte le tampon « Servi ». */
+  isPast?: boolean;
 };
 
 function formatWinner(option: AperitifOption): string {
@@ -17,7 +24,7 @@ function formatWinner(option: AperitifOption): string {
       }).format(new Date(`${option.date}T00:00:00`))
     : "Date mystère";
 
-  return `${dateLabel} · ${option.time || "?"} — ${option.location}`;
+  return `${dateLabel} · ${option.time || "heure mystère"} — ${option.location}`;
 }
 
 function describeEyebrow(result: ResultState): string {
@@ -31,9 +38,15 @@ function describeEyebrow(result: ResultState): string {
   }
 }
 
-export function MobileResultsPanel({ event, result }: MobileResultsPanelProps) {
-  const highlightedId =
-    result.type === "winner"
+export function MobileResultsPanel({
+  event,
+  result,
+  awaitingGuests,
+  isPast,
+}: MobileResultsPanelProps) {
+  const highlightedId = awaitingGuests
+    ? undefined
+    : result.type === "winner"
       ? result.optionId
       : result.type === "tie"
         ? result.optionIds[0]
@@ -66,13 +79,22 @@ export function MobileResultsPanel({ event, result }: MobileResultsPanelProps) {
         : undefined;
 
   return (
-    <div className="verdict">
-      <p className="eyebrow">{describeEyebrow(result)}</p>
+    <div className={`verdict${isPast ? " verdict--past" : ""}`}>
+      {isPast && (
+        <span className="verdict__stamp" aria-label="Apéro passé">
+          Servi
+        </span>
+      )}
+      <p className="eyebrow">{awaitingGuests ? "Le comptoir délibère" : describeEyebrow(result)}</p>
       <div className="verdict__title">
-        {highlightedOption ? formatWinner(highlightedOption) : result.message}
+        {awaitingGuests
+          ? "La tablée n’a pas encore émargé — le zinc réserve son verdict."
+          : highlightedOption
+            ? formatWinner(highlightedOption)
+            : result.message}
       </div>
-      {highlightedOption && <p className="meta">{result.message}</p>}
-      {highlightedResult && (
+      {!awaitingGuests && highlightedOption && <p className="meta">{result.message}</p>}
+      {!awaitingGuests && highlightedResult && (
         <div className="counts">
           <div className="cnt">
             <b>{highlightedResult.yesCount}</b>

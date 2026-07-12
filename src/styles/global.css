@@ -1024,6 +1024,16 @@ input[type="range"] {
   line-height: 1.4;
 }
 
+/* Le rose-rouge est réservé aux problèmes : un succès se dit en vert,
+   une simple information en crème. */
+.feedback--ok {
+  color: #bfe8c0;
+}
+
+.feedback--info {
+  color: rgba(255, 247, 230, 0.82);
+}
+
 .page-message {
   margin: 0;
   padding: 10px 14px;
@@ -1985,4 +1995,175 @@ textarea:focus-visible {
   100% {
     transform: scale(1);
   }
+}
+
+/* ===== Cibles tactiles (app de comptoir : on vise le pouce, verre en main) =====
+   La zone de tap monte à 44 px minimum sans grossir le dessin : padding et
+   min-height font le travail, le rendu reste inchangé à l'œil. */
+.bk {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.slot__x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -12px -12px -12px 0;
+}
+
+.seg__opt {
+  min-height: 44px;
+}
+
+.cheer-btn {
+  min-height: 40px;
+}
+
+.share .cp {
+  min-height: 44px;
+}
+
+.ghost-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.minimap__expand {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* ===== Verdict d'un apéro passé : grisé, tamponné « Servi » ===== */
+.verdict--past {
+  position: relative;
+  opacity: 0.75;
+}
+
+.verdict__stamp {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 4px 12px;
+  border: 2px solid var(--bar-red);
+  border-radius: 8px;
+  color: var(--bar-red);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  transform: rotate(-8deg);
+}
+
+/* ===== Chip récapitulative après vote (le formulaire se replie) ===== */
+.vote-chip {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.vote-chip__check {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: var(--green-600);
+  color: var(--cream);
+}
+
+.vote-chip__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.vote-chip__name {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--cream);
+}
+
+.vote-chip__vote {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.vote-chip__votes {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 247, 230, 0.14);
+  border-radius: 13px;
+  background: rgba(255, 247, 230, 0.05);
+}
+
+.vote-chip__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.vote-chip__slot {
+  color: rgba(255, 247, 230, 0.82);
+  font-weight: 600;
+}
+
+.vote-chip__answer {
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.vote-chip__answer--yes {
+  color: var(--pastis);
+}
+
+.vote-chip__answer--maybe {
+  color: rgba(255, 247, 230, 0.75);
+}
+
+.vote-chip__answer--no {
+  color: #ff9d94;
+}
+
+/* Curseur de pronostic pas encore touché : la jauge s'efface, l'invitation
+   à glisser se lit en creux. */
+.traq--untouched .traq__fill {
+  opacity: 0.25;
+}
+
+.traq--untouched .traq__thumb {
+  opacity: 0.55;
+}
+
+.traq__value--empty {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* Tournées passées de l'ardoise : présentes mais en retrait. */
+.sheet--past {
+  opacity: 0.85;
+}
+
+/* ===== Navigation d'en-tête (cloche + menu, sur toutes les pages) ===== */
+.header-nav {
+  position: relative;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 30;
+}
+
+.header-nav__panel {
+  right: 0;
+  left: auto;
 }

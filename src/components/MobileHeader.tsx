@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { HeaderNav } from "./HeaderNav";
 
 type MobileHeaderProps = {
   eyebrow: string;
@@ -33,6 +34,9 @@ export function MobileHeader({ eyebrow, title, meta }: MobileHeaderProps) {
           </svg>
         </button>
         <p className="eyebrow">{eyebrow}</p>
+        {/* Cloche + menu : la Confrérie reste à portée de pouce sur toutes
+            les pages, pas seulement à l'accueil. */}
+        <HeaderNav />
       </div>
       {title && <h1 className="h1 h1--sm screen-head__title">{title}</h1>}
       {meta && <p className="meta">{meta}</p>}

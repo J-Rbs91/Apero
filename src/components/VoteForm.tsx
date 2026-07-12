@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { AperitifEvent, ParticipantResponse, VoteStatus } from "../types/apero";
 import { useComptoirName } from "../hooks/useComptoirName";
 import { createId } from "../utils/createId";
+import { hapticError, hapticSuccess } from "../utils/haptics";
 import { CompanionsField } from "./CompanionsField";
 import { EventOptionMobileCard } from "./EventOptionMobileCard";
 
@@ -34,8 +35,8 @@ type VoteFormProps = {
   onToggleCheer?: (optionId: string) => void;
   /** Vrai si le convive courant a trinqué à ce créneau. */
   hasCheeredOption?: (optionId: string) => boolean;
-  /** Désactive les boutons trinquer pendant un envoi. */
-  isCheerSaving?: boolean;
+  /** Créneau dont le trinquer est en cours d'envoi (les autres restent vifs). */
+  cheerPendingOptionId?: string | null;
 };
 
 export function VoteForm({
@@ -48,7 +49,7 @@ export function VoteForm({
   childrenAllowed,
   onToggleCheer,
   hasCheeredOption,
-  isCheerSaving,
+  cheerPendingOptionId,
 }: VoteFormProps) {
   const { comptoirName } = useComptoirName();
   const emptyVotes = useMemo(
@@ -64,6 +65,10 @@ export function VoteForm({
   const [comment, setComment] = useState("");
   const [companions, setCompanions] = useState<number | undefined>(undefined);
   const [feedback, setFeedback] = useState("");
+  const [feedbackTone, setFeedbackTone] = useState<"ok" | "error" | "info">("info");
+  // Réponse déjà au registre → le formulaire se replie en chip récapitulative.
+  // « Modifier ma réponse » le rouvre ; un envoi réussi le replie.
+  const [isEditing, setIsEditing] = useState(false);
   // Évite qu'une soumission qu'on vient de faire soi-même ne déclenche le
   // message « réponse retrouvée » quand l'event mis à jour redescend en prop.
   const justSubmittedRef = useRef(false);
@@ -107,7 +112,8 @@ export function VoteForm({
       // le message de succès de handleSubmit prime, pas celui-ci.
       justSubmittedRef.current = false;
     } else {
-      setFeedback("On a retrouvé ta réponse, tu peux la modifier.");
+      setFeedbackTone("info");
+      setFeedback("Le registre se souvient de toi. Retouche, si le cœur t’en dit.");
     }
   }, [emptyVotes, existingParticipant]);
 
@@ -125,16 +131,18 @@ export function VoteForm({
     const trimmedName = participantName.trim();
 
     if (!trimmedName) {
-      setFeedback("Il faut un petit nom pour savoir qui vient — même un pseudo fera l’affaire.");
+      hapticError();
+      setFeedbackTone("error");
+      setFeedback("Sans blaze, pas d’émargement. Même « Jojo » fera l’affaire.");
       return;
     }
 
     const missingVote = event.options.some((option) => !votes[option.id]);
 
     if (missingVote) {
-      setFeedback(
-        "Réponds à chaque créneau proposé (dispo, pas dispo, ou pas sûr), histoire d’y voir clair.",
-      );
+      hapticError();
+      setFeedbackTone("error");
+      setFeedback("Chaque créneau attend son verdict, même un « Sans moi ». Le registre a horreur du vide.");
       return;
     }
 
@@ -153,8 +161,124 @@ export function VoteForm({
     };
 
     justSubmittedRef.current = true;
-    await onSubmit(response);
-    setFeedback(existingParticipant ? "Réponse mise à jour, merci !" : "Réponse bien reçue, merci d’avoir répondu !");
+    try {
+      await onSubmit(response);
+      hapticSuccess();
+      setFeedbackTone("ok");
+      setFeedback(
+        existingParticipant
+          ? "Le registre est corrigé. On ne dira rien."
+          : "C’est émargé. Le registre te remercie.",
+      );
+      // Le geste est accompli : le formulaire se replie, la chip prend le relais.
+      setIsEditing(false);
+    } catch (submitError) {
+      // Jamais de « merci » sur un envoi raté : la saisie reste en place,
+      // l'explication s'affiche ici, sous le pouce.
+      justSubmittedRef.current = false;
+      hapticError();
+      setFeedbackTone("error");
+      setFeedback(
+        submitError instanceof Error && submitError.message
+          ? submitError.message
+          : "L’envoi a raté. Ta réponse reste sous le coude, réessaie.",
+      );
+    }
+  }
+
+  // Formulaire replié : la réponse est au registre, la chip récapitule et
+  // la prochaine action (modifier, contre-proposer) reste à un tap.
+  if (existingParticipant && !isEditing) {
+    const votesByOption = existingParticipant.votes ?? {};
+    const overall = Object.values(votesByOption).some((vote) => vote === "yes")
+      ? "J’y serai"
+      : Object.values(votesByOption).some((vote) => vote === "maybe")
+        ? "J’me tâte"
+        : "Sans moi";
+    const voteLabel: Record<VoteStatus, string> = {
+      yes: "J’y serai",
+      maybe: "J’me tâte",
+      no: "Sans moi",
+    };
+
+    return (
+      <section className="sheet">
+        <p className="eyebrow">Ta réponse est au registre</p>
+        <div className="vote-chip">
+          <span className="vote-chip__check" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+              <path
+                d="M5 12.5l4.2 4.3L19 7.5"
+                stroke="currentColor"
+                strokeWidth="2.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+          <div className="vote-chip__body">
+            <div className="vote-chip__name">{existingParticipant.participantName}</div>
+            <div className="vote-chip__vote">
+              {overall}
+              {existingParticipant.companions
+                ? ` · ${existingParticipant.companions} renfort${existingParticipant.companions > 1 ? "s" : ""}`
+                : ""}
+            </div>
+          </div>
+          <button
+            type="button"
+            className="button button--ghost"
+            onClick={() => {
+              setFeedback("");
+              setIsEditing(true);
+            }}
+          >
+            Modifier ma réponse
+          </button>
+        </div>
+
+        {event.options.length > 1 && (
+          <div className="vote-chip__votes">
+            {event.options.map((option) => {
+              const vote = votesByOption[option.id];
+              return (
+                <div className="vote-chip__row" key={option.id}>
+                  <span className="vote-chip__slot">
+                    {option.date
+                      ? new Intl.DateTimeFormat("fr-FR", {
+                          weekday: "short",
+                          day: "numeric",
+                          month: "short",
+                        }).format(new Date(`${option.date}T00:00:00`))
+                      : "Date mystère"}
+                    {" · "}
+                    {option.time || "heure mystère"}
+                  </span>
+                  <span className={`vote-chip__answer${vote ? ` vote-chip__answer--${vote}` : ""}`}>
+                    {vote ? voteLabel[vote] : "—"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {onProposeSlot && (
+          <button type="button" className="addline" onClick={onProposeSlot}>
+            + Proposer un autre créneau
+          </button>
+        )}
+
+        {feedback && (
+          <p
+            className={`feedback${feedbackTone === "ok" ? " feedback--ok" : ""}${feedbackTone === "info" ? " feedback--info" : ""}`}
+            role="status"
+          >
+            {feedback}
+          </p>
+        )}
+      </section>
+    );
   }
 
   return (
@@ -181,7 +305,7 @@ export function VoteForm({
               isLeading={option.id === leadingOptionId}
               hasCheered={hasCheeredOption?.(option.id)}
               onToggleCheer={onToggleCheer ? () => onToggleCheer(option.id) : undefined}
-              isCheerSaving={isCheerSaving}
+              isCheerSaving={cheerPendingOptionId === option.id}
             />
           ))}
         </div>
@@ -207,7 +331,7 @@ export function VoteForm({
         {onProposeSlot ? (
           <div className="button-row">
             <button className="button button--primary" type="submit" disabled={isSaving}>
-              {isSaving ? "Envoi…" : "Répondre à l’invitation"}
+              {isSaving ? "On émarge…" : "Répondre à l’invitation"}
             </button>
             <button className="button button--ghost" type="button" onClick={onProposeSlot}>
               Proposer un autre créneau
@@ -215,11 +339,14 @@ export function VoteForm({
           </div>
         ) : (
           <button className="button button--primary button--block" type="submit" disabled={isSaving}>
-            {isSaving ? "Envoi de ta réponse…" : "Répondre à l’invitation"}
+            {isSaving ? "On émarge…" : "Répondre à l’invitation"}
           </button>
         )}
         {feedback && (
-          <p className="feedback" role="status">
+          <p
+            className={`feedback${feedbackTone === "ok" ? " feedback--ok" : ""}${feedbackTone === "info" ? " feedback--info" : ""}`}
+            role={feedbackTone === "error" ? "alert" : "status"}
+          >
             {feedback}
           </p>
         )}
