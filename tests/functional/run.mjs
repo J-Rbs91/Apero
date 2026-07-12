@@ -323,8 +323,23 @@ async function waitForSnapshot(page, aperoId) {
   );
 }
 
+async function reopenVoteFormIfCollapsed(page, timeout = 15_000) {
+  const editButton = page.getByRole("button", { name: "Modifier ma réponse" });
+  const nameInput = page.getByPlaceholder("Jojo, Nadine, Éminence Chips…");
+  await Promise.race([
+    editButton.waitFor({ state: "visible", timeout }).catch(() => {}),
+    nameInput.waitFor({ state: "visible", timeout }).catch(() => {}),
+  ]);
+  if (await editButton.isVisible().catch(() => false)) {
+    await editButton.click();
+  }
+}
+
 async function voteOnInvite(page, inviteUrl, { blaze, votes, comment }) {
   await page.goto(inviteUrl);
+  // Réponse déjà au registre : le formulaire est replié en chip récapitulative,
+  // « Modifier ma réponse » le rouvre.
+  await reopenVoteFormIfCollapsed(page);
   const nameInput = page.getByPlaceholder("Jojo, Nadine, Éminence Chips…");
   await nameInput.waitFor({ state: "visible", timeout: 15_000 });
   if (blaze) {
@@ -398,7 +413,7 @@ await scenario("1. Création d'un apéro (onboarding complet, mono-créneau)", a
 
   check("La création redirige vers un lien d'invitation avec clés", Boolean(invite1?.encryptionKey && invite1?.writeKey));
   await waitVisible(page, page.getByRole("heading", { name: APERO_1_NAME }), "Le nom cérémoniel saisi est affiché");
-  await waitVisible(page, page.getByText(`Une invitation de ${ORGANIZER}`), "L'organisateur est identifié sur la page");
+  await waitVisible(page, page.getByText("Ton assemblée"), "L'organisateur est identifié sur la page");
   await waitVisible(
     page,
     page.locator(".person__name", { hasText: ORGANIZER }),
@@ -443,6 +458,9 @@ await scenario("2. Création d'un apéro multi-créneaux", async () => {
 
   check("La création multi-créneaux aboutit sur le lien d'invitation", Boolean(invite2?.aperoId));
   await waitVisible(page, page.getByRole("heading", { name: APERO_2_NAME }), "Le nom de l'apéro multi-créneaux est affiché");
+  // L'organisateur a une réponse d'office : sa chip se rouvre pour inspecter
+  // le formulaire complet.
+  await reopenVoteFormIfCollapsed(page);
   const slotCount = await page.locator(".vote-form .slot").count();
   check("Les 3 créneaux proposés sont affichés dans le formulaire de vote", slotCount === 3, `trouvé : ${slotCount}`);
   await waitForSnapshot(page, invite2.aperoId);
@@ -457,7 +475,7 @@ await scenario("3. Vote d'un invité, puis modification de son vote", async () =
   });
   await waitVisible(
     page,
-    page.getByText("Réponse bien reçue, merci d’avoir répondu !"),
+    page.getByText("C’est émargé. Le registre te remercie."),
     "La première réponse de l'invité est enregistrée",
   );
   await waitVisible(
@@ -466,16 +484,18 @@ await scenario("3. Vote d'un invité, puis modification de son vote", async () =
     "L'invité apparaît au registre des présents",
   );
 
-  // Retour de l'invité : son vote est retrouvé via son blaze, puis modifié.
+  // Retour de l'invité : sa réponse est au registre, repliée en chip — on la
+  // rouvre pour la modifier.
   await page.reload();
   await waitVisible(
     page,
-    page.getByText("On a retrouvé ta réponse, tu peux la modifier."),
+    page.getByText("Ta réponse est au registre"),
     "Au retour, la réponse existante est retrouvée via le blaze",
   );
+  await reopenVoteFormIfCollapsed(page);
   await page.locator(".vote-form .slot").nth(1).getByText(VOTE_YES, { exact: true }).click();
   await page.getByRole("button", { name: "Répondre à l’invitation" }).click();
-  await waitVisible(page, page.getByText("Réponse mise à jour, merci !"), "La modification du vote est enregistrée");
+  await waitVisible(page, page.getByText("Le registre est corrigé. On ne dira rien."), "La modification du vote est enregistrée");
 
   const bobRows = await page.locator(".person__name", { hasText: GUEST_BOB }).count();
   check("Le même blaze ne crée pas de doublon au registre", bobRows === 1, `trouvé : ${bobRows}`);
@@ -494,6 +514,7 @@ await scenario("4. Contre-proposition : un invité ajoute un créneau", async ()
   // Le formulaire se referme sans message depuis que le bouton déclencheur vit
   // dans la barre d'action : la preuve d'acceptation, c'est le créneau qui
   // apparaît dans la liste de vote.
+  await reopenVoteFormIfCollapsed(page);
   await waitVisible(
     page,
     page.locator(".vote-form .slot", { hasText: "La Buvette Clandestine" }),
@@ -516,7 +537,7 @@ await scenario("5. Vote d'un second invité sur tous les créneaux (dont le nouv
   });
   await waitVisible(
     page,
-    page.getByText("Réponse bien reçue, merci d’avoir répondu !"),
+    page.getByText("C’est émargé. Le registre te remercie."),
     "Le second invité vote, y compris sur le créneau contre-proposé",
   );
   await waitVisible(
@@ -539,8 +560,8 @@ await scenario("6. Notifications : badge et carnet du créateur, silence côté 
     `badge : ${badgeText}`,
   );
 
-  await page.locator(".notif-bell").click();
-  await waitVisible(page, page.getByRole("heading", { name: "Tes notifications" }), "Le carnet de notifications s'ouvre");
+  await page.locator(".notif-bell").first().click();
+  await waitVisible(page, page.getByRole("heading", { name: "Ce que le zinc a noté" }), "Le carnet de notifications s'ouvre");
   const pageText = await page.locator(".notif-list").innerText();
   check("Le créateur est notifié de la réponse de Bob", pageText.includes(GUEST_BOB));
   check("Le créateur est notifié de la réponse de Chantal", pageText.includes(GUEST_CHANTAL));
@@ -681,9 +702,9 @@ await scenario("8. Suppression définitive par l'organisateur", async () => {
   // Bob et Chantal rejoignent d'abord l'apéro 1 : on vérifiera qu'il
   // disparaît aussi chez eux, avec un message d'annulation.
   await voteOnInvite(pageBob, invite1.fullUrl, { votes: [VOTE_YES] });
-  await pageBob.getByText("Réponse bien reçue, merci d’avoir répondu !").waitFor({ state: "visible" });
+  await pageBob.getByText("C’est émargé. Le registre te remercie.").waitFor({ state: "visible" });
   await voteOnInvite(pageChantal, invite1.fullUrl, { votes: [VOTE_YES] });
-  await pageChantal.getByText("Réponse bien reçue, merci d’avoir répondu !").waitFor({ state: "visible" });
+  await pageChantal.getByText("C’est émargé. Le registre te remercie.").waitFor({ state: "visible" });
   await pageBob.goto(`${APP_URL}/#/agenda`);
   await waitVisible(
     pageBob,
@@ -693,18 +714,18 @@ await scenario("8. Suppression définitive par l'organisateur", async () => {
 
   const page = pageOrganizer;
   await page.goto(invite1.fullUrl);
-  const deleteButton = page.getByRole("button", { name: "Supprimer cet évènement" });
+  const deleteButton = page.getByRole("button", { name: "Annuler l’apéro" });
   await waitVisible(page, deleteButton, "Le bouton de suppression n'apparaît que chez l'organisateur");
 
   // Contre-épreuve : l'invité Bob ne voit pas ce bouton sur l'apéro 2.
   await pageBob.goto(invite2.fullUrl);
   await pageBob.getByPlaceholder("Jojo, Nadine, Éminence Chips…").waitFor({ state: "visible" });
-  const bobDeleteCount = await pageBob.getByRole("button", { name: "Supprimer cet évènement" }).count();
+  const bobDeleteCount = await pageBob.getByRole("button", { name: "Annuler l’apéro" }).count();
   check("Un invité ne voit pas le bouton de suppression", bobDeleteCount === 0, `trouvé : ${bobDeleteCount}`);
 
   await deleteButton.click();
   await waitVisible(page, page.getByText("Es-tu sûr de vouloir supprimer cet évènement ?"), "La confirmation est demandée");
-  await page.getByRole("button", { name: "Oui, supprimer définitivement" }).click();
+  await page.getByRole("button", { name: "Oui, tout rayer" }).click();
   await page.waitForURL(/#\/agenda/, { timeout: 15_000 });
   check("Après suppression, retour à l'agenda", true);
 
@@ -754,7 +775,7 @@ await scenario("8. Suppression définitive par l'organisateur", async () => {
   // dans le carnet de l'invité.
   await pageBob.goto(`${APP_URL}/`);
   await waitVisible(pageBob, pageBob.locator(".notif-badge"), "L'invité reçoit un badge après l'annulation");
-  await pageBob.locator(".notif-bell").click();
+  await pageBob.locator(".notif-bell").first().click();
   await pageBob.locator(".notif-list").waitFor({ state: "visible" });
   const bobNotifText = await pageBob.locator(".notif-list").innerText();
   check(
@@ -762,7 +783,7 @@ await scenario("8. Suppression définitive par l'organisateur", async () => {
     bobNotifText.includes("Apéro annulé") &&
       bobNotifText.includes(APERO_1_NAME) &&
       // Apostrophe typographique : c'est celle du texte réel de l'app.
-      bobNotifText.includes("annulé par la personne qui l’organisait"),
+      bobNotifText.includes("L’organisateur a rangé le zinc"),
     bobNotifText,
   );
   await snap(pageBob, "notification-apero-annule");

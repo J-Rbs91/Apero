@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AlternativeOptionForm } from "../components/AlternativeOptionForm";
 import { ComptoirWall } from "../components/ComptoirWall";
@@ -145,6 +145,12 @@ export function InvitePage() {
   // Vrai juste après l'envoi d'une réponse : c'est LE moment où l'on propose
   // au convive de convoquer à son tour sa propre assemblée (boucle vertueuse).
   const [hasJustVoted, setHasJustVoted] = useState(false);
+  // L'ordre vote/verdict se décide à l'arrivée sur la page et n'en bouge
+  // plus : voter ne doit pas faire sauter la mise en page sous le pouce
+  // (et un remontage du formulaire perdrait son état). Déclaré ici, avant
+  // les retours anticipés, pour respecter l'ordre des hooks ; initialisé
+  // plus bas, une fois l'apéro déchiffré.
+  const voteFirstRef = useRef<{ aperoId: string | undefined; voteFirst: boolean } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -474,6 +480,12 @@ export function InvitePage() {
       ),
   );
 
+  // Gel de l'ordre vote/verdict pour cette visite (voir déclaration du ref).
+  if (voteFirstRef.current === null || voteFirstRef.current.aperoId !== aperoId) {
+    voteFirstRef.current = { aperoId, voteFirst: !hasVoted };
+  }
+  const voteFirst = voteFirstRef.current.voteFirst;
+
   const winnerId =
     hasGuestResponses && result.type === "winner" ? result.optionId : undefined;
   const winnerOption = winnerId
@@ -738,7 +750,7 @@ export function InvitePage() {
         <>
           {shareFirst && shareBox}
 
-          {!hasVoted && keys.writeKey ? (
+          {voteFirst && keys.writeKey ? (
             <>
               {voteBlock}
               {verdictPanel}
