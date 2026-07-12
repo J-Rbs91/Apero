@@ -3,9 +3,10 @@ import { Link } from "react-router-dom";
 import { requestComptoirNameEdit } from "../hooks/useComptoirName";
 
 // Panneau partagé du menu de la Confrérie (accueil + pages intérieures).
-// Les entrées du quotidien (Ardoise, Tablées, Le Carnet) et les bilans
-// (Palmarès, Les Comptes) restent à plat ; Le Coffre et le changement de
-// blaze, plus rares, sont repliés dans un sous-menu « Réglages ».
+// Les entrées du quotidien (Au programme, Tablées) et les bilans (Palmarès,
+// Rétrospective) restent à plat ; la sauvegarde et le changement de blaze,
+// plus rares, sont repliés dans un sous-menu « Réglages ». Le carnet des
+// notifications n'a pas d'entrée ici : la cloche y mène déjà.
 export function ConfrerieMenuPanel({
   withComptoirLink = false,
   className = "brand-menu__panel",
@@ -25,19 +26,16 @@ export function ConfrerieMenuPanel({
         </Link>
       )}
       <Link className="brand-menu__item" role="menuitem" to="/agenda" onClick={onClose}>
-        Ardoise
+        Au programme
       </Link>
       <Link className="brand-menu__item" role="menuitem" to="/tablees" onClick={onClose}>
         Tablées
-      </Link>
-      <Link className="brand-menu__item" role="menuitem" to="/notifications" onClick={onClose}>
-        Le Carnet
       </Link>
       <Link className="brand-menu__item" role="menuitem" to="/palmares" onClick={onClose}>
         Palmarès
       </Link>
       <Link className="brand-menu__item" role="menuitem" to="/comptes" onClick={onClose}>
-        Les Comptes
+        Rétrospective
       </Link>
 
       <div className="brand-menu__group">
@@ -68,7 +66,7 @@ export function ConfrerieMenuPanel({
               to="/coffre"
               onClick={onClose}
             >
-              Le Coffre
+              Sauvegarde
             </Link>
             <button
               type="button"

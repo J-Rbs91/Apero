@@ -11,7 +11,7 @@ import type { PurgedEventRecord } from "../types/rewards";
 import { shareOrDownloadRecapImage } from "../utils/recapImage";
 import { buildYearRecap } from "../utils/yearRecap";
 
-// Les Comptes du Comptoir : le bilan annuel du membre, calculé sur l'appareil
+// La Rétrospective du Comptoir : le bilan annuel du membre, calculé sur l'appareil
 // depuis les apéros connus localement. Rien ne quitte le navigateur, sauf
 // l'image que le membre choisit lui-même de partager.
 
@@ -72,7 +72,7 @@ export function ComptesPage() {
   if (isLoading) {
     return (
       <MobilePage className="agenda-mobile" overlay="deep">
-        <MobileHeader eyebrow="Les Comptes du Comptoir" />
+        <MobileHeader eyebrow="La Rétrospective du Comptoir" />
         <LoadingScreen title="On épluche les registres" subtitle="La Confrérie compte les tournées de l’année…" />
       </MobilePage>
     );
@@ -80,10 +80,10 @@ export function ComptesPage() {
 
   return (
     <MobilePage className="agenda-mobile" overlay="deep">
-      <MobileHeader eyebrow="Les Comptes du Comptoir" />
+      <MobileHeader eyebrow="La Rétrospective du Comptoir" />
 
       <section className="sheet">
-        <h1 className="h1 h1--sm">Ton exercice {year}</h1>
+        <h1 className="h1 h1--sm">Ta rétrospective {year}</h1>
         <p className="lede">
           Le bilan comptable de tes activités de comptoir, dressé sur cet appareil et
           nulle part ailleurs. Le registre fait foi, le reste est légende.
@@ -120,7 +120,7 @@ export function ComptesPage() {
             année sobre, soit une année ailleurs — dans les deux cas, ça se rattrape.
           </p>
           <Link className="button button--primary button--block" to="/create">
-            Ouvrir l’exercice {currentYear}
+            Lancer l’année {currentYear}
           </Link>
         </section>
       ) : (
@@ -182,7 +182,7 @@ export function ComptesPage() {
           <section className="sheet">
             <p className="eyebrow">Faire circuler</p>
             <p className="lede">
-              Les Comptes se partagent en image — les chiffres, ton blaze, rien d’autre.
+              La rétrospective se partage en image — les chiffres, ton blaze, rien d’autre.
               Ni lien, ni clé : ta comptabilité reste la tienne.
             </p>
             <button
@@ -192,7 +192,7 @@ export function ComptesPage() {
                 setShareFeedback("");
                 const outcome = await shareOrDownloadRecapImage(
                   { recap, memberName: comptoirName },
-                  `comptes-du-comptoir-${year}.png`,
+                  `retrospective-du-comptoir-${year}.png`,
                 );
                 setShareFeedback(
                   outcome === "failed"

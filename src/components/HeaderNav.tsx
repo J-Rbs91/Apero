@@ -4,7 +4,7 @@ import { NotificationBell } from "./NotificationBell";
 
 // Navigation globale des pages intérieures : la cloche et le menu de la
 // Confrérie suivent l'utilisateur partout — plus besoin de remonter à
-// l'accueil pour retrouver son ardoise, ses tablées ou son carnet.
+// l'accueil pour retrouver le programme, ses tablées ou sa rétrospective.
 export function HeaderNav() {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
