@@ -204,7 +204,7 @@ export function AgendaPage() {
                   storageMode === "api-vps" ? `/invite/${event.id}` : `/event/${event.id}`
                 }
               >
-                Voir l’apéro
+                Ouvrir l’apéro
               </Link>
 
               <TraquenardGauge

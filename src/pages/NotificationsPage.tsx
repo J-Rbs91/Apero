@@ -68,7 +68,7 @@ export function NotificationsPage() {
       <MobileHeader eyebrow="Le carnet du comptoir" />
 
       <section className="sheet">
-        <h1 className="h1 h1--sm">Tes notifications</h1>
+        <h1 className="h1 h1--sm">Ce que le zinc a noté</h1>
         <p className="lede">
           Réponses, propositions, confirmations et rappels : tout ce que le zinc a noté pour toi
           depuis ton dernier passage.

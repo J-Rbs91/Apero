@@ -94,7 +94,7 @@ export function CreateEventPage() {
       cleanedOptions.some((option) => !option.date || !option.time || !option.location)
     ) {
       setFeedback(
-        "Chaque créneau réclame un jour, une heure et un établissement, parce qu’un apéro sans lieu ni horaire, ce n’est plus un apéro, c’est un concept — et ici, on n’organise pas de concepts.",
+        "Un jour, une heure, un établissement. Sans ça, ce n’est plus un apéro, c’est un concept — et ici, on n’organise pas de concepts.",
       );
       return;
     }
@@ -107,7 +107,7 @@ export function CreateEventPage() {
 
     if (!hasFutureSlot) {
       setFeedback(
-        "Tous tes créneaux sont déjà dans le passé, ce qui est un joli exploit temporel mais totalement inutile pour inviter qui que ce soit. Propose une date à venir, la machine à remonter le temps est encore en réparation.",
+        "Tous tes créneaux sont déjà passés. Joli exploit temporel, zéro convive. La machine à remonter le temps est en réparation : vise l’avenir.",
       );
       return;
     }
@@ -235,7 +235,7 @@ export function CreateEventPage() {
               ? "La Confrérie est complète, archi-complète même : trop d’apéros tournent déjà en coulisses dans une magouille généralisée que plus personne ne maîtrise vraiment. Clôture un apéro avant d’en lancer un nouveau, sinon c’est le chaos total."
               : error instanceof Error
                 ? error.message
-                : "Le service a fait une bêtise, on ne sait pas comment, et franchement personne ne veut savoir comment. Réessaie dans deux secondes, ça se répare presque toujours tout seul.",
+                : "Le service a fait une bêtise. On ne veut pas savoir laquelle. Deux secondes, ça se répare tout seul.",
       );
     } finally {
       setIsSubmitting(false);
@@ -259,7 +259,7 @@ export function CreateEventPage() {
         </label>
 
         <label className="field">
-          <span>Description</span>
+          <span>Le prétexte</span>
           <input
             value={title}
             onChange={(eventChange) => setTitle(eventChange.target.value)}

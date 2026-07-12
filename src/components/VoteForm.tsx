@@ -326,7 +326,7 @@ export function VoteForm({
         {onProposeSlot ? (
           <div className="button-row">
             <button className="button button--primary" type="submit" disabled={isSaving}>
-              {isSaving ? "Envoi…" : "Répondre à l’invitation"}
+              {isSaving ? "On émarge…" : "Répondre à l’invitation"}
             </button>
             <button className="button button--ghost" type="button" onClick={onProposeSlot}>
               Proposer un autre créneau
@@ -334,7 +334,7 @@ export function VoteForm({
           </div>
         ) : (
           <button className="button button--primary button--block" type="submit" disabled={isSaving}>
-            {isSaving ? "Envoi de ta réponse…" : "Répondre à l’invitation"}
+            {isSaving ? "On émarge…" : "Répondre à l’invitation"}
           </button>
         )}
         {feedback && (

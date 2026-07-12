@@ -24,7 +24,7 @@ function formatWinner(option: AperitifOption): string {
       }).format(new Date(`${option.date}T00:00:00`))
     : "Date mystère";
 
-  return `${dateLabel} · ${option.time || "?"} — ${option.location}`;
+  return `${dateLabel} · ${option.time || "heure mystère"} — ${option.location}`;
 }
 
 function describeEyebrow(result: ResultState): string {

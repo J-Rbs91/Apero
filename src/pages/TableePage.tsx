@@ -277,7 +277,7 @@ export function TableePage() {
                     <div className="slot__d">{item.event?.ceremonialName ?? item.ref.ceremonialName}</div>
                     <div className="slot__p">
                       {item.event
-                        ? `${formatAperoDate(item)} · ${item.event.participants.length} réponses`
+                        ? `${formatAperoDate(item)} · ${item.event.participants.length} réponse${item.event.participants.length > 1 ? "s" : ""}`
                         : "Disparu du registre (annulé ou purgé)"}
                     </div>
                   </div>
