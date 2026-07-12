@@ -9,6 +9,7 @@ import {
   deleteEncryptedApero,
   getCachedAperoEvent,
   getMyAperos,
+  invalidateMyAperosCache,
   readPublicAperoFile,
 } from "./encryptedAperoRepository";
 import { findLocalApero, saveLocalApero } from "./localAperoRegistry";
@@ -86,6 +87,8 @@ function createStorageStub(): Storage {
 describe("encryptedAperoRepository (round-trip fetch stubbé)", () => {
   beforeEach(() => {
     vi.stubEnv("VITE_APERO_API_BASE_URL", API_BASE);
+    // Le cache mémoire de getMyAperos survivrait d'un test à l'autre.
+    invalidateMyAperosCache();
   });
 
   afterEach(() => {

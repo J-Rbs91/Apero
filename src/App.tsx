@@ -60,10 +60,15 @@ export function App() {
 
     // Re-synchronise au retour sur l'app : capte les évolutions distantes et
     // fait mûrir les rappels « peut-être » (48h / 24h / 2h) sans rechargement.
+    // focus et visibilitychange tirent souvent ensemble au retour d'onglet :
+    // le garde-fou temporel évite de doubler la rafale de lectures publiques.
+    let lastSyncAt = Date.now();
     function handleVisible() {
-      if (document.visibilityState === "visible") {
-        void syncAllMyAperos();
+      if (document.visibilityState !== "visible" || Date.now() - lastSyncAt < 5_000) {
+        return;
       }
+      lastSyncAt = Date.now();
+      void syncAllMyAperos();
     }
 
     window.addEventListener("focus", handleVisible);

@@ -1996,3 +1996,43 @@ textarea:focus-visible {
     transform: scale(1);
   }
 }
+
+/* ===== Cibles tactiles (app de comptoir : on vise le pouce, verre en main) =====
+   La zone de tap monte à 44 px minimum sans grossir le dessin : padding et
+   min-height font le travail, le rendu reste inchangé à l'œil. */
+.bk {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.slot__x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -12px -12px -12px 0;
+}
+
+.seg__opt {
+  min-height: 44px;
+}
+
+.cheer-btn {
+  min-height: 40px;
+}
+
+.share .cp {
+  min-height: 44px;
+}
+
+.ghost-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.minimap__expand {
+  min-width: 44px;
+  min-height: 44px;
+}

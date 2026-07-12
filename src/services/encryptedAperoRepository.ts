@@ -79,12 +79,20 @@ async function computeGitBlobSha(bytes: Uint8Array): Promise<string> {
  */
 async function readPublicAperoFileViaRaw(
   aperoId: string,
+  options: { bustCdnCache?: boolean } = {},
 ): Promise<{ file: StoredEncryptedAperoFile; sha: string } | null> {
+  // Le cache Fastly de raw.githubusercontent.com garde une version quelques
+  // minutes : lors d'un retry anti-conflit (409), on force une clé de cache
+  // neuve via la query string, sinon on relit la même version périmée et le
+  // conflit ne se résout jamais.
   const url =
     `https://raw.githubusercontent.com/${githubConfig.owner}/${githubConfig.repo}` +
-    `/${githubConfig.branch}/${APEROS_DATA_PATH}/${aperoId}.json`;
+    `/${githubConfig.branch}/${APEROS_DATA_PATH}/${aperoId}.json` +
+    (options.bustCdnCache ? `?cb=${Date.now()}` : "");
 
-  const response = await fetch(url, { cache: "no-store" });
+  // no-cache (et non no-store) : le navigateur revalide avec son ETag, un 304
+  // est gratuit et instantané.
+  const response = await fetch(url, { cache: "no-cache" });
 
   if (response.status === 404) {
     return null;
@@ -116,6 +124,7 @@ async function readPublicAperoFileViaRaw(
  */
 export async function readPublicAperoFile(
   aperoId: string,
+  options: { bustCdnCache?: boolean } = {},
 ): Promise<{ file: StoredEncryptedAperoFile; sha: string } | null> {
   if (!isValidAperoId(aperoId)) {
     return null;
@@ -125,12 +134,14 @@ export async function readPublicAperoFile(
     `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}` +
     `/contents/${APEROS_DATA_PATH}/${aperoId}.json?ref=${githubConfig.branch}`;
 
+  // no-cache : requête conditionnelle (ETag). Un 304 ne compte PAS dans le
+  // quota anonyme de 60 req/h — no-store brûlait le quota même sans changement.
   const response = await fetch(url, {
     headers: {
       Accept: "application/vnd.github+json",
       "X-GitHub-Api-Version": "2022-11-28",
     },
-    cache: "no-store",
+    cache: "no-cache",
   });
 
   if (response.status === 404) {
@@ -138,7 +149,7 @@ export async function readPublicAperoFile(
   }
 
   if (response.status === 403 || response.status === 429) {
-    return readPublicAperoFileViaRaw(aperoId);
+    return readPublicAperoFileViaRaw(aperoId, options);
   }
 
   if (!response.ok) {
@@ -208,6 +219,7 @@ export function purgeDeletedApero(aperoId: string): boolean {
   const aperoName = entry.lastKnownEvent?.ceremonialName ?? "";
 
   removeLocalApero(aperoId);
+  invalidateMyAperosCache();
   removeNotificationsForApero(aperoId);
   removeSnapshot(aperoId);
 
@@ -312,6 +324,7 @@ export async function createEncryptedApero(
     displayName: event.organizerName,
     role: "creator",
   });
+  invalidateMyAperosCache();
 
   return { aperoId, encryptionKey, writeKey, event, sha: result.sha };
 }
@@ -323,8 +336,9 @@ export async function createEncryptedApero(
 export async function getEncryptedAperoById(
   aperoId: string,
   encryptionKey: string,
+  options: { bustCdnCache?: boolean } = {},
 ): Promise<{ event: AperitifEvent; sha: string } | null> {
-  const stored = await readPublicAperoFile(aperoId);
+  const stored = await readPublicAperoFile(aperoId, options);
 
   if (!stored) {
     return null;
@@ -353,7 +367,11 @@ export async function updateEncryptedApero(
   const maxAttempts = 2;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    const current = await getEncryptedAperoById(aperoId, encryptionKey);
+    // Au retry (409), on contourne le cache CDN : relire la même version
+    // périmée reproduirait exactement le même conflit.
+    const current = await getEncryptedAperoById(aperoId, encryptionKey, {
+      bustCdnCache: attempt > 1,
+    });
 
     if (!current) {
       throw new EncryptedAperoError("NOT_FOUND", "Cet apero n'existe pas ou plus.");
@@ -380,6 +398,7 @@ export async function updateEncryptedApero(
       // Le fichier vient d'être lu publiquement puis réécrit : son existence
       // publique est confirmée, un futur 404 signifiera une vraie suppression.
       cacheLocalAperoEvent(aperoId, updatedEvent, written.sha);
+      invalidateMyAperosCache();
       return updatedEvent;
     } catch (error) {
       const isRetryableConflict =
@@ -478,6 +497,7 @@ export async function deleteEncryptedApero(
     legacyWriteKey: credentials.legacyWriteKey,
   });
   removeLocalApero(aperoId);
+  invalidateMyAperosCache();
 }
 
 export type MyAperoItem = {
@@ -485,8 +505,33 @@ export type MyAperoItem = {
   event: AperitifEvent | null;
 };
 
+// Mutualisation des rafales : démarrage, agenda, palmarès et sync de
+// notifications appellent tous getMyAperos à quelques secondes d'écart.
+// On partage la promesse en vol et on garde le résultat quelques secondes —
+// chaque écriture (vote, création, suppression) invalide immédiatement.
+const MY_APEROS_CACHE_TTL_MS = 15_000;
+let myAperosInflight: { at: number; promise: Promise<MyAperoItem[]> } | null = null;
+
+export function invalidateMyAperosCache(): void {
+  myAperosInflight = null;
+}
+
 /** "Mes aperos" : uniquement les aperos du registre local. */
-export async function getMyAperos(): Promise<MyAperoItem[]> {
+export function getMyAperos(): Promise<MyAperoItem[]> {
+  if (myAperosInflight && Date.now() - myAperosInflight.at < MY_APEROS_CACHE_TTL_MS) {
+    return myAperosInflight.promise;
+  }
+
+  const promise = loadMyAperos().catch((error) => {
+    // Un échec ne doit pas rester collé dans le cache.
+    invalidateMyAperosCache();
+    throw error;
+  });
+  myAperosInflight = { at: Date.now(), promise };
+  return promise;
+}
+
+async function loadMyAperos(): Promise<MyAperoItem[]> {
   const entries = getLocalAperos();
 
   return Promise.all(
