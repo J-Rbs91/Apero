@@ -726,7 +726,7 @@ await scenario("8. Suppression définitive par l'organisateur", async () => {
   check("Un invité ne voit pas le bouton de suppression", bobDeleteCount === 0, `trouvé : ${bobDeleteCount}`);
 
   await deleteButton.click();
-  await waitVisible(page, page.getByText("Es-tu sûr de vouloir supprimer cet évènement ?"), "La confirmation est demandée");
+  await waitVisible(page, page.getByText("On raye tout, vraiment ?"), "La confirmation est demandée");
   await page.getByRole("button", { name: "Oui, tout rayer" }).click();
   await page.waitForURL(/#\/agenda/, { timeout: 15_000 });
   check("Après suppression, retour à l'agenda", true);
