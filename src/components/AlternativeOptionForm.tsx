@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useComptoirName } from "../hooks/useComptoirName";
 import type { AperitifOption } from "../types/apero";
 import { createId } from "../utils/createId";
+import { hapticError, hapticSuccess } from "../utils/haptics";
 import { LocationField, type LocationValue } from "./LocationField";
 
 type AlternativeOptionFormProps = {
@@ -38,11 +39,13 @@ export function AlternativeOptionForm({
     const trimmedLocation = locationValue.location.trim();
 
     if (!date || !time || !trimmedLocation) {
+      hapticError();
       setFeedback("Quitte à imposer cette contradiction, il s’agirait au moins d’avoir l’élégance d’être précis : un jour, une heure ou un lieu, par exemple, histoire que cette proposition ait meilleure mine que la tienne.");
       return;
     }
 
     if (!trimmedName) {
+      hapticError();
       setFeedback("Indique ton blaze, qu’on sache au moins l’intitulé du fauteur de troubles.");
       return;
     }
@@ -64,6 +67,7 @@ export function AlternativeOptionForm({
     } catch (submitError) {
       // Envoi raté : la saisie reste en place, l'explication s'affiche ici.
       // On ne vide jamais un formulaire dont le contenu n'est pas arrivé.
+      hapticError();
       setFeedback(
         submitError instanceof Error && submitError.message
           ? submitError.message
@@ -72,6 +76,7 @@ export function AlternativeOptionForm({
       return;
     }
 
+    hapticSuccess();
     setDate("");
     setTime("");
     setLocationValue({ location: "" });

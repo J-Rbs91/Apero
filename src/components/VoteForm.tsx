@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { AperitifEvent, ParticipantResponse, VoteStatus } from "../types/apero";
 import { useComptoirName } from "../hooks/useComptoirName";
 import { createId } from "../utils/createId";
+import { hapticError, hapticSuccess } from "../utils/haptics";
 import { CompanionsField } from "./CompanionsField";
 import { EventOptionMobileCard } from "./EventOptionMobileCard";
 
@@ -130,6 +131,7 @@ export function VoteForm({
     const trimmedName = participantName.trim();
 
     if (!trimmedName) {
+      hapticError();
       setFeedbackTone("error");
       setFeedback("Sans blaze, pas d’émargement. Même « Jojo » fera l’affaire.");
       return;
@@ -138,6 +140,7 @@ export function VoteForm({
     const missingVote = event.options.some((option) => !votes[option.id]);
 
     if (missingVote) {
+      hapticError();
       setFeedbackTone("error");
       setFeedback("Chaque créneau attend son verdict, même un « Sans moi ». Le registre a horreur du vide.");
       return;
@@ -160,6 +163,7 @@ export function VoteForm({
     justSubmittedRef.current = true;
     try {
       await onSubmit(response);
+      hapticSuccess();
       setFeedbackTone("ok");
       setFeedback(
         existingParticipant
@@ -172,6 +176,7 @@ export function VoteForm({
       // Jamais de « merci » sur un envoi raté : la saisie reste en place,
       // l'explication s'affiche ici, sous le pouce.
       justSubmittedRef.current = false;
+      hapticError();
       setFeedbackTone("error");
       setFeedback(
         submitError instanceof Error && submitError.message

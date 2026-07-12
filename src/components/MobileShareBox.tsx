@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { hapticError, hapticSuccess } from "../utils/haptics";
 
 type MobileShareBoxProps = {
   url: string;
@@ -24,8 +25,10 @@ export function MobileShareBox({ url, title, text, displayUrl, reminder }: Mobil
   async function copyMessage(message: string, successFeedback: string) {
     try {
       await navigator.clipboard.writeText(`${message}\n${url}`);
+      hapticSuccess();
       setFeedback(successFeedback);
     } catch {
+      hapticError();
       setFeedback("Copie impossible ici. Garde le lien sous le coude.");
     }
   }
@@ -61,8 +64,10 @@ export function MobileShareBox({ url, title, text, displayUrl, reminder }: Mobil
     setFeedback("");
     try {
       await navigator.clipboard.writeText(url);
+      hapticSuccess();
       setFeedback("Lien copié.");
     } catch {
+      hapticError();
       setFeedback("Copie impossible ici. Garde le lien sous le coude.");
     }
   }

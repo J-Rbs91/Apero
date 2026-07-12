@@ -36,6 +36,7 @@ import {
 } from "../services/notificationStore";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
 import { createId } from "../utils/createId";
+import { hapticError, hapticSuccess, hapticTap } from "../utils/haptics";
 import { isEventExpired } from "../services/eventPurge";
 import { calculateAverageTraquenardLevel, calculateBestOptions } from "../utils/calculateResults";
 import { downloadAperoIcs } from "../utils/calendarExport";
@@ -318,6 +319,7 @@ export function InvitePage() {
 
     // Optimiste : le verre se lève à l'instant du tap ; le réseau confirme
     // derrière, et en cas de raté on repose le verre tel qu'il était.
+    hapticTap();
     const previousEvent = state.event;
     setState({ status: "ready", event: toggleOptionCheer(previousEvent, optionId, cheerName) });
     setCheerPendingId(optionId);
@@ -334,6 +336,7 @@ export function InvitePage() {
       setState({ status: "ready", event: updatedEvent });
       syncAperoNotificationsFromRegistry(updatedEvent);
     } catch (submitError) {
+      hapticError();
       setState({ status: "ready", event: previousEvent });
       setError(describeApiError(submitError));
     } finally {
@@ -381,10 +384,12 @@ export function InvitePage() {
         ceremonialName: state.event.ceremonialName,
         addedBy: comptoirName.trim() || undefined,
       });
+      hapticSuccess();
       setTableeFeedback(
         `C’est gravé : cet apéro rejoint les annales de « ${tableeEntry.name ?? "la tablée"} ».`,
       );
     } catch {
+      hapticError();
       setTableeFeedback("Le rattachement a capoté. Réessaie dans un instant.");
     } finally {
       setIsAttachingTablee(false);
@@ -414,8 +419,10 @@ export function InvitePage() {
       // qui n'existe plus.
       removeNotificationsForApero(aperoId);
       removeSnapshot(aperoId);
+      hapticSuccess();
       navigate("/agenda", { replace: true });
     } catch (deleteError) {
+      hapticError();
       setError(describeApiError(deleteError));
       setIsDeleting(false);
     }
