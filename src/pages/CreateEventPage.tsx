@@ -279,7 +279,7 @@ export function CreateEventPage() {
             <label className="switchrow__label" htmlFor="children-allowed">
               <span className="switchrow__title">Les mioches sont-ils conviés ?</span>
               <span className="switchrow__state">
-                {childrenAllowed ? "Marmaille admise" : "Entre grandes personnes"}
+                {childrenAllowed ? "Marmaille admise" : "Ce soir c’est sans les mômes"}
               </span>
             </label>
             <ToggleSwitch
@@ -289,11 +289,6 @@ export function CreateEventPage() {
               label="Les mioches sont-ils conviés ?"
             />
           </div>
-          <p className="hint">
-            Coché, la marmaille cavale entre les tabourets ; sinon, c’est apéro entre
-            grandes personnes. Autant que ce soit dit avant que quelqu’un débarque avec
-            toute sa portée.
-          </p>
         </div>
 
         <label className="field">
