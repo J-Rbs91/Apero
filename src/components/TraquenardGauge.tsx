@@ -29,13 +29,15 @@ export function TraquenardGauge({ level, voteCount }: TraquenardGaugeProps) {
   return (
     <div className="traq traq--summary" style={gaugeStyle(ratio)}>
       <div className="traq__head">
-        <p className="traq__title">Traquenard-O-mètre</p>
-        <p className="traq__value">
+        {/* « Pronostic de la tablée » : la synthèse se distingue du curseur
+            interactif (« Ton pronostic ») d'un coup d'œil. */}
+        <p className="traq__title">Pronostic de la tablée</p>
+        <p className={`traq__value${hasLevel ? "" : " traq__value--empty"}`}>
           {hasLevel
             ? `${level.toFixed(1)}/${TRAQUENARD_LEVEL_MAX} · ${describeTraquenardLevel(level)}`
             : voteCount === 0
-              ? "Personne n’a encore répondu"
-              : "En attente de réponses"}
+              ? "Aucun pronostic déposé"
+              : "En attente de pronostics"}
         </p>
       </div>
       <div
@@ -43,8 +45,8 @@ export function TraquenardGauge({ level, voteCount }: TraquenardGaugeProps) {
         role="img"
         aria-label={
           hasLevel
-            ? `Traquenard-O-mètre : ${level.toFixed(1)} sur ${TRAQUENARD_LEVEL_MAX}, ${describeTraquenardLevel(level)}`
-            : "Traquenard-O-mètre : aucune réponse pour l’instant"
+            ? `Pronostic de la tablée : ${level.toFixed(1)} sur ${TRAQUENARD_LEVEL_MAX}, ${describeTraquenardLevel(level)}`
+            : "Pronostic de la tablée : rien de déposé pour l’instant"
         }
       >
         <div className="traq__track">
@@ -57,21 +59,29 @@ export function TraquenardGauge({ level, voteCount }: TraquenardGaugeProps) {
 }
 
 type TraquenardSliderProps = {
-  value: number;
+  /** Null tant que le convive n'a pas touché le curseur : pas de pronostic
+   * gravé d'office, la moyenne de la tablée ne compte que les vrais avis. */
+  value: number | null;
   onChange: (value: number) => void;
 };
 
 // Jauge horizontale interactive : accompagne la réponse de l'utilisateur, qui
 // déplace le curseur pour indiquer son pronostic. La couleur suit la valeur.
 export function TraquenardSlider({ value, onChange }: TraquenardSliderProps) {
-  const ratio = traquenardRatioFromLevel(value);
+  const displayValue = value ?? 5;
+  const ratio = traquenardRatioFromLevel(displayValue);
 
   return (
-    <div className="traq traq--interactive" style={gaugeStyle(ratio)}>
+    <div
+      className={`traq traq--interactive${value == null ? " traq--untouched" : ""}`}
+      style={gaugeStyle(ratio)}
+    >
       <div className="traq__head">
-        <p className="traq__title">Traquenard-O-mètre</p>
-        <p className="traq__value">
-          {value}/{TRAQUENARD_LEVEL_MAX} · {describeTraquenardLevel(value)}
+        <p className="traq__title">Ton pronostic</p>
+        <p className={`traq__value${value == null ? " traq__value--empty" : ""}`}>
+          {value == null
+            ? "Glisse pour te mouiller (optionnel)"
+            : `${value}/${TRAQUENARD_LEVEL_MAX} · ${describeTraquenardLevel(value)}`}
         </p>
       </div>
       <div className="traq__gauge">
@@ -85,10 +95,14 @@ export function TraquenardSlider({ value, onChange }: TraquenardSliderProps) {
           min={0}
           max={TRAQUENARD_LEVEL_MAX}
           step={1}
-          value={value}
+          value={displayValue}
           onChange={(event) => onChange(Number(event.target.value))}
           aria-label="Traquenard-O-mètre : ton pronostic"
-          aria-valuetext={`${value} sur ${TRAQUENARD_LEVEL_MAX}, ${describeTraquenardLevel(value)}`}
+          aria-valuetext={
+            value == null
+              ? "aucun pronostic déposé"
+              : `${value} sur ${TRAQUENARD_LEVEL_MAX}, ${describeTraquenardLevel(value)}`
+          }
         />
       </div>
     </div>

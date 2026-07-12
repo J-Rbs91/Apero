@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
@@ -12,6 +12,7 @@ import {
   calculateAverageTraquenardLevel,
   calculateBestOptions,
 } from "../utils/calculateResults";
+import { buildNextRoundPrefill } from "../utils/nextRound";
 
 function getSlotTime(option: AperitifOption): number {
   if (!option.date || !option.time) {
@@ -30,7 +31,7 @@ function formatSlot(option: AperitifOption): string {
       }).format(new Date(`${option.date}T00:00:00`))
     : "Date mystère";
 
-  return `${dateLabel} · ${option.time || "?"}`;
+  return `${dateLabel} · ${option.time || "heure mystère"}`;
 }
 
 type AgendaItem = {
@@ -53,6 +54,7 @@ async function loadMyLocalAperos(): Promise<AperitifEvent[]> {
 }
 
 export function AgendaPage() {
+  const navigate = useNavigate();
   const [events, setEvents] = useState<AperitifEvent[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -115,6 +117,26 @@ export function AgendaPage() {
       .sort((first, second) => first.earliest - second.earliest);
   }, [events]);
 
+  // Les tournées passées restent sur l'ardoise : c'est là que vit « Remettre
+  // ça » — sans quoi un apéro terminé devient un cul-de-sac dès le lendemain.
+  const pastItems = useMemo(() => {
+    if (!events) {
+      return [];
+    }
+    const now = Date.now();
+
+    return events
+      .map((event) => {
+        const slotTimes = event.options
+          .map(getSlotTime)
+          .filter((time) => !Number.isNaN(time));
+        const latest = slotTimes.length ? Math.max(...slotTimes) : Number.NaN;
+        return { event, latest };
+      })
+      .filter((item) => !Number.isNaN(item.latest) && item.latest < now)
+      .sort((first, second) => second.latest - first.latest);
+  }, [events]);
+
   if (isLoading) {
     return (
       <MobilePage className="agenda-mobile" overlay="deep">
@@ -156,7 +178,7 @@ export function AgendaPage() {
             <section className="sheet" key={event.id}>
               <p className="eyebrow">
                 {upcomingSlots.length} créneau{upcomingSlots.length > 1 ? "x" : ""} ·{" "}
-                {event.participants.length} réponses
+                {event.participants.length} réponse{event.participants.length > 1 ? "s" : ""}
               </p>
               <h2 className="h2">{event.ceremonialName}</h2>
               {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
@@ -196,6 +218,52 @@ export function AgendaPage() {
             </section>
           ))}
         </div>
+      )}
+
+      {pastItems.length > 0 && (
+        <>
+          <section className="sheet">
+            <h2 className="h2">Les tournées passées</h2>
+            <p className="lede">
+              Les verres sont secs, mais rien n’empêche de remettre ça.
+            </p>
+          </section>
+          <div className="event-stack">
+            {pastItems.map(({ event, latest }) => (
+              <section className="sheet sheet--past" key={event.id}>
+                <p className="eyebrow">
+                  {new Intl.DateTimeFormat("fr-FR", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  }).format(new Date(latest))}{" "}
+                  · {event.participants.length} réponse
+                  {event.participants.length > 1 ? "s" : ""}
+                </p>
+                <h2 className="h2">{event.ceremonialName}</h2>
+                <div className="button-row">
+                  <button
+                    type="button"
+                    className="button button--primary"
+                    onClick={() =>
+                      navigate("/create", { state: { prefill: buildNextRoundPrefill(event) } })
+                    }
+                  >
+                    Remettre ça
+                  </button>
+                  <Link
+                    className="button button--ghost"
+                    to={
+                      storageMode === "api-vps" ? `/invite/${event.id}` : `/event/${event.id}`
+                    }
+                  >
+                    Ouvrir l’apéro
+                  </Link>
+                </div>
+              </section>
+            ))}
+          </div>
+        </>
       )}
     </MobilePage>
   );

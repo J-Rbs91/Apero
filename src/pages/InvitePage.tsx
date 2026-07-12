@@ -119,7 +119,9 @@ export function InvitePage() {
   const [state, setState] = useState<LoadState>(
     initialEvent ? { status: "ready", event: initialEvent } : { status: "loading" },
   );
-  const [traquenardVote, setTraquenardVote] = useState(5);
+  // Null tant que le curseur n'a pas été touché : pas de pronostic « moyen »
+  // gravé d'office — la moyenne de la tablée ne compte que les vrais avis.
+  const [traquenardVote, setTraquenardVote] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isProposingSlot, setIsProposingSlot] = useState(false);
   const [isAddingOption, setIsAddingOption] = useState(false);
@@ -242,7 +244,10 @@ export function InvitePage() {
       return;
     }
 
-    const finalResponse: ParticipantResponse = { ...response, traquenardLevel: traquenardVote };
+    const finalResponse: ParticipantResponse = {
+      ...response,
+      traquenardLevel: traquenardVote ?? undefined,
+    };
 
     try {
       setIsSaving(true);
@@ -435,7 +440,26 @@ export function InvitePage() {
 
   const { event } = state;
   const result = calculateBestOptions(event);
-  const winnerId = result.type === "winner" ? result.optionId : undefined;
+
+  // Le rôle et l'état du lecteur pilotent l'ordre de la page : la prochaine
+  // action est toujours le premier bloc atteignable, sans consigne à lire.
+  const organizerKey = normalizeMemberName(event.organizerName);
+  const guests = event.participants.filter(
+    (participant) => normalizeMemberName(participant.participantName) !== organizerKey,
+  );
+  // L'auto-vote de l'organisateur ne fait pas un verdict : tant que la tablée
+  // n'a pas émargé, le comptoir délibère et rien n'est proclamé.
+  const hasGuestResponses = guests.length > 0;
+  const myKey = normalizeMemberName(comptoirName);
+  const hasVoted = Boolean(
+    myKey &&
+      event.participants.some(
+        (participant) => normalizeMemberName(participant.participantName) === myKey,
+      ),
+  );
+
+  const winnerId =
+    hasGuestResponses && result.type === "winner" ? result.optionId : undefined;
   const winnerOption = winnerId
     ? event.options.find((option) => option.id === winnerId)
     : undefined;
@@ -455,27 +479,194 @@ export function InvitePage() {
   // L'annulation n'est visible que depuis le registre local du créateur.
   const localEntry = aperoId ? findLocalApero(aperoId) : null;
   const isOrganizer = localEntry?.role === "creator" && Boolean(localEntry.adminKey || keys.writeKey);
+  // L'organisateur seul au registre : sa prochaine action est de rameuter,
+  // le partage prend la tête de page.
+  const shareFirst = isOrganizer && !hasGuestResponses && !isPastEvent && canShare;
+
+  const shareBox = canShare ? (
+    <MobileShareBox
+      url={inviteUrl}
+      displayUrl={maskInviteUrl(inviteUrl)}
+      title={buildShareTitle(event)}
+      text={buildShareText(event)}
+      reminder={
+        isOrganizer
+          ? {
+              label: "Sonner le rappel",
+              title: buildShareTitle(event),
+              text: buildReminderText(event),
+            }
+          : undefined
+      }
+    />
+  ) : null;
+
+  const voteBlock = keys.writeKey ? (
+    <>
+      <VoteForm
+        event={event}
+        isSaving={isSaving}
+        onSubmit={handleVoteSubmit}
+        leadingOptionId={winnerId}
+        onProposeSlot={() => setIsProposingSlot(true)}
+        childrenAllowed={event.childrenAllowed}
+        onToggleCheer={comptoirName.trim() ? handleToggleCheer : undefined}
+        hasCheeredOption={(optionId) => {
+          const cheerKey = normalizeMemberName(comptoirName);
+          const option = event.options.find((candidate) => candidate.id === optionId);
+          return Boolean(
+            cheerKey &&
+              option?.cheers?.some((name) => normalizeMemberName(name) === cheerKey),
+          );
+        }}
+        isCheerSaving={isCheerSaving}
+        extraFields={
+          <TraquenardSlider value={traquenardVote} onChange={setTraquenardVote} />
+        }
+      />
+      <AlternativeOptionForm
+        isSaving={isAddingOption}
+        isOpen={isProposingSlot}
+        onClose={() => setIsProposingSlot(false)}
+        onSubmit={handleOptionSubmit}
+      />
+    </>
+  ) : (
+    <section className="sheet">
+      <p className="lbl">{event.options.length > 1 ? "Toutes les dates proposées" : "Le créneau proposé"}</p>
+      <div className="slot-stack">
+        {event.options.map((option) => (
+          <div className="slot" key={option.id}>
+            <div className="slot__top">
+              <div>
+                <div className="slot__d">{formatOption(option)}</div>
+                {(option.locationAddress ||
+                  (option.locationLat != null && option.locationLng != null)) && (
+                  <OpenInMapsButton
+                    className="slot__maplink"
+                    label={option.location}
+                    address={option.locationAddress}
+                    lat={option.locationLat}
+                    lng={option.locationLng}
+                  />
+                )}
+              </div>
+              {option.id === winnerId && <span className="agenda-lead">En tête</span>}
+            </div>
+            {(option.cheers?.length ?? 0) > 0 && (
+              <span className="cheer-count">
+                {option.cheers?.length} verre{(option.cheers?.length ?? 0) > 1 ? "s" : ""} levé
+                {(option.cheers?.length ?? 0) > 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+      <p className="lede">
+        Ce lien permet de consulter l’apéro, mais pas d’y répondre : il manque la clé
+        d’écriture. Demande le lien complet à la personne qui t’a invité·e.
+      </p>
+    </section>
+  );
+
+  const verdictPanel = (
+    <MobileResultsPanel
+      event={event}
+      result={result}
+      awaitingGuests={!hasGuestResponses}
+      isPast={isPastEvent}
+    />
+  );
+
+  const tableeSection = keys.encryptionKey ? (
+    <section className="sheet">
+      <p className="eyebrow">La Tablée</p>
+      {localTablees.length > 0 ? (
+        <>
+          <p className="lede">
+            Rattache cet apéro aux annales d’une de tes tablées : la bande le
+            retrouvera avec le reste de son histoire.
+          </p>
+          <label className="field">
+            <span>Choisir la tablée</span>
+            <select
+              value={selectedTableeId}
+              onChange={(eventChange) => setSelectedTableeId(eventChange.target.value)}
+            >
+              <option value="">— Choisir —</option>
+              {localTablees.map((entry) => (
+                <option value={entry.tableeId} key={entry.tableeId}>
+                  {entry.name ?? entry.tableeId}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            className="button button--ghost button--block"
+            onClick={handleAttachToTablee}
+            disabled={!selectedTableeId || isAttachingTablee}
+          >
+            {isAttachingTablee ? "On grave aux annales…" : "Rattacher à cette tablée"}
+          </button>
+        </>
+      ) : (
+        <>
+          <p className="lede">
+            Cette bande mérite mieux qu’un apéro sans lendemain : fonde une tablée,
+            la troupe du registre sera attablée d’office.
+          </p>
+          <button
+            type="button"
+            className="button button--ghost button--block"
+            onClick={() =>
+              navigate("/tablees", {
+                state: {
+                  seedFromApero: {
+                    aperoId,
+                    encryptionKey: keys.encryptionKey,
+                    writeKey: keys.writeKey,
+                    ceremonialName: event.ceremonialName,
+                    memberNames: event.participants.map(
+                      (participant) => participant.participantName,
+                    ),
+                  },
+                },
+              })
+            }
+          >
+            Fonder une tablée avec cette bande
+          </button>
+        </>
+      )}
+      {tableeFeedback && (
+        <p className="meta" role="status">
+          {tableeFeedback}
+        </p>
+      )}
+    </section>
+  ) : null;
 
   return (
     <MobilePage className="event-mobile" overlay="deep">
-      <MobileHeader eyebrow="Invitation" />
+      <MobileHeader eyebrow={isOrganizer ? "Ta convocation" : "Invitation"} />
 
       <section className="sheet">
-        <p className="eyebrow">Une invitation de {event.organizerName}</p>
+        <p className="eyebrow">
+          {isOrganizer ? "Ton assemblée" : `Une invitation de ${event.organizerName}`}
+        </p>
         <h1 className="h1 h1--sm">{event.ceremonialName}</h1>
         {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
         {event.childrenAllowed != null && (
           <span className={`tag ${event.childrenAllowed ? "tag--yes" : "tag--no"}`}>
-            {event.childrenAllowed
-              ? "👶 Marmaille admise — les mioches sont conviés"
-              : "🚫 Sans les mioches — apéro entre grandes personnes"}
+            {event.childrenAllowed ? "Marmaille admise" : "Sans les mioches"}
           </span>
         )}
         {event.recurrence && (
           <p className="meta">Assemblée récurrente : {describeRecurrence(event.recurrence)}.</p>
         )}
-        {hasLocalEntry && (
-          <p className="meta">C’est noté : tu retrouveras cet apéro dans ton ardoise sur cet appareil.</p>
+        {hasLocalEntry && !isPastEvent && (
+          <p className="meta">C’est gravé sur ton ardoise.</p>
         )}
       </section>
 
@@ -485,269 +676,149 @@ export function InvitePage() {
         </p>
       )}
 
-      <MobileResultsPanel event={event} result={result} />
-
-      {canExportToCalendar && winnerOption && (
-        <section className="sheet">
-          <p className="eyebrow">Graver au registre</p>
-          <p className="lede">
-            Le verdict est tombé : grave-le dans ton calendrier avant qu’il ne s’évapore
-            entre deux tournées, ou affiche-le fièrement en image dans la conversation.
-          </p>
-          <button
-            type="button"
-            className="button button--ghost button--block"
-            onClick={() =>
-              downloadAperoIcs({
-                event,
-                option: winnerOption,
-                inviteUrl: canShare ? inviteUrl : undefined,
-              })
-            }
-          >
-            Ajouter à mon calendrier
-          </button>
-          <button
-            type="button"
-            className="button button--ghost button--block"
-            onClick={async () => {
-                setVerdictShareFeedback("");
-                const winnerCounts = result.results.find(
-                  (item) => item.optionId === winnerOption.id,
-                );
-                const outcome = await shareOrDownloadVerdictImage(
-                  {
-                    event,
-                    option: winnerOption,
-                    counts: {
-                      yes: winnerCounts?.yesCount ?? 0,
-                      maybe: winnerCounts?.maybeCount ?? 0,
-                      no: winnerCounts?.noCount ?? 0,
-                    },
-                    traquenardAverage: calculateAverageTraquenardLevel(event),
-                  },
-                  "tableau-de-chasse.png",
-                );
-                setVerdictShareFeedback(
-                  outcome === "failed"
-                    ? "L’image n’a pas voulu sortir du cadre. Réessaie dans un instant."
-                    : outcome === "downloaded"
-                      ? "Tableau de chasse téléchargé : il n’attend plus que la conversation."
-                      : "",
-                );
-            }}
-          >
-            Partager le tableau de chasse
-          </button>
-          {verdictShareFeedback && (
-            <p className="meta" role="status">
-              {verdictShareFeedback}
-            </p>
-          )}
-        </section>
-      )}
-
-      {keys.writeKey ? (
+      {isPastEvent ? (
+        // ---- Apéro passé : le verdict est servi, la suite est la tournée
+        // suivante. Vote, calendrier et partage n'ont plus cours.
         <>
-          <VoteForm
-            event={event}
-            isSaving={isSaving}
-            onSubmit={handleVoteSubmit}
-            leadingOptionId={winnerId}
-            onProposeSlot={() => setIsProposingSlot(true)}
-            childrenAllowed={event.childrenAllowed}
-            onToggleCheer={comptoirName.trim() ? handleToggleCheer : undefined}
-            hasCheeredOption={(optionId) => {
-              const cheerKey = normalizeMemberName(comptoirName);
-              const option = event.options.find((candidate) => candidate.id === optionId);
-              return Boolean(
-                cheerKey &&
-                  option?.cheers?.some((name) => normalizeMemberName(name) === cheerKey),
-              );
-            }}
-            isCheerSaving={isCheerSaving}
-            extraFields={
-              <TraquenardSlider value={traquenardVote} onChange={setTraquenardVote} />
-            }
+          {verdictPanel}
+
+          <section className="sheet">
+            <p className="eyebrow">{event.recurrence ? "La tournée suivante" : "Remettre ça"}</p>
+            <h2 className="h2">
+              {event.recurrence
+                ? "Cette assemblée se répète, le rituel n’attend pas."
+                : "Cet apéro est derrière nous."}
+            </h2>
+            <p className="lede">
+              {event.recurrence
+                ? `La cadence est gravée : ${describeRecurrence(event.recurrence)}. Le rituel n’attend que ta convocation.`
+                : "Les verres sont secs, le zinc est rangé. La suite logique : la même chose, un peu plus tard — et n’importe quel membre de la tablée peut convoquer la prochaine."}
+            </p>
+            <button
+              type="button"
+              className="button button--primary button--block"
+              onClick={() =>
+                navigate("/create", { state: { prefill: buildNextRoundPrefill(event) } })
+              }
+            >
+              {event.recurrence ? "Convoquer la prochaine tournée" : "Remettre ça"}
+            </button>
+          </section>
+
+          <ParticipantList participants={event.participants} />
+
+          <ComptoirWall
+            messages={event.messages ?? []}
+            authorName={comptoirName}
+            onPost={keys.writeKey ? handlePostMessage : undefined}
+            isSaving={isPostingMessage}
           />
-          <AlternativeOptionForm
-            isSaving={isAddingOption}
-            isOpen={isProposingSlot}
-            onClose={() => setIsProposingSlot(false)}
-            onSubmit={handleOptionSubmit}
-          />
+
+          {tableeSection}
         </>
       ) : (
-        <section className="sheet">
-          <p className="lbl">{event.options.length > 1 ? "Toutes les dates proposées" : "Le créneau proposé"}</p>
-          <div className="slot-stack">
-            {event.options.map((option) => (
-              <div className="slot" key={option.id}>
-                <div className="slot__top">
-                  <div>
-                    <div className="slot__d">{formatOption(option)}</div>
-                    {(option.locationAddress ||
-                      (option.locationLat != null && option.locationLng != null)) && (
-                      <OpenInMapsButton
-                        className="slot__maplink"
-                        label={option.location}
-                        address={option.locationAddress}
-                        lat={option.locationLat}
-                        lng={option.locationLng}
-                      />
-                    )}
-                  </div>
-                  {option.id === winnerId && <span className="agenda-lead">En tête</span>}
-                </div>
-                {(option.cheers?.length ?? 0) > 0 && (
-                  <span className="cheer-count">
-                    {option.cheers?.length} verre{(option.cheers?.length ?? 0) > 1 ? "s" : ""} levé
-                    {(option.cheers?.length ?? 0) > 1 ? "s" : ""}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-          <p className="lede">
-            Ce lien permet de consulter l’apéro, mais pas d’y répondre : il manque la clé
-            d’écriture. Demande le lien complet à la personne qui t’a invité·e.
-          </p>
-        </section>
-      )}
+        // ---- Apéro à venir : l'ordre suit le lecteur. Organisateur seul →
+        // partager ; invité pas voté → voter ; a voté → verdict d'abord.
+        <>
+          {shareFirst && shareBox}
 
-      {isPastEvent && (
-        <section className="sheet">
-          <p className="eyebrow">{event.recurrence ? "La tournée suivante" : "Remettre ça"}</p>
-          <h2 className="h2">
-            {event.recurrence
-              ? "Cette assemblée se répète, le rituel n’attend pas."
-              : "Cet apéro est derrière nous."}
-          </h2>
-          <p className="lede">
-            {event.recurrence
-              ? `La cadence est gravée : ${describeRecurrence(event.recurrence)}. Convoque la prochaine tournée, mêmes lieu et heure, date décalée d’autant.`
-              : "Les verres sont secs, le zinc est rangé. La suite logique : la même chose, un peu plus tard — et n’importe quel membre de la tablée peut convoquer la prochaine."}
-          </p>
-          <button
-            type="button"
-            className="button button--primary button--block"
-            onClick={() =>
-              navigate("/create", { state: { prefill: buildNextRoundPrefill(event) } })
-            }
-          >
-            {event.recurrence ? "Convoquer la prochaine tournée" : "Remettre ça"}
-          </button>
-        </section>
-      )}
-
-      {hasJustVoted && !isOrganizer && (
-        <section className="sheet">
-          <p className="eyebrow">À ton tour</p>
-          <h2 className="h2">Tu as émargé. Reste à convoquer.</h2>
-          <p className="lede">
-            Tu sais désormais comment on rameute une tablée : une assemblée, deux ou trois
-            créneaux, un lien. La Confrérie n’attend plus que ta convocation.
-          </p>
-          <Link className="button button--primary button--block" to="/create">
-            Organiser mon propre apéro
-          </Link>
-        </section>
-      )}
-
-      <ParticipantList participants={event.participants} />
-
-      <ComptoirWall
-        messages={event.messages ?? []}
-        authorName={comptoirName}
-        onPost={keys.writeKey ? handlePostMessage : undefined}
-        isSaving={isPostingMessage}
-      />
-
-      {keys.encryptionKey && (
-        <section className="sheet">
-          <p className="eyebrow">La Tablée</p>
-          {localTablees.length > 0 ? (
+          {!hasVoted && keys.writeKey ? (
             <>
-              <p className="lede">
-                Rattache cet apéro aux annales d’une de tes tablées : la bande le
-                retrouvera avec le reste de son histoire.
-              </p>
-              <label className="field">
-                <span>Choisir la tablée</span>
-                <select
-                  value={selectedTableeId}
-                  onChange={(eventChange) => setSelectedTableeId(eventChange.target.value)}
-                >
-                  <option value="">— Choisir —</option>
-                  {localTablees.map((entry) => (
-                    <option value={entry.tableeId} key={entry.tableeId}>
-                      {entry.name ?? entry.tableeId}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <button
-                type="button"
-                className="button button--ghost button--block"
-                onClick={handleAttachToTablee}
-                disabled={!selectedTableeId || isAttachingTablee}
-              >
-                {isAttachingTablee ? "On grave aux annales…" : "Rattacher à cette tablée"}
-              </button>
+              {voteBlock}
+              {verdictPanel}
             </>
           ) : (
             <>
+              {verdictPanel}
+              {voteBlock}
+            </>
+          )}
+
+          {hasGuestResponses && canExportToCalendar && winnerOption && (
+            <section className="sheet">
+              <p className="eyebrow">Graver au registre</p>
               <p className="lede">
-                Cette bande mérite mieux qu’un apéro sans lendemain : fonde une tablée,
-                la troupe du registre sera attablée d’office.
+                Le verdict est tombé : grave-le avant qu’il ne s’évapore entre deux tournées.
               </p>
               <button
                 type="button"
                 className="button button--ghost button--block"
                 onClick={() =>
-                  navigate("/tablees", {
-                    state: {
-                      seedFromApero: {
-                        aperoId,
-                        encryptionKey: keys.encryptionKey,
-                        writeKey: keys.writeKey,
-                        ceremonialName: event.ceremonialName,
-                        memberNames: event.participants.map(
-                          (participant) => participant.participantName,
-                        ),
-                      },
-                    },
+                  downloadAperoIcs({
+                    event,
+                    option: winnerOption,
+                    inviteUrl: canShare ? inviteUrl : undefined,
                   })
                 }
               >
-                Fonder une tablée avec cette bande
+                Graver dans mon calendrier
               </button>
-            </>
+              <button
+                type="button"
+                className="button button--ghost button--block"
+                onClick={async () => {
+                  setVerdictShareFeedback("");
+                  const winnerCounts = result.results.find(
+                    (item) => item.optionId === winnerOption.id,
+                  );
+                  const outcome = await shareOrDownloadVerdictImage(
+                    {
+                      event,
+                      option: winnerOption,
+                      counts: {
+                        yes: winnerCounts?.yesCount ?? 0,
+                        maybe: winnerCounts?.maybeCount ?? 0,
+                        no: winnerCounts?.noCount ?? 0,
+                      },
+                      traquenardAverage: calculateAverageTraquenardLevel(event),
+                    },
+                    "tableau-de-chasse.png",
+                  );
+                  setVerdictShareFeedback(
+                    outcome === "failed"
+                      ? "L’image n’a pas voulu sortir du cadre. Réessaie dans un instant."
+                      : outcome === "downloaded"
+                        ? "Tableau de chasse téléchargé : il n’attend plus que la conversation."
+                        : "",
+                  );
+                }}
+              >
+                Partager le tableau de chasse
+              </button>
+              {verdictShareFeedback && (
+                <p className="meta" role="status">
+                  {verdictShareFeedback}
+                </p>
+              )}
+            </section>
           )}
-          {tableeFeedback && (
-            <p className="meta" role="status">
-              {tableeFeedback}
-            </p>
-          )}
-        </section>
-      )}
 
-      {canShare && (
-        <MobileShareBox
-          url={inviteUrl}
-          displayUrl={maskInviteUrl(inviteUrl)}
-          title={buildShareTitle(event)}
-          text={buildShareText(event)}
-          reminder={
-            isOrganizer
-              ? {
-                  label: "Sonner le rappel",
-                  title: buildShareTitle(event),
-                  text: buildReminderText(event),
-                }
-              : undefined
-          }
-        />
+          <ParticipantList participants={event.participants} />
+
+          <ComptoirWall
+            messages={event.messages ?? []}
+            authorName={comptoirName}
+            onPost={keys.writeKey ? handlePostMessage : undefined}
+            isSaving={isPostingMessage}
+          />
+
+          {tableeSection}
+
+          {!shareFirst && shareBox}
+
+          {hasJustVoted && !isOrganizer && (
+            <section className="sheet">
+              <p className="eyebrow">À ton tour</p>
+              <p className="lede">
+                Une assemblée, deux créneaux, un lien : tu sais tout. La Confrérie
+                n’attend plus que ta convocation.
+              </p>
+              <Link className="button button--ghost button--block" to="/create">
+                Organiser mon propre apéro
+              </Link>
+            </section>
+          )}
+        </>
       )}
 
       {isOrganizer && keys.writeKey && (
@@ -756,7 +827,7 @@ export function InvitePage() {
           className="ghost-link ghost-link--danger"
           onClick={() => setShowDeleteConfirm(true)}
         >
-          Supprimer cet évènement
+          Annuler l’apéro
         </button>
       )}
 
@@ -770,11 +841,11 @@ export function InvitePage() {
           >
             <p className="eyebrow">Annuler l’apéro</p>
             <h2 className="h1 h1--sm" id="delete-title">
-              Es-tu sûr de vouloir supprimer cet évènement ?
+              On raye tout, vraiment ?
             </h2>
             <p className="lede">
-              Cette action est définitive : créneaux, réponses, votes et contre-propositions, tout
-              disparaît pour de bon. Pas de retour en arrière possible.
+              Créneaux, réponses, votes et contre-propositions : tout part au vide-cave,
+              et le vide-cave ne rend rien.
             </p>
             <div className="button-row">
               <button
@@ -791,7 +862,7 @@ export function InvitePage() {
                 onClick={handleDelete}
                 disabled={isDeleting}
               >
-                {isDeleting ? "Suppression…" : "Oui, supprimer définitivement"}
+                {isDeleting ? "On raye…" : "Oui, tout rayer"}
               </button>
             </div>
             {error && <p className="feedback">{error}</p>}

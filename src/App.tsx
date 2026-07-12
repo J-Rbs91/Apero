@@ -20,7 +20,16 @@ const appShellStyle = {
 
 export function App() {
   const { comptoirName, setComptoirName } = useComptoirName();
-  const [showSplash, setShowSplash] = useState(true);
+  // Le rideau ne se lève que sur l'entrée principale : quelqu'un qui arrive
+  // par un lien profond (invitation, tablée) vient voir un contenu précis —
+  // on ne lui met pas un spectacle devant.
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window === "undefined") {
+      return true;
+    }
+    const hash = window.location.hash;
+    return !hash.includes("/invite/") && !hash.includes("/tablee");
+  });
   const [isEditingComptoirName, setIsEditingComptoirName] = useState(false);
   const { isSupported, seenOnboarding, request, dismissOnboarding } = useNotificationPermission();
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);

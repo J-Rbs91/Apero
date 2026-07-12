@@ -5,12 +5,13 @@ type SplashScreenProps = {
   onDone: () => void;
 };
 
-// Le rideau s'efface après trois tours du verre animé, pas une seconde de plus.
-const MAX_LOOPS = 3;
+// Le rideau s'efface après un seul tour du verre : le rituel se goûte, il ne
+// se subit pas. Un tap n'importe où l'écourte encore.
+const MAX_LOOPS = 1;
 const FADE_MS = 560;
 // Filet de sécurité : si le Lottie ne charge pas (donc jamais de boucle), on
-// s'efface quand même. 3 boucles ≈ 5,4 s ; on laisse une marge de chargement.
-const SAFETY_MS = 8500;
+// s'efface quand même, vite — le contenu prime sur le spectacle.
+const SAFETY_MS = 4000;
 
 // La punchline de l'écran d'ouverture. Modifiable d'un mot.
 const TAGLINE = "Nul n’est tenu d’avoir soif pour venir perdre son temps avec panache.";
