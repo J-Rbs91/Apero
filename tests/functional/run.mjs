@@ -718,8 +718,10 @@ await scenario("8. Suppression définitive par l'organisateur", async () => {
   await waitVisible(page, deleteButton, "Le bouton de suppression n'apparaît que chez l'organisateur");
 
   // Contre-épreuve : l'invité Bob ne voit pas ce bouton sur l'apéro 2.
+  // Bob a déjà émargé : sa réponse est repliée en chip récapitulative,
+  // le helper attend la page prête quel que soit l'état du formulaire.
   await pageBob.goto(invite2.fullUrl);
-  await pageBob.getByPlaceholder("Jojo, Nadine, Éminence Chips…").waitFor({ state: "visible" });
+  await reopenVoteFormIfCollapsed(pageBob);
   const bobDeleteCount = await pageBob.getByRole("button", { name: "Annuler l’apéro" }).count();
   check("Un invité ne voit pas le bouton de suppression", bobDeleteCount === 0, `trouvé : ${bobDeleteCount}`);
 
