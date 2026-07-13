@@ -68,6 +68,7 @@ export function EventOptionMobileCard({
       </div>
       <VoteSegmentedControl
         name={`vote-${option.id}`}
+        label={`${formatDateTime(option)} — ${option.location || "lieu mystère"}`}
         value={value}
         onChange={onChange}
       />

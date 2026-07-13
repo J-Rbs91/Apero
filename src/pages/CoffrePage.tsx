@@ -15,23 +15,28 @@ import {
 
 const MIN_PASSPHRASE_LENGTH = 8;
 
+// Succès et erreurs partagent le même emplacement mais pas la même urgence :
+// la tonalité pilote le role ARIA (alert pour les erreurs, status sinon).
+type Feedback = { tone: "ok" | "error"; text: string } | null;
+
 export function CoffrePage() {
   const [exportPassphrase, setExportPassphrase] = useState("");
-  const [exportFeedback, setExportFeedback] = useState("");
+  const [exportFeedback, setExportFeedback] = useState<Feedback>(null);
   const [isExporting, setIsExporting] = useState(false);
 
   const [importPassphrase, setImportPassphrase] = useState("");
-  const [importFeedback, setImportFeedback] = useState("");
+  const [importFeedback, setImportFeedback] = useState<Feedback>(null);
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleExport() {
-    setExportFeedback("");
+    setExportFeedback(null);
 
     if (exportPassphrase.length < MIN_PASSPHRASE_LENGTH) {
-      setExportFeedback(
-        `Il faut une phrase de passe d’au moins ${MIN_PASSPHRASE_LENGTH} caractères : c’est elle qui garde le coffre.`,
-      );
+      setExportFeedback({
+        tone: "error",
+        text: `Il faut une phrase de passe d’au moins ${MIN_PASSPHRASE_LENGTH} caractères : c’est elle qui garde le coffre.`,
+      });
       return;
     }
 
@@ -40,7 +45,10 @@ export function CoffrePage() {
       const payload = collectVaultPayload();
 
       if (payload.aperos.length === 0 && !payload.comptoirName) {
-        setExportFeedback("Le coffre serait vide : rien à emporter sur cet appareil pour l’instant.");
+        setExportFeedback({
+          tone: "error",
+          text: "Le coffre serait vide : rien à emporter sur cet appareil pour l’instant.",
+        });
         return;
       }
 
@@ -58,33 +66,40 @@ export function CoffrePage() {
       URL.revokeObjectURL(url);
 
       setExportPassphrase("");
-      setExportFeedback(
-        `Coffre scellé et téléchargé : ${payload.aperos.length} apéro${payload.aperos.length > 1 ? "s" : ""} et ton blaze. Garde la phrase de passe précieusement, personne ne pourra la retrouver.`,
-      );
+      setExportFeedback({
+        tone: "ok",
+        text: `Coffre scellé et téléchargé : ${payload.aperos.length} apéro${payload.aperos.length > 1 ? "s" : ""} et ton blaze. Garde la phrase de passe précieusement, personne ne pourra la retrouver.`,
+      });
     } catch {
-      setExportFeedback("Le coffre a refusé de se sceller. Réessaie dans un instant.");
+      setExportFeedback({
+        tone: "error",
+        text: "Le coffre a refusé de se sceller. Réessaie dans un instant.",
+      });
     } finally {
       setIsExporting(false);
     }
   }
 
   async function handleImport() {
-    setImportFeedback("");
+    setImportFeedback(null);
     const file = fileInputRef.current?.files?.[0];
 
     if (!file) {
-      setImportFeedback("Choisis d’abord le fichier de coffre à ouvrir.");
+      setImportFeedback({ tone: "error", text: "Choisis d’abord le fichier de coffre à ouvrir." });
       return;
     }
     if (!importPassphrase) {
-      setImportFeedback("Il faut la phrase de passe qui a scellé ce coffre.");
+      setImportFeedback({ tone: "error", text: "Il faut la phrase de passe qui a scellé ce coffre." });
       return;
     }
 
     // Un coffre légitime pèse quelques dizaines de kilo-octets : au-delà de
     // 5 Mo, c'est un fichier forgé ou une erreur de manipulation.
     if (file.size > 5 * 1024 * 1024) {
-      setImportFeedback("Ce fichier est bien trop lourd pour être un coffre de la Confrérie.");
+      setImportFeedback({
+        tone: "error",
+        text: "Ce fichier est bien trop lourd pour être un coffre de la Confrérie.",
+      });
       return;
     }
 
@@ -105,17 +120,21 @@ export function CoffrePage() {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-      setImportFeedback(
-        `Coffre ouvert : ${result.importedAperoCount} apéro${result.importedAperoCount > 1 ? "s" : ""} rapatrié${result.importedAperoCount > 1 ? "s" : ""} sur cet appareil` +
+      setImportFeedback({
+        tone: "ok",
+        text:
+          `Coffre ouvert : ${result.importedAperoCount} apéro${result.importedAperoCount > 1 ? "s" : ""} rapatrié${result.importedAperoCount > 1 ? "s" : ""} sur cet appareil` +
           (result.importedComptoirName ? `, blaze « ${result.importedComptoirName} » adopté` : "") +
           ". Tu retrouveras tout dans l’ardoise.",
-      );
+      });
     } catch (importError) {
-      setImportFeedback(
-        importError instanceof VaultError
-          ? importError.message
-          : "Le coffre n’a pas voulu s’ouvrir. Réessaie dans un instant.",
-      );
+      setImportFeedback({
+        tone: "error",
+        text:
+          importError instanceof VaultError
+            ? importError.message
+            : "Le coffre n’a pas voulu s’ouvrir. Réessaie dans un instant.",
+      });
     } finally {
       setIsImporting(false);
     }
@@ -155,8 +174,11 @@ export function CoffrePage() {
           {isExporting ? "On scelle le coffre…" : "Sceller et télécharger le coffre"}
         </button>
         {exportFeedback && (
-          <p className="feedback" role="status">
-            {exportFeedback}
+          <p
+            className={`feedback${exportFeedback.tone === "ok" ? " feedback--ok" : ""}`}
+            role={exportFeedback.tone === "error" ? "alert" : "status"}
+          >
+            {exportFeedback.text}
           </p>
         )}
       </section>
@@ -190,8 +212,11 @@ export function CoffrePage() {
           {isImporting ? "On force la serrure… non, on déchiffre." : "Ouvrir le coffre sur cet appareil"}
         </button>
         {importFeedback && (
-          <p className="feedback" role="status">
-            {importFeedback}
+          <p
+            className={`feedback${importFeedback.tone === "ok" ? " feedback--ok" : ""}`}
+            role={importFeedback.tone === "error" ? "alert" : "status"}
+          >
+            {importFeedback.text}
           </p>
         )}
       </section>

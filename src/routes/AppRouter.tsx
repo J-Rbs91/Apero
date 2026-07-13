@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
-import { HashRouter, Route, Routes } from "react-router-dom";
+import { HashRouter, Link, Route, Routes } from "react-router-dom";
 import { LoadingScreen } from "../components/LoadingScreen";
+import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { HomePage } from "../pages/HomePage";
 import { InvitePage } from "../pages/InvitePage";
@@ -44,6 +45,26 @@ function RouteFallback() {
   );
 }
 
+// Route de repli : un lien tronqué ou une adresse inconnue ne doit jamais
+// laisser un écran blanc — surtout pas pour un lien d'invitation mal collé.
+function NotFoundRoute() {
+  return (
+    <MobilePage overlay="deep">
+      <MobileHeader eyebrow="La Confrérie" />
+      <section className="sheet">
+        <h1 className="h1 h1--sm">Aïe, ce lien coince</h1>
+        <p className="lede">
+          Cette porte ne mène nulle part : lien tronqué ou adresse inconnue. Si on
+          t’a invité·e, demande le lien complet à la personne qui organise.
+        </p>
+        <Link className="button button--ghost button--block" to="/">
+          Retour au comptoir
+        </Link>
+      </section>
+    </MobilePage>
+  );
+}
+
 export function AppRouter() {
   return (
     <HashRouter>
@@ -64,6 +85,7 @@ export function AppRouter() {
               fragment (#/tablee/:tableeId?k=…&w=…), jamais vers un serveur. */}
           <Route path="/tablees" element={<TableesPage />} />
           <Route path="/tablee/:tableeId" element={<TableePage />} />
+          <Route path="*" element={<NotFoundRoute />} />
         </Routes>
       </Suspense>
     </HashRouter>

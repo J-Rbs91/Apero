@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
+import { useModalDialog } from "../hooks/useModalDialog";
 import { loadLeaflet, MARKER_STYLE, OSM_ATTRIBUTION, OSM_TILE_URL } from "../utils/leaflet";
 import { OpenInMapsButton } from "./OpenInMapsButton";
 
@@ -14,6 +15,7 @@ export function MiniMap({ lat, lng, label, address }: MiniMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const expandedContainerRef = useRef<HTMLDivElement>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const expandedDialogRef = useModalDialog(isExpanded, () => setIsExpanded(false));
 
   useEffect(() => {
     let isMounted = true;
@@ -106,6 +108,8 @@ export function MiniMap({ lat, lng, label, address }: MiniMapProps) {
       {isExpanded && (
         <div className="modal-backdrop" role="presentation">
           <section
+            ref={expandedDialogRef}
+            tabIndex={-1}
             className="sheet modal-sheet modal-sheet--map"
             role="dialog"
             aria-modal="true"

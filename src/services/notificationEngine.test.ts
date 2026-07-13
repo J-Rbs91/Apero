@@ -147,6 +147,36 @@ describe("notifications invités", () => {
     expect(result.notifications.some((n) => n.type === "important-change")).toBe(true);
   });
 
+  it("re-prévient lors d'un retour au créneau confirmé précédent (A → B → A)", () => {
+    const twoOptions = [option(), option({ id: "option_2" })];
+    // Confirmation initiale sur A…
+    const confirmedA = snapshotApero(event({ options: twoOptions, selectedOptionId: "option_1" }));
+    // …changement vers B…
+    const towardsB = event({ options: twoOptions, selectedOptionId: "option_2" });
+    const resultB = diffAperoNotifications(towardsB, confirmedA, yesGuest, Date.parse(NOW_ISO), makeId, NOW_ISO);
+    expect(resultB.notifications.map((n) => n.type)).toEqual(["important-change"]);
+    // …puis retour à A : c'est un changement important à part entière, sa
+    // dedupeKey ne doit pas rejouer celle de la confirmation initiale de A.
+    const backToA = event({ options: twoOptions, selectedOptionId: "option_1" });
+    const resultA = diffAperoNotifications(backToA, resultB.snapshot, yesGuest, Date.parse(NOW_ISO), makeId, NOW_ISO);
+    expect(resultA.notifications.map((n) => n.type)).toEqual(["important-change"]);
+    expect(resultA.notifications[0].dedupeKey).not.toBe(resultB.notifications[0].dedupeKey);
+  });
+
+  it("ne coupe jamais un extrait de mot au milieu d'un emoji (surrogate pair)", () => {
+    const body = `${"x".repeat(88)}🍺${"y".repeat(20)}`;
+    const before = snapshotApero(event());
+    const after = event({
+      messages: [{ id: "message_1", authorName: "Jean-Mi", body, createdAt: NOW_ISO }],
+    });
+    const result = diffAperoNotifications(after, before, yesGuest, Date.parse(NOW_ISO), makeId, NOW_ISO);
+    expect(result.notifications.map((n) => n.type)).toEqual(["new-message"]);
+    // Aucun demi-surrogate isolé (il s'afficherait « � ») dans le corps.
+    expect(result.notifications[0].body).not.toMatch(
+      /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/,
+    );
+  });
+
   it("n'envoie AUCUNE notification à un invité « non »", () => {
     const before = snapshotApero(event());
     const after = event({

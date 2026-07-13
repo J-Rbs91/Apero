@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useComptoirName } from "../hooks/useComptoirName";
 import type { AperitifOption } from "../types/apero";
 import { createId } from "../utils/createId";
@@ -26,15 +26,24 @@ export function AlternativeOptionForm({
   const [time, setTime] = useState("");
   const [locationValue, setLocationValue] = useState<LocationValue>({ location: "" });
   const [feedback, setFeedback] = useState("");
+  // Le blaze mémorisé pré-remplit le champ tant qu'il n'a pas été touché ;
+  // après une première frappe, il doit pouvoir être vidé sans se re-remplir.
+  const nameEditedRef = useRef(false);
+  // Verrou synchrone : disabled={isSaving} ne protège pas deux clics
+  // dispatchés dans la même tâche JS, qui créeraient deux créneaux jumeaux.
+  const submitLockRef = useRef(false);
 
   useEffect(() => {
-    if (!createdByName && comptoirName) {
+    if (!nameEditedRef.current && !createdByName && comptoirName) {
       setCreatedByName(comptoirName);
     }
   }, [createdByName, comptoirName]);
 
   async function handleSubmit(formEvent: React.FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
+    if (submitLockRef.current) {
+      return;
+    }
     const trimmedName = createdByName.trim().replace(/\s+/g, " ");
     const trimmedLocation = locationValue.location.trim();
 
@@ -52,6 +61,7 @@ export function AlternativeOptionForm({
 
     const now = new Date().toISOString();
     try {
+      submitLockRef.current = true;
       await onSubmit({
         id: createId("option"),
         date,
@@ -74,6 +84,8 @@ export function AlternativeOptionForm({
           : "La contre-proposition n’est pas arrivée au registre. Ta saisie reste là, réessaie.",
       );
       return;
+    } finally {
+      submitLockRef.current = false;
     }
 
     hapticSuccess();
@@ -127,7 +139,11 @@ export function AlternativeOptionForm({
           <span>Proposé par</span>
           <input
             value={createdByName}
-            onChange={(eventChange) => setCreatedByName(eventChange.target.value)}
+            maxLength={80}
+            onChange={(eventChange) => {
+              nameEditedRef.current = true;
+              setCreatedByName(eventChange.target.value);
+            }}
             placeholder="Nadine Diabolo, Jean-Mi Pastaga…"
           />
         </label>
@@ -143,7 +159,9 @@ export function AlternativeOptionForm({
       </form>
 
       {feedback && (
-        <p className="feedback" role="status">
+        // Ce bloc ne porte que des erreurs (validation ou envoi raté) :
+        // annonce assertive, comme les erreurs du formulaire de vote.
+        <p className="feedback" role="alert">
           {feedback}
         </p>
       )}

@@ -241,9 +241,11 @@ export function TableePage() {
       <section className="sheet">
         <p className="eyebrow">La prochaine tournée</p>
         <p className="lede">
-          {upcoming.length > 0
-            ? "Une assemblée est déjà en route — mais rien n’interdit d’en convoquer une autre."
-            : "Rien d’attablé à l’horizon. La tablée n’attend qu’une convocation."}
+          {aperoItems === null
+            ? "On relit les annales de la tablée…"
+            : upcoming.length > 0
+              ? "Une assemblée est déjà en route — mais rien n’interdit d’en convoquer une autre."
+              : "Rien d’attablé à l’horizon. La tablée n’attend qu’une convocation."}
         </p>
         <button
           type="button"
@@ -278,14 +280,16 @@ export function TableePage() {
                     <div className="slot__p">
                       {item.event
                         ? `${formatAperoDate(item)} · ${item.event.participants.length} réponse${item.event.participants.length > 1 ? "s" : ""}`
-                        : "Disparu du registre (annulé ou purgé)"}
+                        : item.failed
+                          ? "Impossible de récupérer cet apéro pour le moment"
+                          : "Disparu du registre (annulé ou purgé)"}
                     </div>
                   </div>
                   {item.event && !isEventExpired(item.event, now) && (
                     <span className="agenda-lead">À venir</span>
                   )}
                 </div>
-                {item.event && (
+                {(item.event || item.failed) && (
                   <Link
                     className="ghost-link"
                     to={buildInvitePath(item.ref.aperoId, {

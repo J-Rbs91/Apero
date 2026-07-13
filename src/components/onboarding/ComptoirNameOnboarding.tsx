@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useModalDialog } from "../../hooks/useModalDialog";
 import { WineGlassMark } from "../WineGlassMark";
 import { validateComptoirName } from "../../utils/memberName";
 
@@ -14,6 +15,7 @@ export function ComptoirNameOnboarding({
   const [draftName, setDraftName] = useState(initialName);
   const [confirmedName, setConfirmedName] = useState("");
   const [error, setError] = useState("");
+  const confirmDialogRef = useModalDialog(Boolean(confirmedName), () => setConfirmedName(""));
 
   useEffect(() => {
     setDraftName(initialName);
@@ -86,6 +88,8 @@ export function ComptoirNameOnboarding({
       {confirmedName && (
         <div className="modal-backdrop" role="presentation">
           <section
+            ref={confirmDialogRef}
+            tabIndex={-1}
             aria-labelledby="comptoir-confirm-title"
             aria-modal="true"
             className="sheet modal-sheet"
