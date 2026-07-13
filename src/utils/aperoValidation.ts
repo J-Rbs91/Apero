@@ -235,6 +235,19 @@ function cleanCheers(value: unknown, field: string): string[] | undefined {
   return cheers.length > 0 ? cheers : undefined;
 }
 
+// Référence OSM d'un établissement : « node/123 », « way/456 », « relation/789 ».
+const OSM_PLACE_ID_PATTERN = /^(node|way|relation)\/\d{1,16}$/;
+
+function cleanPlaceId(value: unknown, field: string): string | undefined {
+  if (value == null || value === "") {
+    return undefined;
+  }
+  if (typeof value !== "string" || !OSM_PLACE_ID_PATTERN.test(value)) {
+    fail(field, "reference de lieu OSM invalide");
+  }
+  return value;
+}
+
 function cleanOption(rawOption: unknown, index: number, optionIds: Set<string>): AperitifOption {
   if (!isRecord(rawOption)) {
     fail(`options[${index}]`, "doit etre un objet");
@@ -262,6 +275,7 @@ function cleanOption(rawOption: unknown, index: number, optionIds: Set<string>):
   };
 
   const locationAddress = cleanText(rawOption.locationAddress, `options[${index}].locationAddress`, MAX_ADDRESS_LENGTH);
+  const locationPlaceId = cleanPlaceId(rawOption.locationPlaceId, `options[${index}].locationPlaceId`);
   const note = cleanText(rawOption.note, `options[${index}].note`, MAX_NOTE_LENGTH);
   const createdByName = cleanText(rawOption.createdByName, `options[${index}].createdByName`, MAX_NAME_LENGTH);
   const createdAt = cleanOptionalIsoDate(rawOption.createdAt, `options[${index}].createdAt`);
@@ -274,6 +288,7 @@ function cleanOption(rawOption: unknown, index: number, optionIds: Set<string>):
     ...option,
     ...(locationAddress ? { locationAddress } : {}),
     ...(locationLat != null && locationLng != null ? { locationLat, locationLng } : {}),
+    ...(locationPlaceId ? { locationPlaceId } : {}),
     ...(note ? { note } : {}),
     ...(createdByRole ? { createdByRole } : {}),
     ...(createdByName ? { createdByName } : {}),

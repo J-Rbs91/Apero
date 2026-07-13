@@ -70,6 +70,7 @@ export function AlternativeOptionForm({
         locationAddress: locationValue.locationAddress,
         locationLat: locationValue.locationLat,
         locationLng: locationValue.locationLng,
+        locationPlaceId: locationValue.locationPlaceId,
         createdByRole: "participant",
         createdByName: trimmedName,
         createdAt: now,

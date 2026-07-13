@@ -371,6 +371,7 @@ export function CreateEventPage() {
                     locationAddress: option.locationAddress,
                     locationLat: option.locationLat,
                     locationLng: option.locationLng,
+                    locationPlaceId: option.locationPlaceId,
                   }}
                   onChange={(locationValue) => updateOption(option.id, locationValue)}
                 />

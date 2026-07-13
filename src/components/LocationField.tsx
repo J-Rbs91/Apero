@@ -2,16 +2,29 @@ import { useEffect, useRef, useState } from "react";
 import { LocationPickerMap } from "./LocationPickerMap";
 import type { PlaceSuggestion } from "../utils/photonGeocoding";
 import { reverseGeocode, searchPlaces } from "../utils/photonGeocoding";
+import type { NearbyPlace } from "../utils/nearbyPlaces";
+import { fetchNearbyPlaces, formatDistance } from "../utils/nearbyPlaces";
 
 const SEARCH_DEBOUNCE_MS = 300;
 const MIN_QUERY_LENGTH = 3;
+const GEOLOCATION_TIMEOUT_MS = 12_000;
 
 export type LocationValue = {
   location: string;
   locationAddress?: string;
   locationLat?: number;
   locationLng?: number;
+  // Référence OSM stable de l'établissement quand le lieu vient d'une liste
+  // (« Autour de moi », recherche) — absente pour la saisie libre.
+  locationPlaceId?: string;
 };
+
+type NearbyState =
+  | { status: "idle" }
+  | { status: "locating" }
+  | { status: "searching" }
+  | { status: "ready"; places: NearbyPlace[] }
+  | { status: "error"; message: string };
 
 type LocationFieldProps = {
   label?: string;
@@ -29,6 +42,7 @@ export function LocationField({
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [nearby, setNearby] = useState<NearbyState>({ status: "idle" });
   const containerRef = useRef<HTMLDivElement>(null);
   // Coupe la recherche après un choix dans la liste ou sur la carte : le texte
   // change mais ce n'est pas une frappe utilisateur.
@@ -98,6 +112,7 @@ export function LocationField({
       locationAddress: undefined,
       locationLat: undefined,
       locationLng: undefined,
+      locationPlaceId: undefined,
     });
   }
 
@@ -110,10 +125,68 @@ export function LocationField({
       locationAddress: place.address || undefined,
       locationLat: place.lat,
       locationLng: place.lng,
+      locationPlaceId: place.placeId,
     });
     // Montre immédiatement le point sur la carte : confirmation visuelle du
     // lieu choisi, et possibilité de l'ajuster dans la foulée.
     setIsPickerOpen(true);
+  }
+
+  function handleSelectNearby(place: NearbyPlace) {
+    skipNextSearchRef.current = true;
+    setNearby({ status: "idle" });
+    onChange({
+      location: place.name,
+      locationAddress: place.address || undefined,
+      locationLat: place.lat,
+      locationLng: place.lng,
+      locationPlaceId: place.placeId,
+    });
+    setIsPickerOpen(true);
+  }
+
+  function handleNearbyScan() {
+    if (nearby.status === "locating" || nearby.status === "searching") {
+      return;
+    }
+    if (!("geolocation" in navigator)) {
+      setNearby({
+        status: "error",
+        message: "Ce navigateur ne sait pas te situer. La recherche et la carte restent là.",
+      });
+      return;
+    }
+
+    // La position ne quitte jamais le navigateur : elle ne sert qu'à
+    // interroger OpenStreetMap, jamais un serveur de la Confrérie.
+    setNearby({ status: "locating" });
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        setNearby({ status: "searching" });
+        try {
+          const places = await fetchNearbyPlaces(
+            position.coords.latitude,
+            position.coords.longitude,
+          );
+          setNearby({ status: "ready", places });
+        } catch {
+          setNearby({
+            status: "error",
+            message: "Le quartier ne répond pas (OpenStreetMap est peut-être en pause). Réessaie dans un instant.",
+          });
+        }
+      },
+      (geolocationError) => {
+        setNearby({
+          status: "error",
+          message:
+            geolocationError.code === geolocationError.PERMISSION_DENIED
+              ? "Position refusée : pas de tournée du quartier sans ton feu vert. La recherche et la carte restent là."
+              : "Impossible de te situer pour le moment. Réessaie, ou pointe le rade sur la carte.",
+        });
+      },
+      { enableHighAccuracy: false, timeout: GEOLOCATION_TIMEOUT_MS, maximumAge: 60_000 },
+    );
   }
 
   async function handleMapPick(lat: number, lng: number) {
@@ -124,6 +197,7 @@ export function LocationField({
       locationAddress: undefined,
       locationLat: lat,
       locationLng: lng,
+      locationPlaceId: undefined,
     });
 
     try {
@@ -135,6 +209,9 @@ export function LocationField({
           locationAddress: place.address || undefined,
           locationLat: lat,
           locationLng: lng,
+          // Un point posé à la main n'est pas forcément l'établissement que
+          // Photon croit reconnaître : on ne grave pas sa référence.
+          locationPlaceId: undefined,
         });
       }
     } catch {
@@ -148,8 +225,11 @@ export function LocationField({
       locationAddress: undefined,
       locationLat: undefined,
       locationLng: undefined,
+      locationPlaceId: undefined,
     });
   }
+
+  const isScanning = nearby.status === "locating" || nearby.status === "searching";
 
   return (
     <div className="locfield" ref={containerRef}>
@@ -186,6 +266,51 @@ export function LocationField({
           ))}
         </ul>
       )}
+
+      <button
+        type="button"
+        className="ghost-link locfield__nearby-toggle"
+        onClick={handleNearbyScan}
+        disabled={isScanning}
+      >
+        {nearby.status === "locating"
+          ? "On te situe…"
+          : nearby.status === "searching"
+            ? "On scanne le quartier…"
+            : "Les rades autour de moi"}
+      </button>
+
+      {nearby.status === "error" && (
+        <p className="locfield__nearby-note" role="alert">
+          {nearby.message}
+        </p>
+      )}
+
+      {nearby.status === "ready" &&
+        (nearby.places.length === 0 ? (
+          <p className="locfield__nearby-note" role="status">
+            Aucun comptoir recensé à moins de 800 m. Soit le désert, soit une
+            carte OpenStreetMap à compléter — la recherche reste là.
+          </p>
+        ) : (
+          <ul className="locfield__nearby-list">
+            {nearby.places.map((place) => (
+              <li key={place.placeId}>
+                <button
+                  type="button"
+                  className="locfield__option"
+                  onClick={() => handleSelectNearby(place)}
+                >
+                  <span className="locfield__name">{place.name}</span>
+                  <span className="locfield__addr">
+                    {place.kind} · {formatDistance(place.distanceM)}
+                    {place.address ? ` · ${place.address}` : ""}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        ))}
 
       <button
         type="button"

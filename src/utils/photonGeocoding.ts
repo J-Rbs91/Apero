@@ -9,6 +9,17 @@ export type PlaceSuggestion = {
   address: string;
   lat: number;
   lng: number;
+  // Référence OSM stable (« node/123 ») quand Photon la fournit : permet de
+  // normaliser le lieu choisi, comme les résultats « Autour de moi ».
+  placeId?: string;
+};
+
+// Photon abrège le type OSM (« N », « W », « R ») : on le déplie vers la
+// forme canonique utilisée partout ailleurs (node/way/relation).
+const PHOTON_OSM_TYPES: Record<string, string> = {
+  N: "node",
+  W: "way",
+  R: "relation",
 };
 
 type PhotonFeature = {
@@ -65,6 +76,11 @@ function parseFeature(feature: PhotonFeature, fallbackIndex: number): PlaceSugge
   }
   const address = properties ? buildAddress(properties) : "";
   const name = properties?.name || properties?.street || address || "Position choisie";
+  const osmType = properties?.osm_type ? PHOTON_OSM_TYPES[properties.osm_type] : undefined;
+  const placeId =
+    osmType && typeof properties?.osm_id === "number" && Number.isFinite(properties.osm_id)
+      ? `${osmType}/${properties.osm_id}`
+      : undefined;
 
   return {
     id: `${properties?.osm_type ?? "X"}${properties?.osm_id ?? fallbackIndex}`,
@@ -72,6 +88,7 @@ function parseFeature(feature: PhotonFeature, fallbackIndex: number): PlaceSugge
     address,
     lat,
     lng,
+    ...(placeId ? { placeId } : {}),
   };
 }
 

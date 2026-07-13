@@ -42,6 +42,12 @@ export type AperitifOption = {
   locationAddress?: string;
   locationLat?: number;
   locationLng?: number;
+  // Référence OpenStreetMap stable de l'établissement (« node/123 »,
+  // « way/456 »…) quand le lieu vient d'une liste (Autour de moi, recherche)
+  // plutôt que de la saisie libre. C'est la clé de normalisation des lieux :
+  // sans elle, « Chez Dédé » en texte libre reste inexploitable pour
+  // rapprocher deux apéros du même comptoir.
+  locationPlaceId?: string;
   note?: string;
   createdByRole?: OptionCreatorRole;
   createdByName?: string;

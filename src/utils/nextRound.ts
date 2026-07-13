@@ -18,7 +18,13 @@ export type CreateEventPrefill = {
   options: Array<
     Pick<
       AperitifOption,
-      "date" | "time" | "location" | "locationAddress" | "locationLat" | "locationLng"
+      | "date"
+      | "time"
+      | "location"
+      | "locationAddress"
+      | "locationLat"
+      | "locationLng"
+      | "locationPlaceId"
     >
   >;
 };
@@ -124,6 +130,9 @@ export function buildNextRoundPrefill(event: AperitifEvent, now = new Date()): C
         locationAddress: reference?.locationAddress,
         locationLat: reference?.locationLat,
         locationLng: reference?.locationLng,
+        // La tournée suivante retourne au même comptoir : sa référence de
+        // lieu suit, c'est elle qui rapproche deux apéros du même rade.
+        locationPlaceId: reference?.locationPlaceId,
       },
     ],
   };
