@@ -1822,6 +1822,40 @@ textarea:focus-visible {
   padding-left: 0;
 }
 
+/* ===== Les rades autour de moi ===== */
+.locfield__nearby-toggle {
+  align-self: flex-start;
+  padding-left: 0;
+}
+
+.locfield__nearby-toggle:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.locfield__nearby-note {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgba(255, 247, 230, 0.62);
+}
+
+/* Contrairement aux suggestions de recherche (dropdown flottant), la tournée
+   du quartier s'inscrit dans le flux : on la parcourt comme une liste. */
+.locfield__nearby-list {
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: rgba(10, 30, 24, 0.7);
+  border: 1px solid rgba(255, 247, 230, 0.22);
+  border-radius: 14px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
 .locpicker {
   display: flex;
   flex-direction: column;

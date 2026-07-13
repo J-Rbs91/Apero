@@ -130,6 +130,41 @@ describe("sanitizeAperoEvent", () => {
   });
 });
 
+describe("locationPlaceId (référence OSM du lieu)", () => {
+  function eventWithPlaceId(locationPlaceId: unknown): AperitifEvent {
+    return validEvent({
+      options: [
+        {
+          id: "option_1",
+          date: "2026-07-10",
+          time: "19:00",
+          location: "Bar des Sports",
+          locationPlaceId: locationPlaceId as string,
+        },
+      ],
+    });
+  }
+
+  it("conserve une référence OSM bien formée", () => {
+    for (const placeId of ["node/123", "way/456789", "relation/1"]) {
+      const event = sanitizeAperoEvent(eventWithPlaceId(placeId));
+      expect(event.options[0].locationPlaceId).toBe(placeId);
+    }
+  });
+
+  it("reste optionnelle (absente, null ou vide)", () => {
+    expect(sanitizeAperoEvent(validEvent()).options[0].locationPlaceId).toBeUndefined();
+    expect(sanitizeAperoEvent(eventWithPlaceId("")).options[0].locationPlaceId).toBeUndefined();
+    expect(sanitizeAperoEvent(eventWithPlaceId(null)).options[0].locationPlaceId).toBeUndefined();
+  });
+
+  it("rejette une référence malformée", () => {
+    for (const invalid of ["batiment/123", "node/abc", "node/", "node/123; DROP", 42, "node/" + "9".repeat(30)]) {
+      expect(() => sanitizeAperoEvent(eventWithPlaceId(invalid))).toThrow(AperoValidationError);
+    }
+  });
+});
+
 describe("cheers (trinquer)", () => {
   it("nettoie, déduplique et conserve les verres levés", () => {
     const event = sanitizeAperoEvent(
