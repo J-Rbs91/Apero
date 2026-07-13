@@ -219,6 +219,9 @@ export async function addAperoToTablee(
 export type TableeAperoItem = {
   ref: TableeAperoRef;
   event: AperitifEvent | null;
+  // Vrai quand le chargement a raté (réseau, quota, clé) : à distinguer d'un
+  // apéro réellement disparu (event: null sans failed), qui lui a été annulé.
+  failed?: boolean;
 };
 
 /** Charge les apéros rattachés (null pour ceux devenus illisibles/supprimés). */
@@ -229,7 +232,7 @@ export async function loadTableeAperos(tablee: Tablee): Promise<TableeAperoItem[
         const loaded = await getEncryptedAperoById(ref.aperoId, ref.encryptionKey);
         return { ref, event: loaded?.event ?? null };
       } catch {
-        return { ref, event: null };
+        return { ref, event: null, failed: true };
       }
     }),
   );
@@ -238,6 +241,9 @@ export async function loadTableeAperos(tablee: Tablee): Promise<TableeAperoItem[
 export type MyTableeItem = {
   entry: ReturnType<typeof getLocalTablees>[number];
   tablee: Tablee | null;
+  // Vrai quand le chargement a raté : la tablée existe peut-être toujours,
+  // il ne faut pas la présenter comme absente de l'appareil.
+  failed?: boolean;
 };
 
 /** « Mes tablées » : uniquement celles du registre local de l'appareil. */
@@ -250,7 +256,7 @@ export async function getMyTablees(): Promise<MyTableeItem[]> {
         const loaded = await getTableeById(entry.tableeId, entry.encryptionKey);
         return { entry, tablee: loaded?.tablee ?? null };
       } catch {
-        return { entry, tablee: null };
+        return { entry, tablee: null, failed: true };
       }
     }),
   );

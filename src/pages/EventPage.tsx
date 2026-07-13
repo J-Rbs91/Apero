@@ -9,6 +9,7 @@ import { MobileShareBox } from "../components/MobileShareBox";
 import { ParticipantList } from "../components/ParticipantList";
 import { VoteForm } from "../components/VoteForm";
 import { useComptoirName } from "../hooks/useComptoirName";
+import { useModalDialog } from "../hooks/useModalDialog";
 import { eventStorage } from "../services";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
 import { calculateBestOptions } from "../utils/calculateResults";
@@ -33,6 +34,11 @@ export function EventPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState("");
+  const deleteDialogRef = useModalDialog(showDeleteConfirm, () => {
+    if (!isDeleting) {
+      setShowDeleteConfirm(false);
+    }
+  });
   const [success, setSuccess] = useState("");
   const result = useMemo(() => (event ? calculateBestOptions(event) : null), [event]);
   const shareUrl = `${window.location.origin}${window.location.pathname}#/event/${eventId}`;
@@ -265,6 +271,8 @@ export function EventPage() {
       {showDeleteConfirm && (
         <div className="modal-backdrop" role="presentation">
           <section
+            ref={deleteDialogRef}
+            tabIndex={-1}
             className="sheet modal-sheet"
             role="dialog"
             aria-modal="true"

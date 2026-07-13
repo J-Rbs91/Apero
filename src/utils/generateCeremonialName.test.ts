@@ -51,6 +51,18 @@ describe("ceremonial name generation", () => {
       "NO_CEREMONIAL_NAME_AVAILABLE",
     );
   });
+
+  it("shares the same normalization as isCeremonialNameTaken (case/whitespace)", () => {
+    // Un apéro actif nommé en minuscules doit retirer le nom canonique du
+    // tirage : sinon l'app générerait un nom qu'elle juge elle-même déjà pris.
+    const activeEvents = [createActiveEvent(`  ${APERO_CEREMONIAL_NAMES[0].toLowerCase()}  `)];
+    const availableNames = getAvailableCeremonialNames(activeEvents);
+
+    expect(availableNames).not.toContain(APERO_CEREMONIAL_NAMES[0]);
+    for (const name of availableNames) {
+      expect(isCeremonialNameTaken(name, activeEvents)).toBe(false);
+    }
+  });
 });
 
 describe("isCeremonialNameTaken", () => {

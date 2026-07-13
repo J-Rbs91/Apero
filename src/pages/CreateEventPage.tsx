@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { LocationField } from "../components/LocationField";
 import { ToggleSwitch } from "../components/ToggleSwitch";
@@ -17,6 +17,7 @@ import type {
   ParticipantResponse,
   VoteStatus,
 } from "../types/apero";
+import { AperoValidationError } from "../utils/aperoValidation";
 import { createId } from "../utils/createId";
 import { hapticError, hapticSuccess } from "../utils/haptics";
 import type { CreateEventPrefill } from "../utils/nextRound";
@@ -62,6 +63,10 @@ export function CreateEventPage() {
   );
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Verrou synchrone : disabled={isSubmitting} ne protège pas deux clics
+  // dispatchés dans la même tâche JS (avant que React ne commit l'état),
+  // qui créeraient deux apéros identiques.
+  const submitLockRef = useRef(false);
 
   function updateOption(optionId: string, updates: Partial<AperitifOption>) {
     setOptions((currentOptions) =>
@@ -79,6 +84,9 @@ export function CreateEventPage() {
 
   async function handleSubmit(formEvent: React.FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
+    if (submitLockRef.current) {
+      return;
+    }
     setFeedback("");
 
     const cleanedOptions = options
@@ -116,6 +124,7 @@ export function CreateEventPage() {
     }
 
     try {
+      submitLockRef.current = true;
       setIsSubmitting(true);
       const storageMode = getAperoStorageMode();
       // Mode api-vps : les apéros sont chiffrés, impossible de lister
@@ -240,11 +249,14 @@ export function CreateEventPage() {
             ? "Impossible de joindre le comptoir numérique. Vérifie la connexion (ou que l’API tourne bien) et réessaie."
             : error instanceof Error && error.message === "NO_CEREMONIAL_NAME_AVAILABLE"
               ? "La Confrérie est complète, archi-complète même : trop d’apéros tournent déjà en coulisses dans une magouille généralisée que plus personne ne maîtrise vraiment. Clôture un apéro avant d’en lancer un nouveau, sinon c’est le chaos total."
-              : error instanceof Error
-                ? error.message
-                : "Le service a fait une bêtise. On ne veut pas savoir laquelle. Deux secondes, ça se répare tout seul.",
+              : error instanceof AperoValidationError
+                ? `Le registre refuse cette saisie (${error.message}). Corrige le champ concerné et réessaie.`
+                : error instanceof Error
+                  ? error.message
+                  : "Le service a fait une bêtise. On ne veut pas savoir laquelle. Deux secondes, ça se répare tout seul.",
       );
     } finally {
+      submitLockRef.current = false;
       setIsSubmitting(false);
     }
   }
@@ -260,6 +272,7 @@ export function CreateEventPage() {
           <span>Nom de l’apéro (optionnel)</span>
           <input
             value={ceremonialNameInput}
+            maxLength={160}
             onChange={(eventChange) => setCeremonialNameInput(eventChange.target.value)}
             placeholder="La Grande Tablée des Olives"
           />
@@ -269,6 +282,7 @@ export function CreateEventPage() {
           <span>Le prétexte</span>
           <input
             value={title}
+            maxLength={160}
             onChange={(eventChange) => setTitle(eventChange.target.value)}
             placeholder="Apéro fin de chantier"
           />

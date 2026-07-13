@@ -3,6 +3,7 @@ import type { AperitifEvent, ParticipantResponse, VoteStatus } from "../types/ap
 import { useComptoirName } from "../hooks/useComptoirName";
 import { createId } from "../utils/createId";
 import { hapticError, hapticSuccess } from "../utils/haptics";
+import { normalizeMemberName } from "../utils/memberName";
 import { CompanionsField } from "./CompanionsField";
 import { EventOptionMobileCard } from "./EventOptionMobileCard";
 
@@ -72,9 +73,16 @@ export function VoteForm({
   // Évite qu'une soumission qu'on vient de faire soi-même ne déclenche le
   // message « réponse retrouvée » quand l'event mis à jour redescend en prop.
   const justSubmittedRef = useRef(false);
+  // Le blaze mémorisé pré-remplit le champ tant que le convive n'y a pas
+  // touché ; après une première frappe, le champ lui appartient (il doit
+  // pouvoir le vider pour répondre sous un autre nom).
+  const nameEditedRef = useRef(false);
 
   const existingParticipant = useMemo(() => {
-    const normalizedName = participantName.trim().toLowerCase();
+    // Même clé de normalisation que la fusion au registre (upsertParticipant) :
+    // « José  Pastaga » et « jose pastaga » sont la même personne, la détection
+    // de réponse existante doit le savoir avant que l'envoi ne l'écrase.
+    const normalizedName = normalizeMemberName(participantName);
 
     if (!normalizedName) {
       return null;
@@ -83,25 +91,45 @@ export function VoteForm({
     return (
       event.participants.find(
         (participant) =>
-          participant.participantName.trim().toLowerCase() === normalizedName,
+          normalizeMemberName(participant.participantName) === normalizedName,
       ) ?? null
     );
   }, [event.participants, participantName]);
 
   useEffect(() => {
-    setVotes(emptyVotes);
+    // L'événement est remplacé en entier à chaque action (trinquer optimiste,
+    // mot au mur, contre-proposition…) : on réconcilie au lieu de repartir de
+    // zéro, sinon le brouillon de vote en cours de saisie serait effacé.
+    setVotes((currentVotes) =>
+      Object.keys(emptyVotes).reduce<DraftVotes>((votes, optionId) => {
+        votes[optionId] = currentVotes[optionId] ?? "";
+        return votes;
+      }, {}),
+    );
   }, [emptyVotes]);
 
   useEffect(() => {
-    if (!participantName && comptoirName) {
+    if (!nameEditedRef.current && !participantName && comptoirName) {
       setParticipantName(comptoirName);
     }
   }, [comptoirName, participantName]);
 
+  // Réhydratation de la réponse existante : uniquement quand la réponse
+  // elle-même change (nouvelle personne reconnue, ou modification arrivée
+  // d'un autre appareil) — pas à chaque remplacement d'identité de l'event,
+  // qui écraserait la retouche en cours.
+  const loadedParticipantRef = useRef<string | null>(null);
   useEffect(() => {
     if (!existingParticipant) {
+      loadedParticipantRef.current = null;
       return;
     }
+
+    const participantKey = `${existingParticipant.id}:${existingParticipant.updatedAt}`;
+    if (loadedParticipantRef.current === participantKey) {
+      return;
+    }
+    loadedParticipantRef.current = participantKey;
 
     setVotes({ ...emptyVotes, ...existingParticipant.votes });
     setComment(existingParticipant.comment ?? "");
@@ -290,7 +318,11 @@ export function VoteForm({
           <span>Ton prénom (ou blaze)</span>
           <input
             value={participantName}
-            onChange={(eventChange) => setParticipantName(eventChange.target.value)}
+            maxLength={80}
+            onChange={(eventChange) => {
+              nameEditedRef.current = true;
+              setParticipantName(eventChange.target.value);
+            }}
             placeholder="Jojo, Nadine, Éminence Chips…"
           />
         </label>
@@ -322,6 +354,7 @@ export function VoteForm({
           <span>Un petit mot pour la troupe</span>
           <textarea
             value={comment}
+            maxLength={500}
             onChange={(eventChange) => setComment(eventChange.target.value)}
             rows={3}
             placeholder="Je viendrai si le monde ne s’est pas arrêté de tourner d’ici là."

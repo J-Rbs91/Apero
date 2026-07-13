@@ -12,6 +12,7 @@ import { ParticipantList } from "../components/ParticipantList";
 import { TraquenardSlider } from "../components/TraquenardGauge";
 import { VoteForm } from "../components/VoteForm";
 import { useComptoirName } from "../hooks/useComptoirName";
+import { useModalDialog } from "../hooks/useModalDialog";
 import { AperoApiError } from "../services/aperoApiClient";
 import { isValidAperoId } from "../services/aperoCryptoKeys";
 import { AperoCryptoError } from "../services/aperoEncryption";
@@ -35,6 +36,7 @@ import {
   removeNotificationsForApero,
 } from "../services/notificationStore";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
+import { AperoValidationError } from "../utils/aperoValidation";
 import { createId } from "../utils/createId";
 import { hapticError, hapticSuccess, hapticTap } from "../utils/haptics";
 import { isEventExpired } from "../services/eventPurge";
@@ -90,6 +92,12 @@ function describeApiError(error: unknown): string {
     }
   }
 
+  // Saisie refusée par le registre (champ trop long, donnée invalide…) :
+  // le dire, sinon le convive croit à une panne et réessaie en boucle.
+  if (error instanceof AperoValidationError) {
+    return `Le registre refuse cette saisie (${error.message}). Corrige le champ concerné et réessaie.`;
+  }
+
   return "Un souci technique est survenu, réessaie dans un instant.";
 }
 
@@ -139,6 +147,11 @@ export function InvitePage() {
   const [isAttachingTablee, setIsAttachingTablee] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const deleteDialogRef = useModalDialog(showDeleteConfirm, () => {
+    if (!isDeleting) {
+      setShowDeleteConfirm(false);
+    }
+  });
   const [error, setError] = useState("");
   const [hasLocalEntry, setHasLocalEntry] = useState(
     () => Boolean(aperoId && findLocalApero(aperoId)),
@@ -249,23 +262,51 @@ export function InvitePage() {
     };
   }, [aperoId, keys.encryptionKey]);
 
+  // Le pronostic déjà gravé au registre réapparaît sur la jauge : sans ça, un
+  // simple « Modifier ma réponse » dans une session où le curseur n'a pas été
+  // touché écraserait silencieusement le pronostic précédent.
+  useEffect(() => {
+    if (state.status !== "ready") {
+      return;
+    }
+    setTraquenardVote((currentVote) => {
+      if (currentVote !== null) {
+        return currentVote;
+      }
+      const myKey = normalizeMemberName(comptoirName);
+      const mine = myKey
+        ? state.event.participants.find(
+            (participant) => normalizeMemberName(participant.participantName) === myKey,
+          )
+        : undefined;
+      return mine?.traquenardLevel ?? null;
+    });
+  }, [state, comptoirName]);
+
   async function handleVoteSubmit(response: ParticipantResponse) {
     if (state.status !== "ready" || !aperoId || !keys.writeKey || !keys.encryptionKey) {
       return;
     }
 
+    // Curseur pas touché dans cette session → on conserve le pronostic déjà
+    // au registre plutôt que de l'effacer (upsertParticipant remplace tout).
+    const responseKey = normalizeMemberName(response.participantName);
+    const registeredParticipant = state.event.participants.find(
+      (participant) => normalizeMemberName(participant.participantName) === responseKey,
+    );
     const finalResponse: ParticipantResponse = {
       ...response,
-      traquenardLevel: traquenardVote ?? undefined,
+      traquenardLevel: traquenardVote ?? registeredParticipant?.traquenardLevel,
     };
 
     try {
       setIsSaving(true);
       setError("");
-      // On mémorise le blaze utilisé : les notifications s'appuient dessus pour
-      // reconnaître « moi » et éviter de m'auto-notifier de mes propres actions.
-      setComptoirName(finalResponse.participantName);
       const updatedEvent = await joinApero(aperoId, keys.writeKey, keys.encryptionKey, finalResponse);
+      // On mémorise le blaze utilisé (une fois la réponse acceptée : jamais un
+      // blaze que le registre vient de refuser) : les notifications s'appuient
+      // dessus pour reconnaître « moi » et éviter l'auto-notification.
+      setComptoirName(finalResponse.participantName);
       setState({ status: "ready", event: updatedEvent });
       setHasLocalEntry(true);
       setHasJustVoted(true);
@@ -869,6 +910,8 @@ export function InvitePage() {
       {showDeleteConfirm && (
         <div className="modal-backdrop" role="presentation">
           <section
+            ref={deleteDialogRef}
+            tabIndex={-1}
             className="sheet modal-sheet"
             role="dialog"
             aria-modal="true"

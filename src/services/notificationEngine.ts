@@ -83,6 +83,21 @@ function participantVoteSignature(participant: ParticipantResponse): string {
   return JSON.stringify(entries);
 }
 
+// Tronque un extrait sans jamais couper un couple de substitution UTF-16 en
+// deux : un emoji à cheval sur la limite tomberait en « � » dans le corps de
+// la notification (et casserait toute API exigeant du texte bien formé).
+function truncateExcerpt(text: string, maxLength: number): string {
+  if (text.length <= maxLength) {
+    return text;
+  }
+  let cut = text.slice(0, maxLength - 1);
+  const lastCode = cut.charCodeAt(cut.length - 1);
+  if (lastCode >= 0xd800 && lastCode <= 0xdbff) {
+    cut = cut.slice(0, -1);
+  }
+  return `${cut}…`;
+}
+
 export function snapshotApero(event: AperitifEvent): AperoSnapshot {
   const optionSignatures: Record<string, string> = {};
   for (const option of event.options) {
@@ -211,8 +226,7 @@ function buildNotifications(
       continue;
     }
     if (isCreator || guestFollowsUpdates(viewer.vote)) {
-      const excerpt =
-        message.body.length > 90 ? `${message.body.slice(0, 89)}…` : message.body;
+      const excerpt = truncateExcerpt(message.body, 90);
       drafts.push({
         type: "new-message",
         title: "Un mot au comptoir",
@@ -237,7 +251,9 @@ function buildNotifications(
       body: selected
         ? `« ${event.ceremonialName} » est calé : ${selected.date} à ${selected.time}, ${selected.location}.`
         : `Le créneau retenu de « ${event.ceremonialName} » a changé.`,
-      dedupeKey: `${event.id}:confirmed:${event.selectedOptionId}`,
+      // La provenance entre dans la clé : revenir à un créneau déjà confirmé
+      // par le passé (A → B → A) reste un changement important à annoncer.
+      dedupeKey: `${event.id}:confirmed:${event.selectedOptionId}:from:${previous.selectedOptionId ?? "none"}`,
     });
   }
 

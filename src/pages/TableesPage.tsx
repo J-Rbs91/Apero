@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
@@ -51,6 +51,9 @@ export function TableesPage() {
   const [feedback, setFeedback] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [showForm, setShowForm] = useState(Boolean(seed));
+  // Verrou synchrone : disabled={isCreating} ne protège pas deux clics
+  // dispatchés dans la même tâche JS, qui fonderaient deux tablées jumelles.
+  const createLockRef = useRef(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -74,6 +77,9 @@ export function TableesPage() {
 
   async function handleCreate(formEvent: React.FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
+    if (createLockRef.current) {
+      return;
+    }
     setFeedback("");
 
     const trimmedName = name.trim();
@@ -93,6 +99,7 @@ export function TableesPage() {
     }
 
     try {
+      createLockRef.current = true;
       setIsCreating(true);
       const created = await createTablee({
         name: trimmedName,
@@ -124,6 +131,7 @@ export function TableesPage() {
           : "La fondation a capoté, on ne sait pas trop pourquoi. Réessaie dans un instant.",
       );
     } finally {
+      createLockRef.current = false;
       setIsCreating(false);
     }
   }
@@ -138,6 +146,9 @@ export function TableesPage() {
   }
 
   const knownTablees = items.filter((item) => item.tablee);
+  // Tablées du registre local dont le chargement a raté : elles existent
+  // peut-être toujours, ne surtout pas les présenter comme absentes.
+  const failedTablees = items.filter((item) => !item.tablee && item.failed);
 
   return (
     <MobilePage className="agenda-mobile" overlay="deep">
@@ -152,11 +163,19 @@ export function TableesPage() {
         </p>
       </section>
 
+      {failedTablees.length > 0 && (
+        <p className="page-message page-message--error" role="alert">
+          Impossible de récupérer {failedTablees.length > 1 ? `${failedTablees.length} de tes tablées` : "une de tes tablées"} pour
+          le moment. Vérifie la connexion et réessaie : rien n’est perdu.
+        </p>
+      )}
+
       {knownTablees.length === 0 ? (
         <section className="sheet">
           <p className="lede">
-            Aucune tablée sur cet appareil pour l’instant. Fonde la première : il suffit
-            d’un nom, le reste suivra à la prochaine tournée.
+            {failedTablees.length > 0
+              ? "Tes tablées sont injoignables pour le moment, mais elles sont toujours gravées sur cet appareil."
+              : "Aucune tablée sur cet appareil pour l’instant. Fonde la première : il suffit d’un nom, le reste suivra à la prochaine tournée."}
           </p>
         </section>
       ) : (
