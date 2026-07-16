@@ -1840,6 +1840,25 @@ textarea:focus-visible {
   color: rgba(255, 247, 230, 0.62);
 }
 
+/* Écran de priming : contexte avant la popup de permission du navigateur. */
+.locfield__nearby-prime {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(10, 30, 24, 0.7);
+  border: 1px solid rgba(255, 247, 230, 0.22);
+  border-radius: 14px;
+}
+
+.locfield__nearby-prime-text {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: rgba(255, 247, 230, 0.78);
+}
+
 /* Contrairement aux suggestions de recherche (dropdown flottant), la tournée
    du quartier s'inscrit dans le flux : on la parcourt comme une liste. */
 .locfield__nearby-list {

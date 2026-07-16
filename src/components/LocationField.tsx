@@ -20,7 +20,13 @@ export type LocationValue = {
 };
 
 type NearbyState =
+  // « priming » : on explique pourquoi/comment AVANT de déclencher la popup de
+  // permission du navigateur. Un prompt qui tombe sans contexte se solde
+  // souvent par un refus réflexe, difficile à récupérer ensuite (surtout sur
+  // mobile) — et le priming réaffirme au passage la promesse « ta position ne
+  // part sur aucun serveur ».
   | { status: "idle" }
+  | { status: "priming" }
   | { status: "locating" }
   | { status: "searching" }
   | { status: "ready"; places: NearbyPlace[] }
@@ -145,6 +151,23 @@ export function LocationField({
     setIsPickerOpen(true);
   }
 
+  // Premier temps : le clic sur « Les rades autour de moi » n'appelle PAS
+  // encore la géoloc — il ouvre l'explication. La permission du navigateur
+  // n'est demandée qu'au clic suivant (handleNearbyScan), après contexte.
+  function handleNearbyPrime() {
+    if (nearby.status === "locating" || nearby.status === "searching") {
+      return;
+    }
+    if (!("geolocation" in navigator)) {
+      setNearby({
+        status: "error",
+        message: "Ce navigateur ne sait pas te situer. La recherche et la carte restent là.",
+      });
+      return;
+    }
+    setNearby({ status: "priming" });
+  }
+
   function handleNearbyScan() {
     if (nearby.status === "locating" || nearby.status === "searching") {
       return;
@@ -267,18 +290,44 @@ export function LocationField({
         </ul>
       )}
 
-      <button
-        type="button"
-        className="ghost-link locfield__nearby-toggle"
-        onClick={handleNearbyScan}
-        disabled={isScanning}
-      >
-        {nearby.status === "locating"
-          ? "On te situe…"
-          : nearby.status === "searching"
-            ? "On scanne le quartier…"
-            : "Les rades autour de moi"}
-      </button>
+      {nearby.status === "priming" ? (
+        <div className="locfield__nearby-prime">
+          <p className="locfield__nearby-prime-text">
+            Pour lister les comptoirs autour de toi, la Confrérie a besoin de ta
+            position. Elle reste sur ton téléphone : elle sert juste à
+            interroger la carte OpenStreetMap, et ne part sur aucun serveur.
+          </p>
+          <div className="button-row">
+            <button
+              type="button"
+              className="button button--ghost"
+              onClick={handleNearbyScan}
+            >
+              Chercher autour de moi
+            </button>
+            <button
+              type="button"
+              className="ghost-link"
+              onClick={() => setNearby({ status: "idle" })}
+            >
+              Laisse tomber
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          className="ghost-link locfield__nearby-toggle"
+          onClick={handleNearbyPrime}
+          disabled={isScanning}
+        >
+          {nearby.status === "locating"
+            ? "On te situe…"
+            : nearby.status === "searching"
+              ? "On scanne le quartier…"
+              : "Les rades autour de moi"}
+        </button>
+      )}
 
       {nearby.status === "error" && (
         <p className="locfield__nearby-note" role="alert">
