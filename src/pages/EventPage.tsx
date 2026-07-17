@@ -8,8 +8,8 @@ import { MobileResultsPanel } from "../components/MobileResultsPanel";
 import { MobileShareBox } from "../components/MobileShareBox";
 import { ParticipantList } from "../components/ParticipantList";
 import { VoteForm } from "../components/VoteForm";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { useComptoirName } from "../hooks/useComptoirName";
-import { useModalDialog } from "../hooks/useModalDialog";
 import { eventStorage } from "../services";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
 import { calculateBestOptions } from "../utils/calculateResults";
@@ -34,11 +34,6 @@ export function EventPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState("");
-  const deleteDialogRef = useModalDialog(showDeleteConfirm, () => {
-    if (!isDeleting) {
-      setShowDeleteConfirm(false);
-    }
-  });
   const [success, setSuccess] = useState("");
   const result = useMemo(() => (event ? calculateBestOptions(event) : null), [event]);
   const shareUrl = `${window.location.origin}${window.location.pathname}#/event/${eventId}`;
@@ -268,46 +263,19 @@ export function EventPage() {
         )}
       </div>
 
-      {showDeleteConfirm && (
-        <div className="modal-backdrop" role="presentation">
-          <section
-            ref={deleteDialogRef}
-            tabIndex={-1}
-            className="sheet modal-sheet"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="delete-title"
-          >
-            <p className="eyebrow">Suppression</p>
-            <h2 className="h1 h1--sm" id="delete-title">
-              Supprimer cet apéro ?
-            </h2>
-            <p className="lede">
-              Ça efface tout, pour de bon : créneaux, réponses, propositions, tout y passe. Pas de
-              retour en arrière possible.
-            </p>
-            <div className="button-row">
-              <button
-                type="button"
-                className="button button--ghost"
-                onClick={() => setShowDeleteConfirm(false)}
-                disabled={isDeleting}
-              >
-                Non, je le garde
-              </button>
-              <button
-                type="button"
-                className="button button--danger"
-                onClick={handleDelete}
-                disabled={isDeleting}
-              >
-                {isDeleting ? "Suppression…" : "Oui, supprimer"}
-              </button>
-            </div>
-            {error && <p className="feedback">{error}</p>}
-          </section>
-        </div>
-      )}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        eyebrow="Suppression"
+        title="Supprimer cet apéro ?"
+        body="Ça efface tout, pour de bon : créneaux, réponses, propositions, tout y passe. Pas de retour en arrière possible."
+        cancelLabel="Non, je le garde"
+        confirmLabel="Oui, supprimer"
+        busyLabel="Suppression…"
+        isBusy={isDeleting}
+        error={error || undefined}
+        onCancel={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDelete}
+      />
     </MobilePage>
   );
 }

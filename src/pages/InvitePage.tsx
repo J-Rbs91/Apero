@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { AlternativeOptionForm } from "../components/AlternativeOptionForm";
 import { ComptoirWall } from "../components/ComptoirWall";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
@@ -9,126 +10,49 @@ import { MobileResultsPanel } from "../components/MobileResultsPanel";
 import { MobileShareBox } from "../components/MobileShareBox";
 import { OpenInMapsButton } from "../components/OpenInMapsButton";
 import { ParticipantList } from "../components/ParticipantList";
+import { TableeAttachSection } from "../components/TableeAttachSection";
 import { TraquenardSlider } from "../components/TraquenardGauge";
+import { VerdictExportSection } from "../components/VerdictExportSection";
 import { VoteForm } from "../components/VoteForm";
+import { useAperoInvite } from "../hooks/useAperoInvite";
 import { useComptoirName } from "../hooks/useComptoirName";
-import { useModalDialog } from "../hooks/useModalDialog";
-import { AperoApiError } from "../services/aperoApiClient";
-import { isValidAperoId } from "../services/aperoCryptoKeys";
-import { AperoCryptoError } from "../services/aperoEncryption";
 import {
   addEncryptedAperoMessage,
   addEncryptedAperoOption,
   deleteEncryptedApero,
-  getCachedAperoEvent,
-  getEncryptedAperoById,
   joinApero,
-  purgeDeletedApero,
   toggleEncryptedAperoCheer,
 } from "../services/encryptedAperoRepository";
 import { findLocalApero } from "../services/localAperoRegistry";
-import { getLocalTablees } from "../services/localTableeRegistry";
-import { addAperoToTablee } from "../services/tableeRepository";
 import { syncAperoNotificationsFromRegistry } from "../services/notificationSync";
 import { removeSnapshot } from "../services/notificationSnapshots";
-import {
-  hasAperoDeletedNotification,
-  removeNotificationsForApero,
-} from "../services/notificationStore";
-import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
-import { AperoValidationError } from "../utils/aperoValidation";
+import { removeNotificationsForApero } from "../services/notificationStore";
+import type { AperitifOption, ParticipantResponse } from "../types/apero";
+import { describeApiError } from "../utils/apiErrorMessages";
 import { createId } from "../utils/createId";
 import { hapticError, hapticSuccess, hapticTap } from "../utils/haptics";
 import { isEventExpired } from "../services/eventPurge";
-import { calculateAverageTraquenardLevel, calculateBestOptions } from "../utils/calculateResults";
-import { downloadAperoIcs } from "../utils/calendarExport";
-import { shareOrDownloadVerdictImage } from "../utils/verdictImage";
+import { calculateBestOptions } from "../utils/calculateResults";
 import { formatOption } from "../utils/formatOption";
 import { toggleOptionCheer } from "../utils/eventNormalization";
 import { normalizeMemberName } from "../utils/memberName";
 import { buildNextRoundPrefill, describeRecurrence } from "../utils/nextRound";
-import { buildInviteUrl, maskInviteUrl, resolveInviteKeys } from "../utils/inviteLink";
+import { buildInviteUrl, maskInviteUrl } from "../utils/inviteLink";
 import { buildReminderText, buildShareText, buildShareTitle } from "../utils/shareMessage";
 
 // Page d'invitation du nouveau flux chiffré (mode api-vps).
 // Route : #/invite/:aperoId?k=ENCRYPTION_KEY&w=WRITE_KEY — les clés restent
 // dans le fragment d'URL et ne sont jamais envoyées à un serveur.
-
-type LoadState =
-  | { status: "loading" }
-  | { status: "invalid-id" }
-  | { status: "missing-key" }
-  | { status: "not-found" }
-  // L'apéro était connu sur cet appareil et a disparu du stockage public :
-  // annulé par la personne qui l'organisait (traces locales purgées).
-  | { status: "deleted" }
-  | { status: "bad-key" }
-  | { status: "error"; message: string }
-  | { status: "ready"; event: AperitifEvent };
-
-function describeApiError(error: unknown): string {
-  if (error instanceof AperoApiError) {
-    switch (error.code) {
-      case "API_NOT_CONFIGURED":
-        return "Le comptoir numérique n’est pas encore raccordé (API non configurée). Ta réponse est notée sur cet appareil, elle partira dès que le service sera rétabli.";
-      case "NETWORK_ERROR":
-        return "Impossible de joindre le comptoir numérique. Vérifie la connexion et réessaie — ta réponse reste notée sur cet appareil.";
-      case "CONFLICT":
-        return "Quelqu’un a répondu en même temps que toi. Recharge la page et réessaie, ça passe presque toujours du deuxième coup.";
-      case "WRITE_FORBIDDEN":
-        if (error.serverCode === "LEGACY_DELETE_DISABLED") {
-          return "Cette ancienne convocation n’a pas encore de clé d’annulation sécurisée. Active temporairement ALLOW_LEGACY_WRITE_KEY_DELETE côté API pour la supprimer, puis remets la variable à false.";
-        }
-        return "Ce lien ne permet pas de répondre ici. Vérifie qu’il est complet.";
-      case "NOT_FOUND":
-        if (error.serverCode === "DELETE_ENDPOINT_MISSING") {
-          return "La suppression n’est pas encore disponible côté serveur : l’API du VPS doit être mise à jour. Rien n’a été supprimé.";
-        }
-        return "Un souci technique est survenu, réessaie dans un instant.";
-      case "RATE_LIMITED":
-        return "Le comptoir sature, doucement sur la cadence. Réessaie dans une minute.";
-      default:
-        return "Un souci technique est survenu, réessaie dans un instant.";
-    }
-  }
-
-  // Saisie refusée par le registre (champ trop long, donnée invalide…) :
-  // le dire, sinon le convive croit à une panne et réessaie en boucle.
-  if (error instanceof AperoValidationError) {
-    return `Le registre refuse cette saisie (${error.message}). Corrige le champ concerné et réessaie.`;
-  }
-
-  return "Un souci technique est survenu, réessaie dans un instant.";
-}
+// Le chargement (clés, déchiffrement, états d'échec) vit dans useAperoInvite ;
+// cette page ne raconte que les gestes du convive et la mise en page.
 
 export function InvitePage() {
   const { aperoId } = useParams<{ aperoId: string }>();
-  const location = useLocation();
   const navigate = useNavigate();
   const { comptoirName, setComptoirName } = useComptoirName();
+  const { state, setState, keys, loadWarning, hasLocalEntry, setHasLocalEntry } =
+    useAperoInvite(aperoId);
 
-  // Clés : d'abord le lien (fragment), sinon l'appareil (apéro déjà créé ou
-  // déjà accepté sur cet appareil).
-  const keys = useMemo(() => {
-    const fromLink = resolveInviteKeys(location.search);
-    const localEntry = aperoId ? findLocalApero(aperoId) : null;
-
-    return {
-      encryptionKey: fromLink.encryptionKey ?? localEntry?.encryptionKey,
-      writeKey: fromLink.writeKey ?? localEntry?.writeKey,
-      adminKey: localEntry?.adminKey,
-    };
-  }, [aperoId, location.search]);
-
-  // Apéro tout juste créé (state de navigation) : sert de repli tant que la
-  // lecture publique GitHub n'a pas rattrapé le commit d'écriture — évite un
-  // faux « introuvable » juste après avoir envoyé l'invitation.
-  const seededEvent = (location.state as { createdEvent?: AperitifEvent } | null)?.createdEvent;
-  const initialEvent = seededEvent && seededEvent.id === aperoId ? seededEvent : null;
-
-  const [state, setState] = useState<LoadState>(
-    initialEvent ? { status: "ready", event: initialEvent } : { status: "loading" },
-  );
   // Null tant que le curseur n'a pas été touché : pas de pronostic « moyen »
   // gravé d'office — la moyenne de la tablée ne compte que les vrais avis.
   const [traquenardVote, setTraquenardVote] = useState<number | null>(null);
@@ -139,23 +63,9 @@ export function InvitePage() {
   // le verre : l'application locale est optimiste, le réseau suit.
   const [cheerPendingId, setCheerPendingId] = useState<string | null>(null);
   const [isPostingMessage, setIsPostingMessage] = useState(false);
-  const [verdictShareFeedback, setVerdictShareFeedback] = useState("");
-  // Tablées connues de cet appareil, pour rattacher l'apéro à une bande.
-  const [localTablees] = useState(() => getLocalTablees());
-  const [selectedTableeId, setSelectedTableeId] = useState("");
-  const [tableeFeedback, setTableeFeedback] = useState("");
-  const [isAttachingTablee, setIsAttachingTablee] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const deleteDialogRef = useModalDialog(showDeleteConfirm, () => {
-    if (!isDeleting) {
-      setShowDeleteConfirm(false);
-    }
-  });
   const [error, setError] = useState("");
-  const [hasLocalEntry, setHasLocalEntry] = useState(
-    () => Boolean(aperoId && findLocalApero(aperoId)),
-  );
   // Vrai juste après l'envoi d'une réponse : c'est LE moment où l'on propose
   // au convive de convoquer à son tour sa propre assemblée (boucle vertueuse).
   const [hasJustVoted, setHasJustVoted] = useState(false);
@@ -165,102 +75,6 @@ export function InvitePage() {
   // les retours anticipés, pour respecter l'ordre des hooks ; initialisé
   // plus bas, une fois l'apéro déchiffré.
   const voteFirstRef = useRef<{ aperoId: string | undefined; voteFirst: boolean } | null>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function load() {
-      if (!aperoId || !isValidAperoId(aperoId)) {
-        setState({ status: "invalid-id" });
-        return;
-      }
-
-      // Apéro annulé dont les traces locales ont déjà été purgées (clés
-      // comprises) : le dire clairement AVANT de conclure à un lien incomplet,
-      // sinon on pousse l'invité à réclamer un lien vers un apéro disparu.
-      if (hasAperoDeletedNotification(aperoId)) {
-        setState({ status: "deleted" });
-        return;
-      }
-
-      if (!keys.encryptionKey) {
-        setState({ status: "missing-key" });
-        return;
-      }
-
-      try {
-        if (!initialEvent) {
-          setState({ status: "loading" });
-        }
-        const loaded = await getEncryptedAperoById(aperoId, keys.encryptionKey);
-
-        if (!isMounted) {
-          return;
-        }
-
-        if (!loaded) {
-          if (!initialEvent) {
-            // Apéro supprimé par son organisateur : il disparaît aussi de cet
-            // appareil (registre local, notifications, instantané) — sans
-            // toucher aux apéros jamais encore vus publiquement, dont la
-            // lecture peut simplement être en retard sur l'écriture. Quand la
-            // purge a lieu (ou a déjà eu lieu : la notification d'annulation
-            // en garde la trace), on l'explique clairement au lieu d'un
-            // simple « introuvable ».
-            if (purgeDeletedApero(aperoId) || hasAperoDeletedNotification(aperoId)) {
-              setHasLocalEntry(false);
-              setState({ status: "deleted" });
-            } else {
-              setState({ status: "not-found" });
-            }
-          }
-          // Sinon : on vient de créer cet apéro, la lecture publique GitHub
-          // peut être en retard sur l'écriture — on garde la version fraîche
-          // en mémoire plutôt que d'afficher « introuvable ».
-          return;
-        }
-
-        setState({ status: "ready", event: loaded.event });
-        // Génère les notifications de cet apéro (si connu localement) à partir
-        // de l'écart avec le dernier état vu sur cet appareil.
-        syncAperoNotificationsFromRegistry(loaded.event);
-      } catch (loadError) {
-        if (!isMounted) {
-          return;
-        }
-
-        if (loadError instanceof AperoCryptoError) {
-          setState({ status: "bad-key" });
-          return;
-        }
-
-        // Lecture publique en panne (quota GitHub anonyme épuisé, réseau) :
-        // comme l'agenda, on retombe sur la dernière version connue de cet
-        // apéro sur cet appareil plutôt que de bloquer l'accès — l'organisateur
-        // garde notamment la main pour le supprimer.
-        const cachedEvent = getCachedAperoEvent(aperoId);
-        if (cachedEvent) {
-          setState({ status: "ready", event: cachedEvent });
-          setError(
-            "Impossible de rafraîchir cet apéro pour le moment : voici sa dernière version connue sur cet appareil.",
-          );
-          return;
-        }
-
-        if (!initialEvent) {
-          setState({
-            status: "error",
-            message: "Impossible de récupérer cet apéro pour le moment. Réessaie dans un instant.",
-          });
-        }
-      }
-    }
-
-    load();
-    return () => {
-      isMounted = false;
-    };
-  }, [aperoId, keys.encryptionKey]);
 
   // Le pronostic déjà gravé au registre réapparaît sur la jauge : sans ça, un
   // simple « Modifier ma réponse » dans une session où le curseur n'a pas été
@@ -403,37 +217,6 @@ export function InvitePage() {
       syncAperoNotificationsFromRegistry(updatedEvent);
     } finally {
       setIsPostingMessage(false);
-    }
-  }
-
-  async function handleAttachToTablee() {
-    if (state.status !== "ready" || !aperoId || !keys.encryptionKey || !selectedTableeId) {
-      return;
-    }
-    const tableeEntry = localTablees.find((entry) => entry.tableeId === selectedTableeId);
-    if (!tableeEntry) {
-      return;
-    }
-
-    try {
-      setIsAttachingTablee(true);
-      setTableeFeedback("");
-      await addAperoToTablee(tableeEntry.tableeId, tableeEntry.writeKey, tableeEntry.encryptionKey, {
-        aperoId,
-        encryptionKey: keys.encryptionKey,
-        writeKey: keys.writeKey,
-        ceremonialName: state.event.ceremonialName,
-        addedBy: comptoirName.trim() || undefined,
-      });
-      hapticSuccess();
-      setTableeFeedback(
-        `C’est gravé : cet apéro rejoint les annales de « ${tableeEntry.name ?? "la tablée"} ».`,
-      );
-    } catch {
-      hapticError();
-      setTableeFeedback("Le rattachement a capoté. Réessaie dans un instant.");
-    } finally {
-      setIsAttachingTablee(false);
     }
   }
 
@@ -654,73 +437,8 @@ export function InvitePage() {
     />
   );
 
-  const tableeSection = keys.encryptionKey ? (
-    <section className="sheet">
-      <p className="eyebrow">La Tablée</p>
-      {localTablees.length > 0 ? (
-        <>
-          <p className="lede">
-            Rattache cet apéro aux annales d’une de tes tablées : la bande le
-            retrouvera avec le reste de son histoire.
-          </p>
-          <label className="field">
-            <span>Choisir la tablée</span>
-            <select
-              value={selectedTableeId}
-              onChange={(eventChange) => setSelectedTableeId(eventChange.target.value)}
-            >
-              <option value="">— Choisir —</option>
-              {localTablees.map((entry) => (
-                <option value={entry.tableeId} key={entry.tableeId}>
-                  {entry.name ?? entry.tableeId}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button
-            type="button"
-            className="button button--ghost button--block"
-            onClick={handleAttachToTablee}
-            disabled={!selectedTableeId || isAttachingTablee}
-          >
-            {isAttachingTablee ? "On grave aux annales…" : "Rattacher à cette tablée"}
-          </button>
-        </>
-      ) : (
-        <>
-          <p className="lede">
-            Cette bande mérite mieux qu’un apéro sans lendemain : fonde une tablée,
-            la troupe du registre sera attablée d’office.
-          </p>
-          <button
-            type="button"
-            className="button button--ghost button--block"
-            onClick={() =>
-              navigate("/tablees", {
-                state: {
-                  seedFromApero: {
-                    aperoId,
-                    encryptionKey: keys.encryptionKey,
-                    writeKey: keys.writeKey,
-                    ceremonialName: event.ceremonialName,
-                    memberNames: event.participants.map(
-                      (participant) => participant.participantName,
-                    ),
-                  },
-                },
-              })
-            }
-          >
-            Fonder une tablée avec cette bande
-          </button>
-        </>
-      )}
-      {tableeFeedback && (
-        <p className="meta" role="status">
-          {tableeFeedback}
-        </p>
-      )}
-    </section>
+  const tableeSection = aperoId ? (
+    <TableeAttachSection aperoId={aperoId} keys={keys} event={event} comptoirName={comptoirName} />
   ) : null;
 
   return (
@@ -746,9 +464,9 @@ export function InvitePage() {
         )}
       </section>
 
-      {error && (
+      {(error || loadWarning) && (
         <p className="page-message page-message--error" role="alert">
-          {error}
+          {error || loadWarning}
         </p>
       )}
 
@@ -811,62 +529,12 @@ export function InvitePage() {
           )}
 
           {hasGuestResponses && canExportToCalendar && winnerOption && (
-            <section className="sheet">
-              <p className="eyebrow">Graver au registre</p>
-              <p className="lede">
-                Le verdict est tombé : grave-le avant qu’il ne s’évapore entre deux tournées.
-              </p>
-              <button
-                type="button"
-                className="button button--ghost button--block"
-                onClick={() =>
-                  downloadAperoIcs({
-                    event,
-                    option: winnerOption,
-                    inviteUrl: canShare ? inviteUrl : undefined,
-                  })
-                }
-              >
-                Graver dans mon calendrier
-              </button>
-              <button
-                type="button"
-                className="button button--ghost button--block"
-                onClick={async () => {
-                  setVerdictShareFeedback("");
-                  const winnerCounts = result.results.find(
-                    (item) => item.optionId === winnerOption.id,
-                  );
-                  const outcome = await shareOrDownloadVerdictImage(
-                    {
-                      event,
-                      option: winnerOption,
-                      counts: {
-                        yes: winnerCounts?.yesCount ?? 0,
-                        maybe: winnerCounts?.maybeCount ?? 0,
-                        no: winnerCounts?.noCount ?? 0,
-                      },
-                      traquenardAverage: calculateAverageTraquenardLevel(event),
-                    },
-                    "tableau-de-chasse.png",
-                  );
-                  setVerdictShareFeedback(
-                    outcome === "failed"
-                      ? "L’image n’a pas voulu sortir du cadre. Réessaie dans un instant."
-                      : outcome === "downloaded"
-                        ? "Tableau de chasse téléchargé : il n’attend plus que la conversation."
-                        : "",
-                  );
-                }}
-              >
-                Partager le tableau de chasse
-              </button>
-              {verdictShareFeedback && (
-                <p className="meta" role="status">
-                  {verdictShareFeedback}
-                </p>
-              )}
-            </section>
+            <VerdictExportSection
+              event={event}
+              winnerOption={winnerOption}
+              result={result}
+              inviteUrl={canShare ? inviteUrl : undefined}
+            />
           )}
 
           <ParticipantList participants={event.participants} />
@@ -907,46 +575,19 @@ export function InvitePage() {
         </button>
       )}
 
-      {showDeleteConfirm && (
-        <div className="modal-backdrop" role="presentation">
-          <section
-            ref={deleteDialogRef}
-            tabIndex={-1}
-            className="sheet modal-sheet"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="delete-title"
-          >
-            <p className="eyebrow">Annuler l’apéro</p>
-            <h2 className="h1 h1--sm" id="delete-title">
-              On raye tout, vraiment ?
-            </h2>
-            <p className="lede">
-              Créneaux, réponses, votes et contre-propositions : tout part au vide-cave,
-              et le vide-cave ne rend rien.
-            </p>
-            <div className="button-row">
-              <button
-                type="button"
-                className="button button--ghost"
-                onClick={() => setShowDeleteConfirm(false)}
-                disabled={isDeleting}
-              >
-                Non, je le garde
-              </button>
-              <button
-                type="button"
-                className="button button--danger"
-                onClick={handleDelete}
-                disabled={isDeleting}
-              >
-                {isDeleting ? "On raye…" : "Oui, tout rayer"}
-              </button>
-            </div>
-            {error && <p className="feedback">{error}</p>}
-          </section>
-        </div>
-      )}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        eyebrow="Annuler l’apéro"
+        title="On raye tout, vraiment ?"
+        body="Créneaux, réponses, votes et contre-propositions : tout part au vide-cave, et le vide-cave ne rend rien."
+        cancelLabel="Non, je le garde"
+        confirmLabel="Oui, tout rayer"
+        busyLabel="On raye…"
+        isBusy={isDeleting}
+        error={error || undefined}
+        onCancel={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDelete}
+      />
     </MobilePage>
   );
 }
