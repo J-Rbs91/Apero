@@ -12,12 +12,17 @@ Ligne éditoriale : *une app de comptoir, absurde et pleine de gouaille, ouverte
 
 Chaque apero reste independant :
 
-- un apero = un fichier chiffre dans `data/aperos/<aperoId>.json` ;
+- un apero = un blob chiffre, identifie par son `aperoId` ;
 - un lien = une assemblee precise, avec les cles dans le fragment d'URL ;
 - les participants d'une assemblee ne polluent jamais une autre ;
-- les votes sont fusionnes via l'API VPS, jamais via un token GitHub dans le navigateur.
+- lectures et ecritures passent par l'API VPS (`server/`), jamais par un token dans le navigateur.
 
-Le frontend lit les fichiers chiffres publiquement, mais il ne sait pas ecrire dans GitHub. Les ecritures passent par `server/`, ou le token GitHub reste cote serveur.
+L'API stocke les blobs chiffres selon son `STORAGE_BACKEND` :
+
+- `sqlite` (recommande) : base SQLite locale au VPS (`node:sqlite`, zero dependance) — voir `docs/RACCORDEMENT-VPS.md`, partie C ;
+- `github` (historique, defaut) : chaque apero est un fichier `data/aperos/<aperoId>.json` commite dans ce repo via l'API GitHub, le token restant cote serveur. Le frontend sait encore lire ces fichiers publiquement en repli, le temps de la transition.
+
+Dans les deux cas le serveur ne voit que du chiffre : la cle de dechiffrement ne quitte jamais le fragment d'URL des invites.
 
 ## Noms ceremoniels
 

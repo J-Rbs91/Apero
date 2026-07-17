@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:functional": "node tests/functional/run.mjs"
+    "test:functional": "node tests/functional/run.mjs",
+    "test:functional:sqlite": "node tests/functional/run-sqlite.mjs"
   },
   "dependencies": {
     "@types/leaflet": "^1.9.21",

@@ -71,6 +71,9 @@ const writeLimiter = rateLimit({
   standardHeaders: "draft-8",
   legacyHeaders: false,
   handler: rateLimitResponse,
+  // Les lectures (GET) restent sous le seul plafond global apiLimiter : une
+  // ardoise qui recharge dix aperos ne doit pas epuiser le quota d'ecriture.
+  skip: (req) => req.method === "GET",
 });
 
 app.use(healthRouter);
@@ -82,9 +85,11 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 const server = app.listen(config.port, config.host, () => {
-  logger.info(`apero-api à l'écoute sur ${config.host}:${config.port}`);
+  logger.info(
+    `apero-api à l'écoute sur ${config.host}:${config.port} (stockage : ${config.storageBackend})`,
+  );
 
-  if (!isGithubWriteConfigured()) {
+  if (config.storageBackend === "github" && !isGithubWriteConfigured()) {
     logger.warn(
       "GITHUB_TOKEN absent : les écritures GitHub échoueront tant qu'il n'est pas configuré.",
     );

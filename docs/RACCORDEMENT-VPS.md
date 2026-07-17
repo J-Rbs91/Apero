@@ -291,8 +291,112 @@ git pull origin main
 cd server
 npm ci
 npm run build
+npm prune --omit=dev    # optionnel : retire typescript/tsx (~37 Mo) après le build
 sudo systemctl restart apero-api
 ```
+
+---
+
+## Partie C — Passer au stockage VPS (SQLite)
+
+Depuis le refacto stockage, l'API sait garder les blobs chiffrés dans une
+base SQLite locale au VPS au lieu de les commiter dans le repo GitHub.
+Bénéfices : plus de token GitHub à entretenir, plus de rate limit, plus de
+commits `chore: create apero…` dans l'historique, et des lectures servies
+directement par l'API. Le chiffrement de bout en bout est inchangé : la base
+ne contient que des blobs AES-GCM, le serveur ne voit jamais rien en clair.
+
+Prérequis : Node **22.5+** (`node:sqlite` intégré — un avertissement
+« experimental » au démarrage est normal et sans conséquence).
+
+### C.0 — L'ordre de bascule (important)
+
+1. **D'abord** le déploiement GitHub Pages du frontend à jour (un push sur
+   `main` suffit) : ce frontend lit via l'API et sait se replier sur GitHub
+   tant que l'API n'est pas à jour.
+2. **Ensuite** la mise à jour du code de l'API sur le VPS (toujours en
+   stockage `github` par défaut — rien ne change pour les données).
+3. **Enfin** la bascule SQLite ci-dessous (migration + variable + restart).
+
+Basculer le VPS avant le frontend laisserait les anciens bundles lire des
+données GitHub figées pendant que les écritures partent en SQLite : votes
+invisibles et conflits 409 en boucle. Dans l'ordre ci-dessus, aucune coupure.
+
+### C.1 — Préparer le répertoire de données
+
+Le service tourne en `www-data` avec `ProtectSystem=strict` : la base vit
+dans un répertoire dédié, explicitement autorisé en écriture.
+
+```bash
+sudo mkdir -p /var/lib/apero-api
+sudo chown www-data:www-data /var/lib/apero-api
+```
+
+Ajouter dans `/etc/systemd/system/apero-api.service`, section `[Service]` :
+
+```ini
+ReadWritePaths=/var/lib/apero-api
+```
+
+### C.2 — Migrer les apéros existants
+
+Le clone du repo contient les fichiers `data/aperos/*.json` : on les importe
+tels quels. Le script est idempotent (relançable sans risque) et recalcule le
+même sha que GitHub — les appareils des convives ne voient aucune différence.
+
+```bash
+cd /opt/apero/server
+sudo -u www-data SQLITE_DB_PATH=/var/lib/apero-api/aperos.db \
+  node dist/scripts/migrateFromRepo.js /opt/apero/data/aperos
+```
+
+### C.3 — Basculer la configuration
+
+Dans `/etc/apero-api.env` :
+
+```bash
+STORAGE_BACKEND=sqlite
+SQLITE_DB_PATH=/var/lib/apero-api/aperos.db
+```
+
+Les variables `GITHUB_TOKEN`, `GITHUB_OWNER`, `GITHUB_REPO`, `GITHUB_BRANCH`
+deviennent inutiles : elles peuvent être supprimées (le token peut être
+révoqué sur GitHub). Puis :
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart apero-api
+curl http://127.0.0.1:3103/health
+# Attendu : {"ok":true,"service":"apero-api","storage":"sqlite",...}
+```
+
+### C.4 — Vérifier, puis geler l'archive GitHub
+
+1. Ouvrir un lien d'invitation existant : il doit se charger (lecture via
+   l'API) et accepter un vote.
+2. Créer un apéro de test : **aucun commit** ne doit apparaître dans le repo.
+3. Laisser les anciens fichiers `data/aperos/*.json` dans le repo quelque
+   temps (archive morte, ils ne sont plus ni lus ni écrits) : les très vieux
+   bundles frontend encore en cache navigateur lisent GitHub directement.
+   Ils peuvent être supprimés du repo après quelques semaines.
+
+### C.5 — Sauvegarde
+
+Toute la donnée vit désormais dans un fichier unique :
+
+```bash
+sudo -u www-data sqlite3 /var/lib/apero-api/aperos.db ".backup /var/lib/apero-api/backup-$(date +%F).db"
+```
+
+(ou une simple copie du fichier quand le service est arrêté). À mettre en
+cron si la Confrérie devient sérieuse.
+
+### Note : faut-il encore le clone du repo sur le VPS ?
+
+Au **runtime**, non — l'API n'a besoin que de `server/dist/`, des dépendances
+de production (`npm prune --omit=dev`, ~11 Mo) et de la base SQLite. Le clone
+ne sert plus qu'à builder les mises à jour (`git pull && npm ci && npm run
+build`). Le garder est confortable ; le supprimer économise ~8 Mo.
 
 ### Note Caddy sous-chemin `/_svc/a`
 

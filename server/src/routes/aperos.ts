@@ -3,8 +3,8 @@ import { Router } from "express";
 import { config } from "../config.js";
 import { safeEqualHex, sha256Hex } from "../crypto.js";
 import { ApiError } from "../errors.js";
-import { createOrUpdateAperoFile, deleteAperoFile, getAperoFile } from "../githubClient.js";
-import type { StoredAperoFile } from "../githubClient.js";
+import { getStorage } from "../storage.js";
+import type { StoredAperoFile } from "../storage.js";
 import { logger } from "../logger.js";
 import {
   parseDeleteAperoBody,
@@ -15,13 +15,36 @@ import {
 
 export const aperosRouter = Router();
 
+// Lecture publique du fichier chiffre : c'est le pendant serveur de ce que le
+// frontend lisait directement sur GitHub (Contents API anonyme, 60 req/h).
+// Le blob est chiffre de bout en bout : le servir ne divulgue rien — seule la
+// cle du fragment d'URL, jamais transmise ici, sait l'ouvrir.
+// Le code APERO_NOT_FOUND (et non NOT_FOUND) est un discriminant de contrat :
+// il distingue « apero disparu » d'une vieille API sans cette route, dont le
+// notFoundHandler repond NOT_FOUND — le client sait alors se replier sur la
+// lecture GitHub le temps de la transition.
+aperosRouter.get("/aperos/:aperoId", async (req, res, next) => {
+  try {
+    const aperoId = validateAperoId(req.params.aperoId);
+    const existing = await getStorage().get(aperoId);
+
+    if (!existing) {
+      throw new ApiError(404, "APERO_NOT_FOUND", "This apero does not exist (anymore).");
+    }
+
+    res.json({ ok: true, aperoId, sha: existing.sha, file: existing.json });
+  } catch (error) {
+    next(error);
+  }
+});
+
 aperosRouter.post("/aperos/:aperoId", async (req, res, next) => {
   try {
     const aperoId = validateAperoId(req.params.aperoId);
     const body = parseWriteAperoBody(req.body);
     const receivedKeyHash = sha256Hex(body.writeKey);
 
-    const existing = await getAperoFile(aperoId);
+    const existing = await getStorage().get(aperoId);
     const now = new Date().toISOString();
 
     if (!existing) {
@@ -72,7 +95,7 @@ aperosRouter.post("/aperos/:aperoId", async (req, res, next) => {
         updatedAt: now,
       };
 
-      const { sha } = await createOrUpdateAperoFile(aperoId, file);
+      const { sha } = await getStorage().put(aperoId, file);
       logger.info(`Apero created: ${aperoId}`);
       res.status(201).json({ ok: true, created: true, updated: false, aperoId, sha });
       return;
@@ -108,7 +131,7 @@ aperosRouter.post("/aperos/:aperoId", async (req, res, next) => {
       updatedAt: now,
     };
 
-    const { sha } = await createOrUpdateAperoFile(aperoId, file, existing.sha);
+    const { sha } = await getStorage().put(aperoId, file, existing.sha);
     logger.info(`Apero updated: ${aperoId}`);
     res.json({ ok: true, created: false, updated: true, aperoId, sha });
   } catch (error) {
@@ -120,7 +143,7 @@ async function handleDeleteApero(req: Request, res: Response): Promise<void> {
   const aperoId = validateAperoId(req.params.aperoId);
   const body = parseDeleteAperoBody(req.body);
 
-  const existing = await getAperoFile(aperoId);
+  const existing = await getStorage().get(aperoId);
 
   if (!existing) {
     // Already gone: the target state is reached.
@@ -166,7 +189,7 @@ async function handleDeleteApero(req: Request, res: Response): Promise<void> {
     );
   }
 
-  await deleteAperoFile(aperoId, existing.sha);
+  await getStorage().delete(aperoId, existing.sha);
   logger.info(`Apero deleted: ${aperoId}`);
   res.json({ ok: true, deleted: true, aperoId });
 }

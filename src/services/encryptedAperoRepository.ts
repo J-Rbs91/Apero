@@ -19,6 +19,7 @@ import {
   AperoApiError,
   createOrUpdateEncryptedApero,
   deleteEncryptedApero as deleteEncryptedAperoApi,
+  fetchEncryptedAperoFromApi,
 } from "./aperoApiClient";
 import { generateAperoId, generateBase64UrlRandomKey, isValidAperoId, sha256Hex } from "./aperoCryptoKeys";
 import { decryptAperoData, encryptAperoData, ENCRYPTION_KEY_BYTE_LENGTH } from "./aperoEncryption";
@@ -116,11 +117,15 @@ async function readPublicAperoFileViaRaw(
 }
 
 /**
- * Lecture publique du fichier chiffre via GitHub Contents API, SANS token :
- * le repo est public et ce flux ne doit jamais transporter d'Authorization.
- * Retourne aussi le sha GitHub, indispensable comme baseSha anti-conflit.
- * L'API anonyme est plafonnee a 60 requetes/heure par IP : quota epuise
- * (403/429), on bascule sur raw.githubusercontent.com qui n'a pas ce plafond.
+ * Lecture du fichier chiffre. Source primaire : l'API VPS (GET), qui sert le
+ * blob depuis son stockage (SQLite ou GitHub selon le backend serveur) avec
+ * son sha anti-conflit. Replis :
+ * - API deployee sans route GET (version anterieure) ou non configuree →
+ *   lecture publique GitHub historique, le temps de la transition ;
+ * - panne reseau / 5xx de l'API → l'erreur remonte (l'appelant retombe sur
+ *   son cache local). JAMAIS de repli GitHub dans ce cas : en stockage VPS,
+ *   GitHub ne recoit plus les nouveaux aperos — son 404 ferait passer un
+ *   apero vivant pour supprime et le purgerait des appareils.
  */
 export async function readPublicAperoFile(
   aperoId: string,
@@ -130,6 +135,38 @@ export async function readPublicAperoFile(
     return null;
   }
 
+  let apiResult: Awaited<ReturnType<typeof fetchEncryptedAperoFromApi>>;
+  try {
+    apiResult = await fetchEncryptedAperoFromApi(aperoId);
+  } catch {
+    throw new EncryptedAperoError(
+      "UNREADABLE_FILE",
+      "Lecture impossible via l'API apero pour le moment.",
+    );
+  }
+
+  if (apiResult.status === "ok") {
+    return { file: apiResult.file as StoredEncryptedAperoFile, sha: apiResult.sha };
+  }
+
+  if (apiResult.status === "not-found") {
+    return null;
+  }
+
+  return readPublicAperoFileViaGitHub(aperoId, options);
+}
+
+/**
+ * Lecture publique historique via GitHub Contents API, SANS token : le repo
+ * est public et ce flux ne doit jamais transporter d'Authorization.
+ * Retourne aussi le sha GitHub, indispensable comme baseSha anti-conflit.
+ * L'API anonyme est plafonnee a 60 requetes/heure par IP : quota epuise
+ * (403/429), on bascule sur raw.githubusercontent.com qui n'a pas ce plafond.
+ */
+async function readPublicAperoFileViaGitHub(
+  aperoId: string,
+  options: { bustCdnCache?: boolean } = {},
+): Promise<{ file: StoredEncryptedAperoFile; sha: string } | null> {
   const url =
     `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}` +
     `/contents/${APEROS_DATA_PATH}/${aperoId}.json?ref=${githubConfig.branch}`;

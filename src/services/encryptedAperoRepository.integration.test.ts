@@ -109,8 +109,12 @@ describe("encryptedAperoRepository (round-trip fetch stubbé)", () => {
       const method = init?.method ?? "GET";
       calls.push({ url, method, body: init?.body ? JSON.parse(init.body as string) : undefined });
 
-      if (url.includes("api.github.com")) {
-        return new Response(JSON.stringify({ content: base64(stored), sha: FAKE_SHA }), { status: 200 });
+      // Lecture via l'API VPS (GET) : la source primaire depuis le stockage VPS.
+      if (method === "GET" && url.startsWith(API_BASE)) {
+        return new Response(
+          JSON.stringify({ ok: true, aperoId, sha: FAKE_SHA, file: stored }),
+          { status: 200 },
+        );
       }
       // API VPS POST.
       return new Response(
@@ -261,10 +265,15 @@ describe("encryptedAperoRepository (round-trip fetch stubbé)", () => {
     expect(local?.lastKnownEvent?.id).toBe(created.aperoId);
   });
 
-  it("getMyAperos affiche l'instantane local si GitHub n'a pas encore le fichier", async () => {
+  it("getMyAperos affiche l'instantane local si le stockage n'a pas encore le fichier", async () => {
     const aperoId = generateAperoId();
     const cachedEvent = baseEvent(aperoId);
-    const fetchMock = vi.fn(async () => new Response("{}", { status: 404 }));
+    // 404 APERO_NOT_FOUND : la reponse metier de l'API — definitive, aucun
+    // repli GitHub a tenter derriere.
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ ok: false, error: "APERO_NOT_FOUND" }), { status: 404 }),
+    );
 
     vi.stubGlobal("window", { localStorage: createStorageStub() });
     vi.stubGlobal("fetch", fetchMock);
@@ -294,7 +303,12 @@ describe("encryptedAperoRepository (round-trip fetch stubbé)", () => {
     vi.stubGlobal("window", { localStorage: createStorageStub() });
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () => new Response(JSON.stringify({ content: base64(stored), sha: FAKE_SHA }), { status: 200 })),
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify({ ok: true, aperoId, sha: FAKE_SHA, file: stored }), {
+            status: 200,
+          }),
+      ),
     );
 
     saveLocalApero({
@@ -376,6 +390,15 @@ describe("encryptedAperoRepository (round-trip fetch stubbé)", () => {
         const url = String(input);
         calls.push(url);
 
+        // API VPS anterieure au stockage : la route GET n'existe pas, son
+        // notFoundHandler repond NOT_FOUND → repli lecture GitHub.
+        if (url.startsWith(API_BASE)) {
+          return new Response(
+            JSON.stringify({ ok: false, error: "NOT_FOUND", message: "Route not found." }),
+            { status: 404 },
+          );
+        }
+
         // Quota anonyme épuisé sur l'API Contents.
         if (url.includes("api.github.com")) {
           return new Response("rate limited", { status: 403 });
@@ -396,6 +419,28 @@ describe("encryptedAperoRepository (round-trip fetch stubbé)", () => {
     expect(result!.file.id).toBe(aperoId);
     expect(result!.sha).toBe(expectedSha);
     expect(calls.some((url) => url.includes("raw.githubusercontent.com"))).toBe(true);
+  });
+
+  it("readPublicAperoFile leve une erreur (et ne rend jamais null) quand l'API est en panne", async () => {
+    // Propriete de securite : une panne reseau ne doit JAMAIS ressembler a un
+    // apero supprime (null), sinon getMyAperos purgerait du registre local un
+    // apero bien vivant. L'erreur remonte, l'appelant retombe sur son cache.
+    const calls: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        calls.push(String(input));
+        throw new TypeError("Failed to fetch");
+      }),
+    );
+
+    await expect(readPublicAperoFile("apero_test1234")).rejects.toMatchObject({
+      name: "EncryptedAperoError",
+      code: "UNREADABLE_FILE",
+    });
+    // Et surtout : aucun repli GitHub tente — en stockage VPS, le 404 GitHub
+    // d'un apero recent ferait passer la panne pour une suppression.
+    expect(calls.some((url) => url.includes("github"))).toBe(false);
   });
 
   it("getCachedAperoEvent rend la derniere version locale d'un apero connu", async () => {
