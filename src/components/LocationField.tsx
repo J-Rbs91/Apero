@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { LocationPickerMap } from "./LocationPickerMap";
 import type { PlaceSuggestion } from "../utils/photonGeocoding";
 import { reverseGeocode, searchPlaces } from "../utils/photonGeocoding";
@@ -46,10 +47,17 @@ export function LocationField({
   onChange,
 }: LocationFieldProps) {
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
+  // Overlay de recherche : le champ remonte en haut de l'écran, au-dessus du
+  // clavier, pour que le menu déroulant (et son squelette) reste visible — sinon
+  // les suggestions ancrées sous le champ tombent derrière le clavier mobile.
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  // Requête Photon en vol : pilote le squelette du menu déroulant, qui rend la
+  // complétion auto lisible dès la première frappe (avant même les résultats).
+  const [isSearching, setIsSearching] = useState(false);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [nearby, setNearby] = useState<NearbyState>({ status: "idle" });
   const containerRef = useRef<HTMLDivElement>(null);
+  const overlayInputRef = useRef<HTMLInputElement>(null);
   // Coupe la recherche après un choix dans la liste ou sur la carte : le texte
   // change mais ce n'est pas une frappe utilisateur.
   const skipNextSearchRef = useRef(false);
@@ -64,18 +72,26 @@ export function LocationField({
 
     if (query.length < MIN_QUERY_LENGTH) {
       setSuggestions([]);
-      setIsOpen(false);
+      setIsSearching(false);
       return;
     }
 
+    // On allume le squelette dès la frappe (avant le debounce) : la sensation de
+    // complétion auto est immédiate, pas suspendue au délai réseau.
+    setIsSearching(true);
     const abortController = new AbortController();
     const timer = window.setTimeout(async () => {
       try {
         const places = await searchPlaces(query, abortController.signal);
         setSuggestions(places);
-        setIsOpen(places.length > 0);
       } catch {
         // Photon injoignable : la saisie libre reste souveraine, on se tait.
+      } finally {
+        // La requête annulée (frappe suivante) ne doit pas éteindre le squelette
+        // de la requête en cours — sinon clignotement.
+        if (!abortController.signal.aborted) {
+          setIsSearching(false);
+        }
       }
     }, SEARCH_DEBOUNCE_MS);
 
@@ -86,29 +102,25 @@ export function LocationField({
   }, [value.location]);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!isSearchOpen) {
       return;
-    }
-
-    function handlePointerDown(pointerEvent: PointerEvent) {
-      if (containerRef.current && !containerRef.current.contains(pointerEvent.target as Node)) {
-        setIsOpen(false);
-      }
     }
 
     function handleKeyDown(keyEvent: KeyboardEvent) {
       if (keyEvent.key === "Escape") {
-        setIsOpen(false);
+        setIsSearchOpen(false);
       }
     }
 
-    document.addEventListener("pointerdown", handlePointerDown);
+    // On fige le défilement du fond pendant que l'overlay occupe l'écran.
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
+      document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen]);
+  }, [isSearchOpen]);
 
   function handleInput(text: string) {
     // Toute frappe manuelle invalide les coordonnées du choix précédent
@@ -124,7 +136,8 @@ export function LocationField({
 
   function handleSelect(place: PlaceSuggestion) {
     skipNextSearchRef.current = true;
-    setIsOpen(false);
+    setIsSearchOpen(false);
+    setIsSearching(false);
     setSuggestions([]);
     onChange({
       location: place.name,
@@ -261,34 +274,114 @@ export function LocationField({
         <input
           value={value.location}
           onChange={(eventChange) => handleInput(eventChange.target.value)}
+          onFocus={() => setIsSearchOpen(true)}
           placeholder={placeholder}
           autoComplete="off"
           role="combobox"
-          aria-expanded={isOpen}
+          aria-expanded={isSearchOpen}
           aria-autocomplete="list"
         />
       </label>
       {value.locationAddress && (
         <p className="locfield__picked">{value.locationAddress}</p>
       )}
-      {isOpen && (
-        <ul className="locfield__list" role="listbox">
-          {suggestions.map((place) => (
-            <li key={place.id}>
-              <button
-                type="button"
-                className="locfield__option"
-                role="option"
-                aria-selected="false"
-                onClick={() => handleSelect(place)}
-              >
-                <span className="locfield__name">{place.name}</span>
-                {place.address && <span className="locfield__addr">{place.address}</span>}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+
+      {isSearchOpen &&
+        createPortal(
+          <div
+            className="locsearch"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Recherche du lieu"
+          >
+            <button
+              type="button"
+              className="locsearch__scrim"
+              aria-label="Fermer la recherche"
+              onClick={() => setIsSearchOpen(false)}
+            />
+            <div className="locsearch__panel">
+              <div className="locsearch__bar">
+                <button
+                  type="button"
+                  className="locsearch__back"
+                  aria-label="Retour"
+                  onClick={() => setIsSearchOpen(false)}
+                >
+                  ←
+                </button>
+                <input
+                  ref={overlayInputRef}
+                  className="locsearch__input"
+                  value={value.location}
+                  onChange={(eventChange) => handleInput(eventChange.target.value)}
+                  placeholder={placeholder}
+                  autoComplete="off"
+                  autoFocus
+                  role="combobox"
+                  aria-expanded={suggestions.length > 0}
+                  aria-autocomplete="list"
+                />
+                {value.location.length > 0 && (
+                  <button
+                    type="button"
+                    className="locsearch__clear"
+                    aria-label="Effacer"
+                    onClick={() => {
+                      handleInput("");
+                      overlayInputRef.current?.focus();
+                    }}
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              <div className="locsearch__results">
+                {value.location.trim().length < MIN_QUERY_LENGTH ? (
+                  <p className="locsearch__hint">
+                    Tape le nom du rade (au moins {MIN_QUERY_LENGTH} lettres) — les
+                    suggestions s’affichent ici au fil de ta saisie.
+                  </p>
+                ) : isSearching ? (
+                  <ul className="locsearch__list locsearch__list--skeleton" aria-hidden="true">
+                    {[0, 1, 2, 3].map((row) => (
+                      <li key={row} className="locsearch__skel">
+                        <span className="locsearch__skel-line locsearch__skel-line--name" />
+                        <span className="locsearch__skel-line locsearch__skel-line--addr" />
+                      </li>
+                    ))}
+                  </ul>
+                ) : suggestions.length > 0 ? (
+                  <ul className="locsearch__list" role="listbox">
+                    {suggestions.map((place) => (
+                      <li key={place.id}>
+                        <button
+                          type="button"
+                          className="locfield__option"
+                          role="option"
+                          aria-selected="false"
+                          onClick={() => handleSelect(place)}
+                        >
+                          <span className="locfield__name">{place.name}</span>
+                          {place.address && (
+                            <span className="locfield__addr">{place.address}</span>
+                          )}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="locsearch__hint">
+                    Aucun lieu trouvé. Ferme la recherche pour le pointer toi-même
+                    sur la carte.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
 
       {nearby.status === "priming" ? (
         <div className="locfield__nearby-prime">
