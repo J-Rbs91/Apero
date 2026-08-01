@@ -10,10 +10,12 @@ import type { LocalAperoEntry, StoredEncryptedAperoFile } from "../types/encrypt
 import {
   appendEventMessage,
   appendEventOption,
+  applyAperoSettings,
   normalizeEvent,
   toggleOptionCheer,
   upsertParticipant,
 } from "../utils/eventNormalization";
+import type { AperoSettings } from "../utils/eventNormalization";
 import { sanitizeAperoEvent } from "../utils/aperoValidation";
 import {
   AperoApiError,
@@ -495,6 +497,22 @@ export async function toggleEncryptedAperoCheer(
 ): Promise<AperitifEvent> {
   return updateEncryptedApero(aperoId, writeKey, encryptionKey, (event) =>
     toggleOptionCheer(event, optionId, participantName),
+  );
+}
+
+/**
+ * Retouche les reglages de l'apero (nom, pretexte, politique mioches,
+ * cadence). Reservee a l'organisateur cote interface : cryptographiquement,
+ * c'est la write key qui autorise l'ecriture, comme pour toute mutation.
+ */
+export async function updateEncryptedAperoSettings(
+  aperoId: string,
+  writeKey: string,
+  encryptionKey: string,
+  settings: AperoSettings,
+): Promise<AperitifEvent> {
+  return updateEncryptedApero(aperoId, writeKey, encryptionKey, (event) =>
+    applyAperoSettings(event, settings),
   );
 }
 

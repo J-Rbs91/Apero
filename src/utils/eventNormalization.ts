@@ -1,4 +1,10 @@
-import type { AperitifEvent, AperitifOption, AperoMessage, ParticipantResponse } from "../types/apero";
+import type {
+  AperitifEvent,
+  AperitifOption,
+  AperoMessage,
+  AperoRecurrence,
+  ParticipantResponse,
+} from "../types/apero";
 import { MAX_MESSAGES } from "./aperoValidation";
 import { sanitizeAperoEvent } from "./aperoValidation";
 import { normalizeMemberName } from "./memberName";
@@ -122,6 +128,61 @@ export function upsertParticipant(
   return {
     ...event,
     participants,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * Réglages d'un apéro modifiables après coup par la personne qui l'a convoqué :
+ * ce qui se règle à la création SAUF les créneaux (les votes y sont accrochés)
+ * et le blaze de l'organisateur (il identifie l'auteur au registre).
+ * `undefined` vaut « pas de valeur » et efface le champ : politique mioches
+ * laissée non précisée, prétexte retiré, assemblée qui cesse de se répéter.
+ */
+export type AperoSettings = {
+  ceremonialName: string;
+  title?: string;
+  childrenAllowed?: boolean;
+  recurrence?: AperoRecurrence;
+};
+
+/** Réglages actuels d'un apéro, prêts à pré-remplir le formulaire d'édition. */
+export function readAperoSettings(event: AperitifEvent): AperoSettings {
+  return {
+    ceremonialName: event.ceremonialName,
+    title: event.title,
+    childrenAllowed: event.childrenAllowed,
+    recurrence: event.recurrence,
+  };
+}
+
+/**
+ * Applique de nouveaux réglages à un apéro. Les champs optionnels vidés
+ * disparaissent de l'objet (et non « présents à undefined ») : c'est ainsi que
+ * le registre distingue « sans les mioches » de « rien n'a été précisé ».
+ * Un nom cérémonial vide est ignoré : un apéro sans nom n'existe pas.
+ */
+export function applyAperoSettings(
+  event: AperitifEvent,
+  settings: AperoSettings,
+): AperitifEvent {
+  const ceremonialName = settings.ceremonialName.trim();
+  const title = settings.title?.trim();
+  const {
+    title: _droppedTitle,
+    childrenAllowed: _droppedChildrenAllowed,
+    recurrence: _droppedRecurrence,
+    ...rest
+  } = event;
+
+  return {
+    ...rest,
+    ceremonialName: ceremonialName || event.ceremonialName,
+    ...(title ? { title } : {}),
+    ...(settings.childrenAllowed != null
+      ? { childrenAllowed: settings.childrenAllowed }
+      : {}),
+    ...(settings.recurrence ? { recurrence: settings.recurrence } : {}),
     updatedAt: new Date().toISOString(),
   };
 }

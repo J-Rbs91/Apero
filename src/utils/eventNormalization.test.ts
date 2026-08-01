@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
-import { appendEventMessage, appendEventOption, normalizeEvent, toggleOptionCheer, upsertParticipant } from "./eventNormalization";
-import { AperoValidationError } from "./aperoValidation";
+import {
+  appendEventMessage,
+  appendEventOption,
+  applyAperoSettings,
+  normalizeEvent,
+  readAperoSettings,
+  toggleOptionCheer,
+  upsertParticipant,
+} from "./eventNormalization";
+import { AperoValidationError, sanitizeAperoEvent } from "./aperoValidation";
 
 function createEvent(id: string, option: AperitifOption): AperitifEvent {
   return {
@@ -182,5 +190,73 @@ describe("appendEventMessage", () => {
     expect(updated.messages).toHaveLength(200);
     expect(updated.messages?.[0].id).toBe("message_1");
     expect(updated.messages?.at(-1)?.id).toBe("message_new");
+  });
+});
+
+describe("applyAperoSettings", () => {
+  const settingsEvent: AperitifEvent = {
+    ...createEvent("apero_settings", {
+      id: "option_a",
+      date: "2026-07-03",
+      time: "19:00",
+      location: "Bar A",
+    }),
+    title: "Fin de chantier",
+    childrenAllowed: true,
+    recurrence: "weekly",
+  };
+
+  it("corrige la politique mioches sans toucher au reste", () => {
+    const updated = applyAperoSettings(settingsEvent, {
+      ...readAperoSettings(settingsEvent),
+      childrenAllowed: false,
+    });
+
+    expect(updated.childrenAllowed).toBe(false);
+    expect(updated.ceremonialName).toBe(settingsEvent.ceremonialName);
+    expect(updated.title).toBe("Fin de chantier");
+    expect(updated.recurrence).toBe("weekly");
+    expect(updated.options).toEqual(settingsEvent.options);
+    expect(updated.participants).toEqual(settingsEvent.participants);
+  });
+
+  it("efface les champs optionnels vidés au lieu de les laisser à undefined", () => {
+    const updated = applyAperoSettings(settingsEvent, {
+      ceremonialName: "Le Nouveau Concile",
+    });
+
+    expect(updated.ceremonialName).toBe("Le Nouveau Concile");
+    expect("title" in updated).toBe(false);
+    expect("childrenAllowed" in updated).toBe(false);
+    expect("recurrence" in updated).toBe(false);
+  });
+
+  it("ignore un nom cérémonial vide : un apéro sans nom n'existe pas", () => {
+    const updated = applyAperoSettings(settingsEvent, {
+      ...readAperoSettings(settingsEvent),
+      ceremonialName: "   ",
+    });
+
+    expect(updated.ceremonialName).toBe(settingsEvent.ceremonialName);
+  });
+
+  it("rogne les espaces et rafraîchit la date de mise à jour", () => {
+    const updated = applyAperoSettings(settingsEvent, {
+      ceremonialName: "  La Grande Tablée  ",
+      title: "  Apéro de rentrée  ",
+    });
+
+    expect(updated.ceremonialName).toBe("La Grande Tablée");
+    expect(updated.title).toBe("Apéro de rentrée");
+    expect(updated.updatedAt).not.toBe(settingsEvent.updatedAt);
+  });
+
+  it("produit un apéro que le registre accepte tel quel", () => {
+    const updated = applyAperoSettings(settingsEvent, {
+      ceremonialName: "La Grande Tablée",
+      childrenAllowed: false,
+    });
+
+    expect(() => sanitizeAperoEvent(updated, updated.id)).not.toThrow();
   });
 });

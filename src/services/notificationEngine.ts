@@ -14,6 +14,15 @@ import type {
 } from "../types/notifications";
 import { normalizeMemberName } from "../utils/memberName";
 
+// Réglages d'un apéro tels que déjà vus. `null` sur childrenAllowed vaut
+// « pas précisé » (et survit au JSON, contrairement à undefined).
+export type AperoSettingsSnapshot = {
+  ceremonialName: string;
+  title: string;
+  childrenAllowed: boolean | null;
+  recurrence: string;
+};
+
 // Instantané de l'état « déjà vu » d'un apéro sur cet appareil.
 export type AperoSnapshot = {
   // Signature de contenu de chaque créneau, indexée par id.
@@ -25,6 +34,11 @@ export type AperoSnapshot = {
   // Mots du mur du comptoir déjà vus. Optionnel : les instantanés d'avant la
   // fonctionnalité n'ont pas le champ (aucun message n'existait alors).
   messageIds?: string[];
+  // Réglages de l'apéro déjà vus (nom, prétexte, politique mioches, cadence),
+  // pour repérer une retouche de l'organisateur. Optionnel : les instantanés
+  // d'avant cette fonctionnalité n'ont pas le champ — leur première
+  // comparaison ne notifie rien, elle se contente d'enregistrer l'état.
+  settings?: AperoSettingsSnapshot;
   // Rappels « peut-être » déjà déclenchés ("48h", "24h", "2h").
   firedReminders: string[];
   // Coup de coude « à qui le tour ? » déjà envoyé une fois l'apéro passé.
@@ -42,6 +56,7 @@ export function createEmptySnapshot(): AperoSnapshot {
     participantVotes: {},
     selectedOptionId: undefined,
     messageIds: [],
+    settings: undefined,
     firedReminders: [],
     firedNextRoundNudge: false,
     initialized: false,
@@ -76,6 +91,24 @@ function optionSignature(option: AperitifOption): string {
     option.locationLng ?? "",
     option.note ?? "",
   ].join("|");
+}
+
+function eventSettings(event: AperitifEvent): AperoSettingsSnapshot {
+  return {
+    ceremonialName: event.ceremonialName,
+    title: event.title ?? "",
+    childrenAllowed: event.childrenAllowed ?? null,
+    recurrence: event.recurrence ?? "",
+  };
+}
+
+function settingsSignature(settings: AperoSettingsSnapshot): string {
+  return JSON.stringify([
+    settings.ceremonialName,
+    settings.title,
+    settings.childrenAllowed,
+    settings.recurrence,
+  ]);
 }
 
 function participantVoteSignature(participant: ParticipantResponse): string {
@@ -115,9 +148,51 @@ export function snapshotApero(event: AperitifEvent): AperoSnapshot {
     participantVotes,
     selectedOptionId: event.selectedOptionId,
     messageIds: (event.messages ?? []).map((message) => message.id),
+    settings: eventSettings(event),
     firedReminders: [],
     initialized: true,
   };
+}
+
+/**
+ * Ce qu'on annonce à la tablée quand l'organisateur retouche ses réglages.
+ * La politique mioches passe devant : elle conditionne les renforts déjà
+ * annoncés (« je viens avec les deux petits »). Rendu null si rien de
+ * notifiable n'a bougé.
+ */
+function describeSettingsChange(
+  previous: AperoSettingsSnapshot,
+  next: AperoSettingsSnapshot,
+): string | null {
+  const name = next.ceremonialName;
+
+  if (previous.childrenAllowed !== next.childrenAllowed) {
+    if (next.childrenAllowed === true) {
+      return `« ${name} » : les mioches sont finalement conviés. Compte-les dans tes renforts.`;
+    }
+    if (next.childrenAllowed === false) {
+      return `« ${name} » : ce sera finalement sans les mioches. Prévois la garde, et revois tes renforts.`;
+    }
+    return `« ${name} » : la politique mioches n’est plus tranchée. Demande à l’organisateur.`;
+  }
+
+  if (previous.ceremonialName !== next.ceremonialName) {
+    return `« ${previous.ceremonialName} » s’appelle désormais « ${name} ». Même tablée, nouvelle enseigne.`;
+  }
+
+  if (previous.title !== next.title) {
+    return next.title
+      ? `Le prétexte de « ${name} » a changé : ${next.title}.`
+      : `« ${name} » n’a plus de prétexte affiché. On trinque, c’est déjà un motif.`;
+  }
+
+  if (previous.recurrence !== next.recurrence) {
+    return next.recurrence
+      ? `« ${name} » devient une assemblée récurrente. Le rituel prend la cadence.`
+      : `« ${name} » ne se répète plus : ce sera une assemblée d’un soir.`;
+  }
+
+  return null;
 }
 
 // Un invité « oui » ou encore indécis (« none ») est tenu au courant des
@@ -255,6 +330,25 @@ function buildNotifications(
       // par le passé (A → B → A) reste un changement important à annoncer.
       dedupeKey: `${event.id}:confirmed:${event.selectedOptionId}:from:${previous.selectedOptionId ?? "none"}`,
     });
+  }
+
+  // 5) Réglages retouchés par l'organisateur : la tablée engagée doit le
+  // savoir, la politique mioches en tête. Instantané d'avant cette
+  // fonctionnalité (settings absent) : rien à comparer, on ne notifie pas.
+  if (previous.settings && !isCreator && guestFollowsUpdates(viewer.vote)) {
+    const nextSettings = eventSettings(event);
+    const change = describeSettingsChange(previous.settings, nextSettings);
+
+    if (change) {
+      drafts.push({
+        type: "important-change",
+        title: "L’apéro a été retouché",
+        body: change,
+        // Provenance et destination dans la clé, comme pour la confirmation
+        // de créneau : revenir à un réglage déjà connu reste une nouvelle.
+        dedupeKey: `${event.id}:settings:${settingsSignature(nextSettings)}:from:${settingsSignature(previous.settings)}`,
+      });
+    }
   }
 
   return drafts;

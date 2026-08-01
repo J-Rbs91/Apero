@@ -373,3 +373,74 @@ describe("mur du comptoir", () => {
     expect(result.snapshot.messageIds).toContain("message_2");
   });
 });
+
+describe("réglages retouchés par l'organisateur", () => {
+  it("prévient la tablée engagée d'un changement de politique mioches", () => {
+    const before = snapshotApero(event({ childrenAllowed: true }));
+    const after = event({ childrenAllowed: false });
+    const result = diffAperoNotifications(after, before, yesGuest, Date.parse(NOW_ISO), makeId, NOW_ISO);
+
+    expect(result.notifications.map((n) => n.type)).toEqual(["important-change"]);
+    expect(result.notifications[0].body).toContain("sans les mioches");
+  });
+
+  it("annonce le nouveau nom d'un apéro rebaptisé", () => {
+    const before = snapshotApero(event());
+    const after = event({ ceremonialName: "La Grande Tablée des Olives" });
+    const result = diffAperoNotifications(after, before, yesGuest, Date.parse(NOW_ISO), makeId, NOW_ISO);
+
+    expect(result.notifications.map((n) => n.type)).toEqual(["important-change"]);
+    expect(result.notifications[0].body).toContain("La Grande Tablée des Olives");
+  });
+
+  it("ne s'auto-notifie pas : le créateur retouche, il le sait déjà", () => {
+    const before = snapshotApero(event({ childrenAllowed: true }));
+    const after = event({ childrenAllowed: false });
+    const result = diffAperoNotifications(after, before, creator, Date.parse(NOW_ISO), makeId, NOW_ISO);
+
+    expect(result.notifications).toHaveLength(0);
+  });
+
+  it("laisse en paix un invité « non »", () => {
+    const before = snapshotApero(event({ childrenAllowed: true }));
+    const after = event({ childrenAllowed: false });
+    const result = diffAperoNotifications(after, before, noGuest, Date.parse(NOW_ISO), makeId, NOW_ISO);
+
+    expect(result.notifications).toHaveLength(0);
+  });
+
+  it("ne notifie rien quand les réglages n'ont pas bougé", () => {
+    const before = snapshotApero(event({ childrenAllowed: false }));
+    const result = diffAperoNotifications(
+      event({ childrenAllowed: false }),
+      before,
+      yesGuest,
+      Date.parse(NOW_ISO),
+      makeId,
+      NOW_ISO,
+    );
+
+    expect(result.notifications).toHaveLength(0);
+  });
+
+  it("re-prévient lors d'un aller-retour sur la politique mioches", () => {
+    const withKids = snapshotApero(event({ childrenAllowed: true }));
+    const withoutKids = event({ childrenAllowed: false });
+    const first = diffAperoNotifications(withoutKids, withKids, yesGuest, Date.parse(NOW_ISO), makeId, NOW_ISO);
+    const backToKids = event({ childrenAllowed: true });
+    const second = diffAperoNotifications(backToKids, first.snapshot, yesGuest, Date.parse(NOW_ISO), makeId, NOW_ISO);
+
+    expect(second.notifications.map((n) => n.type)).toEqual(["important-change"]);
+    expect(second.notifications[0].dedupeKey).not.toBe(first.notifications[0].dedupeKey);
+  });
+
+  it("ne notifie pas sur un instantané d'avant la fonctionnalité (settings absent)", () => {
+    const legacySnapshot = { ...snapshotApero(event({ childrenAllowed: true })), settings: undefined };
+    const after = event({ childrenAllowed: false });
+    const result = diffAperoNotifications(after, legacySnapshot, yesGuest, Date.parse(NOW_ISO), makeId, NOW_ISO);
+
+    expect(result.notifications).toHaveLength(0);
+    // …mais l'état est enregistré : la prochaine retouche, elle, sera annoncée.
+    expect(result.snapshot.settings?.childrenAllowed).toBe(false);
+  });
+});

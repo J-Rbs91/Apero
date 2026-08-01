@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AlternativeOptionForm } from "../components/AlternativeOptionForm";
+import { AperoSettingsForm } from "../components/AperoSettingsForm";
 import { ComptoirWall } from "../components/ComptoirWall";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { LoadingScreen } from "../components/LoadingScreen";
@@ -22,6 +23,7 @@ import {
   deleteEncryptedApero,
   joinApero,
   toggleEncryptedAperoCheer,
+  updateEncryptedAperoSettings,
 } from "../services/encryptedAperoRepository";
 import { findLocalApero } from "../services/localAperoRegistry";
 import { syncAperoNotificationsFromRegistry } from "../services/notificationSync";
@@ -34,7 +36,8 @@ import { hapticError, hapticSuccess, hapticTap } from "../utils/haptics";
 import { isEventExpired } from "../services/eventPurge";
 import { calculateBestOptions } from "../utils/calculateResults";
 import { formatOption } from "../utils/formatOption";
-import { toggleOptionCheer } from "../utils/eventNormalization";
+import { readAperoSettings, toggleOptionCheer } from "../utils/eventNormalization";
+import type { AperoSettings } from "../utils/eventNormalization";
 import { normalizeMemberName } from "../utils/memberName";
 import { buildNextRoundPrefill, describeRecurrence } from "../utils/nextRound";
 import { buildInviteUrl, maskInviteUrl } from "../utils/inviteLink";
@@ -63,6 +66,8 @@ export function InvitePage() {
   // le verre : l'application locale est optimiste, le réseau suit.
   const [cheerPendingId, setCheerPendingId] = useState<string | null>(null);
   const [isPostingMessage, setIsPostingMessage] = useState(false);
+  const [isEditingSettings, setIsEditingSettings] = useState(false);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState("");
@@ -220,6 +225,33 @@ export function InvitePage() {
     }
   }
 
+  async function handleSettingsSubmit(settings: AperoSettings) {
+    if (state.status !== "ready" || !aperoId || !keys.writeKey || !keys.encryptionKey) {
+      return;
+    }
+
+    try {
+      setIsSavingSettings(true);
+      setError("");
+      const updatedEvent = await updateEncryptedAperoSettings(
+        aperoId,
+        keys.writeKey,
+        keys.encryptionKey,
+        settings,
+      );
+      setState({ status: "ready", event: updatedEvent });
+      // La tablée engagée est prévenue du changement (politique mioches en
+      // tête : elle a pu conditionner les renforts déjà annoncés).
+      syncAperoNotificationsFromRegistry(updatedEvent);
+    } catch (submitError) {
+      // Même contrat que les autres formulaires : l'échec remonte au
+      // formulaire, qui garde la saisie et l'explique à hauteur d'yeux.
+      throw new Error(describeApiError(submitError));
+    } finally {
+      setIsSavingSettings(false);
+    }
+  }
+
   async function handleDelete() {
     if (!aperoId) {
       return;
@@ -341,6 +373,9 @@ export function InvitePage() {
   // L'organisateur seul au registre : sa prochaine action est de rameuter,
   // le partage prend la tête de page.
   const shareFirst = isOrganizer && !hasGuestResponses && !isPastEvent && canShare;
+  // Retoucher les réglages : réservé à l'auteur de l'apéro, et seulement tant
+  // que l'assemblée est devant nous — on ne réécrit pas une soirée passée.
+  const canEditSettings = isOrganizer && Boolean(keys.writeKey) && !isPastEvent;
 
   const shareBox = canShare ? (
     <MobileShareBox
@@ -462,12 +497,37 @@ export function InvitePage() {
         {hasLocalEntry && !isPastEvent && (
           <p className="meta">C’est gravé sur ton ardoise.</p>
         )}
+        {canEditSettings && !isEditingSettings && (
+          <button
+            type="button"
+            className="ghost-link"
+            onClick={() => {
+              hapticTap();
+              setIsEditingSettings(true);
+            }}
+          >
+            Retoucher l’apéro
+          </button>
+        )}
       </section>
 
       {(error || loadWarning) && (
         <p className="page-message page-message--error" role="alert">
           {error || loadWarning}
         </p>
+      )}
+
+      {canEditSettings && (
+        // Remonté à chaque enregistrement : rouvrir le formulaire repart
+        // toujours des réglages tels qu'ils sont gravés au registre.
+        <AperoSettingsForm
+          key={event.updatedAt}
+          settings={readAperoSettings(event)}
+          isOpen={isEditingSettings}
+          isSaving={isSavingSettings}
+          onClose={() => setIsEditingSettings(false)}
+          onSubmit={handleSettingsSubmit}
+        />
       )}
 
       {isPastEvent ? (
