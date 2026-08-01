@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
+import { Field } from "../components/ui";
 import {
   collectVaultPayload,
   decryptVault,
@@ -155,16 +156,22 @@ export function CoffrePage() {
 
       <section className="sheet">
         <p className="eyebrow">Sceller un coffre</p>
-        <label className="field">
-          <span>Phrase de passe (garde-la précieusement)</span>
-          <input
-            type="password"
-            value={exportPassphrase}
-            onChange={(eventChange) => setExportPassphrase(eventChange.target.value)}
-            placeholder="Une phrase que toi seul connais"
-            autoComplete="new-password"
-          />
-        </label>
+        <Field
+          label="Phrase de passe"
+          requirement="required"
+          hint="Garde-la précieusement : sans elle, le coffre ne se rouvre pas."
+        >
+          {(control) => (
+            <input
+              {...control}
+              type="password"
+              value={exportPassphrase}
+              onChange={(eventChange) => setExportPassphrase(eventChange.target.value)}
+              placeholder="Une phrase que toi seul connais"
+              autoComplete="new-password"
+            />
+          )}
+        </Field>
         <button
           type="button"
           className="button button--primary button--block"
@@ -187,22 +194,25 @@ export function CoffrePage() {
         <p className="eyebrow">Ouvrir un coffre</p>
         <p className="hint">
           Sur le nouvel appareil : choisis le fichier, saisis la phrase de passe, et tout
-          fusionne avec l’existant — un apéro déjà connu ici garde son rôle d’organisateur.
+          fusionne avec l’existant : un apéro déjà connu ici garde son rôle d’organisateur.
         </p>
-        <label className="field">
-          <span>Fichier de coffre</span>
-          <input ref={fileInputRef} type="file" accept="application/json,.json" />
-        </label>
-        <label className="field">
-          <span>Phrase de passe</span>
-          <input
-            type="password"
-            value={importPassphrase}
-            onChange={(eventChange) => setImportPassphrase(eventChange.target.value)}
-            placeholder="Celle qui a scellé le coffre"
-            autoComplete="off"
-          />
-        </label>
+        <Field label="Fichier de coffre" requirement="required">
+          {(control) => (
+            <input {...control} ref={fileInputRef} type="file" accept="application/json,.json" />
+          )}
+        </Field>
+        <Field label="Phrase de passe" requirement="required">
+          {(control) => (
+            <input
+              {...control}
+              type="password"
+              value={importPassphrase}
+              onChange={(eventChange) => setImportPassphrase(eventChange.target.value)}
+              placeholder="Celle qui a scellé le coffre"
+              autoComplete="off"
+            />
+          )}
+        </Field>
         <button
           type="button"
           className="button button--ghost button--block"

@@ -5,6 +5,7 @@ import type { PlaceSuggestion } from "../utils/photonGeocoding";
 import { reverseGeocode, searchPlaces } from "../utils/photonGeocoding";
 import type { NearbyPlace } from "../utils/nearbyPlaces";
 import { fetchNearbyPlaces, formatDistance } from "../utils/nearbyPlaces";
+import { Field, type FieldRequirement } from "./ui";
 
 const SEARCH_DEBOUNCE_MS = 300;
 const MIN_QUERY_LENGTH = 3;
@@ -38,6 +39,12 @@ type LocationFieldProps = {
   placeholder?: string;
   value: LocationValue;
   onChange: (value: LocationValue) => void;
+  /** Obligatoire ou facultatif, annoncé comme sur tous les autres champs. */
+  requirement?: FieldRequirement;
+  /** Phrase d'aide sous le libellé. */
+  hint?: string;
+  /** Erreur de ce champ, affichée sous la saisie. */
+  error?: string;
 };
 
 export function LocationField({
@@ -45,6 +52,9 @@ export function LocationField({
   placeholder = "Bar des Sports",
   value,
   onChange,
+  requirement,
+  hint,
+  error,
 }: LocationFieldProps) {
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   // Overlay de recherche : le champ remonte en haut de l'écran, au-dessus du
@@ -269,19 +279,27 @@ export function LocationField({
 
   return (
     <div className="locfield" ref={containerRef}>
-      <label className="field field--wide">
-        <span>{label}</span>
-        <input
-          value={value.location}
-          onChange={(eventChange) => handleInput(eventChange.target.value)}
-          onFocus={() => setIsSearchOpen(true)}
-          placeholder={placeholder}
-          autoComplete="off"
-          role="combobox"
-          aria-expanded={isSearchOpen}
-          aria-autocomplete="list"
-        />
-      </label>
+      <Field
+        label={label}
+        requirement={requirement}
+        hint={hint}
+        error={error}
+        className="field--wide"
+      >
+        {(control) => (
+          <input
+            {...control}
+            value={value.location}
+            onChange={(eventChange) => handleInput(eventChange.target.value)}
+            onFocus={() => setIsSearchOpen(true)}
+            placeholder={placeholder}
+            autoComplete="off"
+            role="combobox"
+            aria-expanded={isSearchOpen}
+            aria-autocomplete="list"
+          />
+        )}
+      </Field>
       {value.locationAddress && (
         <p className="locfield__picked">{value.locationAddress}</p>
       )}
@@ -340,7 +358,7 @@ export function LocationField({
               <div className="locsearch__results">
                 {value.location.trim().length < MIN_QUERY_LENGTH ? (
                   <p className="locsearch__hint">
-                    Tape le nom du rade (au moins {MIN_QUERY_LENGTH} lettres) — les
+                    Tape le nom du rade (au moins {MIN_QUERY_LENGTH} lettres) : les
                     suggestions s’affichent ici au fil de ta saisie.
                   </p>
                 ) : isSearching ? (
@@ -432,7 +450,7 @@ export function LocationField({
         (nearby.places.length === 0 ? (
           <p className="locfield__nearby-note" role="status">
             Aucun comptoir recensé à moins de 800 m. Soit le désert, soit une
-            carte OpenStreetMap à compléter — la recherche reste là.
+            carte OpenStreetMap à compléter. La recherche reste là.
           </p>
         ) : (
           <ul className="locfield__nearby-list">

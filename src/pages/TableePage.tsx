@@ -209,7 +209,7 @@ export function TableePage() {
 
       <section className="sheet">
         <p className="eyebrow">
-          {tablee.members.length} attablé{tablee.members.length > 1 ? "s" : ""} — fondée par{" "}
+          {tablee.members.length} attablé{tablee.members.length > 1 ? "s" : ""}, fondée par{" "}
           {tablee.founderName}
         </p>
         <h1 className="h1 h1--sm">{tablee.name}</h1>
@@ -244,7 +244,7 @@ export function TableePage() {
           {aperoItems === null
             ? "On relit les annales de la tablée…"
             : upcoming.length > 0
-              ? "Une assemblée est déjà en route — mais rien n’interdit d’en convoquer une autre."
+              ? "Une assemblée est déjà en route, mais rien n’interdit d’en convoquer une autre."
               : "Rien d’attablé à l’horizon. La tablée n’attend qu’une convocation."}
         </p>
         <button
@@ -327,7 +327,7 @@ export function TableePage() {
         <MobileShareBox
           url={shareUrl}
           displayUrl={maskInviteUrl(shareUrl)}
-          title={`La Confrérie du Petit Jaune — ${tablee.name}`}
+          title={`La Confrérie du Petit Jaune : ${tablee.name}`}
           text={buildTableeShareText(tablee.name, tablee.founderName)}
         />
       )}

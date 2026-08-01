@@ -103,15 +103,20 @@ export function HomePage() {
 
       <div className="grow" />
 
+      {/* Un apéro en cours passe devant : c'est la seule chose qui attend une
+          action de la part de l'habitué qui rouvre l'app. */}
       {nextApero && (
-        <section className="sheet">
+        <section className="sheet sheet--hero">
           <p className="eyebrow">
             {nextApero.isDecided ? "Prochain rendez-vous" : "Ça vote au comptoir"}
           </p>
           <h2 className="h2">{nextApero.event.ceremonialName}</h2>
-          <p className="meta">
-            {formatNextDate(nextApero.startMs)} · {nextApero.event.participants.length}{" "}
-            réponse{nextApero.event.participants.length > 1 ? "s" : ""} au registre
+          <p className="factline">
+            <span>{formatNextDate(nextApero.startMs)}</span>
+            <span>
+              <b>{nextApero.event.participants.length}</b> réponse
+              {nextApero.event.participants.length > 1 ? "s" : ""} au registre
+            </span>
           </p>
           <Link className="button button--primary button--block" to={nextApero.path}>
             Ouvrir l’apéro
@@ -124,8 +129,8 @@ export function HomePage() {
         <hr className="accent" />
         <h1 className="h1">La Confrérie du Petit Jaune</h1>
         <p className="lede">
-          Le zinc décide, pour toute la tablée. Choisir une date d’apéro, c’est plus sérieux qu’il
-          n’y paraît.
+          Le zinc décide, pour toute la tablée. Tu proposes des créneaux, tu partages un lien,
+          la tablée tranche.
         </p>
         <p className="hint">
           Nous ne saurions présumer de ce que tu porteras à tes lèvres, ni sous quelle toiture, ou
@@ -138,7 +143,6 @@ export function HomePage() {
         >
           Organiser un apéro
         </Link>
-        <p className="meta meta--center">Propose · partage · le comptoir tranche</p>
       </section>
     </MobilePage>
   );

@@ -24,7 +24,7 @@ function formatWinner(option: AperitifOption): string {
       }).format(new Date(`${option.date}T00:00:00`))
     : "Date mystère";
 
-  return `${dateLabel} · ${option.time || "heure mystère"} — ${option.location}`;
+  return `${dateLabel} · ${option.time || "heure mystère"}, ${option.location}`;
 }
 
 function describeEyebrow(result: ResultState): string {
@@ -88,7 +88,7 @@ export function MobileResultsPanel({
       <p className="eyebrow">{awaitingGuests ? "Le comptoir délibère" : describeEyebrow(result)}</p>
       <div className="verdict__title">
         {awaitingGuests
-          ? "La tablée n’a pas encore émargé — le zinc réserve son verdict."
+          ? "La tablée n’a pas encore émargé : le zinc réserve son verdict."
           : highlightedOption
             ? formatWinner(highlightedOption)
             : result.message}

@@ -163,7 +163,7 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
   y += 46;
   context.fillStyle = CANVAS_COLORS.muted;
   context.font = `600 28px ${FONT}`;
-  context.fillText("Tableau de chasse — le registre fait foi", margin, y);
+  context.fillText("Tableau de chasse : le registre fait foi", margin, y);
   y += 96;
 
   // Nom cérémoniel.
@@ -198,7 +198,7 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
   context.fillText(formatVerdictDate(input.option), margin, y);
   y += 66;
   context.font = `700 44px ${FONT}`;
-  context.fillText(`${input.option.time || "Heure mystère"} — ${input.option.location}`, margin, y);
+  context.fillText(`${input.option.time || "Heure mystère"}, ${input.option.location}`, margin, y);
   y += 54;
   if (addressLines.length > 0) {
     context.fillStyle = CANVAS_COLORS.muted;

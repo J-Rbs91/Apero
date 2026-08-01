@@ -1,5 +1,5 @@
-import { useState } from "react";
 import type { ParticipantResponse } from "../types/apero";
+import { Disclosure } from "./ui";
 
 type PresenceGroup = "coming" | "wavering" | "declined";
 
@@ -54,8 +54,11 @@ type ParticipantListProps = {
   participants: ParticipantResponse[];
 };
 
+/**
+ * Le registre des réponses, rangé dans un volet : le compte se lit sans
+ * ouvrir, le détail attend qu'on le demande.
+ */
 export function ParticipantList({ participants }: ParticipantListProps) {
-  const [showOthers, setShowOthers] = useState(false);
   const comingParticipants = participants.filter(
     (participant) => getPresenceGroup(participant) === "coming",
   );
@@ -65,67 +68,54 @@ export function ParticipantList({ participants }: ParticipantListProps) {
   const decliningParticipants = participants.filter(
     (participant) => getPresenceGroup(participant) === "declined",
   );
-  const othersCount = waveringParticipants.length + decliningParticipants.length;
+
+  const summary =
+    participants.length === 0
+      ? "Personne n’a encore émargé."
+      : [
+          `${comingParticipants.length} confirmé${comingParticipants.length > 1 ? "s" : ""}`,
+          `${waveringParticipants.length} qui hésite${waveringParticipants.length > 1 ? "nt" : ""}`,
+          `${decliningParticipants.length} sans nous`,
+        ].join(" · ");
 
   return (
-    <section className="sheet" id="reponses">
-      <p className="eyebrow">Qui vient ?</p>
+    <Disclosure title="Qui vient ?" summary={summary} badge={participants.length}>
       {participants.length === 0 ? (
-        <p className="lede">Personne n’a encore répondu. Sois le premier, ou la première !</p>
+        <p className="lede">Personne n’a encore répondu. Sois le premier, ou la première.</p>
       ) : (
         <>
-          {comingParticipants.length === 0 ? (
-            <p className="lede">Personne n’a encore confirmé sa venue pour l’instant.</p>
-          ) : (
-            <div className="people">
-              {comingParticipants.map((participant) => (
-                <ParticipantRow key={participant.id} participant={participant} />
-              ))}
-            </div>
-          )}
-
-          {othersCount > 0 && (
+          {comingParticipants.length > 0 && (
             <>
-              <button
-                type="button"
-                className="ghost-link"
-                aria-expanded={showOthers}
-                aria-controls="reponses-autres"
-                onClick={() => setShowOthers((isShown) => !isShown)}
-              >
-                {showOthers
-                  ? "Masquer les autres réponses"
-                  : `Voir qui hésite ou décline (${othersCount})`}
-              </button>
-
-              {showOthers && (
-                <div id="reponses-autres" className="event-stack">
-                  {waveringParticipants.length > 0 && (
-                    <>
-                      <p className="lbl">Le cul entre deux chaises</p>
-                      <div className="people">
-                        {waveringParticipants.map((participant) => (
-                          <ParticipantRow key={participant.id} participant={participant} />
-                        ))}
-                      </div>
-                    </>
-                  )}
-                  {decliningParticipants.length > 0 && (
-                    <>
-                      <p className="lbl">Les déserteurs</p>
-                      <div className="people">
-                        {decliningParticipants.map((participant) => (
-                          <ParticipantRow key={participant.id} participant={participant} />
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
+              <p className="lbl">Ils y seront</p>
+              <div className="people">
+                {comingParticipants.map((participant) => (
+                  <ParticipantRow key={participant.id} participant={participant} />
+                ))}
+              </div>
+            </>
+          )}
+          {waveringParticipants.length > 0 && (
+            <>
+              <p className="lbl">Le cul entre deux chaises</p>
+              <div className="people">
+                {waveringParticipants.map((participant) => (
+                  <ParticipantRow key={participant.id} participant={participant} />
+                ))}
+              </div>
+            </>
+          )}
+          {decliningParticipants.length > 0 && (
+            <>
+              <p className="lbl">Les déserteurs</p>
+              <div className="people">
+                {decliningParticipants.map((participant) => (
+                  <ParticipantRow key={participant.id} participant={participant} />
+                ))}
+              </div>
             </>
           )}
         </>
       )}
-    </section>
+    </Disclosure>
   );
 }

@@ -15,6 +15,7 @@ import { TableeAttachSection } from "../components/TableeAttachSection";
 import { TraquenardSlider } from "../components/TraquenardGauge";
 import { VerdictExportSection } from "../components/VerdictExportSection";
 import { VoteForm } from "../components/VoteForm";
+import { Disclosure } from "../components/ui";
 import { useAperoInvite } from "../hooks/useAperoInvite";
 import { useComptoirName } from "../hooks/useComptoirName";
 import {
@@ -46,8 +47,11 @@ import { buildReminderText, buildShareText, buildShareTitle } from "../utils/sha
 // Page d'invitation du nouveau flux chiffré (mode api-vps).
 // Route : #/invite/:aperoId?k=ENCRYPTION_KEY&w=WRITE_KEY — les clés restent
 // dans le fragment d'URL et ne sont jamais envoyées à un serveur.
-// Le chargement (clés, déchiffrement, états d'échec) vit dans useAperoInvite ;
-// cette page ne raconte que les gestes du convive et la mise en page.
+//
+// Organisation de la page depuis la refonte : une carte de tête qui dit de
+// quoi il s'agit, UN geste attendu (répondre, ou rameuter), le verdict, puis
+// tout le second plan rangé dans des volets repliés. Un seul bouton plein par
+// écran, et c'est celui qui enregistre.
 
 export function InvitePage() {
   const { aperoId } = useParams<{ aperoId: string }>();
@@ -383,6 +387,12 @@ export function InvitePage() {
       displayUrl={maskInviteUrl(inviteUrl)}
       title={buildShareTitle(event)}
       text={buildShareText(event)}
+      isPrimary={shareFirst}
+      lead={
+        shareFirst
+          ? "Personne n’a encore répondu. Envoie le lien, c’est la seule porte d’entrée."
+          : undefined
+      }
       reminder={
         isOrganizer
           ? {
@@ -476,31 +486,18 @@ export function InvitePage() {
     <TableeAttachSection aperoId={aperoId} keys={keys} event={event} comptoirName={comptoirName} />
   ) : null;
 
-  return (
-    <MobilePage className="event-mobile" overlay="deep">
-      <MobileHeader eyebrow={isOrganizer ? "Ta convocation" : "Invitation"} />
-
-      <section className="sheet">
-        <p className="eyebrow">
-          {isOrganizer ? "Ton assemblée" : `Une invitation de ${event.organizerName}`}
-        </p>
-        <h1 className="h1 h1--sm">{event.ceremonialName}</h1>
-        {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
-        {event.childrenAllowed != null && (
-          <span className={`tag ${event.childrenAllowed ? "tag--yes" : "tag--no"}`}>
-            {event.childrenAllowed ? "Marmaille admise" : "Sans les mioches"}
-          </span>
-        )}
-        {event.recurrence && (
-          <p className="meta">Assemblée récurrente : {describeRecurrence(event.recurrence)}.</p>
-        )}
-        {hasLocalEntry && !isPastEvent && (
-          <p className="meta">C’est gravé sur ton ardoise.</p>
-        )}
-        {canEditSettings && !isEditingSettings && (
+  // Toutes les commandes de l'organisateur au même endroit, repliées : elles
+  // ne se disputent plus l'écran avec le geste attendu du convive.
+  const organizerTools =
+    isOrganizer && keys.writeKey ? (
+      <Disclosure
+        title="Coulisses de l’organisation"
+        summary="Retoucher les réglages, ou tout annuler."
+      >
+        {canEditSettings && (
           <button
             type="button"
-            className="ghost-link"
+            className="button button--ghost button--block"
             onClick={() => {
               hapticTap();
               setIsEditingSettings(true);
@@ -509,6 +506,49 @@ export function InvitePage() {
             Retoucher l’apéro
           </button>
         )}
+        <p className="field__hint">
+          Annuler efface créneaux, réponses et contre-propositions pour toute la tablée.
+          C’est sans retour.
+        </p>
+        <button
+          type="button"
+          className="button button--danger button--block"
+          onClick={() => setShowDeleteConfirm(true)}
+        >
+          Annuler l’apéro
+        </button>
+      </Disclosure>
+    ) : null;
+
+  return (
+    <MobilePage className="event-mobile" overlay="deep">
+      <MobileHeader eyebrow={isOrganizer ? "Ta convocation" : "Invitation"} />
+
+      <section className="sheet sheet--hero">
+        <p className="eyebrow">
+          {isOrganizer ? "Ton assemblée" : `Une invitation de ${event.organizerName}`}
+        </p>
+        <h1 className="h1 h1--sm">{event.ceremonialName}</h1>
+        {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
+        <p className="factline">
+          <span>
+            <b>{event.options.length}</b> créneau{event.options.length > 1 ? "x" : ""} proposé
+            {event.options.length > 1 ? "s" : ""}
+          </span>
+          <span>
+            <b>{event.participants.length}</b> réponse{event.participants.length > 1 ? "s" : ""} au
+            registre
+          </span>
+        </p>
+        <div className="tagrow">
+          {event.childrenAllowed != null && (
+            <span className={`tag ${event.childrenAllowed ? "tag--yes" : "tag--no"}`}>
+              {event.childrenAllowed ? "Marmaille admise" : "Sans les mioches"}
+            </span>
+          )}
+          {event.recurrence && <span className="tag">{describeRecurrence(event.recurrence)}</span>}
+          {hasLocalEntry && !isPastEvent && <span className="tag">Sur ton ardoise</span>}
+        </div>
       </section>
 
       {(error || loadWarning) && (
@@ -546,7 +586,7 @@ export function InvitePage() {
             <p className="lede">
               {event.recurrence
                 ? `La cadence est gravée : ${describeRecurrence(event.recurrence)}. Le rituel n’attend que ta convocation.`
-                : "Les verres sont secs, le zinc est rangé. La suite logique : la même chose, un peu plus tard — et n’importe quel membre de la tablée peut convoquer la prochaine."}
+                : "Les verres sont secs, le zinc est rangé. La suite logique : la même chose un peu plus tard, et n’importe quel membre de la tablée peut convoquer la prochaine."}
             </p>
             <button
               type="button"
@@ -597,6 +637,8 @@ export function InvitePage() {
             />
           )}
 
+          {!shareFirst && shareBox}
+
           <ParticipantList participants={event.participants} />
 
           <ComptoirWall
@@ -607,8 +649,6 @@ export function InvitePage() {
           />
 
           {tableeSection}
-
-          {!shareFirst && shareBox}
 
           {hasJustVoted && !isOrganizer && (
             <section className="sheet">
@@ -625,15 +665,7 @@ export function InvitePage() {
         </>
       )}
 
-      {isOrganizer && keys.writeKey && (
-        <button
-          type="button"
-          className="ghost-link ghost-link--danger"
-          onClick={() => setShowDeleteConfirm(true)}
-        >
-          Annuler l’apéro
-        </button>
-      )}
+      {organizerTools}
 
       <ConfirmDialog
         isOpen={showDeleteConfirm}

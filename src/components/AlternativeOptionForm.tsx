@@ -4,16 +4,22 @@ import type { AperitifOption } from "../types/apero";
 import { createId } from "../utils/createId";
 import { hapticError, hapticSuccess } from "../utils/haptics";
 import { LocationField, type LocationValue } from "./LocationField";
+import { ActionBar, FormSheet, TextField } from "./ui";
 
 type AlternativeOptionFormProps = {
   isSaving: boolean;
-  /** Ouverture pilotée par le parent : le bouton déclencheur vit désormais à
-   * côté du bouton « Répondre à l'invitation », dans le formulaire de vote. */
+  /** Ouverture pilotée par le parent : le bouton déclencheur vit dans le
+   * formulaire de vote, juste sous la liste des créneaux. */
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (option: AperitifOption) => Promise<void>;
 };
 
+/**
+ * Contre-proposition de créneau. Elle prend tout l'écran : un titre, trois
+ * champs, un bouton. Aucune confusion possible avec le formulaire de réponse
+ * qui vit derrière.
+ */
 export function AlternativeOptionForm({
   isSaving,
   isOpen,
@@ -26,6 +32,7 @@ export function AlternativeOptionForm({
   const [time, setTime] = useState("");
   const [locationValue, setLocationValue] = useState<LocationValue>({ location: "" });
   const [feedback, setFeedback] = useState("");
+  const [hasTriedSubmit, setHasTriedSubmit] = useState(false);
   // Le blaze mémorisé pré-remplit le champ tant qu'il n'a pas été touché ;
   // après une première frappe, il doit pouvoir être vidé sans se re-remplir.
   const nameEditedRef = useRef(false);
@@ -39,17 +46,22 @@ export function AlternativeOptionForm({
     }
   }, [createdByName, comptoirName]);
 
+  const trimmedName = createdByName.trim().replace(/\s+/g, " ");
+  const trimmedLocation = locationValue.location.trim();
+  const isReady = Boolean(date && time && trimmedLocation && trimmedName);
+
   async function handleSubmit(formEvent: React.FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
     if (submitLockRef.current) {
       return;
     }
-    const trimmedName = createdByName.trim().replace(/\s+/g, " ");
-    const trimmedLocation = locationValue.location.trim();
+    setHasTriedSubmit(true);
 
     if (!date || !time || !trimmedLocation) {
       hapticError();
-      setFeedback("Quitte à imposer cette contradiction, il s’agirait au moins d’avoir l’élégance d’être précis : un jour, une heure ou un lieu, par exemple, histoire que cette proposition ait meilleure mine que la tienne.");
+      setFeedback(
+        "Quitte à imposer cette contradiction, il s’agirait au moins d’avoir l’élégance d’être précis : un jour, une heure et un lieu, histoire que cette proposition ait meilleure mine que la tienne.",
+      );
       return;
     }
 
@@ -94,70 +106,78 @@ export function AlternativeOptionForm({
     setTime("");
     setLocationValue({ location: "" });
     setFeedback("");
+    setHasTriedSubmit(false);
     onClose();
   }
 
-  if (!isOpen) {
-    return null;
-  }
-
   return (
-    <section className="sheet">
-      <p className="eyebrow">Proposer une autre date</p>
-
-      <form className="vote-form" onSubmit={handleSubmit}>
-        <div className="slot">
-          <div className="slot__fields">
-            <label className="field">
-              <span>Jour</span>
-              <input
-                type="date"
-                value={date}
-                onChange={(eventChange) => setDate(eventChange.target.value)}
-              />
-            </label>
-            <label className="field">
-              <span>Heure</span>
-              <input
-                type="time"
-                value={time}
-                onChange={(eventChange) => setTime(eventChange.target.value)}
-              />
-            </label>
-            <LocationField
-              label="Établissement"
-              placeholder="Le Bar du Coin"
-              value={locationValue}
-              onChange={setLocationValue}
-            />
-          </div>
-        </div>
-
-        {/* Le créneau mène le formulaire (l'intention du clic « Proposer un
-            autre créneau »). Le prénom, déjà connu via le blaze mémorisé,
-            ferme en confirmation plutôt que de rejouer une saisie d'identité. */}
-        <label className="field">
-          <span>Proposé par</span>
-          <input
-            value={createdByName}
-            maxLength={80}
-            onChange={(eventChange) => {
-              nameEditedRef.current = true;
-              setCreatedByName(eventChange.target.value);
-            }}
-            placeholder="Nadine Diabolo, Jean-Mi Pastaga…"
-          />
-        </label>
-
-        <div className="button-row">
+    <FormSheet
+      isOpen={isOpen}
+      title="Proposer un autre créneau"
+      lead="Il rejoindra la liste : toute la tablée pourra voter dessus."
+      onClose={onClose}
+      onSubmit={handleSubmit}
+      footer={
+        <ActionBar
+          status={
+            isReady
+              ? "Prêt à rejoindre la liste des créneaux."
+              : "Jour, heure et troquet sont obligatoires."
+          }
+          tone={isReady ? "ready" : hasTriedSubmit ? "blocked" : "neutral"}
+          secondary={
+            <button type="button" className="ghost-link" onClick={onClose}>
+              Laisser tomber
+            </button>
+          }
+        >
           <button className="button button--primary" disabled={isSaving} type="submit">
-            {isSaving ? "Envoi…" : "Proposer cette date"}
+            {isSaving ? "Envoi…" : "Proposer ce créneau"}
           </button>
-          <button className="button button--ghost" type="button" onClick={onClose}>
-            Annuler
-          </button>
-        </div>
-      </form>
+        </ActionBar>
+      }
+    >
+      <div className="slot__fields">
+        <TextField
+          label="Jour"
+          requirement="required"
+          type="date"
+          value={date}
+          error={hasTriedSubmit && !date ? "Choisis un jour." : undefined}
+          onChange={setDate}
+        />
+        <TextField
+          label="Heure"
+          requirement="required"
+          type="time"
+          value={time}
+          error={hasTriedSubmit && !time ? "Choisis une heure." : undefined}
+          onChange={setTime}
+        />
+        <LocationField
+          label="Le troquet"
+          requirement="required"
+          placeholder="Le Bar du Coin"
+          hint="Tape trois lettres, la liste te propose les rades du coin."
+          error={hasTriedSubmit && !trimmedLocation ? "Indique où on se retrouve." : undefined}
+          value={locationValue}
+          onChange={setLocationValue}
+        />
+      </div>
+
+      <TextField
+        label="Proposé par"
+        requirement="required"
+        hint="Pour que la tablée sache qui a bousculé le programme."
+        value={createdByName}
+        maxLength={80}
+        placeholder="Nadine Diabolo, Jean-Mi Pastaga…"
+        error={hasTriedSubmit && !trimmedName ? "Indique ton blaze." : undefined}
+        onChange={(value) => {
+          nameEditedRef.current = true;
+          setCreatedByName(value);
+        }}
+      />
 
       {feedback && (
         // Ce bloc ne porte que des erreurs (validation ou envoi raté) :
@@ -166,6 +186,6 @@ export function AlternativeOptionForm({
           {feedback}
         </p>
       )}
-    </section>
+    </FormSheet>
   );
 }

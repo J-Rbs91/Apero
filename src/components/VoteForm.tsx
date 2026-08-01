@@ -6,6 +6,7 @@ import { hapticError, hapticSuccess } from "../utils/haptics";
 import { normalizeMemberName } from "../utils/memberName";
 import { CompanionsField } from "./CompanionsField";
 import { EventOptionMobileCard } from "./EventOptionMobileCard";
+import { ActionBar, Disclosure, FormSection, TextAreaField, TextField } from "./ui";
 
 type DraftVotes = Record<string, VoteStatus | "">;
 
@@ -14,17 +15,16 @@ type VoteFormProps = {
   isSaving: boolean;
   onSubmit: (response: ParticipantResponse) => Promise<void>;
   /**
-   * Champs additionnels insérés juste après les créneaux, avant le mot libre
-   * (ex. pronostic ludique du Traquenard-O-mètre). Regroupés avec les votes
-   * (même geste, même famille « mon ressenti sur cet apéro »), ils laissent le
-   * commentaire fermer le formulaire juste avant le bouton d'envoi.
+   * Champs additionnels rangés avec les détails facultatifs (ex. pronostic du
+   * Traquenard-O-mètre) : le geste obligatoire reste en tête, le reste se
+   * déplie pour qui veut.
    */
   extraFields?: React.ReactNode;
   /** Créneau actuellement en tête, mis en évidence dans la liste des cartes. */
   leadingOptionId?: string;
   /**
-   * Ouvre le formulaire de contre-proposition. Fourni → un bouton « Proposer un
-   * autre créneau » s'affiche à côté du bouton d'envoi, sur la même ligne.
+   * Ouvre le formulaire de contre-proposition. Fourni → une action secondaire
+   * « Proposer un autre créneau » apparaît, nettement en second plan.
    */
   onProposeSlot?: () => void;
   /** Politique mioches de l'apéro, relayée au bloc « renforts ». */
@@ -40,6 +40,29 @@ type VoteFormProps = {
   cheerPendingOptionId?: string | null;
 };
 
+const voteLabel: Record<VoteStatus, string> = {
+  yes: "J’y serai",
+  maybe: "J’me tâte",
+  no: "Sans moi",
+};
+
+function formatSlotShort(date: string | undefined, time: string | undefined): string {
+  const dateLabel = date
+    ? new Intl.DateTimeFormat("fr-FR", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+      }).format(new Date(`${date}T00:00:00`))
+    : "Date mystère";
+
+  return `${dateLabel} · ${time || "heure mystère"}`;
+}
+
+/**
+ * Le geste central de l'app : dire si on vient. Un seul bouton l'enregistre,
+ * il est collé en bas de l'écran, et la barre au-dessus dit toujours ce qui
+ * manque encore pour pouvoir appuyer dessus.
+ */
 export function VoteForm({
   event,
   isSaving,
@@ -67,7 +90,10 @@ export function VoteForm({
   const [companions, setCompanions] = useState<number | undefined>(undefined);
   const [feedback, setFeedback] = useState("");
   const [feedbackTone, setFeedbackTone] = useState<"ok" | "error" | "info">("info");
-  // Réponse déjà au registre → le formulaire se replie en chip récapitulative.
+  // Vrai après une tentative d'envoi : tant qu'on n'a pas essayé, on ne
+  // souligne rien en rouge — on annonce seulement ce qui reste à faire.
+  const [hasTriedSubmit, setHasTriedSubmit] = useState(false);
+  // Réponse déjà au registre → le formulaire se replie en récapitulatif.
   // « Modifier ma réponse » le rouvre ; un envoi réussi le replie.
   const [isEditing, setIsEditing] = useState(false);
   // Évite qu'une soumission qu'on vient de faire soi-même ne déclenche le
@@ -153,24 +179,38 @@ export function VoteForm({
     setFeedback("");
   }
 
+  const missingSlots = event.options.filter((option) => !votes[option.id]);
+  const trimmedName = participantName.trim();
+  const isNameMissing = !trimmedName;
+  const isComplete = missingSlots.length === 0 && !isNameMissing;
+
+  // Ce que dit la barre d'action : jamais « erreur », toujours « il manque
+  // ceci ». Le convive sait quoi faire sans avoir à deviner.
+  const actionStatus = isNameMissing
+    ? "Il manque ton blaze en haut du formulaire."
+    : missingSlots.length > 0
+      ? `Encore ${missingSlots.length} créneau${missingSlots.length > 1 ? "x" : ""} à trancher.`
+      : existingParticipant
+        ? "Tout est rempli. Plus qu’à corriger le registre."
+        : "Tout est rempli. Plus qu’à émarger.";
+
   async function handleSubmit(formEvent: React.FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
+    setHasTriedSubmit(true);
 
-    const trimmedName = participantName.trim();
-
-    if (!trimmedName) {
+    if (isNameMissing) {
       hapticError();
       setFeedbackTone("error");
       setFeedback("Sans blaze, pas d’émargement. Même « Jojo » fera l’affaire.");
       return;
     }
 
-    const missingVote = event.options.some((option) => !votes[option.id]);
-
-    if (missingVote) {
+    if (missingSlots.length > 0) {
       hapticError();
       setFeedbackTone("error");
-      setFeedback("Chaque créneau attend son verdict, même un « Sans moi ». Le registre a horreur du vide.");
+      setFeedback(
+        "Chaque créneau attend son verdict, même un « Sans moi ». Les créneaux qui manquent sont surlignés au-dessus.",
+      );
       return;
     }
 
@@ -198,7 +238,9 @@ export function VoteForm({
           ? "Le registre est corrigé. On ne dira rien."
           : "C’est émargé. Le registre te remercie.",
       );
-      // Le geste est accompli : le formulaire se replie, la chip prend le relais.
+      // Le geste est accompli : le formulaire se replie, le récapitulatif prend
+      // le relais.
+      setHasTriedSubmit(false);
       setIsEditing(false);
     } catch (submitError) {
       // Jamais de « merci » sur un envoi raté : la saisie reste en place,
@@ -214,8 +256,8 @@ export function VoteForm({
     }
   }
 
-  // Formulaire replié : la réponse est au registre, la chip récapitule et
-  // la prochaine action (modifier, contre-proposer) reste à un tap.
+  // Formulaire replié : la réponse est au registre, le récapitulatif rappelle
+  // ce qui a été dit et la prochaine action reste à un tap.
   if (existingParticipant && !isEditing) {
     const votesByOption = existingParticipant.votes ?? {};
     const overall = Object.values(votesByOption).some((vote) => vote === "yes")
@@ -223,73 +265,64 @@ export function VoteForm({
       : Object.values(votesByOption).some((vote) => vote === "maybe")
         ? "J’me tâte"
         : "Sans moi";
-    const voteLabel: Record<VoteStatus, string> = {
-      yes: "J’y serai",
-      maybe: "J’me tâte",
-      no: "Sans moi",
-    };
 
     return (
       <section className="sheet">
         <p className="eyebrow">Ta réponse est au registre</p>
-        <div className="vote-chip">
-          <span className="vote-chip__check" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-              <path
-                d="M5 12.5l4.2 4.3L19 7.5"
-                stroke="currentColor"
-                strokeWidth="2.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
-          <div className="vote-chip__body">
-            <div className="vote-chip__name">{existingParticipant.participantName}</div>
-            <div className="vote-chip__vote">
-              {overall}
-              {existingParticipant.companions
-                ? ` · ${existingParticipant.companions} renfort${existingParticipant.companions > 1 ? "s" : ""}`
-                : ""}
+
+        <div className="recap">
+          <div className="recap__head">
+            <span className="recap__check" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                <path
+                  d="M5 12.5l4.2 4.3L19 7.5"
+                  stroke="currentColor"
+                  strokeWidth="2.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+            <div className="recap__body">
+              <div className="recap__name">{existingParticipant.participantName}</div>
+              <div className="recap__vote">
+                {overall}
+                {existingParticipant.companions
+                  ? ` · ${existingParticipant.companions} renfort${existingParticipant.companions > 1 ? "s" : ""}`
+                  : ""}
+              </div>
             </div>
           </div>
-          <button
-            type="button"
-            className="button button--ghost"
-            onClick={() => {
-              setFeedback("");
-              setIsEditing(true);
-            }}
-          >
-            Modifier ma réponse
-          </button>
+
+          {event.options.length > 1 && (
+            <div className="recap__rows">
+              {event.options.map((option) => {
+                const vote = votesByOption[option.id];
+                return (
+                  <div className="recap__row" key={option.id}>
+                    <span className="recap__slot">
+                      {formatSlotShort(option.date, option.time)}
+                    </span>
+                    <span className={`recap__answer${vote ? ` recap__answer--${vote}` : ""}`}>
+                      {vote ? voteLabel[vote] : "Pas de réponse"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {event.options.length > 1 && (
-          <div className="vote-chip__votes">
-            {event.options.map((option) => {
-              const vote = votesByOption[option.id];
-              return (
-                <div className="vote-chip__row" key={option.id}>
-                  <span className="vote-chip__slot">
-                    {option.date
-                      ? new Intl.DateTimeFormat("fr-FR", {
-                          weekday: "short",
-                          day: "numeric",
-                          month: "short",
-                        }).format(new Date(`${option.date}T00:00:00`))
-                      : "Date mystère"}
-                    {" · "}
-                    {option.time || "heure mystère"}
-                  </span>
-                  <span className={`vote-chip__answer${vote ? ` vote-chip__answer--${vote}` : ""}`}>
-                    {vote ? voteLabel[vote] : "—"}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <button
+          type="button"
+          className="button button--ghost button--block"
+          onClick={() => {
+            setFeedback("");
+            setIsEditing(true);
+          }}
+        >
+          Modifier ma réponse
+        </button>
 
         {onProposeSlot && (
           <button type="button" className="addline" onClick={onProposeSlot}>
@@ -311,70 +344,84 @@ export function VoteForm({
 
   return (
     <section className="sheet">
-      <p className="eyebrow">{existingParticipant ? "Modifier ma réponse" : "Répondre à l’invitation"}</p>
-
       <form className="vote-form" onSubmit={handleSubmit}>
-        <label className="field">
-          <span>Ton prénom (ou blaze)</span>
-          <input
+        <FormSection
+          step={1}
+          title="Qui répond ?"
+          lead="Le blaze qui apparaîtra au registre de la tablée."
+          isDone={!isNameMissing}
+        >
+          <TextField
+            label="Ton prénom (ou blaze)"
+            requirement="required"
             value={participantName}
             maxLength={80}
-            onChange={(eventChange) => {
-              nameEditedRef.current = true;
-              setParticipantName(eventChange.target.value);
-            }}
             placeholder="Jojo, Nadine, Éminence Chips…"
+            error={hasTriedSubmit && isNameMissing ? "Indique un blaze pour émarger." : undefined}
+            onChange={(value) => {
+              nameEditedRef.current = true;
+              setParticipantName(value);
+            }}
           />
-        </label>
+        </FormSection>
 
-        <div className="slot-stack">
-          {event.options.map((option) => (
-            <EventOptionMobileCard
-              key={option.id}
-              option={option}
-              value={votes[option.id]}
-              onChange={(status) => updateVote(option.id, status)}
-              isLeading={option.id === leadingOptionId}
-              hasCheered={hasCheeredOption?.(option.id)}
-              onToggleCheer={onToggleCheer ? () => onToggleCheer(option.id) : undefined}
-              isCheerSaving={cheerPendingOptionId === option.id}
-            />
-          ))}
-        </div>
+        <FormSection
+          step={2}
+          title={event.options.length > 1 ? "Tranche chaque créneau" : "Tranche le créneau"}
+          lead="Une réponse par créneau proposé, même un « Sans moi »."
+          status={`${event.options.length - missingSlots.length}/${event.options.length}`}
+          isDone={missingSlots.length === 0}
+        >
+          <div className="slot-stack">
+            {event.options.map((option) => (
+              <EventOptionMobileCard
+                key={option.id}
+                option={option}
+                value={votes[option.id]}
+                onChange={(status) => updateVote(option.id, status)}
+                error={
+                  hasTriedSubmit && !votes[option.id]
+                    ? "Ce créneau attend encore ta réponse."
+                    : undefined
+                }
+                isLeading={option.id === leadingOptionId}
+                hasCheered={hasCheeredOption?.(option.id)}
+                onToggleCheer={onToggleCheer ? () => onToggleCheer(option.id) : undefined}
+                isCheerSaving={cheerPendingOptionId === option.id}
+              />
+            ))}
+          </div>
 
-        <CompanionsField
-          companions={companions}
-          onChange={setCompanions}
-          childrenAllowed={childrenAllowed}
-        />
+          {onProposeSlot && (
+            <button type="button" className="addline" onClick={onProposeSlot}>
+              + Aucun ne va : proposer un autre créneau
+            </button>
+          )}
+        </FormSection>
 
-        {extraFields}
+        <Disclosure
+          title="Ajouter des détails"
+          summary="Renforts, pronostic, petit mot. Rien d’obligatoire."
+        >
+          <CompanionsField
+            companions={companions}
+            onChange={setCompanions}
+            childrenAllowed={childrenAllowed}
+          />
 
-        <label className="field">
-          <span>Un petit mot pour la troupe</span>
-          <textarea
+          {extraFields}
+
+          <TextAreaField
+            label="Un petit mot pour la troupe"
+            requirement="optional"
             value={comment}
             maxLength={500}
-            onChange={(eventChange) => setComment(eventChange.target.value)}
             rows={3}
             placeholder="Je viendrai si le monde ne s’est pas arrêté de tourner d’ici là."
+            onChange={setComment}
           />
-        </label>
+        </Disclosure>
 
-        {onProposeSlot ? (
-          <div className="button-row">
-            <button className="button button--primary" type="submit" disabled={isSaving}>
-              {isSaving ? "On émarge…" : "Répondre à l’invitation"}
-            </button>
-            <button className="button button--ghost" type="button" onClick={onProposeSlot}>
-              Proposer un autre créneau
-            </button>
-          </div>
-        ) : (
-          <button className="button button--primary button--block" type="submit" disabled={isSaving}>
-            {isSaving ? "On émarge…" : "Répondre à l’invitation"}
-          </button>
-        )}
         {feedback && (
           <p
             className={`feedback${feedbackTone === "ok" ? " feedback--ok" : ""}${feedbackTone === "info" ? " feedback--info" : ""}`}
@@ -383,6 +430,34 @@ export function VoteForm({
             {feedback}
           </p>
         )}
+
+        <ActionBar
+          status={actionStatus}
+          tone={isComplete ? "ready" : hasTriedSubmit ? "blocked" : "neutral"}
+          secondary={
+            existingParticipant ? (
+              <button
+                type="button"
+                className="ghost-link"
+                onClick={() => {
+                  setFeedback("");
+                  setHasTriedSubmit(false);
+                  setIsEditing(false);
+                }}
+              >
+                Laisser ma réponse telle quelle
+              </button>
+            ) : undefined
+          }
+        >
+          <button className="button button--primary" type="submit" disabled={isSaving}>
+            {isSaving
+              ? "On émarge…"
+              : existingParticipant
+                ? "Enregistrer ma réponse"
+                : "Envoyer ma réponse"}
+          </button>
+        </ActionBar>
       </form>
     </section>
   );
