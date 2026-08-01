@@ -2,9 +2,19 @@
 // comptoir. Centralisé : le même incident doit se raconter pareil partout.
 
 import { AperoApiError } from "../services/aperoApiClient";
+import { EncryptedAperoError } from "../services/encryptedAperoRepository";
 import { AperoValidationError } from "./aperoValidation";
 
 export function describeApiError(error: unknown): string {
+  // Écriture avortée AVANT l'envoi : toute mutation relit d'abord la version
+  // en cours (anti-écrasement). Lecture en panne = rien n'est parti, et ça ne
+  // se raconte pas comme un « souci technique » indéfini.
+  if (error instanceof EncryptedAperoError) {
+    return error.code === "NOT_FOUND"
+      ? "Cet apéro n’existe plus au registre : il a été annulé entre-temps."
+      : "Impossible de relire cet apéro pour le moment (comptoir injoignable) : rien n’a été modifié. Réessaie dans un instant.";
+  }
+
   if (error instanceof AperoApiError) {
     switch (error.code) {
       case "API_NOT_CONFIGURED":

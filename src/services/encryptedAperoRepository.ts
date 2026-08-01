@@ -175,19 +175,29 @@ async function readPublicAperoFileViaGitHub(
 
   // no-cache : requête conditionnelle (ETag). Un 304 ne compte PAS dans le
   // quota anonyme de 60 req/h — no-store brûlait le quota même sans changement.
-  const response = await fetch(url, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
-    cache: "no-cache",
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(url, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      cache: "no-cache",
+    });
+  } catch {
+    // Appel qui claque avant toute réponse (réseau mobile capricieux, DNS,
+    // filtrage) : le CDN raw sert le même fichier par un autre chemin, il
+    // mérite sa chance avant de déclarer l'apéro illisible.
+    return readPublicAperoFileViaRaw(aperoId, options);
+  }
 
   if (response.status === 404) {
     return null;
   }
 
-  if (response.status === 403 || response.status === 429) {
+  // Quota anonyme épuisé (403/429) ou API GitHub en vrac (5xx) : même repli.
+  if (response.status === 403 || response.status === 429 || response.status >= 500) {
     return readPublicAperoFileViaRaw(aperoId, options);
   }
 

@@ -421,6 +421,66 @@ describe("encryptedAperoRepository (round-trip fetch stubbé)", () => {
     expect(calls.some((url) => url.includes("raw.githubusercontent.com"))).toBe(true);
   });
 
+  it("readPublicAperoFile bascule sur raw quand l'appel a l'API Contents claque (reseau mobile)", async () => {
+    // Sur une API VPS sans route GET, toute lecture depend de l'API Contents
+    // anonyme : un appel qui n'aboutit meme pas ne doit pas condamner la
+    // lecture tant que le CDN raw peut servir le meme fichier.
+    const rawBody = '{"id":"apero_test1234","version":1,"writeKeyHash":"abc"}';
+    const calls: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        calls.push(url);
+
+        if (url.startsWith(API_BASE)) {
+          return new Response(
+            JSON.stringify({ ok: false, error: "NOT_FOUND", message: "Route not found." }),
+            { status: 404 },
+          );
+        }
+
+        if (url.includes("api.github.com")) {
+          throw new TypeError("Failed to fetch");
+        }
+
+        return new Response(rawBody, { status: 200 });
+      }),
+    );
+
+    const result = await readPublicAperoFile("apero_test1234");
+
+    expect(result?.file.id).toBe("apero_test1234");
+    expect(calls.some((url) => url.includes("raw.githubusercontent.com"))).toBe(true);
+  });
+
+  it("readPublicAperoFile bascule sur raw quand l'API Contents rend un 5xx", async () => {
+    const rawBody = '{"id":"apero_test1234","version":1,"writeKeyHash":"abc"}';
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+
+        if (url.startsWith(API_BASE)) {
+          return new Response(
+            JSON.stringify({ ok: false, error: "NOT_FOUND", message: "Route not found." }),
+            { status: 404 },
+          );
+        }
+
+        if (url.includes("api.github.com")) {
+          return new Response("bad gateway", { status: 502 });
+        }
+
+        return new Response(rawBody, { status: 200 });
+      }),
+    );
+
+    await expect(readPublicAperoFile("apero_test1234")).resolves.toMatchObject({
+      file: { id: "apero_test1234" },
+    });
+  });
+
   it("readPublicAperoFile leve une erreur (et ne rend jamais null) quand l'API est en panne", async () => {
     // Propriete de securite : une panne reseau ne doit JAMAIS ressembler a un
     // apero supprime (null), sinon getMyAperos purgerait du registre local un
