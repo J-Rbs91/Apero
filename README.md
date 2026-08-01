@@ -131,6 +131,34 @@ Cette URL n’est pas un secret (elle est publique dans le bundle), une variable
 
 La procédure complète (mise en service de l’API sur le VPS + raccordement GitHub) est décrite dans [`docs/RACCORDEMENT-VPS.md`](docs/RACCORDEMENT-VPS.md).
 
+## Interface : le kit de la Confrérie
+
+L’interface a été refondue autour de quatre règles, décrites en détail dans
+[`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md) :
+
+1. **un champ dit ce qu’on attend de lui** : libellé au-dessus, mention
+   `Obligatoire` ou `Facultatif`, phrase d’aide, erreur sous le champ concerné ;
+2. **ce qui se sélectionne ressemble à quelque chose qui se sélectionne** :
+   cartes cochables (`ChoiceGroup`) au lieu de menus déroulants qui imitaient
+   des zones de texte ;
+3. **le bouton qui enregistre reste sous le pouce** : barre d’action épinglée
+   (`ActionBar`) qui annonce la prochaine chose à faire, et feuille plein écran
+   (`FormSheet`) pour les saisies secondaires ;
+4. **un seul bouton plein par écran** : le jaune pastis est réservé à l’action
+   qui enregistre.
+
+Les composants partagés vivent dans [`src/components/ui/`](src/components/ui/)
+(`Field`, `ChoiceGroup`, `SwitchRow`, `FormSection`, `Disclosure`, `ActionBar`,
+`FormSheet`). Les jetons de style (accent unique, échelle d’arrondis, échelle
+typographique) sont en tête de `src/styles/global.css`.
+
+Les guides de conception qui ont servi de référence sont embarqués dans le repo,
+sous [`.claude/skills/`](.claude/skills/) — notamment
+`higgsfield-websites/references/design-recipe.md` (typographie, couleur, états
+de formulaire), `app-layouts.md` (divulgation progressive, action épinglée) et
+`review-rubric.md` (revue mécanique avant livraison). Ils sont lus par les
+agents qui travaillent sur ce repo, et restent lisibles à la main.
+
 ## Fonctionnalités
 
 - Accueil au nom officiel `La Confrérie du Petit Jaune`.

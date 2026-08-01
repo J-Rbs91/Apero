@@ -1,11 +1,13 @@
 import type { AperitifOption, VoteStatus } from "../types/apero";
 import { OpenInMapsButton } from "./OpenInMapsButton";
-import { VoteSegmentedControl } from "./VoteSegmentedControl";
+import { ChoiceGroup, type ChoiceOption } from "./ui";
 
 type EventOptionMobileCardProps = {
   option: AperitifOption;
   value: VoteStatus | "";
   onChange: (status: VoteStatus) => void;
+  /** Message d'erreur du créneau : « il manque ta réponse ici ». */
+  error?: string;
   /** Créneau actuellement en tête (le plus de présences confirmées). */
   isLeading?: boolean;
   /** Vrai si le convive courant a déjà trinqué à ce créneau. */
@@ -15,6 +17,12 @@ type EventOptionMobileCardProps = {
   /** Désactive le bouton pendant l'envoi. */
   isCheerSaving?: boolean;
 };
+
+const voteChoices: ChoiceOption<VoteStatus>[] = [
+  { value: "yes", label: "J’y serai", tone: "accent" },
+  { value: "maybe", label: "J’me tâte", tone: "warn" },
+  { value: "no", label: "Sans moi", tone: "danger" },
+];
 
 function formatCheerCount(count: number): string {
   return `${count} verre${count > 1 ? "s" : ""} levé${count > 1 ? "s" : ""}`;
@@ -32,23 +40,30 @@ function formatDateTime(option: AperitifOption): string {
   return `${dateLabel} · ${option.time || "heure mystère"}`;
 }
 
+/**
+ * Un créneau proposé, avec le choix qui va avec. La carte porte son propre
+ * état (« à trancher » tant que rien n'est coché) : on voit du premier coup
+ * d'œil ce qui reste à faire dans la liste.
+ */
 export function EventOptionMobileCard({
   option,
   value,
   onChange,
+  error,
   isLeading,
   hasCheered,
   onToggleCheer,
   isCheerSaving,
 }: EventOptionMobileCardProps) {
   const cheerCount = option.cheers?.length ?? 0;
+  const slotLabel = `${formatDateTime(option)}, ${option.location || "lieu mystère"}`;
   const subtitle =
     option.createdByRole === "participant" && option.createdByName
       ? `${option.location} · proposé par ${option.createdByName}`
       : option.location;
 
   return (
-    <div className="slot">
+    <div className={`slot${value ? "" : " slot--incomplete"}`}>
       <div className="slot__top">
         <div>
           <div className="slot__d">{formatDateTime(option)}</div>
@@ -64,14 +79,27 @@ export function EventOptionMobileCard({
           )}
           {option.note && <div className="slot__p">{option.note}</div>}
         </div>
-        {isLeading && <span className="agenda-lead">En tête</span>}
+        {isLeading ? (
+          <span className="agenda-lead">En tête</span>
+        ) : (
+          <span className={`slot__state slot__state--${value ? "done" : "todo"}`}>
+            {value ? "Répondu" : "À voter"}
+          </span>
+        )}
       </div>
-      <VoteSegmentedControl
+
+      <ChoiceGroup
         name={`vote-${option.id}`}
-        label={`${formatDateTime(option)} — ${option.location || "lieu mystère"}`}
+        legend="Ta réponse"
+        legendDetail={slotLabel}
+        requirement="required"
+        layout="row"
+        options={voteChoices}
         value={value}
         onChange={onChange}
+        error={error}
       />
+
       {(onToggleCheer || cheerCount > 0) && (
         <div className="cheer-row">
           {onToggleCheer && (

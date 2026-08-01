@@ -20,7 +20,7 @@ export function describeApiError(error: unknown): string {
       case "API_NOT_CONFIGURED":
         return "Le comptoir numérique n’est pas encore raccordé (API non configurée). Ta réponse est notée sur cet appareil, elle partira dès que le service sera rétabli.";
       case "NETWORK_ERROR":
-        return "Impossible de joindre le comptoir numérique. Vérifie la connexion et réessaie — ta réponse reste notée sur cet appareil.";
+        return "Impossible de joindre le comptoir numérique. Vérifie la connexion et réessaie. Ta réponse reste notée sur cet appareil.";
       case "CONFLICT":
         return "Quelqu’un a répondu en même temps que toi. Recharge la page et réessaie, ça passe presque toujours du deuxième coup.";
       case "WRITE_FORBIDDEN":

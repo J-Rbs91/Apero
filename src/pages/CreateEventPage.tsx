@@ -1,9 +1,17 @@
 import { useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { LocationField } from "../components/LocationField";
-import { ToggleSwitch } from "../components/ToggleSwitch";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
+import {
+  ActionBar,
+  ChoiceGroup,
+  Disclosure,
+  FormSection,
+  SwitchRow,
+  TextField,
+  type ChoiceOption,
+} from "../components/ui";
 import { getAperoStorageMode } from "../config/aperoApiConfig";
 import { eventStorage } from "../services";
 import { AperoApiError } from "../services/aperoApiClient";
@@ -28,6 +36,15 @@ import {
 } from "../utils/generateCeremonialName";
 import { buildInvitePath } from "../utils/inviteLink";
 
+type RecurrenceChoice = AperoRecurrence | "once";
+
+const recurrenceChoices: ChoiceOption<RecurrenceChoice>[] = [
+  { value: "once", label: "Une seule fois", description: "On verra bien après." },
+  { value: "weekly", label: "Chaque semaine", description: "Le rituel hebdomadaire." },
+  { value: "biweekly", label: "Une semaine sur deux" },
+  { value: "monthly", label: "Chaque mois" },
+];
+
 function createEmptyOption(): AperitifOption {
   return {
     id: createId("option"),
@@ -35,6 +52,21 @@ function createEmptyOption(): AperitifOption {
     time: "",
     location: "",
   };
+}
+
+/** Ce qui manque dans un créneau, champ par champ. */
+function missingFieldsOf(option: AperitifOption): Array<"date" | "time" | "location"> {
+  const missing: Array<"date" | "time" | "location"> = [];
+  if (!option.date.trim()) {
+    missing.push("date");
+  }
+  if (!option.time.trim()) {
+    missing.push("time");
+  }
+  if (!option.location.trim()) {
+    missing.push("location");
+  }
+  return missing;
 }
 
 export function CreateEventPage() {
@@ -55,13 +87,16 @@ export function CreateEventPage() {
   const [ceremonialNameInput, setCeremonialNameInput] = useState(prefill?.ceremonialName ?? "");
   const [title, setTitle] = useState(prefill?.title ?? "");
   const [childrenAllowed, setChildrenAllowed] = useState(prefill?.childrenAllowed ?? false);
-  const [recurrence, setRecurrence] = useState<AperoRecurrence | "">(prefill?.recurrence ?? "");
+  const [recurrence, setRecurrence] = useState<RecurrenceChoice>(prefill?.recurrence ?? "once");
   const [options, setOptions] = useState<AperitifOption[]>(() =>
     prefill?.options?.length
       ? prefill.options.map((option) => ({ ...option, id: createId("option") }))
       : [createEmptyOption()],
   );
   const [feedback, setFeedback] = useState("");
+  // Tant qu'on n'a pas tenté d'envoyer, rien n'est souligné en rouge : la
+  // barre du bas se contente d'annoncer ce qui reste à remplir.
+  const [hasTriedSubmit, setHasTriedSubmit] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Verrou synchrone : disabled={isSubmitting} ne protège pas deux clics
   // dispatchés dans la même tâche JS (avant que React ne commit l'état),
@@ -82,12 +117,27 @@ export function CreateEventPage() {
     );
   }
 
+  const completeOptions = options.filter((option) => missingFieldsOf(option).length === 0);
+  const incompleteCount = options.length - completeOptions.length;
+  const isReady = completeOptions.length > 0 && incompleteCount === 0;
+
+  // La barre du bas parle toujours de la prochaine chose à faire, jamais en
+  // langage de validation.
+  const actionStatus = isReady
+    ? completeOptions.length > 1
+      ? `${completeOptions.length} créneaux prêts. La tablée tranchera.`
+      : "Le créneau est prêt. La tablée n’a plus qu’à répondre."
+    : incompleteCount === options.length
+      ? "Remplis jour, heure et troquet du créneau 1."
+      : `Encore ${incompleteCount} créneau${incompleteCount > 1 ? "x" : ""} à compléter (ou à retirer).`;
+
   async function handleSubmit(formEvent: React.FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
     if (submitLockRef.current) {
       return;
     }
     setFeedback("");
+    setHasTriedSubmit(true);
 
     const cleanedOptions = options
       .map((option) => ({
@@ -104,7 +154,7 @@ export function CreateEventPage() {
     ) {
       hapticError();
       setFeedback(
-        "Un jour, une heure, un établissement. Sans ça, ce n’est plus un apéro, c’est un concept — et ici, on n’organise pas de concepts.",
+        "Un jour, une heure, un établissement. Sans ça, ce n’est plus un apéro, c’est un concept, et ici on n’organise pas de concepts. Les champs qui manquent sont signalés au-dessus.",
       );
       return;
     }
@@ -146,8 +196,9 @@ export function CreateEventPage() {
         : storageMode === "api-vps"
           ? pickRandomCeremonialName()
           : generateUniqueCeremonialName(activeEvents);
-      const now = new Date().toISOString();
+      const nowIso = new Date().toISOString();
       const trimmedOrganizerName = comptoirName.trim();
+      const savedRecurrence = recurrence === "once" ? undefined : recurrence;
 
       // L'organisateur est compté présent par défaut sur tous ses créneaux.
       const organizerVotes: Record<string, VoteStatus> = {};
@@ -158,8 +209,8 @@ export function CreateEventPage() {
         id: createId("participant"),
         participantName: trimmedOrganizerName,
         votes: organizerVotes,
-        createdAt: now,
-        updatedAt: now,
+        createdAt: nowIso,
+        updatedAt: nowIso,
       };
 
       if (storageMode === "api-vps") {
@@ -173,16 +224,16 @@ export function CreateEventPage() {
           beaufLevel: "medium",
           status: "active",
           childrenAllowed,
-          recurrence: recurrence || undefined,
+          recurrence: savedRecurrence,
           options: cleanedOptions.map((option) => ({
             ...option,
             createdByRole: "organizer",
             createdByName: trimmedOrganizerName,
-            createdAt: now,
+            createdAt: nowIso,
           })),
           participants: [organizerParticipant],
-          createdAt: now,
-          updatedAt: now,
+          createdAt: nowIso,
+          updatedAt: nowIso,
         });
 
         // Convocation depuis une tablée : on grave l'apéro à ses annales.
@@ -225,16 +276,16 @@ export function CreateEventPage() {
         beaufLevel: "medium",
         status: "active",
         childrenAllowed,
-        recurrence: recurrence || undefined,
+        recurrence: savedRecurrence,
         options: cleanedOptions.map((option) => ({
           ...option,
           createdByRole: "organizer",
           createdByName: trimmedOrganizerName,
-          createdAt: now,
+          createdAt: nowIso,
         })),
         participants: [organizerParticipant],
-        createdAt: now,
-        updatedAt: now,
+        createdAt: nowIso,
+        updatedAt: nowIso,
       };
 
       await eventStorage.createEvent(event);
@@ -263,139 +314,170 @@ export function CreateEventPage() {
 
   return (
     <MobilePage className="create-mobile" overlay="deep">
-      <MobileHeader eyebrow="Invitation" />
+      <MobileHeader eyebrow="Nouvelle assemblée" />
 
       <form className="sheet" onSubmit={handleSubmit}>
-        <h1 className="h1 h1--sm">Organiser un apéro</h1>
+        <div>
+          <h1 className="h1 h1--sm">Organiser un apéro</h1>
+          <p className="lede">
+            Une seule chose est obligatoire : au moins un créneau complet. Tout le reste
+            se règle après, ou jamais.
+          </p>
+        </div>
 
-        <label className="field">
-          <span>Nom de l’apéro (optionnel)</span>
-          <input
+        <FormSection
+          step={1}
+          title="Les créneaux"
+          lead="Jour, heure et troquet. Propose-en plusieurs, la tablée tranchera."
+          status={`${completeOptions.length}/${options.length}`}
+          isDone={isReady}
+        >
+          <div className="slot-stack">
+            {options.map((option, index) => {
+              const missing = missingFieldsOf(option);
+              const showErrors = hasTriedSubmit && missing.length > 0;
+
+              return (
+                <div
+                  className={`slot slot--editable${missing.length > 0 ? " slot--incomplete" : ""}`}
+                  key={option.id}
+                >
+                  <div className="slot__top">
+                    <span className="slot__no">
+                      Créneau {index + 1}
+                      <span
+                        className={`slot__state slot__state--${missing.length === 0 ? "done" : "todo"}`}
+                      >
+                        {missing.length === 0 ? "Complet" : "À compléter"}
+                      </span>
+                    </span>
+                    {options.length > 1 && (
+                      <button
+                        type="button"
+                        className="slot__x"
+                        onClick={() => removeOption(option.id)}
+                      >
+                        Retirer
+                      </button>
+                    )}
+                  </div>
+                  <div className="slot__fields">
+                    <TextField
+                      label="Jour"
+                      requirement="required"
+                      type="date"
+                      value={option.date}
+                      error={showErrors && missing.includes("date") ? "Choisis un jour." : undefined}
+                      onChange={(value) => updateOption(option.id, { date: value })}
+                    />
+                    <TextField
+                      label="Heure"
+                      requirement="required"
+                      type="time"
+                      value={option.time}
+                      error={showErrors && missing.includes("time") ? "Choisis une heure." : undefined}
+                      onChange={(value) => updateOption(option.id, { time: value })}
+                    />
+                    <LocationField
+                      label="Le troquet"
+                      requirement="required"
+                      hint="Tape trois lettres, la liste te propose les rades du coin."
+                      error={
+                        showErrors && missing.includes("location")
+                          ? "Indique où on se retrouve."
+                          : undefined
+                      }
+                      value={{
+                        location: option.location,
+                        locationAddress: option.locationAddress,
+                        locationLat: option.locationLat,
+                        locationLng: option.locationLng,
+                        locationPlaceId: option.locationPlaceId,
+                      }}
+                      onChange={(locationValue) => updateOption(option.id, locationValue)}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            className="addline"
+            onClick={() => setOptions((currentOptions) => [...currentOptions, createEmptyOption()])}
+          >
+            + Ajouter un créneau
+          </button>
+        </FormSection>
+
+        <FormSection
+          step={2}
+          title="La carte de visite"
+          lead="Rien d’obligatoire ici : sans nom, la Confrérie en tire un au sort."
+        >
+          <TextField
+            label="Nom de l’apéro"
+            requirement="optional"
             value={ceremonialNameInput}
             maxLength={160}
-            onChange={(eventChange) => setCeremonialNameInput(eventChange.target.value)}
             placeholder="La Grande Tablée des Olives"
+            onChange={setCeremonialNameInput}
           />
-        </label>
-
-        <label className="field">
-          <span>Le prétexte</span>
-          <input
+          <TextField
+            label="Le prétexte"
+            requirement="optional"
+            hint="La raison officielle du rassemblement, si tant est qu’il en faille une."
             value={title}
             maxLength={160}
-            onChange={(eventChange) => setTitle(eventChange.target.value)}
             placeholder="Apéro fin de chantier"
+            onChange={setTitle}
           />
-        </label>
+        </FormSection>
 
-        <div className="setting">
-          <div className="switchrow">
-            <label className="switchrow__label" htmlFor="children-allowed">
-              <span className="switchrow__title">Les mioches sont-ils conviés ?</span>
-              <span className="switchrow__state">
-                {childrenAllowed ? "Marmaille admise" : "Ce soir c’est sans les mômes"}
-              </span>
-            </label>
-            <ToggleSwitch
-              id="children-allowed"
-              checked={childrenAllowed}
-              onChange={setChildrenAllowed}
-              label="Les mioches sont-ils conviés ?"
-            />
-          </div>
-        </div>
-
-        <label className="field">
-          <span>Ça se reproduit ?</span>
-          <select
-            value={recurrence}
-            onChange={(eventChange) =>
-              setRecurrence(eventChange.target.value as AperoRecurrence | "")
-            }
-          >
-            <option value="">Une fois, on verra après</option>
-            <option value="weekly">Chaque semaine</option>
-            <option value="biweekly">Toutes les deux semaines</option>
-            <option value="monthly">Chaque mois</option>
-          </select>
-        </label>
-        {recurrence && (
-          <p className="hint">
-            Une assemblée qui se répète devient un rituel : une fois celle-ci passée, la
-            Confrérie proposera de convoquer la suivante dans la foulée, mêmes lieu et
-            heure, date décalée d’autant.
-          </p>
-        )}
-
-        <hr className="accent accent--wide" />
-
-        <p className="lbl">Les créneaux</p>
-        <div className="slot-stack">
-          {options.map((option, index) => (
-            <div className="slot" key={option.id}>
-              <div className="slot__top">
-                <p className="lbl">Créneau {index + 1}</p>
-                <button
-                  type="button"
-                  className="slot__x"
-                  onClick={() => removeOption(option.id)}
-                  aria-label="Retirer le créneau"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="slot__fields">
-                <label className="field">
-                  <span>Jour</span>
-                  <input
-                    type="date"
-                    value={option.date}
-                    onChange={(eventChange) =>
-                      updateOption(option.id, { date: eventChange.target.value })
-                    }
-                  />
-                </label>
-                <label className="field">
-                  <span>Heure</span>
-                  <input
-                    type="time"
-                    value={option.time}
-                    onChange={(eventChange) =>
-                      updateOption(option.id, { time: eventChange.target.value })
-                    }
-                  />
-                </label>
-                <LocationField
-                  value={{
-                    location: option.location,
-                    locationAddress: option.locationAddress,
-                    locationLat: option.locationLat,
-                    locationLng: option.locationLng,
-                    locationPlaceId: option.locationPlaceId,
-                  }}
-                  onChange={(locationValue) => updateOption(option.id, locationValue)}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <button
-          type="button"
-          className="addline"
-          onClick={() => setOptions((currentOptions) => [...currentOptions, createEmptyOption()])}
+        <Disclosure
+          title="Réglages de l’assemblée"
+          summary="Politique mioches et cadence. Modifiables plus tard."
         >
-          + Ajouter un créneau
-        </button>
+          <SwitchRow
+            title="Les mioches sont-ils conviés ?"
+            state={childrenAllowed ? "Marmaille admise" : "Ce soir c’est sans les mômes"}
+            checked={childrenAllowed}
+            onChange={setChildrenAllowed}
+          />
 
-        <button className="button button--primary button--block" disabled={isSubmitting}>
-          {isSubmitting ? "Création de l’apéro…" : "Créer l’apéro"}
-        </button>
+          <ChoiceGroup
+            name="recurrence"
+            legend="Ça se reproduit ?"
+            requirement="optional"
+            options={recurrenceChoices}
+            value={recurrence}
+            onChange={setRecurrence}
+          />
+
+          {recurrence !== "once" && (
+            <p className="field__hint">
+              Une assemblée qui se répète devient un rituel : une fois celle-ci passée, la
+              Confrérie proposera de convoquer la suivante dans la foulée, mêmes lieu et
+              heure, date décalée d’autant.
+            </p>
+          )}
+        </Disclosure>
+
         {feedback && (
           <p className="feedback" role="alert">
             {feedback}
           </p>
         )}
+
+        <ActionBar
+          status={actionStatus}
+          tone={isReady ? "ready" : hasTriedSubmit ? "blocked" : "neutral"}
+        >
+          <button className="button button--primary" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Création de l’apéro…" : "Créer l’apéro"}
+          </button>
+        </ActionBar>
       </form>
     </MobilePage>
   );

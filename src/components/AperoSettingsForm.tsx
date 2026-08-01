@@ -2,7 +2,16 @@ import { useState } from "react";
 import type { AperoRecurrence } from "../types/apero";
 import type { AperoSettings } from "../utils/eventNormalization";
 import { hapticError, hapticSuccess } from "../utils/haptics";
-import { ToggleSwitch } from "./ToggleSwitch";
+import { ActionBar, ChoiceGroup, FormSheet, SwitchRow, TextField, type ChoiceOption } from "./ui";
+
+type RecurrenceChoice = AperoRecurrence | "once";
+
+const recurrenceChoices: ChoiceOption<RecurrenceChoice>[] = [
+  { value: "once", label: "Une seule fois", description: "On verra bien après." },
+  { value: "weekly", label: "Chaque semaine", description: "Le rituel hebdomadaire." },
+  { value: "biweekly", label: "Une semaine sur deux" },
+  { value: "monthly", label: "Chaque mois" },
+];
 
 type AperoSettingsFormProps = {
   /** Réglages actuels de l'apéro, qui pré-remplissent le formulaire. */
@@ -33,12 +42,16 @@ export function AperoSettingsForm({
   const [ceremonialName, setCeremonialName] = useState(settings.ceremonialName);
   const [title, setTitle] = useState(settings.title ?? "");
   const [childrenAllowed, setChildrenAllowed] = useState(settings.childrenAllowed ?? false);
-  const [recurrence, setRecurrence] = useState<AperoRecurrence | "">(settings.recurrence ?? "");
+  const [recurrence, setRecurrence] = useState<RecurrenceChoice>(settings.recurrence ?? "once");
   const [feedback, setFeedback] = useState("");
+  const [hasTriedSubmit, setHasTriedSubmit] = useState(false);
+
+  const trimmedCeremonialName = ceremonialName.trim();
+  const isReady = Boolean(trimmedCeremonialName);
 
   async function handleSubmit(formEvent: React.FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
-    const trimmedCeremonialName = ceremonialName.trim();
+    setHasTriedSubmit(true);
 
     if (!trimmedCeremonialName) {
       hapticError();
@@ -51,7 +64,7 @@ export function AperoSettingsForm({
         ceremonialName: trimmedCeremonialName,
         title: title.trim() || undefined,
         childrenAllowed,
-        recurrence: recurrence || undefined,
+        recurrence: recurrence === "once" ? undefined : recurrence,
       });
     } catch (submitError) {
       // Échec d'écriture : la saisie reste en place, l'explication s'affiche
@@ -67,96 +80,87 @@ export function AperoSettingsForm({
 
     hapticSuccess();
     setFeedback("");
+    setHasTriedSubmit(false);
     onClose();
   }
 
-  if (!isOpen) {
-    return null;
-  }
-
   return (
-    <section className="sheet">
-      <p className="eyebrow">Retoucher l’apéro</p>
-
-      <form onSubmit={handleSubmit}>
-        <label className="field">
-          <span>Nom de l’apéro</span>
-          <input
-            value={ceremonialName}
-            maxLength={160}
-            onChange={(eventChange) => setCeremonialName(eventChange.target.value)}
-            placeholder="La Grande Tablée des Olives"
-          />
-        </label>
-
-        <label className="field">
-          <span>Le prétexte</span>
-          <input
-            value={title}
-            maxLength={160}
-            onChange={(eventChange) => setTitle(eventChange.target.value)}
-            placeholder="Apéro fin de chantier"
-          />
-        </label>
-
-        <div className="setting">
-          <div className="switchrow">
-            <label className="switchrow__label" htmlFor="edit-children-allowed">
-              <span className="switchrow__title">Les mioches sont-ils conviés ?</span>
-              <span className="switchrow__state">
-                {childrenAllowed ? "Marmaille admise" : "Ce soir c’est sans les mômes"}
-              </span>
-            </label>
-            <ToggleSwitch
-              id="edit-children-allowed"
-              checked={childrenAllowed}
-              onChange={setChildrenAllowed}
-              label="Les mioches sont-ils conviés ?"
-            />
-          </div>
-        </div>
-        {settings.childrenAllowed == null && (
-          <p className="hint">
-            Rien n’avait été précisé jusqu’ici sur les mioches : enregistrer tranchera la
-            question pour toute la tablée.
-          </p>
-        )}
-
-        <label className="field">
-          <span>Ça se reproduit ?</span>
-          <select
-            value={recurrence}
-            onChange={(eventChange) =>
-              setRecurrence(eventChange.target.value as AperoRecurrence | "")
-            }
-          >
-            <option value="">Une fois, on verra après</option>
-            <option value="weekly">Chaque semaine</option>
-            <option value="biweekly">Toutes les deux semaines</option>
-            <option value="monthly">Chaque mois</option>
-          </select>
-        </label>
-
-        <p className="hint">
-          Les créneaux ne se retouchent pas ici : les votes y sont accrochés. Pour changer
-          l’heure ou le troquet, propose un autre créneau.
-        </p>
-
-        <div className="button-row">
+    <FormSheet
+      isOpen={isOpen}
+      title="Retoucher l’apéro"
+      lead="Le nom, le prétexte et les règles. Les créneaux, eux, ne bougent plus."
+      onClose={onClose}
+      onSubmit={handleSubmit}
+      footer={
+        <ActionBar
+          status={
+            isReady
+              ? "La tablée sera prévenue du changement."
+              : "Le nom de l’apéro ne peut pas rester vide."
+          }
+          tone={isReady ? "ready" : hasTriedSubmit ? "blocked" : "neutral"}
+          secondary={
+            <button type="button" className="ghost-link" onClick={onClose}>
+              Annuler les retouches
+            </button>
+          }
+        >
           <button className="button button--primary" disabled={isSaving} type="submit">
-            {isSaving ? "Enregistrement…" : "Enregistrer"}
+            {isSaving ? "Enregistrement…" : "Enregistrer les retouches"}
           </button>
-          <button className="button button--ghost" type="button" onClick={onClose}>
-            Annuler
-          </button>
-        </div>
-      </form>
+        </ActionBar>
+      }
+    >
+      <TextField
+        label="Nom de l’apéro"
+        requirement="required"
+        value={ceremonialName}
+        maxLength={160}
+        placeholder="La Grande Tablée des Olives"
+        error={hasTriedSubmit && !isReady ? "Donne-lui un nom." : undefined}
+        onChange={setCeremonialName}
+      />
+
+      <TextField
+        label="Le prétexte"
+        requirement="optional"
+        value={title}
+        maxLength={160}
+        placeholder="Apéro fin de chantier"
+        onChange={setTitle}
+      />
+
+      <SwitchRow
+        title="Les mioches sont-ils conviés ?"
+        state={childrenAllowed ? "Marmaille admise" : "Ce soir c’est sans les mômes"}
+        checked={childrenAllowed}
+        onChange={setChildrenAllowed}
+        hint={
+          settings.childrenAllowed == null
+            ? "Rien n’avait été précisé jusqu’ici : enregistrer tranchera la question pour toute la tablée."
+            : undefined
+        }
+      />
+
+      <ChoiceGroup
+        name="edit-recurrence"
+        legend="Ça se reproduit ?"
+        requirement="optional"
+        options={recurrenceChoices}
+        value={recurrence}
+        onChange={setRecurrence}
+      />
+
+      <p className="field__hint">
+        Les créneaux ne se retouchent pas ici : les votes y sont accrochés. Pour changer
+        l’heure ou le troquet, propose un autre créneau.
+      </p>
 
       {feedback && (
         <p className="feedback" role="alert">
           {feedback}
         </p>
       )}
-    </section>
+    </FormSheet>
   );
 }

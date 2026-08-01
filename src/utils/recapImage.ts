@@ -135,7 +135,7 @@ export async function renderRecapImage({ recap, memberName }: RecapImageInput): 
   y += 46;
   context.fillStyle = CANVAS_COLORS.muted;
   context.font = `600 28px ${CANVAS_FONT}`;
-  context.fillText(`Les Comptes du Comptoir — exercice ${recap.year}`, margin, y);
+  context.fillText(`Les Comptes du Comptoir, exercice ${recap.year}`, margin, y);
   y += 100;
 
   context.fillStyle = CANVAS_COLORS.cream;

@@ -84,7 +84,7 @@ export function buildAperoIcs({ event, option, inviteUrl, now }: BuildAperoIcsIn
   const end = new Date(start.getTime() + DEFAULT_DURATION_MINUTES * 60 * 1000);
   const stamp = now ?? new Date();
 
-  const summary = `Apéro — ${event.ceremonialName}`;
+  const summary = `Apéro : ${event.ceremonialName}`;
   const descriptionParts = [
     `Convocation de ${event.organizerName} pour « ${event.ceremonialName} ».`,
   ];
@@ -96,7 +96,7 @@ export function buildAperoIcs({ event, option, inviteUrl, now }: BuildAperoIcsIn
   }
 
   const location = option.locationAddress
-    ? `${option.location} — ${option.locationAddress}`
+    ? `${option.location}, ${option.locationAddress}`
     : option.location;
 
   const lines = [

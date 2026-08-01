@@ -33,6 +33,48 @@
   --overlay-deep: linear-gradient(180deg, rgba(7, 28, 20, 0.18), rgba(7, 28, 20, 0.52));
 
   --sheet-shadow: 0 24px 56px rgba(0, 0, 0, 0.4);
+
+  /* ---- Socle de la refonte -------------------------------------------
+     Une seule couleur d'accent (le pastis) pilote tout ce sur quoi on peut
+     appuyer. Le rouge et le vert ne sont plus décoratifs : ils ne disent
+     qu'une chose, « ça coince » ou « c'est passé ». */
+  --danger: #ff8f85;
+  --danger-strong: #b8322b;
+  --ok: #9fdcae;
+
+  /* Traits et fonds : trois niveaux, pas un de plus. */
+  --line-soft: rgba(255, 247, 230, 0.16);
+  --line: rgba(255, 247, 230, 0.28);
+  --line-strong: rgba(255, 247, 230, 0.5);
+  --fill-soft: rgba(255, 247, 230, 0.06);
+  --fill: rgba(255, 247, 230, 0.1);
+
+  /* Une seule échelle d'arrondis pour toute l'app. */
+  --r-xs: 10px;
+  --r-sm: 14px;
+  --r-md: 18px;
+  --r-lg: 24px;
+  --r-pill: 999px;
+
+  /* Texte : plus rien sous 12px, les libellés de champ passent à 13.5px.
+     L'ancienne interface descendait à 9.5px, illisible au comptoir. */
+  --t-micro: 12px;
+  --t-label: 13.5px;
+  --t-body: 15px;
+  --t-lede: 15.5px;
+}
+
+/* Libellé réservé aux lecteurs d'écran (légende d'un groupe déjà titré). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 * {
@@ -192,27 +234,29 @@ a {
   font-size: 20px;
 }
 
+/* Le surtitre reste rare : une seule ligne de ce genre par bloc, sinon la
+   page se met à crier partout et plus rien ne ressort. */
 .eyebrow {
   margin: 0;
-  font-size: 10.5px;
+  font-size: var(--t-micro);
   font-weight: 700;
-  letter-spacing: 0.26em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--pastis);
 }
 
 .lede {
   margin: 0;
-  color: rgba(255, 247, 230, 0.82);
-  font-size: 14px;
+  color: rgba(255, 247, 230, 0.86);
+  font-size: var(--t-lede);
   font-weight: 500;
-  line-height: 1.42;
+  line-height: 1.45;
 }
 
 .meta {
   margin: 0;
-  color: rgba(255, 247, 230, 0.72);
-  font-size: 12.5px;
+  color: rgba(255, 247, 230, 0.74);
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.4;
 }
@@ -223,19 +267,18 @@ a {
 
 .hint {
   margin: 0;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1.35;
+  color: rgba(255, 247, 230, 0.68);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 .lbl {
   margin: 0;
-  font-size: 11px;
+  font-size: var(--t-label);
   font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(255, 247, 230, 0.7);
+  letter-spacing: 0.04em;
+  color: var(--cream);
 }
 
 .accent {
@@ -424,68 +467,106 @@ a {
 
 /* ===== Frosted glass sheet — signature container ===== */
 .sheet {
-  background: rgba(16, 38, 30, 0.5);
+  background: rgba(16, 38, 30, 0.52);
   backdrop-filter: blur(20px) saturate(1.15);
   -webkit-backdrop-filter: blur(20px) saturate(1.15);
-  border: 1px solid rgba(255, 247, 230, 0.22);
-  border-radius: 24px;
+  border: 1px solid rgba(255, 247, 230, 0.2);
+  border-radius: var(--r-lg);
   padding: 18px 16px;
   color: var(--cream);
   box-shadow: var(--sheet-shadow);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
-/* ===== Buttons ===== */
+/* Carte de tête d'une page : c'est elle qui porte le nom de l'apéro et son
+   état. Une seule par écran, sinon plus rien ne domine. */
+.sheet--hero {
+  gap: 10px;
+  border-color: rgba(244, 197, 66, 0.28);
+}
+
+/* ===== Boutons =====
+   Trois niveaux, jamais plus, et un seul « primary » visible à la fois par
+   écran : c'est lui qui enregistre. Le reste est en second plan pour qu'on
+   n'ait jamais à se demander sur quoi appuyer. */
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 50px;
-  padding: 0 18px;
+  min-height: 52px;
+  padding: 0 20px;
   border: 0;
-  border-radius: 999px;
-  font-size: 14.5px;
+  border-radius: var(--r-pill);
+  font-size: var(--t-body);
   font-weight: 800;
+  text-align: center;
   text-decoration: none;
   color: var(--ink);
-  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
-}
-
-.button:hover {
-  transform: translateY(-1px);
+  transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease,
+    border-color 140ms ease;
 }
 
 .button:active {
-  transform: translateY(1px);
+  transform: scale(0.98);
 }
 
 .button:disabled,
-.button:disabled:hover {
+.button:disabled:hover,
+.button:disabled:active {
   transform: none;
 }
 
+/* L'action qui enregistre : pleine, jaune, avec une ombre portée qui la
+   décolle du verre dépoli. Rien d'autre sur l'écran n'a cette allure. */
 .button--primary {
   color: var(--ink);
   background: var(--pastis);
+  box-shadow: 0 10px 24px rgba(244, 197, 66, 0.24);
 }
 
+.button--primary:hover {
+  background: var(--pastis-soft);
+}
+
+.button--primary:disabled {
+  box-shadow: none;
+}
+
+/* Action secondaire : contour net, jamais rempli. */
 .button--ghost,
 .button--secondary {
   color: var(--cream);
-  background: transparent;
-  border: 1.5px solid rgba(255, 247, 230, 0.55);
+  background: rgba(255, 247, 230, 0.04);
+  border: 1.5px solid var(--line-strong);
+}
+
+.button--ghost:hover,
+.button--secondary:hover {
+  background: var(--fill);
+}
+
+/* Action de service (copier, ouvrir) : discrète, sans contour appuyé. */
+.button--quiet {
+  color: var(--cream);
+  background: var(--fill);
+  border: 1px solid var(--line-soft);
+  font-weight: 700;
+}
+
+.button--quiet:hover {
+  background: rgba(255, 247, 230, 0.16);
 }
 
 .button--danger {
   color: var(--cream);
-  background: var(--bar-red);
+  background: var(--danger-strong);
 }
 
 .button--large {
-  min-height: 54px;
+  min-height: 56px;
 }
 
 .button--block {
@@ -505,6 +586,8 @@ a {
 
 .ghost-link {
   align-self: center;
+  max-width: 100%;
+  text-align: center;
   margin-top: 2px;
   padding: 8px 12px;
   border: 0;
@@ -561,31 +644,131 @@ a {
   margin: 2px 0 0;
 }
 
-/* ===== Fields ===== */
+/* ===== Champs =====
+   Un champ dit trois choses avant qu'on le touche : son nom, s'il est
+   obligatoire, et ce qu'on attend dedans. Et une quatrième après : ce qui
+   cloche, juste sous lui. */
 .field {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
+  /* Sans ça, un champ posé dans une grille refuse de rétrécir sous la
+     largeur de son libellé et fait déborder toute la page. */
+  min-width: 0;
 }
 
+.field__label,
 .field > span {
-  font-size: 11px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  font-size: var(--t-label);
   font-weight: 700;
-  letter-spacing: 0.04em;
-  color: rgba(255, 247, 230, 0.85);
+  letter-spacing: 0;
+  color: var(--cream);
+}
+
+.field__name {
+  flex: 1 1 auto;
+}
+
+/* La mention obligatoire/facultatif : c'était LA question de l'ancienne
+   interface, elle se lit maintenant sans cliquer nulle part. */
+.field__req {
+  flex: 0 0 auto;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.field__req--required {
+  background: rgba(244, 197, 66, 0.18);
+  color: var(--pastis-soft);
+}
+
+.field__req--optional {
+  background: var(--fill);
+  color: rgba(255, 247, 230, 0.6);
+}
+
+.field__hint {
+  margin: -1px 0 0;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.38;
+  color: rgba(255, 247, 230, 0.66);
+}
+
+.field__error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--danger);
+}
+
+.field__error::before {
+  content: "!";
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--danger);
+  color: #3a0f0c;
+  font-size: 11px;
+  font-weight: 900;
 }
 
 input,
 textarea,
 select {
   width: 100%;
-  min-height: 44px;
-  border: 1px solid rgba(255, 247, 230, 0.28);
-  border-radius: 12px;
-  padding: 9px 12px;
+  min-height: 50px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
   color: var(--cream);
-  background: rgba(255, 247, 230, 0.08);
+  background: rgba(255, 247, 230, 0.09);
   font-size: 16px;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+input:hover,
+textarea:hover,
+select:hover {
+  border-color: var(--line-strong);
+}
+
+/* Champ en faute : le contour parle avant même de lire le message. */
+input[aria-invalid="true"],
+textarea[aria-invalid="true"],
+select[aria-invalid="true"],
+.field--invalid input,
+.field--invalid textarea,
+.field--invalid select {
+  border-color: var(--danger);
+  background: rgba(184, 50, 43, 0.12);
+}
+
+/* Un menu déroulant doit ressembler à un menu déroulant, pas à une zone de
+   texte : chevron visible, fond légèrement distinct. */
+select {
+  appearance: none;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff7e6' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  background-size: 18px 18px;
 }
 
 /* Les options du menu natif s'affichent sur fond clair du système : encre
@@ -666,20 +849,27 @@ input[type="range"] {
   gap: 10px;
 }
 
+/* Trinquer est un clin d'œil, pas le geste attendu : il reste en retrait
+   pour ne pas concurrencer le bouton qui enregistre la réponse. */
 .cheer-btn {
-  border: 1px solid rgba(244, 197, 66, 0.5);
-  border-radius: 999px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-pill);
   padding: 6px 12px;
   background: transparent;
-  color: var(--pastis);
+  color: rgba(255, 247, 230, 0.68);
   font-size: 13px;
   font-weight: 700;
 }
 
+.cheer-btn:hover {
+  border-color: rgba(244, 197, 66, 0.45);
+  color: var(--pastis-soft);
+}
+
 .cheer-btn--on {
-  background: var(--pastis);
-  border-color: var(--pastis);
-  color: var(--ink);
+  background: rgba(244, 197, 66, 0.14);
+  border-color: rgba(244, 197, 66, 0.45);
+  color: var(--pastis-soft);
 }
 
 .cheer-btn:disabled {
@@ -687,7 +877,7 @@ input[type="range"] {
 }
 
 .cheer-count {
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--muted);
 }
 
@@ -701,166 +891,208 @@ input[type="range"] {
 .slot {
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  padding: 11px;
-  border: 1px solid rgba(255, 247, 230, 0.16);
-  border-radius: 15px;
-  background: rgba(255, 247, 230, 0.06);
+  gap: 12px;
+  padding: 14px;
+  border: 1.5px solid var(--line-soft);
+  border-radius: var(--r-md);
+  background: var(--fill-soft);
+}
+
+/* Créneau en cours de saisie dans le formulaire de création : il porte son
+   propre numéro et son propre état, on ne les confond pas entre eux. */
+.slot--editable {
+  gap: 14px;
+  border-style: solid;
+}
+
+.slot--incomplete {
+  border-color: rgba(244, 197, 66, 0.42);
 }
 
 .slot__top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  gap: 10px;
+}
+
+.slot__no {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
+  font-size: var(--t-label);
+  font-weight: 800;
+  color: var(--cream);
+}
+
+.slot__state {
+  flex: 0 0 auto;
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
+  background: var(--fill);
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+  color: rgba(255, 247, 230, 0.66);
+}
+
+.slot__state--todo {
+  background: rgba(244, 197, 66, 0.2);
+  color: var(--pastis-soft);
+}
+
+.slot__state--done {
+  background: rgba(159, 220, 174, 0.18);
+  color: var(--ok);
 }
 
 .slot__d {
   font-family: "Manrope", system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 15.5px;
-  line-height: 1.1;
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 1.2;
   color: var(--cream);
 }
 
 .slot__p {
-  margin-top: 1px;
-  font-size: 12px;
+  margin-top: 3px;
+  font-size: 13.5px;
   font-weight: 600;
-  color: rgba(255, 247, 230, 0.6);
+  color: rgba(255, 247, 230, 0.68);
 }
 
+/* Retirer un créneau : c'était une croix nue de 15px, on ne savait ni que
+   c'était un bouton ni ce qu'il faisait. */
 .slot__x {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   flex: 0 0 auto;
-  border: 0;
-  background: none;
-  color: rgba(255, 247, 230, 0.5);
-  font-size: 15px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: rgba(255, 247, 230, 0.7);
+  font-size: 12.5px;
+  font-weight: 700;
   line-height: 1;
-  padding: 2px;
+}
+
+.slot__x:hover {
+  border-color: rgba(255, 143, 133, 0.6);
+  color: var(--danger);
 }
 
 .slot__fields {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 9px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
 }
 
-.slot__fields .field--wide {
+.slot__fields .field--wide,
+.slot__fields .locfield {
   grid-column: 1 / -1;
 }
 
+/* Ajouter une ligne : un bouton en pointillés, mais assez gros et assez
+   contrasté pour se voir comme une action. */
 .addline {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 8px;
   width: 100%;
-  min-height: 44px;
-  border: 1.5px dashed rgba(255, 247, 230, 0.32);
-  border-radius: 12px;
+  min-height: 50px;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: var(--r-sm);
   background: transparent;
-  color: rgba(255, 247, 230, 0.8);
-  font-size: 12.5px;
+  color: var(--cream);
+  font-size: 14px;
   font-weight: 800;
 }
 
-/* ===== Segmented vote control ===== */
-.seg {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-}
-
-.seg__opt {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 38px;
-  padding: 0 4px;
-  border: 1px solid rgba(255, 247, 230, 0.22);
-  border-radius: 999px;
-  background: rgba(255, 247, 230, 0.07);
-  color: rgba(255, 247, 230, 0.66);
-  font-size: 11.5px;
-  font-weight: 700;
-  text-align: center;
-}
-
-.seg__opt input {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.seg__opt span {
-  position: relative;
-  z-index: 1;
-}
-
-.seg__opt.on-y {
-  background: var(--pastis);
+.addline:hover {
+  background: var(--fill-soft);
   border-color: var(--pastis);
-  color: var(--ink);
+  color: var(--pastis-soft);
 }
 
-.seg__opt.on-m {
-  background: rgba(255, 247, 230, 0.85);
-  border-color: transparent;
-  color: var(--ink);
+.addline:active {
+  transform: scale(0.99);
 }
 
-.seg__opt.on-n {
-  background: rgba(184, 50, 43, 0.32);
-  border-color: rgba(184, 50, 43, 0.5);
-  color: #ffd9d4;
-}
-
-/* ===== Réglage secondaire : interrupteur discret ===== */
+/* ===== Réglage oui/non ===== */
 .setting {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .switchrow {
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Toute la ligne est le bouton : on n'a plus à viser la petite bascule. */
+.switchrow__button {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
+  width: 100%;
+  min-height: 58px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  background: var(--fill-soft);
+  text-align: left;
+  transition: border-color 140ms ease, background 140ms ease;
 }
 
-.switchrow__label {
+.switchrow__button--on {
+  border-color: rgba(244, 197, 66, 0.5);
+  background: rgba(244, 197, 66, 0.1);
+}
+
+.switchrow__button:active {
+  transform: scale(0.995);
+}
+
+.switchrow__text {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  cursor: pointer;
+  gap: 2px;
 }
 
 .switchrow__title {
-  font-size: 12.5px;
+  font-size: var(--t-label);
   font-weight: 700;
   color: var(--cream);
 }
 
 .switchrow__state {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
-  color: rgba(255, 247, 230, 0.55);
+  color: rgba(255, 247, 230, 0.62);
+}
+
+.switchrow__button--on .switchrow__state {
+  color: var(--pastis-soft);
 }
 
 .switch {
   flex: 0 0 auto;
   position: relative;
-  width: 46px;
-  height: 27px;
+  display: block;
+  width: 50px;
+  height: 30px;
   min-height: 0;
   padding: 0;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 247, 230, 0.26);
-  background: rgba(255, 247, 230, 0.1);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--fill);
   transition: background 0.16s ease, border-color 0.16s ease;
 }
 
@@ -868,21 +1100,21 @@ input[type="range"] {
   position: absolute;
   top: 50%;
   left: 3px;
-  width: 21px;
-  height: 21px;
+  width: 23px;
+  height: 23px;
   border-radius: 50%;
-  background: rgba(255, 247, 230, 0.72);
+  background: rgba(255, 247, 230, 0.78);
   transform: translateY(-50%);
   transition: transform 0.16s ease, background 0.16s ease;
 }
 
-.switch--on {
+.switchrow__button--on .switch {
   background: var(--pastis);
   border-color: var(--pastis);
 }
 
-.switch--on .switch__knob {
-  transform: translate(19px, -50%);
+.switchrow__button--on .switch__knob {
+  transform: translate(20px, -50%);
   background: var(--ink);
 }
 
@@ -1019,16 +1251,22 @@ input[type="range"] {
   color: rgba(255, 247, 230, 0.72);
 }
 
+/* Copier est un service, pas le geste du moment : fond neutre, pour laisser
+   le jaune au seul bouton qui enregistre. */
 .share .cp {
   flex: 0 0 auto;
   min-height: 34px;
   padding: 0 14px;
-  border: 0;
-  border-radius: 9px;
-  background: var(--pastis);
-  color: var(--ink);
-  font-size: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xs);
+  background: var(--fill);
+  color: var(--cream);
+  font-size: 13px;
   font-weight: 800;
+}
+
+.share .cp:hover {
+  background: rgba(255, 247, 230, 0.18);
 }
 
 /* ===== People (registre) ===== */
@@ -1463,12 +1701,16 @@ input[type="range"] {
 .ghost-link:focus-visible,
 .brandpill--button:focus-visible,
 .brand-menu__item:focus-visible,
-.seg__opt:focus-within,
+.choice:focus-within,
+.switchrow__button:focus-visible,
+.disclose__head:focus-visible,
+.formsheet__close:focus-visible,
 .share .cp:focus-visible,
 .slot__x:focus-visible,
 .switch:focus-visible,
 .stepper__btn:focus-visible,
 input:focus-visible,
+select:focus-visible,
 textarea:focus-visible {
   outline: 3px solid var(--pastis);
   outline-offset: 2px;
@@ -1480,6 +1722,7 @@ textarea:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 5px;
+  min-width: 0;
 }
 
 .slot__fields .locfield {
@@ -2312,15 +2555,6 @@ textarea:focus-visible {
 }
 
 .slot__x {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  margin: -12px -12px -12px 0;
-}
-
-.seg__opt {
   min-height: 44px;
 }
 
@@ -2472,4 +2706,650 @@ textarea:focus-visible {
 .header-nav__panel {
   right: 0;
   left: auto;
+}
+
+/* =====================================================================
+   Refonte : composants de saisie
+   Trois principes, tirés du guide de conception Higgsfield embarqué dans
+   .claude/skills/higgsfield-websites (design-recipe §7, app-layouts) :
+   1. un champ dit s'il est obligatoire avant qu'on le touche ;
+   2. ce qui se sélectionne ressemble à quelque chose qui se sélectionne ;
+   3. le bouton qui enregistre reste sous le pouce, toujours au même endroit.
+   ===================================================================== */
+
+/* ---- Groupe de choix : des cartes cochables, pas un menu déroulant ---- */
+.choicegroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choicegroup__legend {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 2px;
+}
+
+.choices {
+  display: grid;
+  gap: 8px;
+}
+
+.choices--stack {
+  grid-template-columns: 1fr;
+}
+
+.choices--row {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.choice {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-sm);
+  background: rgba(255, 247, 230, 0.05);
+  color: var(--cream);
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, transform 120ms ease;
+}
+
+.choice:hover {
+  border-color: var(--line-strong);
+  background: var(--fill);
+}
+
+.choice:active {
+  transform: scale(0.985);
+}
+
+.choice input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* La pastille : vide, elle annonce « il y a un choix à faire ici ». */
+.choice__mark {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 50%;
+  color: transparent;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.choice__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.choice__label {
+  font-size: var(--t-label);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.choice__desc {
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: rgba(255, 247, 230, 0.62);
+}
+
+/* Choix retenu : rempli, coché, impossible à rater. */
+.choice--on {
+  border-color: var(--pastis);
+  background: rgba(244, 197, 66, 0.16);
+}
+
+.choice--on .choice__mark {
+  border-color: var(--pastis);
+  background: var(--pastis);
+  color: var(--ink);
+}
+
+.choice--on .choice__desc {
+  color: rgba(255, 247, 230, 0.78);
+}
+
+/* Un « sans moi » retenu se colore en rouge : c'est un état, pas un accent. */
+.choice--danger.choice--on {
+  border-color: rgba(184, 50, 43, 0.75);
+  background: rgba(184, 50, 43, 0.24);
+}
+
+.choice--danger.choice--on .choice__mark {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: #3a0f0c;
+}
+
+.choice--warn.choice--on {
+  border-color: rgba(255, 247, 230, 0.8);
+  background: rgba(255, 247, 230, 0.18);
+}
+
+.choice--warn.choice--on .choice__mark {
+  border-color: var(--cream);
+  background: var(--cream);
+  color: var(--ink);
+}
+
+/* En rangée de trois, le libellé se centre et la pastille passe au-dessus. */
+.choices--row .choice {
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 6px;
+  text-align: center;
+}
+
+.choices--row .choice__body {
+  align-items: center;
+}
+
+.choicegroup--invalid .choice {
+  border-color: rgba(255, 143, 133, 0.55);
+}
+
+/* ---- Bloc de formulaire numéroté ---- */
+.formsec {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 14px;
+  border: 1.5px solid var(--line-soft);
+  border-radius: var(--r-md);
+  background: rgba(9, 30, 22, 0.32);
+}
+
+.formsec--done {
+  border-color: rgba(159, 220, 174, 0.3);
+}
+
+.formsec__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+}
+
+.formsec__step {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--pastis);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.formsec--done .formsec__step {
+  background: var(--ok);
+  color: #123122;
+}
+
+.formsec__titles {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.formsec__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--cream);
+}
+
+.formsec__lead {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.38;
+  color: rgba(255, 247, 230, 0.7);
+}
+
+.formsec__status {
+  flex: 0 0 auto;
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
+  background: var(--fill);
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(255, 247, 230, 0.72);
+  white-space: nowrap;
+}
+
+.formsec__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---- Volet repliable ---- */
+.disclose {
+  /* `overflow: hidden` annule la taille minimale automatique d'un enfant
+     flex : sans ce flex-none, le volet replié s'écrase à zéro. */
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 247, 230, 0.18);
+  border-radius: var(--r-lg);
+  background: rgba(16, 38, 30, 0.5);
+  backdrop-filter: blur(20px) saturate(1.15);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+  box-shadow: var(--sheet-shadow);
+  overflow: hidden;
+}
+
+/* Rangé DANS une carte (formulaire de réponse) : plus besoin du verre
+   dépoli, le volet se contente d'un contour. */
+.sheet .disclose,
+.formsheet__body .disclose {
+  border: 1.5px solid var(--line-soft);
+  border-radius: var(--r-md);
+  background: rgba(9, 30, 22, 0.3);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+
+.disclose__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 10px 14px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--cream);
+}
+
+.disclose__head::-webkit-details-marker {
+  display: none;
+}
+
+.disclose__head:hover {
+  background: var(--fill-soft);
+}
+
+.disclose__text {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.disclose__title {
+  font-size: var(--t-label);
+  font-weight: 800;
+}
+
+.disclose__summary {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: rgba(255, 247, 230, 0.6);
+}
+
+.disclose__badge {
+  flex: 0 0 auto;
+  min-width: 24px;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: var(--fill);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+  color: rgba(255, 247, 230, 0.8);
+}
+
+.disclose__chevron {
+  flex: 0 0 auto;
+  color: rgba(255, 247, 230, 0.6);
+  transition: transform 160ms ease;
+}
+
+.disclose[open] > .disclose__head .disclose__chevron {
+  transform: rotate(180deg);
+}
+
+.disclose__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 2px 14px 16px;
+}
+
+/* ---- Barre d'action collante ----
+   Le reproche principal de l'ancienne version : le bouton d'enregistrement
+   vivait au fond d'un long défilement. Il est maintenant toujours là. */
+.actionbar {
+  position: sticky;
+  bottom: 8px;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  background: rgba(9, 30, 22, 0.88);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.36);
+}
+
+.actionbar__status {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+  color: rgba(255, 247, 230, 0.74);
+}
+
+.actionbar__status--blocked {
+  color: var(--danger);
+}
+
+.actionbar__status--ready {
+  color: var(--ok);
+}
+
+.actionbar__main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.actionbar__main .button {
+  width: 100%;
+}
+
+.actionbar__secondary {
+  display: flex;
+  justify-content: center;
+}
+
+/* ---- Feuille de saisie plein écran ---- */
+.formsheet {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.formsheet__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 20, 14, 0.66);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.formsheet__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 480px);
+  max-height: 94dvh;
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  border: 1px solid rgba(255, 247, 230, 0.22);
+  border-bottom: 0;
+  background: rgba(12, 34, 25, 0.96);
+  box-shadow: 0 -18px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.formsheet__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px 16px 12px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.formsheet__titles {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.formsheet__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--cream);
+}
+
+.formsheet__lead {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.38;
+  color: rgba(255, 247, 230, 0.68);
+}
+
+.formsheet__close {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-xs);
+  border: 1px solid var(--line-soft);
+  background: var(--fill);
+  color: var(--cream);
+}
+
+.formsheet__close:hover {
+  background: rgba(255, 247, 230, 0.18);
+}
+
+.formsheet__body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+  padding: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.formsheet__foot {
+  flex: 0 0 auto;
+  padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line-soft);
+  background: rgba(9, 28, 20, 0.9);
+}
+
+.formsheet__foot .actionbar {
+  position: static;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* ---- Récapitulatif de réponse (formulaire replié) ---- */
+.recap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1.5px solid rgba(159, 220, 174, 0.32);
+  border-radius: var(--r-md);
+  background: rgba(159, 220, 174, 0.08);
+}
+
+.recap__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.recap__check {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: #123122;
+}
+
+.recap__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.recap__name {
+  font-size: var(--t-label);
+  font-weight: 800;
+  color: var(--cream);
+}
+
+.recap__vote {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 247, 230, 0.72);
+}
+
+.recap__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recap__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--r-xs);
+  background: rgba(255, 247, 230, 0.05);
+}
+
+.recap__slot {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 247, 230, 0.78);
+}
+
+.recap__answer {
+  flex: 0 0 auto;
+  padding: 2px 9px;
+  border-radius: var(--r-pill);
+  background: var(--fill);
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(255, 247, 230, 0.72);
+}
+
+.recap__answer--yes {
+  background: rgba(244, 197, 66, 0.24);
+  color: var(--pastis-soft);
+}
+
+.recap__answer--maybe {
+  background: rgba(255, 247, 230, 0.18);
+  color: var(--cream);
+}
+
+.recap__answer--no {
+  background: rgba(184, 50, 43, 0.26);
+  color: var(--danger);
+}
+
+/* ---- Rangée d'étiquettes sous un titre ---- */
+.tagrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.tagrow .tag {
+  margin-top: 0;
+}
+
+/* ---- Ligne de repères chiffrés (créneaux, réponses) ---- */
+.factline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 247, 230, 0.7);
+}
+
+.factline b {
+  color: var(--cream);
+  font-weight: 800;
+}
+
+/* Le pied de page respire assez pour que la barre collante ne masque
+   jamais le dernier champ. */
+.mobile-page__inner {
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+}
+
+/* ---- Mouvement : tout reste sage si le système le demande ---- */
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .choice,
+  .switchrow__button,
+  .disclose__chevron,
+  .addline,
+  .cheer-btn {
+    transition: none;
+  }
+
+  .button:active,
+  .choice:active,
+  .switchrow__button:active,
+  .addline:active {
+    transform: none;
+  }
 }

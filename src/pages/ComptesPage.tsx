@@ -117,7 +117,7 @@ export function ComptesPage() {
         <section className="sheet">
           <p className="lede">
             Aucune trace de toi dans les registres de {year} sur cet appareil. Soit une
-            année sobre, soit une année ailleurs — dans les deux cas, ça se rattrape.
+            année sobre, soit une année ailleurs : dans les deux cas, ça se rattrape.
           </p>
           <Link className="button button--primary button--block" to="/create">
             Lancer l’année {currentYear}
@@ -167,7 +167,7 @@ export function ComptesPage() {
               <>
                 <p className="lbl">La plus grande tablée</p>
                 <p className="lede">
-                  {recap.biggestTableName} — {recap.biggestTableSize} convives au registre.
+                  {recap.biggestTableName} : {recap.biggestTableSize} convives au registre.
                 </p>
               </>
             )}
@@ -182,7 +182,7 @@ export function ComptesPage() {
           <section className="sheet">
             <p className="eyebrow">Faire circuler</p>
             <p className="lede">
-              La rétrospective se partage en image — les chiffres, ton blaze, rien d’autre.
+              La rétrospective se partage en image : les chiffres, ton blaze, rien d’autre.
               Ni lien, ni clé : ta comptabilité reste la tienne.
             </p>
             <button

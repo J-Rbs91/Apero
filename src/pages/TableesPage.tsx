@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
+import { TextField } from "../components/ui";
 import { useComptoirName } from "../hooks/useComptoirName";
 import { AperoApiError } from "../services/aperoApiClient";
 import { createTablee, getMyTablees, type MyTableeItem } from "../services/tableeRepository";
@@ -223,22 +224,20 @@ export function TableesPage() {
               rejoindra les annales de la tablée.
             </p>
           )}
-          <label className="field">
-            <span>Nom de la tablée</span>
-            <input
-              value={name}
-              onChange={(eventChange) => setName(eventChange.target.value)}
-              placeholder="Les Piliers du Jeudi"
-            />
-          </label>
-          <label className="field">
-            <span>Devise (optionnelle)</span>
-            <input
-              value={motto}
-              onChange={(eventChange) => setMotto(eventChange.target.value)}
-              placeholder="On ne présume rien, on trinque."
-            />
-          </label>
+          <TextField
+            label="Nom de la tablée"
+            requirement="required"
+            value={name}
+            placeholder="Les Piliers du Jeudi"
+            onChange={setName}
+          />
+          <TextField
+            label="Devise"
+            requirement="optional"
+            value={motto}
+            placeholder="On ne présume rien, on trinque."
+            onChange={setMotto}
+          />
           <button className="button button--primary button--block" disabled={isCreating}>
             {isCreating ? "Fondation en cours…" : "Fonder la tablée"}
           </button>

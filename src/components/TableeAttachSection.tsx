@@ -5,6 +5,7 @@ import { addAperoToTablee } from "../services/tableeRepository";
 import type { AperitifEvent } from "../types/apero";
 import { hapticError, hapticSuccess } from "../utils/haptics";
 import type { InviteKeys } from "../hooks/useAperoInvite";
+import { ChoiceGroup, Disclosure } from "./ui";
 
 // Rattacher l'apéro aux annales d'une tablée de l'appareil — ou fonder la
 // première avec la troupe du registre. Section autonome : son état (choix,
@@ -61,28 +62,31 @@ export function TableeAttachSection({ aperoId, keys, event, comptoirName }: Tabl
   }
 
   return (
-    <section className="sheet">
-      <p className="eyebrow">La Tablée</p>
+    <Disclosure
+      title="Rattacher à une tablée"
+      summary={
+        localTablees.length > 0
+          ? `${localTablees.length} tablée${localTablees.length > 1 ? "s" : ""} sur cet appareil.`
+          : "Fonder une bande avec les convives de ce registre."
+      }
+    >
       {localTablees.length > 0 ? (
         <>
           <p className="lede">
             Rattache cet apéro aux annales d’une de tes tablées : la bande le
             retrouvera avec le reste de son histoire.
           </p>
-          <label className="field">
-            <span>Choisir la tablée</span>
-            <select
-              value={selectedTableeId}
-              onChange={(eventChange) => setSelectedTableeId(eventChange.target.value)}
-            >
-              <option value="">— Choisir —</option>
-              {localTablees.map((entry) => (
-                <option value={entry.tableeId} key={entry.tableeId}>
-                  {entry.name ?? entry.tableeId}
-                </option>
-              ))}
-            </select>
-          </label>
+          <ChoiceGroup
+            name="tablee-attach"
+            legend="À quelle tablée ?"
+            requirement="required"
+            options={localTablees.map((entry) => ({
+              value: entry.tableeId,
+              label: entry.name ?? entry.tableeId,
+            }))}
+            value={selectedTableeId}
+            onChange={setSelectedTableeId}
+          />
           <button
             type="button"
             className="button button--ghost button--block"
@@ -126,6 +130,6 @@ export function TableeAttachSection({ aperoId, keys, event, comptoirName }: Tabl
           {feedback}
         </p>
       )}
-    </section>
+    </Disclosure>
   );
 }

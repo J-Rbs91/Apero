@@ -66,7 +66,7 @@ export function NotificationPermissionOnboarding({
             onClick={onSkip}
             disabled={isRequesting}
           >
-            Plus tard — garder juste le badge
+            Plus tard, garder juste le badge
           </button>
         </section>
       </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useModalDialog } from "../../hooks/useModalDialog";
 import { WineGlassMark } from "../WineGlassMark";
+import { Field } from "../ui";
 import { validateComptoirName } from "../../utils/memberName";
 
 type ComptoirNameOnboardingProps = {
@@ -63,24 +64,26 @@ export function ComptoirNameOnboarding({
           </p>
 
           <form className="vote-form" onSubmit={handleSubmit}>
-            <label className="field">
-              <span>Nom de comptoir</span>
-              <input
-                autoFocus
-                maxLength={48}
-                value={draftName}
-                onChange={(eventChange) => setDraftName(eventChange.target.value)}
-                placeholder="Jean-Michel Pastaga, Gisèle Perrier…"
-              />
-            </label>
+            <Field
+              label="Nom de comptoir"
+              requirement="required"
+              hint="Un prénom, un surnom, ce que tu veux : c’est ce que la tablée verra."
+              error={error || undefined}
+            >
+              {(control) => (
+                <input
+                  {...control}
+                  autoFocus
+                  maxLength={48}
+                  value={draftName}
+                  onChange={(eventChange) => setDraftName(eventChange.target.value)}
+                  placeholder="Jean-Michel Pastaga, Gisèle Perrier…"
+                />
+              )}
+            </Field>
             <button className="button button--primary button--block" type="submit">
               Valider mon blaze
             </button>
-            {error && (
-              <p className="feedback" role="alert">
-                {error}
-              </p>
-            )}
           </form>
         </section>
       </div>

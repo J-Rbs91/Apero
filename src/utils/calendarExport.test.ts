@@ -39,7 +39,7 @@ describe("buildAperoIcs", () => {
     // Deux heures plus tard, le mensonge socialement acceptable.
     expect(ics).toContain("DTEND:20260704T213000");
     expect(ics).toContain("DTSTAMP:20260701T100000Z");
-    expect(ics).toContain("SUMMARY:Apéro — Le Concile du Saucisson");
+    expect(ics).toContain("SUMMARY:Apéro : Le Concile du Saucisson");
     expect(ics).toContain("END:VCALENDAR");
     // Les lignes sont terminées par CRLF.
     expect(ics).toContain("\r\n");
@@ -47,7 +47,7 @@ describe("buildAperoIcs", () => {
 
   it("échappe l'adresse (virgules) dans LOCATION", () => {
     const ics = buildAperoIcs({ event, option, now: new Date("2026-07-01T10:00:00.000Z") });
-    expect(ics).toContain("Le Bar du Coin — 3 rue des Olives\\, Marseille");
+    expect(ics).toContain("Le Bar du Coin\\, 3 rue des Olives\\, Marseille");
   });
 
   it("glisse le lien d'invitation dans la description", () => {

@@ -3,7 +3,7 @@ import { calculateBestOptions } from "./calculateResults";
 import { formatOption } from "./formatOption";
 
 export function buildShareTitle(event: AperitifEvent): string {
-  return `La Confrérie du Petit Jaune — ${event.ceremonialName}`;
+  return `La Confrérie du Petit Jaune : ${event.ceremonialName}`;
 }
 
 export function buildShareText(event: AperitifEvent): string {
@@ -22,7 +22,7 @@ export function buildShareText(event: AperitifEvent): string {
   if (event.childrenAllowed != null) {
     lines.push(
       event.childrenAllowed
-        ? "Les chiards sont de la partie — ramène la portée, y’a du sirop pour tout le monde."
+        ? "Les chiards sont de la partie : ramène la portée, y’a du sirop pour tout le monde."
         : "Pas de mioches ce coup-ci : on trinque entre adultes vaccinés.",
     );
     lines.push("");

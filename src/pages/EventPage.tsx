@@ -177,7 +177,7 @@ export function EventPage() {
           <h1 className="h1 h1--sm">Cet apéro est terminé</h1>
           <p className="lede">
             La soirée est passée, cette page a été nettoyée, mais rassure-toi : les hauts faits
-            de la tablée, eux, restent gravés dans la Confrérie pour l’éternité — ou en tout cas
+            de la tablée, eux, restent gravés dans la Confrérie pour l’éternité, ou en tout cas
             jusqu’à la prochaine purge.
           </p>
           <Link className="button button--primary button--block" to="/">
@@ -196,7 +196,7 @@ export function EventPage() {
           <h1 className="h1 h1--sm">Cet apéro n’existe pas</h1>
           <p className="lede">
             Soit le lien est complètement moisi, soit le troquet a purement et simplement fermé
-            boutique — et dans les deux cas, on ne peut plus rien pour toi ici.
+            boutique, et dans les deux cas, on ne peut plus rien pour toi ici.
           </p>
           {error && <p className="feedback">{error}</p>}
           <Link className="button button--primary button--block" to="/">

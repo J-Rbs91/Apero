@@ -165,7 +165,7 @@ export function AgendaPage() {
         <section className="sheet">
           <p className="lede">
             L’ardoise est vide, désespérément vide, le comptoir tourne au ralenti dans un silence
-            presque inquiétant — à toi de relancer la machine avant que ça devienne
+            presque inquiétant. À toi de relancer la machine avant que ça devienne
             philosophique.
           </p>
           <Link className="button button--primary button--block" to="/create">

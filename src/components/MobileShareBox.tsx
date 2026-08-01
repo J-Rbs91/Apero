@@ -8,6 +8,14 @@ type MobileShareBoxProps = {
   /** Version affichée du lien (ex. lien d'invitation avec clés masquées). */
   displayUrl?: string;
   /**
+   * Vrai quand rameuter EST le geste attendu sur cet écran : le bouton passe
+   * alors en plein jaune. Ailleurs il reste en second plan, pour qu'un seul
+   * bouton plein par écran indique quoi faire.
+   */
+  isPrimary?: boolean;
+  /** Une phrase de contexte au-dessus des boutons. */
+  lead?: string;
+  /**
    * Message secondaire de relance (ex. « Sonner le rappel » de l'organisateur) :
    * même lien, mais un texte qui récapitule l'état du registre pour aiguillonner
    * les retardataires.
@@ -19,7 +27,15 @@ type MobileShareBoxProps = {
   };
 };
 
-export function MobileShareBox({ url, title, text, displayUrl, reminder }: MobileShareBoxProps) {
+export function MobileShareBox({
+  url,
+  title,
+  text,
+  displayUrl,
+  isPrimary = false,
+  lead,
+  reminder,
+}: MobileShareBoxProps) {
   const [feedback, setFeedback] = useState("");
 
   async function copyMessage(message: string, successFeedback: string) {
@@ -73,14 +89,23 @@ export function MobileShareBox({ url, title, text, displayUrl, reminder }: Mobil
   }
 
   return (
-    <div className="share-box">
-      <p className="eyebrow">Rameuter le comptoir</p>
-      <button className="button button--primary button--block" type="button" onClick={handleShare}>
+    <section className={`sheet${isPrimary ? " sheet--hero" : ""}`}>
+      <div>
+        <p className="eyebrow">Rameuter le comptoir</p>
+        {lead && <p className="lede">{lead}</p>}
+      </div>
+
+      <button
+        className={`button ${isPrimary ? "button--primary" : "button--ghost"} button--block`}
+        type="button"
+        onClick={handleShare}
+      >
         Partager l’invitation
       </button>
+
       {reminder && (
         <button
-          className="button button--ghost button--block"
+          className="button button--quiet button--block"
           type="button"
           onClick={() =>
             shareMessage(
@@ -93,17 +118,19 @@ export function MobileShareBox({ url, title, text, displayUrl, reminder }: Mobil
           {reminder.label}
         </button>
       )}
+
       <div className="share">
         <code>{displayUrl ?? url}</code>
         <button className="cp" type="button" onClick={handleCopyLink}>
           Copier
         </button>
       </div>
+
       {feedback && (
         <p className="meta" role="status">
           {feedback}
         </p>
       )}
-    </div>
+    </section>
   );
 }

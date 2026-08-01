@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { AperoMessage } from "../types/apero";
 import { hapticError, hapticTap } from "../utils/haptics";
+import { Disclosure, TextAreaField } from "./ui";
 
 // Le mur du comptoir : les mots lâchés par la tablée autour de l'apéro.
 // Pas une messagerie — un fil court, signé au blaze, gravé dans le payload
@@ -40,7 +41,8 @@ export function ComptoirWall({ messages, authorName, onPost, isSaving }: Comptoi
   const [draft, setDraft] = useState("");
   const [feedback, setFeedback] = useState("");
 
-  const canPost = Boolean(onPost && authorName.trim());
+  const trimmedAuthor = authorName.trim();
+  const canPost = Boolean(onPost && trimmedAuthor);
 
   async function handleSubmit(formEvent: React.FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
@@ -62,12 +64,18 @@ export function ComptoirWall({ messages, authorName, onPost, isSaving }: Comptoi
   }
 
   return (
-    <section className="sheet">
-      <p className="eyebrow">Le mur du comptoir</p>
+    <Disclosure
+      title="Le mur du comptoir"
+      summary={
+        messages.length === 0
+          ? "Personne n’a encore rien lâché."
+          : `Dernier mot ${formatWhen(messages[messages.length - 1].createdAt)}.`
+      }
+      badge={messages.length}
+    >
       {messages.length === 0 ? (
         <p className="lede">
-          Personne n’a encore rien lâché. Le premier mot donne toujours le ton de la
-          soirée — à toi de voir lequel.
+          Le premier mot donne toujours le ton de la soirée. À toi de voir lequel.
         </p>
       ) : (
         <div className="wall-list">
@@ -85,20 +93,20 @@ export function ComptoirWall({ messages, authorName, onPost, isSaving }: Comptoi
 
       {onPost && (
         <form className="wall-form" onSubmit={handleSubmit}>
-          <label className="field">
-            <span>Lâcher un mot{authorName.trim() ? ` (signé ${authorName.trim()})` : ""}</span>
-            <textarea
-              value={draft}
-              onChange={(eventChange) => setDraft(eventChange.target.value)}
-              rows={2}
-              maxLength={500}
-              placeholder="J’amène les olives, quelqu’un gère la glace ?"
-              disabled={!canPost || isSaving}
-            />
-          </label>
-          {!authorName.trim() && (
-            <p className="hint">Choisis d’abord ton blaze (menu de la Confrérie) pour signer tes mots.</p>
-          )}
+          <TextAreaField
+            label={trimmedAuthor ? `Lâcher un mot (signé ${trimmedAuthor})` : "Lâcher un mot"}
+            requirement="optional"
+            hint={
+              trimmedAuthor
+                ? undefined
+                : "Choisis d’abord ton blaze (menu de la Confrérie) pour signer tes mots."
+            }
+            value={draft}
+            rows={2}
+            maxLength={500}
+            placeholder="J’amène les olives, quelqu’un gère la glace ?"
+            onChange={setDraft}
+          />
           <button
             className="button button--ghost button--block"
             type="submit"
@@ -113,6 +121,6 @@ export function ComptoirWall({ messages, authorName, onPost, isSaving }: Comptoi
           )}
         </form>
       )}
-    </section>
+    </Disclosure>
   );
 }

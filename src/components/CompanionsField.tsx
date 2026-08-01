@@ -1,5 +1,5 @@
-import { ToggleSwitch } from "./ToggleSwitch";
 import { MAX_COMPANIONS } from "../utils/aperoValidation";
+import { SwitchRow } from "./ui";
 
 type CompanionsFieldProps = {
   /** Nombre de renforts (undefined = le convive vient en solo). */
@@ -10,9 +10,9 @@ type CompanionsFieldProps = {
 };
 
 /**
- * Bloc « tu ramènes du monde ? » de la réponse : réglage secondaire, donc
- * interrupteur discret plutôt que grosses pastilles. Coché, on révèle le
- * compteur de pièces rapportées au +/-.
+ * Bloc « tu ramènes du monde ? » de la réponse : une ligne oui/non qui dit son
+ * état en toutes lettres, et le compteur au +/- qui n'apparaît qu'une fois la
+ * réponse « oui ».
  */
 export function CompanionsField({
   companions,
@@ -40,20 +40,12 @@ export function CompanionsField({
 
   return (
     <div className="setting">
-      <div className="switchrow">
-        <label className="switchrow__label" htmlFor="companions-toggle">
-          <span className="switchrow__title">Tu débarques accompagné·e ?</span>
-          <span className="switchrow__state">
-            {accompanied ? "En escadron" : "Peinard, en solo"}
-          </span>
-        </label>
-        <ToggleSwitch
-          id="companions-toggle"
-          checked={accompanied}
-          onChange={setAccompanied}
-          label="Tu débarques accompagné·e ?"
-        />
-      </div>
+      <SwitchRow
+        title="Tu débarques accompagné·e ?"
+        state={accompanied ? "En escadron" : "Peinard, en solo"}
+        checked={accompanied}
+        onChange={setAccompanied}
+      />
 
       {accompanied && (
         <div className="companions">
@@ -83,7 +75,7 @@ export function CompanionsField({
               {count > 1 ? "renforts" : "renfort"}
             </span>
           </div>
-          <p className="hint">
+          <p className="field__hint">
             Le nombre de bouches en plus, qu’on prévoie assez de cacahuètes.{miocheNote}
           </p>
         </div>
