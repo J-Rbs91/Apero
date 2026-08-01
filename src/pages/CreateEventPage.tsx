@@ -328,7 +328,7 @@ export function CreateEventPage() {
         <FormSection
           step={1}
           title="Les créneaux"
-          lead="Jour, heure et troquet. Propose-en plusieurs, la tablée tranchera."
+          lead="Jour, heure et troquet : les trois sont obligatoires. Propose plusieurs créneaux, la tablée tranchera."
           status={`${completeOptions.length}/${options.length}`}
           isDone={isReady}
         >
@@ -362,9 +362,11 @@ export function CreateEventPage() {
                     )}
                   </div>
                   <div className="slot__fields">
+                    {/* Pas de pastille « Obligatoire » sur chacun des trois :
+                        le bloc le dit une fois, la carte porte son état, et
+                        l'erreur tombe sous le champ concerné à l'envoi. */}
                     <TextField
                       label="Jour"
-                      requirement="required"
                       type="date"
                       value={option.date}
                       error={showErrors && missing.includes("date") ? "Choisis un jour." : undefined}
@@ -372,7 +374,6 @@ export function CreateEventPage() {
                     />
                     <TextField
                       label="Heure"
-                      requirement="required"
                       type="time"
                       value={option.time}
                       error={showErrors && missing.includes("time") ? "Choisis une heure." : undefined}
@@ -380,7 +381,6 @@ export function CreateEventPage() {
                     />
                     <LocationField
                       label="Le troquet"
-                      requirement="required"
                       hint="Tape trois lettres, la liste te propose les rades du coin."
                       error={
                         showErrors && missing.includes("location")

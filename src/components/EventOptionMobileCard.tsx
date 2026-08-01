@@ -92,7 +92,6 @@ export function EventOptionMobileCard({
         name={`vote-${option.id}`}
         legend="Ta réponse"
         legendDetail={slotLabel}
-        requirement="required"
         layout="row"
         options={voteChoices}
         value={value}
