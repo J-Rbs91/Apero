@@ -1963,7 +1963,13 @@ textarea:focus-visible {
   gap: 6px;
 }
 
+/* `isolation: isolate` enferme l'échelle de plans de Leaflet (tuiles 400,
+   contrôles 800, coins 1000) dans le cadre de la carte. Sans ça, elle se
+   compare à nos propres calques — la modale du sceau est à 20, le carnet de
+   notifications à 200 — et la vignette peut se peindre par-dessus. */
 .minimap__canvas {
+  position: relative;
+  isolation: isolate;
   height: 150px;
   border-radius: 14px;
   border: 1px solid rgba(255, 247, 230, 0.22);
@@ -2295,6 +2301,8 @@ textarea:focus-visible {
 }
 
 .locpicker__canvas {
+  position: relative;
+  isolation: isolate;
   height: 190px;
   border-radius: 14px;
   border: 1px solid rgba(255, 247, 230, 0.22);
