@@ -72,7 +72,7 @@ function cleanText(
   }
 
   if (typeof value !== "string") {
-    fail(field, "doit etre du texte");
+    fail(field, "doit être du texte");
   }
 
   const cleaned = value.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim();
@@ -85,7 +85,7 @@ function cleanText(
   }
 
   if (cleaned.length > maxLength) {
-    fail(field, `depasse ${maxLength} caracteres`);
+    fail(field, `dépasse ${maxLength} caractères`);
   }
 
   return cleaned;
@@ -156,15 +156,15 @@ function cleanOptionalNumber(
   }
 
   if (typeof value !== "number" || !Number.isFinite(value)) {
-    fail(field, "doit etre un nombre fini");
+    fail(field, "doit être un nombre fini");
   }
 
   if (options.integer && !Number.isInteger(value)) {
-    fail(field, "doit etre un entier");
+    fail(field, "doit être un entier");
   }
 
   if (value < min || value > max) {
-    fail(field, `doit etre entre ${min} et ${max}`);
+    fail(field, `doit être entre ${min} et ${max}`);
   }
 
   return value;
@@ -176,7 +176,7 @@ function cleanOptionalBoolean(value: unknown, field: string): boolean | undefine
   }
 
   if (typeof value !== "boolean") {
-    fail(field, "doit etre un booleen");
+    fail(field, "doit être un booléen");
   }
 
   return value;
@@ -196,7 +196,7 @@ function cleanEnum<T extends string>(
   }
 
   if (typeof value !== "string" || !allowed.has(value)) {
-    fail(field, "valeur non autorisee");
+    fail(field, "valeur non autorisée");
   }
 
   return value as T;
@@ -210,11 +210,11 @@ function cleanCheers(value: unknown, field: string): string[] | undefined {
   }
 
   if (!Array.isArray(value)) {
-    fail(field, "doit etre un tableau");
+    fail(field, "doit être un tableau");
   }
 
   if (value.length > MAX_PARTICIPANTS) {
-    fail(field, `depasse ${MAX_PARTICIPANTS} entrees`);
+    fail(field, `dépasse ${MAX_PARTICIPANTS} entrées`);
   }
 
   const seen = new Set<string>();
@@ -243,26 +243,26 @@ function cleanPlaceId(value: unknown, field: string): string | undefined {
     return undefined;
   }
   if (typeof value !== "string" || !OSM_PLACE_ID_PATTERN.test(value)) {
-    fail(field, "reference de lieu OSM invalide");
+    fail(field, "référence de lieu OSM invalide");
   }
   return value;
 }
 
 function cleanOption(rawOption: unknown, index: number, optionIds: Set<string>): AperitifOption {
   if (!isRecord(rawOption)) {
-    fail(`options[${index}]`, "doit etre un objet");
+    fail(`options[${index}]`, "doit être un objet");
   }
 
   const id = cleanId(rawOption.id, `options[${index}].id`);
   if (optionIds.has(id)) {
-    fail(`options[${index}].id`, "identifiant duplique");
+    fail(`options[${index}].id`, "identifiant dupliqué");
   }
   optionIds.add(id);
 
   const locationLat = cleanOptionalNumber(rawOption.locationLat, `options[${index}].locationLat`, -90, 90);
   const locationLng = cleanOptionalNumber(rawOption.locationLng, `options[${index}].locationLng`, -180, 180);
   if ((locationLat == null) !== (locationLng == null)) {
-    fail(`options[${index}]`, "latitude et longitude doivent etre fournies ensemble");
+    fail(`options[${index}]`, "latitude et longitude doivent être fournies ensemble");
   }
 
   const option: AperitifOption = {
@@ -304,17 +304,17 @@ function cleanParticipant(
   participantIds: Set<string>,
 ): ParticipantResponse {
   if (!isRecord(rawParticipant)) {
-    fail(`participants[${index}]`, "doit etre un objet");
+    fail(`participants[${index}]`, "doit être un objet");
   }
 
   const id = cleanId(rawParticipant.id, `participants[${index}].id`);
   if (participantIds.has(id)) {
-    fail(`participants[${index}].id`, "identifiant duplique");
+    fail(`participants[${index}].id`, "identifiant dupliqué");
   }
   participantIds.add(id);
 
   if (!isRecord(rawParticipant.votes)) {
-    fail(`participants[${index}].votes`, "doit etre un objet");
+    fail(`participants[${index}].votes`, "doit être un objet");
   }
 
   const votes: Record<string, VoteStatus> = {};
@@ -367,12 +367,12 @@ function cleanMessage(
   messageIds: Set<string>,
 ): AperoMessage {
   if (!isRecord(rawMessage)) {
-    fail(`messages[${index}]`, "doit etre un objet");
+    fail(`messages[${index}]`, "doit être un objet");
   }
 
   const id = cleanId(rawMessage.id, `messages[${index}].id`);
   if (messageIds.has(id)) {
-    fail(`messages[${index}].id`, "identifiant duplique");
+    fail(`messages[${index}].id`, "identifiant dupliqué");
   }
   messageIds.add(id);
 
@@ -394,11 +394,11 @@ function cleanMessages(value: unknown): AperoMessage[] | undefined {
   }
 
   if (!Array.isArray(value)) {
-    fail("event.messages", "doit etre un tableau");
+    fail("event.messages", "doit être un tableau");
   }
 
   if (value.length > MAX_MESSAGES) {
-    fail("event.messages", `depasse ${MAX_MESSAGES} messages`);
+    fail("event.messages", `dépasse ${MAX_MESSAGES} messages`);
   }
 
   const messageIds = new Set<string>();
@@ -408,26 +408,26 @@ function cleanMessages(value: unknown): AperoMessage[] | undefined {
 
 export function sanitizeAperoEvent(rawEvent: unknown, expectedId?: string): AperitifEvent {
   if (!isRecord(rawEvent)) {
-    fail("event", "doit etre un objet");
+    fail("event", "doit être un objet");
   }
 
   const id = cleanId(rawEvent.id, "event.id", APERO_ID_PATTERN);
   if (expectedId && id !== expectedId) {
-    fail("event.id", "ne correspond pas au fichier demande");
+    fail("event.id", "ne correspond pas au fichier demandé");
   }
 
   if (!Array.isArray(rawEvent.options) || rawEvent.options.length === 0) {
-    fail("event.options", "au moins un creneau est requis");
+    fail("event.options", "au moins un créneau est requis");
   }
   if (rawEvent.options.length > MAX_OPTIONS) {
-    fail("event.options", `depasse ${MAX_OPTIONS} creneaux`);
+    fail("event.options", `dépasse ${MAX_OPTIONS} créneaux`);
   }
 
   if (!Array.isArray(rawEvent.participants)) {
-    fail("event.participants", "doit etre un tableau");
+    fail("event.participants", "doit être un tableau");
   }
   if (rawEvent.participants.length > MAX_PARTICIPANTS) {
-    fail("event.participants", `depasse ${MAX_PARTICIPANTS} participants`);
+    fail("event.participants", `dépasse ${MAX_PARTICIPANTS} participants`);
   }
 
   const optionIds = new Set<string>();

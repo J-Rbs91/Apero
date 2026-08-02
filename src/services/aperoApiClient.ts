@@ -71,7 +71,7 @@ export async function fetchEncryptedAperoFromApi(
   } catch {
     throw new AperoApiError(
       "NETWORK_ERROR",
-      "L'API apero est injoignable (reseau, CORS ou serveur arrete).",
+      "L’API apéro est injoignable (réseau, CORS ou serveur arrêté).",
     );
   }
 
@@ -98,11 +98,11 @@ export async function fetchEncryptedAperoFromApi(
   try {
     body = (await response.json()) as { ok?: boolean; file?: unknown; sha?: string };
   } catch {
-    throw new AperoApiError("UNEXPECTED_RESPONSE", "Reponse illisible de l'API apero.");
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse illisible de l’API apéro.");
   }
 
   if (body?.ok !== true || typeof body.sha !== "string" || body.file == null) {
-    throw new AperoApiError("UNEXPECTED_RESPONSE", "Reponse inattendue de l'API apero.");
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse inattendue de l’API apéro.");
   }
 
   return { status: "ok", file: body.file, sha: body.sha };
@@ -178,7 +178,7 @@ export async function createOrUpdateEncryptedApero(
   if (!baseUrl) {
     throw new AperoApiError(
       "API_NOT_CONFIGURED",
-      "VITE_APERO_API_BASE_URL est absente : impossible de joindre l'API apero.",
+      "VITE_APERO_API_BASE_URL est absente : impossible de joindre l’API apéro.",
     );
   }
 
@@ -201,7 +201,7 @@ export async function createOrUpdateEncryptedApero(
   } catch {
     throw new AperoApiError(
       "NETWORK_ERROR",
-      "L'API apero est injoignable (reseau, CORS ou serveur arrete).",
+      "L’API apéro est injoignable (réseau, CORS ou serveur arrêté).",
     );
   }
 
@@ -220,11 +220,11 @@ export async function createOrUpdateEncryptedApero(
   try {
     result = (await response.json()) as CreateOrUpdateEncryptedAperoResult;
   } catch {
-    throw new AperoApiError("UNEXPECTED_RESPONSE", "Reponse illisible de l'API apero.");
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse illisible de l’API apéro.");
   }
 
   if (result?.ok !== true || typeof result.sha !== "string") {
-    throw new AperoApiError("UNEXPECTED_RESPONSE", "Reponse inattendue de l'API apero.");
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse inattendue de l’API apéro.");
   }
 
   return result;
@@ -251,7 +251,7 @@ export async function deleteEncryptedApero(
   if (!baseUrl) {
     throw new AperoApiError(
       "API_NOT_CONFIGURED",
-      "VITE_APERO_API_BASE_URL est absente : impossible de joindre l'API apero.",
+      "VITE_APERO_API_BASE_URL est absente : impossible de joindre l’API apéro.",
     );
   }
 
@@ -272,7 +272,7 @@ export async function deleteEncryptedApero(
   } catch {
     throw new AperoApiError(
       "NETWORK_ERROR",
-      "L'API apero est injoignable (reseau, CORS ou serveur arrete).",
+      "L’API apéro est injoignable (réseau, CORS ou serveur arrêté).",
     );
   }
 
@@ -286,7 +286,7 @@ export async function deleteEncryptedApero(
   if (response.status === 404) {
     throw new AperoApiError(
       "NOT_FOUND",
-      "L'endpoint de suppression est absent de l'API deployee.",
+      "L’endpoint de suppression est absent de l’API déployée.",
       404,
       "DELETE_ENDPOINT_MISSING",
     );
@@ -307,11 +307,11 @@ export async function deleteEncryptedApero(
   try {
     result = (await response.json()) as DeleteEncryptedAperoResult;
   } catch {
-    throw new AperoApiError("UNEXPECTED_RESPONSE", "Reponse illisible de l'API apero.");
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse illisible de l’API apéro.");
   }
 
   if (result?.ok !== true) {
-    throw new AperoApiError("UNEXPECTED_RESPONSE", "Reponse inattendue de l'API apero.");
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse inattendue de l’API apéro.");
   }
 
   return result;

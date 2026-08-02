@@ -45,7 +45,7 @@ function cleanText(
   }
 
   if (typeof value !== "string") {
-    fail(field, "doit etre du texte");
+    fail(field, "doit être du texte");
   }
 
   const cleaned = value.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim();
@@ -58,7 +58,7 @@ function cleanText(
   }
 
   if (cleaned.length > maxLength) {
-    fail(field, `depasse ${maxLength} caracteres`);
+    fail(field, `dépasse ${maxLength} caractères`);
   }
 
   return cleaned;
@@ -85,14 +85,14 @@ function cleanKey(value: unknown, field: string, options: { required?: boolean }
     return undefined;
   }
   if (typeof value !== "string" || value.length < 16 || value.length > MAX_KEY_LENGTH) {
-    fail(field, "cle invalide");
+    fail(field, "clé invalide");
   }
   return value;
 }
 
 function cleanMember(rawMember: unknown, index: number): TableeMember {
   if (!isRecord(rawMember)) {
-    fail(`members[${index}]`, "doit etre un objet");
+    fail(`members[${index}]`, "doit être un objet");
   }
 
   return {
@@ -105,7 +105,7 @@ function cleanMember(rawMember: unknown, index: number): TableeMember {
 
 function cleanAperoRef(rawRef: unknown, index: number): TableeAperoRef {
   if (!isRecord(rawRef)) {
-    fail(`aperoRefs[${index}]`, "doit etre un objet");
+    fail(`aperoRefs[${index}]`, "doit être un objet");
   }
 
   const aperoId = cleanText(rawRef.aperoId, `aperoRefs[${index}].aperoId`, 80, {
@@ -134,11 +134,11 @@ function cleanAperoRef(rawRef: unknown, index: number): TableeAperoRef {
 
 export function sanitizeTablee(rawTablee: unknown, expectedId?: string): Tablee {
   if (!isRecord(rawTablee)) {
-    fail("tablee", "doit etre un objet");
+    fail("tablee", "doit être un objet");
   }
 
   if (rawTablee.kind !== "tablee") {
-    fail("tablee.kind", "ce fichier n'est pas une tablee");
+    fail("tablee.kind", "ce fichier n’est pas une tablée");
   }
 
   const id = cleanText(rawTablee.id, "tablee.id", 80, { required: true }) as string;
@@ -146,22 +146,22 @@ export function sanitizeTablee(rawTablee: unknown, expectedId?: string): Tablee 
     fail("tablee.id", "identifiant invalide");
   }
   if (expectedId && id !== expectedId) {
-    fail("tablee.id", "ne correspond pas au fichier demande");
+    fail("tablee.id", "ne correspond pas au fichier demandé");
   }
 
   if (!Array.isArray(rawTablee.members)) {
-    fail("tablee.members", "doit etre un tableau");
+    fail("tablee.members", "doit être un tableau");
   }
   if (rawTablee.members.length > MAX_MEMBERS) {
-    fail("tablee.members", `depasse ${MAX_MEMBERS} membres`);
+    fail("tablee.members", `dépasse ${MAX_MEMBERS} membres`);
   }
 
   const rawRefs = rawTablee.aperoRefs == null ? [] : rawTablee.aperoRefs;
   if (!Array.isArray(rawRefs)) {
-    fail("tablee.aperoRefs", "doit etre un tableau");
+    fail("tablee.aperoRefs", "doit être un tableau");
   }
   if (rawRefs.length > MAX_APERO_REFS) {
-    fail("tablee.aperoRefs", `depasse ${MAX_APERO_REFS} aperos`);
+    fail("tablee.aperoRefs", `dépasse ${MAX_APERO_REFS} apéros`);
   }
 
   // Membres dédupliqués par nom normalisé, comme partout ailleurs.

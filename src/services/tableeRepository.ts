@@ -151,7 +151,7 @@ export async function updateTablee(
     const current = await getTableeById(tableeId, encryptionKey);
 
     if (!current) {
-      throw new AperoApiError("NOT_FOUND", "Cette tablee n'existe pas ou plus.");
+      throw new AperoApiError("NOT_FOUND", "Cette tablée n’existe pas ou plus.");
     }
 
     const updated = sanitizeTablee(
@@ -179,7 +179,7 @@ export async function updateTablee(
     }
   }
 
-  throw new AperoApiError("CONFLICT", "Conflit d'ecriture persistant.");
+  throw new AperoApiError("CONFLICT", "Conflit d’écriture persistant.");
 }
 
 /** S'attabler : ajoute le blaze aux membres et mémorise la tablée localement. */

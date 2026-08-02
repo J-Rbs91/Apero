@@ -114,7 +114,7 @@ async function readPublicAperoFileViaRaw(
     const file = JSON.parse(new TextDecoder().decode(bytes)) as StoredEncryptedAperoFile;
     return { file, sha: await computeGitBlobSha(bytes) };
   } catch {
-    throw new EncryptedAperoError("UNREADABLE_FILE", "Fichier apero illisible.");
+    throw new EncryptedAperoError("UNREADABLE_FILE", "Fichier apéro illisible.");
   }
 }
 
@@ -143,7 +143,7 @@ export async function readPublicAperoFile(
   } catch {
     throw new EncryptedAperoError(
       "UNREADABLE_FILE",
-      "Lecture impossible via l'API apero pour le moment.",
+      "Lecture impossible via l’API apéro pour le moment.",
     );
   }
 
@@ -213,7 +213,7 @@ async function readPublicAperoFileViaGitHub(
     const file = JSON.parse(decodeBase64Content(body.content)) as StoredEncryptedAperoFile;
     return { file, sha: body.sha };
   } catch {
-    throw new EncryptedAperoError("UNREADABLE_FILE", "Fichier apero illisible.");
+    throw new EncryptedAperoError("UNREADABLE_FILE", "Fichier apéro illisible.");
   }
 }
 
@@ -423,7 +423,7 @@ export async function updateEncryptedApero(
     });
 
     if (!current) {
-      throw new EncryptedAperoError("NOT_FOUND", "Cet apero n'existe pas ou plus.");
+      throw new EncryptedAperoError("NOT_FOUND", "Cet apéro n’existe pas ou plus.");
     }
 
     const updatedEvent = sanitizeAperoEvent(
@@ -459,7 +459,7 @@ export async function updateEncryptedApero(
     }
   }
 
-  throw new AperoApiError("CONFLICT", "Conflit d'ecriture persistant.");
+  throw new AperoApiError("CONFLICT", "Conflit d’écriture persistant.");
 }
 
 /**
