@@ -114,7 +114,7 @@ export function AlternativeOptionForm({
     <FormSheet
       isOpen={isOpen}
       title="Proposer un autre créneau"
-      lead="Jour, heure et troquet, puis ton blaze. Il rejoindra la liste : toute la tablée pourra voter dessus."
+      lead="Jour, heure et troquet, puis ton blaze. Le créneau rejoindra la liste, et toute la tablée pourra voter dessus."
       onClose={onClose}
       onSubmit={handleSubmit}
       footer={
