@@ -3353,3 +3353,49 @@ textarea:focus-visible {
     transform: none;
   }
 }
+
+/* ---- Bloc refusé à l'envoi ----
+   On ne se contente pas d'un message : le formulaire remonte sur le bloc
+   fautif, le passe au rouge et le secoue une fois. */
+.slot--error {
+  border-color: var(--danger);
+  background: rgba(184, 50, 43, 0.1);
+}
+
+.slot--error .slot__state--todo {
+  background: rgba(184, 50, 43, 0.26);
+  color: var(--danger);
+}
+
+.is-shaking {
+  animation: slot-shake 560ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes slot-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  12% {
+    transform: translateX(-8px);
+  }
+  28% {
+    transform: translateX(7px);
+  }
+  44% {
+    transform: translateX(-5px);
+  }
+  60% {
+    transform: translateX(4px);
+  }
+  78% {
+    transform: translateX(-2px);
+  }
+}
+
+/* Mouvement coupé : le rouge et le défilement suffisent à désigner le bloc. */
+@media (prefers-reduced-motion: reduce) {
+  .is-shaking {
+    animation: none;
+  }
+}
