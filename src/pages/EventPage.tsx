@@ -207,7 +207,7 @@ export function EventPage() {
     );
   }
 
-  const metaText = `par ${event.organizerName} · ${event.options.length} créneaux · ${event.participants.length} réponses`;
+  const metaText = `par ${event.organizerName} · ${event.options.length} créneau${event.options.length > 1 ? "x" : ""} · ${event.participants.length} réponse${event.participants.length > 1 ? "s" : ""}`;
   const isOrganizer =
     Boolean(comptoirName) &&
     normalizeMemberName(comptoirName) === normalizeMemberName(event.organizerName);

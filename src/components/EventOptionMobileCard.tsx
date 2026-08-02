@@ -8,6 +8,10 @@ type EventOptionMobileCardProps = {
   onChange: (status: VoteStatus) => void;
   /** Message d'erreur du créneau : « il manque ta réponse ici ». */
   error?: string;
+  /** Ref posée sur la carte, pour pouvoir y ramener le regard à l'envoi. */
+  containerRef?: (node: HTMLDivElement | null) => void;
+  /** Vrai le temps de la secousse qui signale le créneau refusé. */
+  isShaking?: boolean;
   /** Créneau actuellement en tête (le plus de présences confirmées). */
   isLeading?: boolean;
   /** Vrai si le convive courant a déjà trinqué à ce créneau. */
@@ -50,6 +54,8 @@ export function EventOptionMobileCard({
   value,
   onChange,
   error,
+  containerRef,
+  isShaking,
   isLeading,
   hasCheered,
   onToggleCheer,
@@ -63,7 +69,16 @@ export function EventOptionMobileCard({
       : option.location;
 
   return (
-    <div className={`slot${value ? "" : " slot--incomplete"}`}>
+    <div
+      ref={containerRef}
+      className={[
+        "slot",
+        value ? "" : error ? "slot--error" : "slot--incomplete",
+        isShaking ? "is-shaking" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <div className="slot__top">
         <div>
           <div className="slot__d">{formatDateTime(option)}</div>
@@ -92,7 +107,6 @@ export function EventOptionMobileCard({
         name={`vote-${option.id}`}
         legend="Ta réponse"
         legendDetail={slotLabel}
-        requirement="required"
         layout="row"
         options={voteChoices}
         value={value}

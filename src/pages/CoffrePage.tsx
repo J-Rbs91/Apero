@@ -111,7 +111,7 @@ export function CoffrePage() {
       try {
         parsed = JSON.parse(rawText);
       } catch {
-        throw new VaultError("INVALID_FILE", "Ce fichier n'est pas un coffre de la Confrérie.");
+        throw new VaultError("INVALID_FILE", "Ce fichier n’est pas un coffre de la Confrérie.");
       }
 
       const payload = await decryptVault(parsed, importPassphrase);
@@ -194,7 +194,7 @@ export function CoffrePage() {
         <p className="eyebrow">Ouvrir un coffre</p>
         <p className="hint">
           Sur le nouvel appareil : choisis le fichier, saisis la phrase de passe, et tout
-          fusionne avec l’existant : un apéro déjà connu ici garde son rôle d’organisateur.
+          fusionne avec l’existant. Un apéro déjà connu ici garde son rôle d’organisateur.
         </p>
         <Field label="Fichier de coffre" requirement="required">
           {(control) => (

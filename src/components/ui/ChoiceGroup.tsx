@@ -96,6 +96,10 @@ export function ChoiceGroup<TValue extends string>({
                 name={name}
                 value={option.value}
                 checked={isPicked}
+                // Porté par les radios plutôt que par le <fieldset> : c'est ce
+                // qui permet au formulaire de venir poser le focus ici quand
+                // il remonte sur le bloc refusé.
+                aria-invalid={error ? true : undefined}
                 onChange={() => onChange(option.value)}
               />
               <span className="choice__mark" aria-hidden="true">

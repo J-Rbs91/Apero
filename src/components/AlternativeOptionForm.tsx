@@ -114,7 +114,7 @@ export function AlternativeOptionForm({
     <FormSheet
       isOpen={isOpen}
       title="Proposer un autre créneau"
-      lead="Il rejoindra la liste : toute la tablée pourra voter dessus."
+      lead="Jour, heure et troquet, puis ton blaze. Le créneau rejoindra la liste, et toute la tablée pourra voter dessus."
       onClose={onClose}
       onSubmit={handleSubmit}
       footer={
@@ -137,10 +137,11 @@ export function AlternativeOptionForm({
         </ActionBar>
       }
     >
+      {/* Les trois champs du créneau sont obligatoires : la phrase du pied de
+          feuille le dit une fois, inutile de coller une pastille sur chacun. */}
       <div className="slot__fields">
         <TextField
           label="Jour"
-          requirement="required"
           type="date"
           value={date}
           error={hasTriedSubmit && !date ? "Choisis un jour." : undefined}
@@ -148,7 +149,6 @@ export function AlternativeOptionForm({
         />
         <TextField
           label="Heure"
-          requirement="required"
           type="time"
           value={time}
           error={hasTriedSubmit && !time ? "Choisis une heure." : undefined}
@@ -156,7 +156,6 @@ export function AlternativeOptionForm({
         />
         <LocationField
           label="Le troquet"
-          requirement="required"
           placeholder="Le Bar du Coin"
           hint="Tape trois lettres, la liste te propose les rades du coin."
           error={hasTriedSubmit && !trimmedLocation ? "Indique où on se retrouve." : undefined}
@@ -167,7 +166,6 @@ export function AlternativeOptionForm({
 
       <TextField
         label="Proposé par"
-        requirement="required"
         hint="Pour que la tablée sache qui a bousculé le programme."
         value={createdByName}
         maxLength={80}

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { AperitifEvent, ParticipantResponse, VoteStatus } from "../types/apero";
 import { useComptoirName } from "../hooks/useComptoirName";
+import { useShakeInvalid } from "../hooks/useShakeInvalid";
 import { createId } from "../utils/createId";
 import { hapticError, hapticSuccess } from "../utils/haptics";
 import { normalizeMemberName } from "../utils/memberName";
@@ -103,6 +104,8 @@ export function VoteForm({
   // touché ; après une première frappe, le champ lui appartient (il doit
   // pouvoir le vider pour répondre sous un autre nom).
   const nameEditedRef = useRef(false);
+  // Renvoie le regard sur le bloc qui coince quand on tente d'émarger.
+  const { registerNode, shake, shakingId } = useShakeInvalid();
 
   const existingParticipant = useMemo(() => {
     // Même clé de normalisation que la fusion au registre (upsertParticipant) :
@@ -198,19 +201,17 @@ export function VoteForm({
     formEvent.preventDefault();
     setHasTriedSubmit(true);
 
+    // Pas de message en pied de formulaire : on remonte sur le bloc fautif,
+    // il passe au rouge, il tremble, et le focus s'y pose.
     if (isNameMissing) {
       hapticError();
-      setFeedbackTone("error");
-      setFeedback("Sans blaze, pas d’émargement. Même « Jojo » fera l’affaire.");
+      shake("name");
       return;
     }
 
     if (missingSlots.length > 0) {
       hapticError();
-      setFeedbackTone("error");
-      setFeedback(
-        "Chaque créneau attend son verdict, même un « Sans moi ». Les créneaux qui manquent sont surlignés au-dessus.",
-      );
+      shake(missingSlots[0].id);
       return;
     }
 
@@ -351,18 +352,20 @@ export function VoteForm({
           lead="Le blaze qui apparaîtra au registre de la tablée."
           isDone={!isNameMissing}
         >
-          <TextField
-            label="Ton prénom (ou blaze)"
-            requirement="required"
-            value={participantName}
-            maxLength={80}
-            placeholder="Jojo, Nadine, Éminence Chips…"
-            error={hasTriedSubmit && isNameMissing ? "Indique un blaze pour émarger." : undefined}
-            onChange={(value) => {
-              nameEditedRef.current = true;
-              setParticipantName(value);
-            }}
-          />
+          <div ref={registerNode("name")} className={shakingId === "name" ? "is-shaking" : ""}>
+            <TextField
+              label="Ton prénom (ou blaze)"
+              requirement="required"
+              value={participantName}
+              maxLength={80}
+              placeholder="Jojo, Nadine, Éminence Chips…"
+              error={hasTriedSubmit && isNameMissing ? "Indique un blaze pour émarger." : undefined}
+              onChange={(value) => {
+                nameEditedRef.current = true;
+                setParticipantName(value);
+              }}
+            />
+          </div>
         </FormSection>
 
         <FormSection
@@ -384,6 +387,8 @@ export function VoteForm({
                     ? "Ce créneau attend encore ta réponse."
                     : undefined
                 }
+                containerRef={registerNode(option.id)}
+                isShaking={shakingId === option.id}
                 isLeading={option.id === leadingOptionId}
                 hasCheered={hasCheeredOption?.(option.id)}
                 onToggleCheer={onToggleCheer ? () => onToggleCheer(option.id) : undefined}

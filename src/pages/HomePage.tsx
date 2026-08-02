@@ -134,7 +134,7 @@ export function HomePage() {
         </p>
         <p className="hint">
           Nous ne saurions présumer de ce que tu porteras à tes lèvres, ni sous quelle toiture, ou
-          pas, tu le porteras. Ces détails demeurent ta souveraine affaire. En revanche nul ne
+          pas, tu le porteras. Ces détails demeurent ta souveraine affaire. En revanche, nul ne
           saurait se dérober à la question qui vient, ça, jamais.
         </p>
         <Link

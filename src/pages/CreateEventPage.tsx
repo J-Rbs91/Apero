@@ -18,6 +18,7 @@ import { AperoApiError } from "../services/aperoApiClient";
 import { createEncryptedApero } from "../services/encryptedAperoRepository";
 import { addAperoToTablee } from "../services/tableeRepository";
 import { useComptoirName } from "../hooks/useComptoirName";
+import { useShakeInvalid } from "../hooks/useShakeInvalid";
 import type {
   AperitifEvent,
   AperitifOption,
@@ -102,6 +103,8 @@ export function CreateEventPage() {
   // dispatchés dans la même tâche JS (avant que React ne commit l'état),
   // qui créeraient deux apéros identiques.
   const submitLockRef = useRef(false);
+  // Renvoie le regard sur le créneau incomplet quand on tente de créer.
+  const { registerNode, shake, shakingId } = useShakeInvalid();
 
   function updateOption(optionId: string, updates: Partial<AperitifOption>) {
     setOptions((currentOptions) =>
@@ -152,10 +155,13 @@ export function CreateEventPage() {
       cleanedOptions.length === 0 ||
       cleanedOptions.some((option) => !option.date || !option.time || !option.location)
     ) {
+      // Pas de laïus en pied de page : on remonte sur le créneau fautif, il
+      // passe au rouge, il tremble, et le premier champ vide prend le focus.
       hapticError();
-      setFeedback(
-        "Un jour, une heure, un établissement. Sans ça, ce n’est plus un apéro, c’est un concept, et ici on n’organise pas de concepts. Les champs qui manquent sont signalés au-dessus.",
-      );
+      const firstIncomplete = options.find((option) => missingFieldsOf(option).length > 0);
+      if (firstIncomplete) {
+        shake(firstIncomplete.id);
+      }
       return;
     }
 
@@ -328,7 +334,7 @@ export function CreateEventPage() {
         <FormSection
           step={1}
           title="Les créneaux"
-          lead="Jour, heure et troquet. Propose-en plusieurs, la tablée tranchera."
+          lead="Propose plusieurs créneaux, la tablée tranchera."
           status={`${completeOptions.length}/${options.length}`}
           isDone={isReady}
         >
@@ -339,7 +345,14 @@ export function CreateEventPage() {
 
               return (
                 <div
-                  className={`slot slot--editable${missing.length > 0 ? " slot--incomplete" : ""}`}
+                  ref={registerNode(option.id)}
+                  className={[
+                    "slot slot--editable",
+                    missing.length > 0 ? (showErrors ? "slot--error" : "slot--incomplete") : "",
+                    shakingId === option.id ? "is-shaking" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
                   key={option.id}
                 >
                   <div className="slot__top">
@@ -362,9 +375,11 @@ export function CreateEventPage() {
                     )}
                   </div>
                   <div className="slot__fields">
+                    {/* Pas de pastille « Obligatoire » sur chacun des trois :
+                        le bloc le dit une fois, la carte porte son état, et
+                        l'erreur tombe sous le champ concerné à l'envoi. */}
                     <TextField
                       label="Jour"
-                      requirement="required"
                       type="date"
                       value={option.date}
                       error={showErrors && missing.includes("date") ? "Choisis un jour." : undefined}
@@ -372,7 +387,6 @@ export function CreateEventPage() {
                     />
                     <TextField
                       label="Heure"
-                      requirement="required"
                       type="time"
                       value={option.time}
                       error={showErrors && missing.includes("time") ? "Choisis une heure." : undefined}
@@ -380,7 +394,6 @@ export function CreateEventPage() {
                     />
                     <LocationField
                       label="Le troquet"
-                      requirement="required"
                       hint="Tape trois lettres, la liste te propose les rades du coin."
                       error={
                         showErrors && missing.includes("location")
