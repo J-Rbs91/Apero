@@ -124,7 +124,7 @@ export function buildTableeTitles(stats: TableeMemberStats[]): TableeTitle[] {
     titles.push({
       id: "convocateur",
       title: "Grand Convocateur",
-      description: "A convoqué le plus d'assemblées. La bande lui doit ses meilleures excuses du lendemain.",
+      description: "A convoqué le plus d’assemblées. La bande lui doit ses meilleures excuses du lendemain.",
       memberName: convocateur.displayName,
       score: convocateur.organizedCount,
     });
@@ -135,7 +135,7 @@ export function buildTableeTitles(stats: TableeMemberStats[]): TableeTitle[] {
     titles.push({
       id: "ministre",
       title: "Ministre du Peut-être",
-      description: "Champion du « j'me tâte ». Un jour il tranchera, mais pas aujourd'hui.",
+      description: "Champion du « J’me tâte ». Un jour il tranchera, mais pas aujourd’hui.",
       memberName: ministre.displayName,
       score: ministre.maybeCount,
     });

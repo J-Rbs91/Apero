@@ -87,7 +87,7 @@ export async function renderRecapImage({ recap, memberName }: RecapImageInput): 
   if (recap.biggestTableName) {
     lineBlocks.push({
       label: "La plus grande tablée",
-      value: `${recap.biggestTableName} (${recap.biggestTableSize} convives)`,
+      value: `${recap.biggestTableName} (${recap.biggestTableSize} convive${plural(recap.biggestTableSize)})`,
     });
   }
   lineBlocks.push({

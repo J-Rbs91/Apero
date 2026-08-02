@@ -141,7 +141,7 @@ export async function decryptVault(
     file.kdf.iterations < 1 ||
     file.kdf.iterations > 5_000_000
   ) {
-    throw new VaultError("INVALID_FILE", "Ce fichier n'est pas un coffre de la Confrérie.");
+    throw new VaultError("INVALID_FILE", "Ce fichier n’est pas un coffre de la Confrérie.");
   }
 
   let salt: Uint8Array<ArrayBuffer>;
@@ -162,7 +162,7 @@ export async function decryptVault(
   try {
     plaintext = await getSubtle().decrypt({ name: "AES-GCM", iv }, key, ciphertext);
   } catch {
-    throw new VaultError("BAD_PASSPHRASE", "Cette phrase de passe n'ouvre pas ce coffre.");
+    throw new VaultError("BAD_PASSPHRASE", "Cette phrase de passe n’ouvre pas ce coffre.");
   }
 
   try {
