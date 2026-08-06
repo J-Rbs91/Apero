@@ -282,6 +282,32 @@ Conséquence pour les notifications système : on fait du **best-effort** via l�
 
 L’interface n’utilise aucun emoji. Les pictogrammes doivent être des SVG monochromes de style glyph afin de conserver une direction artistique cohérente.
 
-Les icônes locales vivent dans `src/assets/icons/`. Les fichiers actuels sont des placeholders SVG simples, monochromes et recolorables via `currentColor`. Les SVG définitifs doivent être téléchargés depuis IconScout en style glyph avant une mise en production visuelle.
+Les icônes locales vivent dans `src/assets/icons/`. Les fichiers actuels sont des placeholders SVG simples, monochromes et recolorables via `currentColor`.
+
+> ⚠️ **Ne pas committer d'icônes IconScout ici.** Ce dépôt est public, or la [licence IconScout](https://iconscout.com/licenses) interdit la redistribution de ses éléments « with source files », même modifiés et même gratuits : les verser dans un dépôt public serait une violation. Pour les SVG définitifs en style glyph, prendre un jeu sous licence permissive — [Lucide](https://lucide.dev/) (ISC), [Phosphor](https://phosphoricons.com/) (MIT) ou [Tabler Icons](https://tabler.io/icons) (MIT) — et l'ajouter à `CREDITS.md`.
 
 Les badges utilisent `iconName` plutôt qu’un champ `icon` en emoji. Le composant `Icon` applique les SVG locaux sous forme de masque CSS, ce qui permet de contrôler la couleur depuis les styles.
+
+## Licence et crédits
+
+Le code source est publié sous **licence MIT** (voir [`LICENSE`](LICENSE)).
+
+Certains actifs embarqués dans ce dépôt ne sont **pas** couverts par cette licence et
+restent soumis à la leur — police Manrope (SIL OFL 1.1), animation Lottie issue de
+Noto Animated Emoji (CC BY 4.0, modifiée), images d'ambiance générées par IA, données
+cartographiques OpenStreetMap (ODbL). Le détail, fichier par fichier, est dans
+[`CREDITS.md`](CREDITS.md).
+
+Deux règles à respecter pour toute contribution :
+
+- **Aucun actif dont la licence interdit la redistribution avec les fichiers sources**
+  (le dépôt est public — cela exclut notamment IconScout).
+- **Aucune ressource chargée depuis un CDN tiers** dans le parcours utilisateur. Les
+  polices sont auto-hébergées : servir Manrope depuis `fonts.googleapis.com`
+  transmettrait l'adresse IP de chaque visiteur à Google sans base légale, ce qu'un
+  tribunal allemand a jugé contraire au RGPD (LG München I, 20 janvier 2022).
+
+Les mentions légales et l'information RGPD destinées aux utilisateurs vivent dans
+l'app, sur la route `#/registre-legal` (`src/pages/RegistreLegalPage.tsx`) : toute
+évolution qui changerait la nature des données traitées doit y être répercutée avant
+d'être déployée.

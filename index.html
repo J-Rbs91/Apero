@@ -14,12 +14,10 @@
     <link rel="apple-touch-icon" href="%BASE_URL%apple-touch-icon.png" />
     <link rel="manifest" href="%BASE_URL%manifest.webmanifest" />
     <meta name="theme-color" content="#182c1f" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Manrope est auto-hébergée (src/assets/fonts/, déclarée dans
+         src/styles/global.css). Ne jamais rétablir un chargement de police
+         depuis un CDN tiers : cela transmettrait l'adresse IP de chaque
+         visiteur sans base légale (RGPD). Voir CREDITS.md. -->
   </head>
   <body>
     <div id="root"></div>

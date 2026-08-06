@@ -30,6 +30,11 @@ const NotificationsPage = lazy(() =>
 const PalmaresPage = lazy(() =>
   import("../pages/PalmaresPage").then((module) => ({ default: module.PalmaresPage })),
 );
+const RegistreLegalPage = lazy(() =>
+  import("../pages/RegistreLegalPage").then((module) => ({
+    default: module.RegistreLegalPage,
+  })),
+);
 const TableePage = lazy(() =>
   import("../pages/TableePage").then((module) => ({ default: module.TableePage })),
 );
@@ -81,6 +86,9 @@ export function AppRouter() {
           <Route path="/palmares" element={<PalmaresPage />} />
           <Route path="/comptes" element={<ComptesPage />} />
           <Route path="/coffre" element={<CoffrePage />} />
+          {/* Mentions légales et information RGPD : obligatoires pour un
+              service en ligne accessible au public. */}
+          <Route path="/registre-legal" element={<RegistreLegalPage />} />
           {/* Les Tablées : mêmes règles que les invitations, clés dans le
               fragment (#/tablee/:tableeId?k=…&w=…), jamais vers un serveur. */}
           <Route path="/tablees" element={<TableesPage />} />

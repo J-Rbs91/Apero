@@ -79,6 +79,14 @@ export function ConfrerieMenuPanel({
             >
               Changer de blaze
             </button>
+            <Link
+              className="brand-menu__item brand-menu__item--sub"
+              role="menuitem"
+              to="/registre-legal"
+              onClick={onClose}
+            >
+              Le registre légal
+            </Link>
           </div>
         )}
       </div>
