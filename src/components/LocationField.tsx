@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { LocationPickerMap } from "./LocationPickerMap";
+import { OsmAttribution } from "./OsmAttribution";
 import type { PlaceSuggestion } from "../utils/photonGeocoding";
 import { reverseGeocode, searchPlaces } from "../utils/photonGeocoding";
 import type { NearbyPlace } from "../utils/nearbyPlaces";
@@ -395,6 +396,7 @@ export function LocationField({
                     sur la carte.
                   </p>
                 )}
+                {suggestions.length > 0 && <OsmAttribution />}
               </div>
             </div>
           </div>,
@@ -469,6 +471,9 @@ export function LocationField({
                 </button>
               </li>
             ))}
+            <li className="locfield__nearby-credit">
+              <OsmAttribution />
+            </li>
           </ul>
         ))}
 
