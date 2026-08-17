@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
+import { AppLink } from "../components/AppLink";
 import { BrandMenu } from "../components/BrandMenu";
 import { MobilePage } from "../components/MobilePage";
 import { eventStorage } from "../services";
@@ -118,9 +118,9 @@ export function HomePage() {
               {nextApero.event.participants.length > 1 ? "s" : ""} au registre
             </span>
           </p>
-          <Link className="button button--primary button--block" to={nextApero.path}>
+          <AppLink className="button button--primary button--block" to={nextApero.path}>
             Ouvrir l’apéro
-          </Link>
+          </AppLink>
         </section>
       )}
 
@@ -137,12 +137,12 @@ export function HomePage() {
           pas, tu le porteras. Ces détails demeurent ta souveraine affaire. En revanche, nul ne
           saurait se dérober à la question qui vient, ça, jamais.
         </p>
-        <Link
+        <AppLink
           className={`button ${nextApero ? "button--ghost" : "button--primary"} button--block`}
           to="/create"
         >
           Organiser un apéro
-        </Link>
+        </AppLink>
       </section>
     </MobilePage>
   );

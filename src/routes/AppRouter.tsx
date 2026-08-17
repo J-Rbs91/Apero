@@ -1,5 +1,7 @@
 import { lazy, Suspense } from "react";
-import { HashRouter, Link, Route, Routes } from "react-router";
+import { HashRouter, Route, Routes } from "react-router";
+import { AppLink } from "../components/AppLink";
+import { RelaisDeNavigation } from "./useAppNavigation";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
@@ -62,9 +64,9 @@ function NotFoundRoute() {
           Cette porte ne mène nulle part : lien tronqué ou adresse inconnue. Si on
           t’a invité·e, demande le lien complet à la personne qui organise.
         </p>
-        <Link className="button button--ghost button--block" to="/">
+        <AppLink className="button button--ghost button--block" to="/">
           Retour au comptoir
-        </Link>
+        </AppLink>
       </section>
     </MobilePage>
   );
@@ -73,6 +75,7 @@ function NotFoundRoute() {
 export function AppRouter() {
   return (
     <HashRouter>
+      <RelaisDeNavigation />
       <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/" element={<HomePage />} />

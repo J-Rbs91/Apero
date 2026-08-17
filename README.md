@@ -99,7 +99,8 @@ npm run dev
 ## Tests
 
 ```bash
-npm test
+npm test          # unitaires + garde-fous de structure
+npm run test:nav  # contrat du geste retour, dans un vrai navigateur
 ```
 
 ## Build
@@ -130,6 +131,31 @@ Le workflow injecte `VITE_APERO_API_BASE_URL` au build depuis une **variable de 
 Cette URL n’est pas un secret (elle est publique dans le bundle), une variable suffit — pas besoin d’un secret GitHub. Par tolérance, le workflow accepte aussi un **secret** du même nom si la variable est absente, mais l’onglet `Variables` reste l’endroit recommandé.
 
 La procédure complète (mise en service de l’API sur le VPS + raccordement GitHub) est décrite dans [`docs/RACCORDEMENT-VPS.md`](docs/RACCORDEMENT-VPS.md).
+
+## Navigation : ce que fait le geste retour
+
+Le bouton retour d'Android, celui du navigateur et le glissement latéral d'iOS
+rejouent la **pile d'historique** — la chronologie des écrans visités, à
+l'envers. On se représente pourtant une application comme un **arbre**, où
+« retour » veut dire remonter d'un niveau. Les deux divergent au premier pas de
+côté, et c'est le défaut de navigation le plus courant des applications web
+installables : il ne se voit pas sur un ordinateur, où personne n'appuie sur
+retour.
+
+Un seul invariant le tient : la pile d'historique est toujours le chemin de la
+racine à l'écran courant. Descendre empile, un frère remplace, remonter dépile —
+et l'intention se déduit de la position des deux écrans dans l'arbre, jamais
+d'une déclaration à la main. Rien n'est intercepté : c'est le navigateur qui
+dépile.
+
+- [`src/routes/navigationTree.ts`](src/routes/navigationTree.ts) — le seul
+  endroit où la structure est déclarée. Ajouter un écran, c'est y ajouter une
+  ligne ; `npm test` échoue s'il manque.
+- [`src/routes/useAppNavigation.ts`](src/routes/useAppNavigation.ts) — le point
+  de passage unique, qui compare les profondeurs et choisit le geste.
+- [`docs/NAVIGATION.md`](docs/NAVIGATION.md) — le contrat, les arbitrages, et
+  les six vérifications à faire sur un téléphone. Elles ne s'automatisent pas
+  ici : un geste retour ne se lit pas dans du code.
 
 ## Interface : le kit de la Confrérie
 

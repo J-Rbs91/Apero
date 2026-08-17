@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router";
+import { useAppNavigation } from "../routes/useAppNavigation";
 import { HeaderNav } from "./HeaderNav";
 
 type MobileHeaderProps = {
@@ -8,21 +8,22 @@ type MobileHeaderProps = {
 };
 
 export function MobileHeader({ eyebrow, title, meta }: MobileHeaderProps) {
-  const navigate = useNavigate();
+  /* Le bouton retour REMONTE d'un niveau dans l'arbre — il ne rejoue pas la
+     chronologie des visites. `navigate(-1)` ramenait à l'écran précédemment vu,
+     ce qui n'est le parent qu'au premier pas : après trois apéros consultés à la
+     file, il fallait trois appuis pour revenir au programme. Et il ne navigue
+     pas non plus vers le parent, ce qui empilerait une entrée de plus et
+     éloignerait la sortie à chaque remontée.
 
-  function handleBack() {
-    const historyIndex = window.history.state?.idx ?? 0;
-    if (historyIndex > 0) {
-      navigate(-1);
-    } else {
-      navigate("/");
-    }
-  }
+     C'est aussi la seule façon que ce bouton et celui du téléphone aboutissent
+     au même écran depuis le même point. Le contrat est en tête de
+     src/routes/navigationTree.ts. */
+  const { remonter } = useAppNavigation();
 
   return (
     <header className="screen-head">
       <div className="backrow">
-        <button type="button" className="bk" onClick={handleBack} aria-label="Retour">
+        <button type="button" className="bk" onClick={remonter} aria-label="Retour">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
             <path
               d="M15 5l-7 7 7 7"

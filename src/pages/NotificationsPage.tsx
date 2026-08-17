@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { AppLink } from "../components/AppLink";
+import { useAppNavigation } from "../routes/useAppNavigation";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { getAperoStorageMode } from "../config/aperoApiConfig";
@@ -33,7 +34,7 @@ function formatWhen(iso: string): string {
 }
 
 export function NotificationsPage() {
-  const navigate = useNavigate();
+  const { aller } = useAppNavigation();
   const { notifications, unreadCount, markAllRead, clearNotifications } = useNotifications();
   const { permission, isSupported, request } = useNotificationPermission();
 
@@ -60,7 +61,7 @@ export function NotificationsPage() {
   const sorted = useMemo(() => notifications, [notifications]);
 
   function handleOpen(notification: AppNotification) {
-    navigate(aperoPath(notification.aperoId));
+    aller(aperoPath(notification.aperoId));
   }
 
   return (
@@ -109,9 +110,9 @@ export function NotificationsPage() {
             Le carnet est vide, silencieux, presque zen. Dès qu’un convive bouge une olive, tu le
             sauras ici.
           </p>
-          <Link className="button button--ghost button--block" to="/agenda">
+          <AppLink className="button button--ghost button--block" to="/agenda">
             Voir l’ardoise du comptoir
-          </Link>
+          </AppLink>
         </section>
       ) : (
         <div className="notif-list">

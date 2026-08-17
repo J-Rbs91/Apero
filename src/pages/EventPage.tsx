@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router";
+import { useLocation, useParams } from "react-router";
+import { AppLink } from "../components/AppLink";
+import { useAppNavigation } from "../routes/useAppNavigation";
 import { AlternativeOptionForm } from "../components/AlternativeOptionForm";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
@@ -20,7 +22,7 @@ const MIN_LOADING_MS = 700;
 
 export function EventPage() {
   const { eventId } = useParams<{ eventId: string }>();
-  const navigate = useNavigate();
+  const { aller } = useAppNavigation();
   const location = useLocation();
   const { comptoirName } = useComptoirName();
   const seededEvent = (location.state as { createdEvent?: AperitifEvent } | null)?.createdEvent;
@@ -150,7 +152,9 @@ export function EventPage() {
       setIsDeleting(true);
       setError("");
       await eventStorage.deleteEvent(eventId);
-      navigate("/agenda", { replace: true });
+      /* Même raison que sur la page d'invitation : l'apéro supprimé quitte la
+         pile avec son entrée. */
+      aller("/agenda");
     } catch (deleteError) {
       setError(
         deleteError instanceof Error
@@ -180,9 +184,9 @@ export function EventPage() {
             de la tablée, eux, restent gravés dans la Confrérie pour l’éternité, ou en tout cas
             jusqu’à la prochaine purge.
           </p>
-          <Link className="button button--primary button--block" to="/">
+          <AppLink className="button button--primary button--block" to="/">
             Retourner à l’accueil
-          </Link>
+          </AppLink>
         </section>
       </MobilePage>
     );
@@ -199,9 +203,9 @@ export function EventPage() {
             boutique, et dans les deux cas, on ne peut plus rien pour toi ici.
           </p>
           {error && <p className="feedback">{error}</p>}
-          <Link className="button button--primary button--block" to="/">
+          <AppLink className="button button--primary button--block" to="/">
             Retour à la Confrérie
-          </Link>
+          </AppLink>
         </section>
       </MobilePage>
     );

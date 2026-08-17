@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
+import { useLocation } from "react-router";
+import { AppLink } from "../components/AppLink";
+import { useAppNavigation } from "../routes/useAppNavigation";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
@@ -40,7 +42,7 @@ function suggestTableeName(ceremonialName: string): string {
 }
 
 export function TableesPage() {
-  const navigate = useNavigate();
+  const { aller } = useAppNavigation();
   const location = useLocation();
   const { comptoirName } = useComptoirName();
 
@@ -118,12 +120,14 @@ export function TableesPage() {
           : undefined,
       });
 
-      navigate(
+      /* La tablée créée est un cran plus profond que la liste : on descend, on
+         ne remplace pas. Le geste retour ramène alors à la liste — d'où on
+         vient — au lieu de sauter au comptoir. */
+      aller(
         buildTableePath(created.tableeId, {
           encryptionKey: created.encryptionKey,
           writeKey: created.writeKey,
         }),
-        { replace: true },
       );
     } catch (createError) {
       setFeedback(
@@ -190,7 +194,7 @@ export function TableesPage() {
               <h2 className="h2">{tablee!.name}</h2>
               {tablee!.motto && <p className="lede">{"« "}{tablee!.motto}{" »"}</p>}
               <p className="meta">fondée par {tablee!.founderName}</p>
-              <Link
+              <AppLink
                 className="button button--ghost button--block"
                 to={buildTableePath(entry.tableeId, {
                   encryptionKey: entry.encryptionKey,
@@ -198,7 +202,7 @@ export function TableesPage() {
                 })}
               >
                 Voir la tablée
-              </Link>
+              </AppLink>
             </section>
           ))}
         </div>

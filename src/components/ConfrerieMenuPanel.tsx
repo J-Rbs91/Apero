@@ -1,8 +1,15 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { AppLink } from "./AppLink";
 import { requestComptoirNameEdit } from "../hooks/useComptoirName";
 
 // Panneau partagé du menu de la Confrérie (accueil + pages intérieures).
+//
+// Les entrées ne referment pas le menu elles-mêmes : le menu est une couche
+// posée sur l'écran, son ouverture vit dans l'historique, et une entrée de menu
+// est au même niveau que l'écran visé — la navigation REMPLACE donc l'entrée de
+// la couche, ce qui referme le menu et laisse la pile inchangée. `onClose` ne
+// sert plus qu'aux fermetures sans navigation : Échap, clic hors du panneau, et
+// le changement de blaze qui ouvre une invite par-dessus.
 // Les entrées du quotidien (Au programme, Tablées) et les bilans (Palmarès,
 // Rétrospective) restent à plat ; la sauvegarde et le changement de blaze,
 // plus rares, sont repliés dans un sous-menu « Réglages ». Le carnet des
@@ -21,22 +28,22 @@ export function ConfrerieMenuPanel({
   return (
     <div className={className} role="menu">
       {withComptoirLink && (
-        <Link className="brand-menu__item" role="menuitem" to="/" onClick={onClose}>
+        <AppLink className="brand-menu__item" role="menuitem" to="/">
           Le Comptoir
-        </Link>
+        </AppLink>
       )}
-      <Link className="brand-menu__item" role="menuitem" to="/agenda" onClick={onClose}>
+      <AppLink className="brand-menu__item" role="menuitem" to="/agenda">
         Au programme
-      </Link>
-      <Link className="brand-menu__item" role="menuitem" to="/tablees" onClick={onClose}>
+      </AppLink>
+      <AppLink className="brand-menu__item" role="menuitem" to="/tablees">
         Tablées
-      </Link>
-      <Link className="brand-menu__item" role="menuitem" to="/palmares" onClick={onClose}>
+      </AppLink>
+      <AppLink className="brand-menu__item" role="menuitem" to="/palmares">
         Palmarès
-      </Link>
-      <Link className="brand-menu__item" role="menuitem" to="/comptes" onClick={onClose}>
+      </AppLink>
+      <AppLink className="brand-menu__item" role="menuitem" to="/comptes">
         Rétrospective
-      </Link>
+      </AppLink>
 
       <div className="brand-menu__group">
         <button
@@ -60,14 +67,13 @@ export function ConfrerieMenuPanel({
         </button>
         {isSettingsOpen && (
           <div className="brand-menu__sub" role="menu">
-            <Link
+            <AppLink
               className="brand-menu__item brand-menu__item--sub"
               role="menuitem"
               to="/coffre"
-              onClick={onClose}
             >
               Sauvegarde
-            </Link>
+            </AppLink>
             <button
               type="button"
               className="brand-menu__item brand-menu__item--sub"
@@ -79,14 +85,13 @@ export function ConfrerieMenuPanel({
             >
               Changer de blaze
             </button>
-            <Link
+            <AppLink
               className="brand-menu__item brand-menu__item--sub"
               role="menuitem"
               to="/registre-legal"
-              onClick={onClose}
             >
               Le registre légal
-            </Link>
+            </AppLink>
           </div>
         )}
       </div>
