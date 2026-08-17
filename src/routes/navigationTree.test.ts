@@ -88,6 +88,22 @@ describe("l'arbre des écrans", () => {
   });
 });
 
+describe("le bouton retour de l'interface", () => {
+  it("est présent sur chaque écran intérieur", () => {
+    /* L'iPhone n'a pas de bouton retour matériel, et une application ajoutée à
+       l'écran d'accueil n'a pas de barre de navigateur : sans en-tête portant
+       le retour, l'écran est sans issue. Seul le comptoir en est dispensé —
+       c'est la racine, il n'y a rien au-dessus. */
+    const sansRetour = Object.entries(SOURCES)
+      .filter(([chemin]) => /\/pages\/[A-Za-z]+Page\.tsx$/.test(chemin))
+      .filter(([chemin]) => !chemin.endsWith("HomePage.tsx"))
+      .filter(([, source]) => !source.includes("MobileHeader"))
+      .map(([chemin]) => chemin);
+
+    expect(sansRetour).toEqual([]);
+  });
+});
+
 describe("le point de passage unique", () => {
   it("est le seul à naviguer : aucune page n'utilise Link ou useNavigate", () => {
     /* Un lien qui contourne le point de passage est le seul endroit où le
