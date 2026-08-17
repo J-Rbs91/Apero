@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:functional": "node tests/functional/run.mjs",
+    "test:nav": "node tests/functional/navigation.mjs",
     "test:functional:sqlite": "node tests/functional/run-sqlite.mjs"
   },
   "dependencies": {

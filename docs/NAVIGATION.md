@@ -148,8 +148,14 @@ dans du code : il se constate, et il se compte.
 6. **Arriver directement en profondeur** par un lien d'invitation, puis appuyer
    sur retour. On doit monter dans l'arbre, pas sortir au premier appui.
 
-`npm test` ne vérifie pas ce comportement — il ne le pourrait pas sans
-navigateur. Il protège les deux conditions structurelles sans lesquelles le
+`npm run test:nav` (`tests/functional/navigation.mjs`) déroule ces six
+vérifications dans un vrai navigateur, sur un écran de téléphone, avec de vrais
+parcours d'historique : la page ne les voit pas venir, ce qui est précisément ce
+qui distingue ce contrôle d'un test qui appellerait la fonction de fermeture. Ce
+qu'il ne peut pas attester, c'est le ressenti du glissement latéral d'iOS —
+celui-là se voit sur un appareil.
+
+`npm test` protège en plus les deux conditions structurelles sans lesquelles le
 défaut revient au prochain écran ajouté : la profondeur déclarée en un seul
 endroit, et la navigation qui passe par un seul point (aucun `<Link>` ni
 `useNavigate` hors de `AppLink` et `useAppNavigation`).

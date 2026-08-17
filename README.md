@@ -99,7 +99,8 @@ npm run dev
 ## Tests
 
 ```bash
-npm test
+npm test          # unitaires + garde-fous de structure
+npm run test:nav  # contrat du geste retour, dans un vrai navigateur
 ```
 
 ## Build
