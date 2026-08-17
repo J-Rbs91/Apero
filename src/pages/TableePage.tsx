@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router";
+import { useLocation, useParams } from "react-router";
+import { AppLink } from "../components/AppLink";
+import { useAppNavigation } from "../routes/useAppNavigation";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
@@ -55,7 +57,7 @@ function formatAperoDate(item: TableeAperoItem): string {
 export function TableePage() {
   const { tableeId } = useParams<{ tableeId: string }>();
   const location = useLocation();
-  const navigate = useNavigate();
+  const { aller } = useAppNavigation();
   const { comptoirName } = useComptoirName();
 
   const keys = useMemo(() => {
@@ -171,9 +173,9 @@ export function TableePage() {
         <section className="sheet">
           <h1 className="h1 h1--sm">Aïe, ce lien coince</h1>
           <p className="lede">{message}</p>
-          <Link className="button button--ghost button--block" to="/tablees">
+          <AppLink className="button button--ghost button--block" to="/tablees">
             Voir mes tablées
-          </Link>
+          </AppLink>
         </section>
       </MobilePage>
     );
@@ -251,7 +253,7 @@ export function TableePage() {
           type="button"
           className="button button--primary button--block"
           onClick={() =>
-            navigate("/create", {
+            aller("/create", {
               state: {
                 linkToTablee: keys.writeKey
                   ? {
@@ -290,7 +292,7 @@ export function TableePage() {
                   )}
                 </div>
                 {(item.event || item.failed) && (
-                  <Link
+                  <AppLink
                     className="ghost-link"
                     to={buildInvitePath(item.ref.aperoId, {
                       encryptionKey: item.ref.encryptionKey,
@@ -298,7 +300,7 @@ export function TableePage() {
                     })}
                   >
                     Ouvrir l’apéro
-                  </Link>
+                  </AppLink>
                 )}
               </div>
             ))}

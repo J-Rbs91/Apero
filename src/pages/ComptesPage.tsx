@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router";
+import { AppLink } from "../components/AppLink";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
@@ -119,9 +119,9 @@ export function ComptesPage() {
             Aucune trace de toi dans les registres de {year} sur cet appareil. Soit une
             année sobre, soit une année ailleurs : dans les deux cas, ça se rattrape.
           </p>
-          <Link className="button button--primary button--block" to="/create">
+          <AppLink className="button button--primary button--block" to="/create">
             Lancer l’année {currentYear}
-          </Link>
+          </AppLink>
         </section>
       ) : (
         <>

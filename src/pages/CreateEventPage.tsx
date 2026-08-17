@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation } from "react-router";
+import { useAppNavigation } from "../routes/useAppNavigation";
 import { LocationField } from "../components/LocationField";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
@@ -71,7 +72,7 @@ function missingFieldsOf(option: AperitifOption): Array<"date" | "time" | "locat
 }
 
 export function CreateEventPage() {
-  const navigate = useNavigate();
+  const { aller } = useAppNavigation();
   const location = useLocation();
   const { comptoirName } = useComptoirName();
 
@@ -264,7 +265,10 @@ export function CreateEventPage() {
         }
 
         hapticSuccess();
-        navigate(
+        /* Fin de tunnel : l'apéro créé est au même niveau que le formulaire, la
+           navigation REMPLACE donc son entrée. Un appui sur retour ramène d'où
+           l'on venait, et ne rouvre pas un parcours terminé. */
+        aller(
           buildInvitePath(created.aperoId, {
             encryptionKey: created.encryptionKey,
             writeKey: created.writeKey,
@@ -296,7 +300,7 @@ export function CreateEventPage() {
 
       await eventStorage.createEvent(event);
       hapticSuccess();
-      navigate(`/event/${event.id}`, { state: { createdEvent: event } });
+      aller(`/event/${event.id}`, { state: { createdEvent: event } });
     } catch (error) {
       hapticError();
       setFeedback(

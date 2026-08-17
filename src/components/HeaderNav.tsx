@@ -1,12 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { useAppNavigation } from "../routes/useAppNavigation";
 import { ConfrerieMenuPanel } from "./ConfrerieMenuPanel";
 import { NotificationBell } from "./NotificationBell";
 
 // Navigation globale des pages intérieures : la cloche et le menu de la
 // Confrérie suivent l'utilisateur partout — plus besoin de remonter à
 // l'accueil pour retrouver le programme, ses tablées ou sa rétrospective.
+/* Même couche que sur l'accueil, même raison : voir BrandMenu. */
 export function HeaderNav() {
-  const [isOpen, setIsOpen] = useState(false);
+  const { ouvrirCouche, fermerCouche, coucheCourante } = useAppNavigation();
+  const isOpen = coucheCourante === "menu";
+  const setIsOpen = (ouvert: boolean) => (ouvert ? ouvrirCouche("menu") : fermerCouche());
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,7 +47,7 @@ export function HeaderNav() {
         aria-haspopup="menu"
         aria-expanded={isOpen}
         aria-label="Menu de la Confrérie"
-        onClick={() => setIsOpen((open) => !open)}
+        onClick={() => setIsOpen(!isOpen)}
       >
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
           <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" />

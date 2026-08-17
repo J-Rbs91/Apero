@@ -1,10 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { useAppNavigation } from "../routes/useAppNavigation";
 import { ConfrerieMenuPanel } from "./ConfrerieMenuPanel";
 import { NotificationBell } from "./NotificationBell";
 import { WineGlassMark } from "./WineGlassMark";
 
+/* Le menu est une COUCHE posée sur l'écran, pas un écran : son ouverture empile
+   une entrée d'historique, et le geste retour du téléphone la referme au lieu de
+   quitter la page. L'état ouvert se LIT dans l'historique plutôt que de vivre à
+   côté — deux sources qui divergent, c'est un menu qui reste affiché sur un
+   écran qu'on a quitté. Le contrat est en tête de src/routes/navigationTree.ts. */
 export function BrandMenu() {
-  const [isOpen, setIsOpen] = useState(false);
+  const { ouvrirCouche, fermerCouche, coucheCourante } = useAppNavigation();
+  const isOpen = coucheCourante === "menu";
+  const setIsOpen = (ouvert: boolean) => (ouvert ? ouvrirCouche("menu") : fermerCouche());
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -41,7 +49,7 @@ export function BrandMenu() {
         aria-haspopup="menu"
         aria-expanded={isOpen}
         aria-label="Menu de la Confrérie"
-        onClick={() => setIsOpen((open) => !open)}
+        onClick={() => setIsOpen(!isOpen)}
       >
         <WineGlassMark size={26} />
         <span>Menu de la Confrérie</span>

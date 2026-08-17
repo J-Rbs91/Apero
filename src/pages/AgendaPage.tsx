@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { AppLink } from "../components/AppLink";
+import { useAppNavigation } from "../routes/useAppNavigation";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
@@ -54,7 +55,7 @@ async function loadMyLocalAperos(): Promise<AperitifEvent[]> {
 }
 
 export function AgendaPage() {
-  const navigate = useNavigate();
+  const { aller } = useAppNavigation();
   const [events, setEvents] = useState<AperitifEvent[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -168,9 +169,9 @@ export function AgendaPage() {
             presque inquiétant. À toi de relancer la machine avant que ça devienne
             philosophique.
           </p>
-          <Link className="button button--primary button--block" to="/create">
+          <AppLink className="button button--primary button--block" to="/create">
             Organiser un apéro
-          </Link>
+          </AppLink>
         </section>
       ) : (
         <div className="event-stack">
@@ -198,14 +199,14 @@ export function AgendaPage() {
                 ))}
               </div>
 
-              <Link
+              <AppLink
                 className="button button--ghost button--block"
                 to={
                   storageMode === "api-vps" ? `/invite/${event.id}` : `/event/${event.id}`
                 }
               >
                 Ouvrir l’apéro
-              </Link>
+              </AppLink>
 
               <TraquenardGauge
                 level={calculateAverageTraquenardLevel(event)}
@@ -246,19 +247,19 @@ export function AgendaPage() {
                     type="button"
                     className="button button--primary"
                     onClick={() =>
-                      navigate("/create", { state: { prefill: buildNextRoundPrefill(event) } })
+                      aller("/create", { state: { prefill: buildNextRoundPrefill(event) } })
                     }
                   >
                     Remettre ça
                   </button>
-                  <Link
+                  <AppLink
                     className="button button--ghost"
                     to={
                       storageMode === "api-vps" ? `/invite/${event.id}` : `/event/${event.id}`
                     }
                   >
                     Ouvrir l’apéro
-                  </Link>
+                  </AppLink>
                 </div>
               </section>
             ))}

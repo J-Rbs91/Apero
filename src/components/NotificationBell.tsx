@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { AppLink } from "./AppLink";
 import { useNotifications } from "../hooks/useNotifications";
 import { NotificationBadge } from "./NotificationBadge";
 
@@ -8,7 +8,7 @@ export function NotificationBell({ className }: { className?: string }) {
   const { unreadCount } = useNotifications();
 
   return (
-    <Link
+    <AppLink
       to="/notifications"
       className={`notif-bell${className ? ` ${className}` : ""}`}
       aria-label={
@@ -34,6 +34,6 @@ export function NotificationBell({ className }: { className?: string }) {
         />
       </svg>
       <NotificationBadge count={unreadCount} />
-    </Link>
+    </AppLink>
   );
 }

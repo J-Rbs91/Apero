@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useParams } from "react-router";
+import { AppLink } from "../components/AppLink";
+import { useAppNavigation } from "../routes/useAppNavigation";
 import { AlternativeOptionForm } from "../components/AlternativeOptionForm";
 import { AperoSettingsForm } from "../components/AperoSettingsForm";
 import { ComptoirWall } from "../components/ComptoirWall";
@@ -55,7 +57,7 @@ import { buildReminderText, buildShareText, buildShareTitle } from "../utils/sha
 
 export function InvitePage() {
   const { aperoId } = useParams<{ aperoId: string }>();
-  const navigate = useNavigate();
+  const { aller } = useAppNavigation();
   const { comptoirName, setComptoirName } = useComptoirName();
   const { state, setState, keys, loadWarning, hasLocalEntry, setHasLocalEntry } =
     useAperoInvite(aperoId);
@@ -280,7 +282,10 @@ export function InvitePage() {
       removeNotificationsForApero(aperoId);
       removeSnapshot(aperoId);
       hapticSuccess();
-      navigate("/agenda", { replace: true });
+      /* L'apéro supprimé n'existe plus : on REMONTE au programme. Dépiler fait
+         partir son entrée avec lui — la remplacer la laisserait accessible au
+         geste retour, sur un apéro qui n'est plus là. */
+      aller("/agenda");
     } catch (deleteError) {
       hapticError();
       setError(describeApiError(deleteError));
@@ -319,9 +324,9 @@ export function InvitePage() {
             {state.status === "deleted" ? "Apéro annulé" : "Aïe, ce lien coince"}
           </h1>
           <p className="lede">{message}</p>
-          <Link className="button button--ghost button--block" to="/">
+          <AppLink className="button button--ghost button--block" to="/">
             Retour au comptoir
-          </Link>
+          </AppLink>
         </section>
       </MobilePage>
     );
@@ -592,7 +597,7 @@ export function InvitePage() {
               type="button"
               className="button button--primary button--block"
               onClick={() =>
-                navigate("/create", { state: { prefill: buildNextRoundPrefill(event) } })
+                aller("/create", { state: { prefill: buildNextRoundPrefill(event) } })
               }
             >
               {event.recurrence ? "Convoquer la prochaine tournée" : "Remettre ça"}
@@ -657,9 +662,9 @@ export function InvitePage() {
                 Une assemblée, deux créneaux, un lien : tu sais tout. La Confrérie
                 n’attend plus que ta convocation.
               </p>
-              <Link className="button button--ghost button--block" to="/create">
+              <AppLink className="button button--ghost button--block" to="/create">
                 Organiser mon propre apéro
-              </Link>
+              </AppLink>
             </section>
           )}
         </>

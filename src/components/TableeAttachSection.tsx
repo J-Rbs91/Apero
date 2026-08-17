@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useAppNavigation } from "../routes/useAppNavigation";
 import { getLocalTablees } from "../services/localTableeRegistry";
 import { addAperoToTablee } from "../services/tableeRepository";
 import type { AperitifEvent } from "../types/apero";
@@ -19,7 +19,7 @@ type TableeAttachSectionProps = {
 };
 
 export function TableeAttachSection({ aperoId, keys, event, comptoirName }: TableeAttachSectionProps) {
-  const navigate = useNavigate();
+  const { aller } = useAppNavigation();
   // Tablées connues de cet appareil, pour rattacher l'apéro à une bande.
   const [localTablees] = useState(() => getLocalTablees());
   const [selectedTableeId, setSelectedTableeId] = useState("");
@@ -106,7 +106,7 @@ export function TableeAttachSection({ aperoId, keys, event, comptoirName }: Tabl
             type="button"
             className="button button--ghost button--block"
             onClick={() =>
-              navigate("/tablees", {
+              aller("/tablees", {
                 state: {
                   seedFromApero: {
                     aperoId,
