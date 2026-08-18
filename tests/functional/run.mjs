@@ -268,7 +268,7 @@ async function passOnboarding(page, blaze) {
   await page.getByRole("button", { name: "Oui, grave ça dans le zinc" }).click();
   // L'écran d'autorisation des notifications suit immédiatement (Chromium
   // supporte l'API Notification) : on choisit le badge interne seul.
-  const skipButton = page.getByRole("button", { name: "Plus tard — garder juste le badge" });
+  const skipButton = page.getByRole("button", { name: "Plus tard, garder juste le badge" });
   await skipButton.waitFor({ state: "visible", timeout: 10_000 });
   await skipButton.click();
 }
