@@ -22,7 +22,7 @@ export function RegistreLegalPage() {
         </p>
         <ul className="legal-list">
           <li>
-            <strong>Éditeur</strong> : J-Rbs91 — projet personnel édité à titre non
+            <strong>Éditeur</strong> : J-Rbs91, projet personnel édité à titre non
             professionnel.
           </li>
           <li>
@@ -37,8 +37,8 @@ export function RegistreLegalPage() {
             .
           </li>
           <li>
-            <strong>Hébergement du site</strong> : GitHub Pages — GitHub, Inc.,
-            88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis.
+            <strong>Hébergement du site</strong> : GitHub Pages (GitHub, Inc.,
+            88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis).
           </li>
           <li>
             <strong>Hébergement de l’API</strong> : serveur privé (VPS) opéré pour
@@ -76,7 +76,7 @@ export function RegistreLegalPage() {
         <h3 className="h3">Ce que le serveur stocke</h3>
         <ul className="legal-list">
           <li>
-            Le contenu d’un apéro — noms, dates, lieux, votes, mots du comptoir —
+            Le contenu d’un apéro (noms, dates, lieux, votes, mots du comptoir)
             est chiffré sur ton appareil <strong>avant</strong> d’être envoyé
             (AES-GCM). Le serveur ne conserve qu’un bloc illisible pour lui : il ne
             peut savoir ni qui participe, ni où, ni quand.
@@ -101,13 +101,13 @@ export function RegistreLegalPage() {
         </p>
         <ul className="legal-list">
           <li>
-            <strong>Tuiles OpenStreetMap</strong> — affichage des fonds de carte.
+            <strong>Tuiles OpenStreetMap</strong> : affichage des fonds de carte.
           </li>
           <li>
-            <strong>Photon</strong> (komoot) — recherche d’adresse.
+            <strong>Photon</strong> (komoot) : recherche d’adresse.
           </li>
           <li>
-            <strong>Overpass</strong> — liste des bars et cafés autour de toi.
+            <strong>Overpass</strong> : liste des bars et cafés autour de toi.
           </li>
         </ul>
         <p className="hint">
@@ -167,11 +167,11 @@ export function RegistreLegalPage() {
         <h2 className="h2">Crédits</h2>
         <ul className="legal-list">
           <li>
-            Police <strong>Manrope</strong> — The Manrope Project Authors, SIL Open
+            Police <strong>Manrope</strong> : The Manrope Project Authors, SIL Open
             Font License 1.1.
           </li>
           <li>
-            Animation du verre — <strong>Noto Animated Emoji</strong> (Google),
+            Animation du verre : <strong>Noto Animated Emoji</strong> (Google),
             sous licence{" "}
             <a
               href="https://creativecommons.org/licenses/by/4.0/"
@@ -183,7 +183,7 @@ export function RegistreLegalPage() {
             , modifiée (deux calques retirés).
           </li>
           <li>
-            Images d’ambiance du comptoir — générées par IA (Google Gemini).
+            Images d’ambiance du comptoir : générées par IA (Google Gemini).
           </li>
           <li>
             Code source sous licence MIT, ouvert sur{" "}
