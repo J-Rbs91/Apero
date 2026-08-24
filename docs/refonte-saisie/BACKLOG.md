@@ -1,0 +1,20 @@
+# BACKLOG.md — ordonné par impact sur la vitesse de saisie
+
+Statuts : `à faire` / `en cours` / `fait` / `abandonné + motif`.
+
+| # | Item | Source | Impact | Statut |
+|---|---|---|---|---|
+| 1 | Réduire le coût du champ lieu (`LocationField`) : repenser le passage systématique par l'overlay plein écran pour une recherche texte courte | `AUDIT-1.md` §3.5 | Élevé — champ le plus coûteux des trois formulaires de saisie de créneau | à faire |
+| 2 | Ajouter `requirement="required"` (ou équivalent) sur le champ « Proposé par » de `AlternativeOptionForm.tsx:167-178` | `AUDIT-1.md` §3.1 | Moyen — un aller-retour évitable sur un formulaire secondaire | à faire |
+| 3 | Alléger la hiérarchie typographique de `.feedback` (erreurs génériques) pour qu'elle ne dépasse jamais le poids d'une `.field__error`, sans toucher au texte | `DECISIONS.md` D1 | Moyen — condition pour reloger A1, A2, A3, A5, A6, A7 sans perdre l'info utile | à faire |
+| 4 | Ajouter `useShakeInvalid` à `AlternativeOptionForm.tsx` pour rejoindre le comportement de `CreateEventPage` et `VoteForm` | `AUDIT-1.md` §3.3 | Faible à moyen — cohérence, formulaire court | à faire |
+| 5 | Déplacer A8/A9 (« Marmaille admise » / « Ce soir c'est sans les mômes » ; « En escadron » / « Peinard, en solo ») de `SwitchRow.state` vers `SwitchRow.hint`, avec un `state` fonctionnel neuf | `DECISIONS.md` D1 | Moyen — libère la zone de décision de ces deux réglages | à faire |
+| 6 | Documenter dans `docs/DESIGN-SYSTEM.md` l'exception des trois champs de créneau sans pastille `Obligatoire`/`Facultatif` | `AUDIT-1.md` §3.2 | Faible — cohérence documentaire | à faire |
+| 7 | Ajouter un signifiant visuel (icône) à `LocationField` pour annoncer le comportement enrichi (recherche, carte, géolocalisation) avant le premier tap | `AUDIT-1.md` §3.4 | Faible — amélioration de découvrabilité, pas bloquant | à faire |
+| 8 | Revue QA finale, accessibilité, responsive, cohérence, purge des restes | Trajectoire itération 5 | — | à faire |
+| 9 | Double mesure finale (vitesse de saisie, présence du ton) vs itération 1 | Trajectoire itération 5 | — | à faire |
+
+## Écarté cette itération
+
+Aucun item écarté à l'itération 1 : c'est un audit, rien n'a encore été
+proposé puis refusé.
