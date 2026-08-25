@@ -141,7 +141,7 @@ try {
   const nameInput = guest.getByPlaceholder("Jojo, Nadine, Éminence Chips…");
   await nameInput.waitFor({ state: "visible", timeout: 20000 });
   await nameInput.fill(GUEST);
-  await guest.locator(".vote-form .slot").first().getByText("J’y serai", { exact: true }).click();
+  await guest.locator(".vote-form .slot").first().locator('input[value="yes"]').check();
   await guest.getByRole("button", { name: "Répondre à l’invitation" }).click();
   await guest.getByText("C’est émargé. Le registre te remercie.").waitFor({ state: "visible", timeout: 20000 });
   check("Vote invité accepté par l’application", true);
