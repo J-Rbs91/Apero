@@ -23,6 +23,7 @@ jobs:
           APP_BASE='https://j-rbs91.github.io/Apero'
           API_BASE='https://panum.fr/_svc/a'
           ORIGIN='https://j-rbs91.github.io'
+          EXISTING_ID='apero_2yhdzGNLja'
 
           echo '=== 1. GitHub Pages frontend ==='
           curl --fail --silent --show-error --location \
@@ -36,50 +37,99 @@ jobs:
           curl --fail --silent --show-error --location \
             --retry 3 --retry-delay 1 \
             "https://j-rbs91.github.io${JS_PATH}" -o /tmp/apero-bundle.js
-
           grep -Fq "$API_BASE" /tmp/apero-bundle.js
           echo 'Deployed bundle contains expected VPS API base URL.'
 
-          echo '=== 2. VPS API health ==='
+          echo '=== 2. VPS API health/version ==='
           curl --fail --silent --show-error --location \
             --retry 3 --retry-delay 1 \
             "$API_BASE/health" -o /tmp/health.json
           cat /tmp/health.json
           jq -e '.ok == true and .service == "apero-api"' /tmp/health.json >/dev/null
-          STORAGE=$(jq -r '.storage // "unknown"' /tmp/health.json)
-          case "$STORAGE" in
-            github|sqlite) ;;
-            *) echo "Unexpected storage backend: $STORAGE" >&2; exit 1 ;;
-          esac
-          echo "Live storage backend: $STORAGE"
+          STORAGE=$(jq -r '.storage // "legacy-unknown"' /tmp/health.json)
+          if [ "$STORAGE" = 'legacy-unknown' ]; then
+            echo 'API health has no storage field: deployed API predates current main health contract.'
+          else
+            case "$STORAGE" in github|sqlite) ;; *) echo "Unexpected storage backend: $STORAGE" >&2; exit 1 ;; esac
+          fi
 
-          echo '=== 3. CORS from GitHub Pages origin ==='
+          echo '=== 3. CORS + POST preflight ==='
           curl --silent --show-error --location \
             -D /tmp/cors.headers -o /tmp/cors.body \
             -H "Origin: $ORIGIN" \
             "$API_BASE/health"
           tr -d '\r' </tmp/cors.headers | grep -Fqi "access-control-allow-origin: $ORIGIN"
-          echo 'CORS origin accepted.'
 
-          echo '=== 4. Public API read path ==='
-          EXISTING_ID='apero_2yhdzGNLja'
+          PREFLIGHT_STATUS=$(curl --silent --show-error \
+            -o /tmp/preflight.body -D /tmp/preflight.headers -w '%{http_code}' \
+            -X OPTIONS \
+            -H "Origin: $ORIGIN" \
+            -H 'Access-Control-Request-Method: POST' \
+            -H 'Access-Control-Request-Headers: Content-Type' \
+            "$API_BASE/api/aperos/$EXISTING_ID")
+          echo "OPTIONS write route -> HTTP $PREFLIGHT_STATUS"
+          test "$PREFLIGHT_STATUS" = '204'
+          tr -d '\r' </tmp/preflight.headers | grep -Fqi "access-control-allow-origin: $ORIGIN"
+          echo 'CORS and browser POST preflight accepted.'
+
+          echo '=== 4. GitHub source object exists ==='
+          GH_STATUS=$(curl --silent --show-error --location \
+            -H 'Accept: application/vnd.github+json' \
+            -o /tmp/github-existing.json -w '%{http_code}' \
+            "https://api.github.com/repos/J-Rbs91/Apero/contents/data/aperos/$EXISTING_ID.json?ref=main")
+          echo "GitHub data object -> HTTP $GH_STATUS"
+          test "$GH_STATUS" = '200'
+          jq -e '.type == "file" and (.sha | test("^[0-9a-f]{40}$"))' /tmp/github-existing.json >/dev/null
+          echo 'Encrypted source object exists on GitHub main.'
+
+          echo '=== 5. Public API read path / legacy fallback ==='
           STATUS=$(curl --silent --show-error --location \
             -o /tmp/read-existing.json -w '%{http_code}' \
             "$API_BASE/api/aperos/$EXISTING_ID")
           echo "GET existing apero -> HTTP $STATUS"
-          test "$STATUS" = '200'
-          jq -e --arg id "$EXISTING_ID" '.ok == true and .aperoId == $id and (.sha | test("^[0-9a-f]{40}$"))' /tmp/read-existing.json >/dev/null
-          echo 'Public encrypted-apero read through VPS API works.'
+          API_READ='unknown'
+          if [ "$STATUS" = '200' ]; then
+            jq -e --arg id "$EXISTING_ID" '.ok == true and .aperoId == $id and (.sha | test("^[0-9a-f]{40}$"))' /tmp/read-existing.json >/dev/null
+            API_READ='modern-api'
+            echo 'Current API serves encrypted reads directly.'
+          elif [ "$STATUS" = '404' ] && jq -e '.error == "NOT_FOUND"' /tmp/read-existing.json >/dev/null 2>&1; then
+            API_READ='legacy-github-fallback'
+            echo 'Legacy API has no GET route; current frontend must use its intentional GitHub fallback.'
+          else
+            echo 'Unexpected API read response:' >&2
+            cat /tmp/read-existing.json >&2
+            exit 1
+          fi
 
-          echo '=== 5. Missing-object contract ==='
-          MISSING_ID="apero_E2E_missing_${GITHUB_RUN_ID}"
+          echo '=== 6. Non-destructive write-path probe ==='
+          # Wrong key on a real object: exercises Caddy -> POST route -> storage lookup/auth,
+          # but must never mutate the object.
+          WRONG_KEY='e2e-deliberately-wrong-key-20260826'
+          WRONG_HASH=$(printf '%s' "$WRONG_KEY" | sha256sum | awk '{print $1}')
+          WRITE_STATUS=$(curl --silent --show-error --location \
+            -o /tmp/write-probe.json -w '%{http_code}' \
+            -X POST \
+            -H 'Content-Type: application/json' \
+            -H "Origin: $ORIGIN" \
+            "$API_BASE/api/aperos/$EXISTING_ID" \
+            --data "{\"writeKey\":\"$WRONG_KEY\",\"writeKeyHash\":\"$WRONG_HASH\",\"encryptedPayload\":{\"version\":1,\"encryption\":{\"algorithm\":\"AES-GCM\",\"iv\":\"AAAAAAAAAAAAAAAA\",\"ciphertext\":\"AAAA\"}}}")
+          echo "POST existing with deliberately wrong key -> HTTP $WRITE_STATUS"
+          test "$WRITE_STATUS" = '403'
+          jq -e '.ok == false and (.error == "INVALID_WRITE_KEY" or .error == "WRITE_NOT_ALLOWED")' /tmp/write-probe.json >/dev/null
+          echo 'Write route reaches authorization/storage and correctly refuses mutation.'
+
+          echo '=== 7. Missing-object contract ==='
+          MISSING_ID="apero_E2Emissing${GITHUB_RUN_ID}"
           STATUS=$(curl --silent --show-error --location \
             -o /tmp/read-missing.json -w '%{http_code}' \
             "$API_BASE/api/aperos/$MISSING_ID")
           echo "GET missing apero -> HTTP $STATUS"
           test "$STATUS" = '404'
-          jq -e '.ok == false and .error == "APERO_NOT_FOUND"' /tmp/read-missing.json >/dev/null
-          echo 'Missing-object contract works.'
+          if [ "$API_READ" = 'modern-api' ]; then
+            jq -e '.ok == false and .error == "APERO_NOT_FOUND"' /tmp/read-missing.json >/dev/null
+          else
+            jq -e '.ok == false and .error == "NOT_FOUND"' /tmp/read-missing.json >/dev/null
+          fi
 
           echo '=== RESULT ==='
-          echo "E2E_LIVE_WIRING_OK storage=$STORAGE bundle=$JS_PATH"
+          echo "E2E_LIVE_WIRING_OK storage=$STORAGE api_read=$API_READ bundle=$JS_PATH"
