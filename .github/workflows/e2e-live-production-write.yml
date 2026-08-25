@@ -22,4 +22,4 @@ jobs:
       - name: Install Chromium
         run: npx playwright@1.61.1 install --with-deps chromium
       - name: Real browser E2E against production
-        run: node tests/live-production-e2e-v2.mjs
+        run: node tests/live-production-e2e-v3.mjs
