@@ -21,5 +21,21 @@ jobs:
       - run: npm ci
       - name: Install Chromium
         run: npx playwright@1.61.1 install --with-deps chromium
+      - name: Adapt temporary harness to current organizer disclosure
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tests/live-production-e2e-v3.mjs')
+          s = p.read_text()
+          old = '  const deleteButton = organizer.getByRole("button", { name: "Annuler l’apéro" });'
+          new = '''  const organizerTools = organizer.locator("details.disclose").filter({ hasText: "Coulisses de l’organisation" }).first();
+          await organizerTools.waitFor({ state: "visible", timeout: 15000 });
+          if (!(await organizerTools.getAttribute("open"))) await organizerTools.locator("summary").click();
+          const deleteButton = organizer.getByRole("button", { name: "Annuler l’apéro" });'''
+          if old not in s:
+              raise SystemExit('delete marker not found')
+          p.write_text(s.replace(old, new))
+          PY
       - name: Real browser E2E against production
         run: node tests/live-production-e2e-v3.mjs
