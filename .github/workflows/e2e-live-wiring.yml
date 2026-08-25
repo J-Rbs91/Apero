@@ -1,6 +1,9 @@
 name: E2E live wiring check
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - test/e2e-live-wiring-20260826
