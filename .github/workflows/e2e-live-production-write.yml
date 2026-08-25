@@ -26,12 +26,12 @@ jobs:
         run: npm ci
 
       - name: Install Chromium for Playwright
-        run: npx playwright install --with-deps chromium
+        run: npx playwright@1.61.1 install --with-deps chromium
 
       - name: Real browser E2E against production
         shell: bash
         run: |
-          cat > /tmp/apero-live-e2e.mjs <<'EOF'
+          cat > ./apero-live-e2e.mjs <<'EOF'
           import { chromium } from "playwright-core";
 
           const APP = "https://j-rbs91.github.io/Apero";
@@ -210,4 +210,4 @@ jobs:
           }
           EOF
 
-          node /tmp/apero-live-e2e.mjs
+          node ./apero-live-e2e.mjs
