@@ -1,0 +1,50 @@
+name: Patch functional optional details
+
+on:
+  push:
+    branches:
+      - fix/stale-github-read-cache
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/stale-github-read-cache
+      - name: Open optional details before filling comment
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tests/functional/run.mjs')
+          s = p.read_text()
+          old = '''  if (comment) {
+            await page
+              .getByPlaceholder("Je viendrai si le monde ne s’est pas arrêté de tourner d’ici là.")
+              .fill(comment);
+          }'''
+          new = '''  if (comment) {
+            await openDisclosure(page, "Ajouter des détails");
+            await page
+              .getByPlaceholder("Je viendrai si le monde ne s’est pas arrêté de tourner d’ici là.")
+              .fill(comment);
+          }'''
+          if old not in s:
+              raise SystemExit('comment block marker not found')
+          p.write_text(s.replace(old, new, 1))
+          PY
+          git diff --check
+          git diff -- tests/functional/run.mjs
+      - name: Commit patch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/functional/run.mjs
+          git commit -m "test: open optional details before filling comment"
+          git push origin HEAD:fix/stale-github-read-cache
