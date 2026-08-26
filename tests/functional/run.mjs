@@ -367,6 +367,7 @@ async function voteOnInvite(page, inviteUrl, { blaze, votes, comment }) {
     await cards.nth(index).getByRole("radio", { name: votes[index] }).check();
   }
   if (comment) {
+    await openDisclosure(page, "Ajouter des détails");
     await page
       .getByPlaceholder("Je viendrai si le monde ne s’est pas arrêté de tourner d’ici là.")
       .fill(comment);
