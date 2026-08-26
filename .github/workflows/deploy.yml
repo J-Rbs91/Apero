@@ -18,6 +18,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
 
     env:
       VITE_GITHUB_OWNER: j-rbs91
@@ -46,9 +47,39 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
+          cache: npm
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         run: npm ci
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Install server dependencies
+        working-directory: server
+        run: npm ci
+
+      - name: Server tests
+        working-directory: server
+        run: npm test
+
+      - name: Build server
+        working-directory: server
+        run: npm run build
+
+      - name: Install Chromium for functional E2E
+        shell: bash
+        run: |
+          npx playwright@1.61.1 install --with-deps chromium
+          CHROMIUM_PATH="$(find "$HOME/.cache/ms-playwright" -type f -path '*/chrome-linux*/chrome' | head -n 1)"
+          if [ -z "$CHROMIUM_PATH" ]; then
+            echo "::error::Chromium executable not found after Playwright install"
+            exit 1
+          fi
+          echo "APERO_TEST_CHROMIUM=$CHROMIUM_PATH" >> "$GITHUB_ENV"
+
+      - name: Functional E2E (GitHub backend)
+        run: npm run test:functional
 
       - name: Build Vite app
         run: npm run build

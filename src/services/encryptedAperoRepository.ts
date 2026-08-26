@@ -169,9 +169,13 @@ async function readPublicAperoFileViaGitHub(
   aperoId: string,
   options: { bustCdnCache?: boolean } = {},
 ): Promise<{ file: StoredEncryptedAperoFile; sha: string } | null> {
+  // `cache: no-cache` ne suffit pas toujours avec le cache partagé de la
+  // Contents API. Les lectures explicitement fraîches ajoutent donc une clé
+  // de requête unique, comme le fallback raw le fait déjà.
   const url =
     `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}` +
-    `/contents/${APEROS_DATA_PATH}/${aperoId}.json?ref=${githubConfig.branch}`;
+    `/contents/${APEROS_DATA_PATH}/${aperoId}.json?ref=${githubConfig.branch}` +
+    (options.bustCdnCache ? `&cb=${Date.now()}` : "");
 
   // no-cache : requête conditionnelle (ETag). Un 304 ne compte PAS dans le
   // quota anonyme de 60 req/h — no-store brûlait le quota même sans changement.

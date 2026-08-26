@@ -91,7 +91,12 @@ export function useAperoInvite(aperoId: string | undefined) {
         if (!initialEvent) {
           setState({ status: "loading" });
         }
-        const loaded = await getEncryptedAperoById(aperoId, keys.encryptionKey);
+        // Une ouverture explicite doit refléter les votes les plus récents.
+        // Tant que l'ancienne API VPS force le fallback GitHub, on contourne
+        // donc le cache partagé de la Contents API / du CDN pour cette lecture.
+        const loaded = await getEncryptedAperoById(aperoId, keys.encryptionKey, {
+          bustCdnCache: true,
+        });
 
         if (!isMounted) {
           return;
