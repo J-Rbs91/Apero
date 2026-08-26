@@ -287,11 +287,19 @@ function parseInviteUrl(url) {
   };
 }
 
+async function closeLocationSearchIfOpen(page) {
+  const closeSearch = page.getByRole("button", { name: "Fermer la recherche" });
+  if (await closeSearch.isVisible().catch(() => false)) {
+    await closeSearch.click();
+  }
+}
+
 async function fillCreateSlot(page, index, { date, time, location }) {
   const slot = page.locator("form .slot").nth(index);
   await slot.locator('input[type="date"]').fill(date);
   await slot.locator('input[type="time"]').fill(time);
   await slot.locator(".field--wide input").fill(location);
+  await closeLocationSearchIfOpen(page);
 }
 
 async function createApero(page, { name, description, slots }) {
@@ -335,6 +343,15 @@ async function reopenVoteFormIfCollapsed(page, timeout = 15_000) {
   }
 }
 
+async function openDisclosure(page, title) {
+  const disclosure = page.locator("details.disclose").filter({ hasText: title }).first();
+  await disclosure.waitFor({ state: "visible", timeout: 15_000 });
+  if (!(await disclosure.getAttribute("open"))) {
+    await disclosure.locator("summary").click();
+  }
+  return disclosure;
+}
+
 async function voteOnInvite(page, inviteUrl, { blaze, votes, comment }) {
   await page.goto(inviteUrl);
   // Réponse déjà au registre : le formulaire est replié en chip récapitulative,
@@ -347,14 +364,14 @@ async function voteOnInvite(page, inviteUrl, { blaze, votes, comment }) {
   }
   const cards = page.locator(".vote-form .slot");
   for (let index = 0; index < votes.length; index += 1) {
-    await cards.nth(index).getByText(votes[index], { exact: true }).click();
+    await cards.nth(index).getByRole("radio", { name: votes[index] }).check();
   }
   if (comment) {
     await page
       .getByPlaceholder("Je viendrai si le monde ne s’est pas arrêté de tourner d’ici là.")
       .fill(comment);
   }
-  await page.getByRole("button", { name: "Répondre à l’invitation" }).click();
+  await page.getByRole("button", { name: /^(Envoyer|Enregistrer) ma réponse$/ }).click();
 }
 
 const VOTE_YES = "J’y serai";
@@ -414,6 +431,7 @@ await scenario("1. Création d'un apéro (onboarding complet, mono-créneau)", a
   check("La création redirige vers un lien d'invitation avec clés", Boolean(invite1?.encryptionKey && invite1?.writeKey));
   await waitVisible(page, page.getByRole("heading", { name: APERO_1_NAME }), "Le nom cérémoniel saisi est affiché");
   await waitVisible(page, page.getByText("Ton assemblée"), "L'organisateur est identifié sur la page");
+  await openDisclosure(page, "Qui vient ?");
   await waitVisible(
     page,
     page.locator(".person__name", { hasText: ORGANIZER }),
@@ -478,6 +496,7 @@ await scenario("3. Vote d'un invité, puis modification de son vote", async () =
     page.getByText("C’est émargé. Le registre te remercie."),
     "La première réponse de l'invité est enregistrée",
   );
+  await openDisclosure(page, "Qui vient ?");
   await waitVisible(
     page,
     page.locator(".person__name", { hasText: GUEST_BOB }),
@@ -493,8 +512,8 @@ await scenario("3. Vote d'un invité, puis modification de son vote", async () =
     "Au retour, la réponse existante est retrouvée via le blaze",
   );
   await reopenVoteFormIfCollapsed(page);
-  await page.locator(".vote-form .slot").nth(1).getByText(VOTE_YES, { exact: true }).click();
-  await page.getByRole("button", { name: "Répondre à l’invitation" }).click();
+  await page.locator(".vote-form .slot").nth(1).getByRole("radio", { name: VOTE_YES }).check();
+  await page.getByRole("button", { name: /^(Envoyer|Enregistrer) ma réponse$/ }).click();
   await waitVisible(page, page.getByText("Le registre est corrigé. On ne dira rien."), "La modification du vote est enregistrée");
 
   const bobRows = await page.locator(".person__name", { hasText: GUEST_BOB }).count();
@@ -509,6 +528,7 @@ await scenario("4. Contre-proposition : un invité ajoute un créneau", async ()
   await form.locator('input[type="date"]').fill(futureDate(6));
   await form.locator('input[type="time"]').fill("21:00");
   await form.locator(".field--wide input").fill("La Buvette Clandestine");
+  await closeLocationSearchIfOpen(page);
   await page.getByRole("button", { name: "Proposer cette date" }).click();
 
   // Le formulaire se referme sans message depuis que le bouton déclencheur vit
@@ -540,6 +560,7 @@ await scenario("5. Vote d'un second invité sur tous les créneaux (dont le nouv
     page.getByText("C’est émargé. Le registre te remercie."),
     "Le second invité vote, y compris sur le créneau contre-proposé",
   );
+  await openDisclosure(page, "Qui vient ?");
   await waitVisible(
     page,
     page.locator(".person__name", { hasText: GUEST_CHANTAL }),
@@ -625,7 +646,7 @@ await scenario("7. Isolation : seuls l'organisateur et les invités voient l'ap�
     page.getByText("Ce lien permet de consulter l’apéro, mais pas d’y répondre", { exact: false }),
     "La clé de lecture seule permet de consulter sans répondre",
   );
-  const voteFormCount = await page.getByRole("button", { name: "Répondre à l’invitation" }).count();
+  const voteFormCount = await page.locator(".vote-form").count();
   check("Sans clé d'écriture, pas de formulaire de vote", voteFormCount === 0);
 
   // 7e. Côté API : une écriture avec une mauvaise write key est refusée.
@@ -714,6 +735,7 @@ await scenario("8. Suppression définitive par l'organisateur", async () => {
 
   const page = pageOrganizer;
   await page.goto(invite1.fullUrl);
+  await openDisclosure(page, "Coulisses de l’organisation");
   const deleteButton = page.getByRole("button", { name: "Annuler l’apéro" });
   await waitVisible(page, deleteButton, "Le bouton de suppression n'apparaît que chez l'organisateur");
 
