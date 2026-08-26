@@ -53,7 +53,7 @@ jobs:
 
           old = '''async function voteOnInvite(page, inviteUrl, { blaze, votes, comment }) {
           '''
-          helper = '''async function openDisclosure(page, title) {
+          new = '''async function openDisclosure(page, title) {
             const disclosure = page.locator("details.disclose").filter({ hasText: title }).first();
             await disclosure.waitFor({ state: "visible", timeout: 15_000 });
             if (!(await disclosure.getAttribute("open"))) {
@@ -64,21 +64,19 @@ jobs:
 
           async function voteOnInvite(page, inviteUrl, { blaze, votes, comment }) {
           '''
-          replacements.append((old, helper, 'disclosure helper'))
+          replacements.append((old, new, 'disclosure helper'))
 
           old = '''    await cards.nth(index).getByText(votes[index], { exact: true }).click();'''
           new = '''    await cards.nth(index).getByRole("radio", { name: votes[index] }).check();'''
           replacements.append((old, new, 'radio vote'))
 
+          old = '''  await page.locator(".vote-form .slot").nth(1).getByText(VOTE_YES, { exact: true }).click();'''
+          new = '''  await page.locator(".vote-form .slot").nth(1).getByRole("radio", { name: VOTE_YES }).check();'''
+          replacements.append((old, new, 'edit vote radio'))
+
           old = '''  await page.getByRole("button", { name: "Répondre à l’invitation" }).click();'''
           new = '''  await page.getByRole("button", { name: /^(Envoyer|Enregistrer) ma réponse$/ }).click();'''
           replacements.append((old, new, 'submit label'))
-
-          old = '''  await page.locator(".vote-form .slot").nth(1).getByText(VOTE_YES, { exact: true }).click();
-            await page.getByRole("button", { name: "Répondre à l’invitation" }).click();'''
-          new = '''  await page.locator(".vote-form .slot").nth(1).getByRole("radio", { name: VOTE_YES }).check();
-            await page.getByRole("button", { name: "Enregistrer ma réponse" }).click();'''
-          replacements.append((old, new, 'edit vote'))
 
           old = '''  const voteFormCount = await page.getByRole("button", { name: "Répondre à l’invitation" }).count();'''
           new = '''  const voteFormCount = await page.locator(".vote-form").count();'''
