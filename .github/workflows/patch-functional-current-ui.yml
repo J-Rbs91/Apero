@@ -1,0 +1,148 @@
+name: Patch functional E2E current UI
+
+on:
+  push:
+    branches:
+      - fix/stale-github-read-cache
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/stale-github-read-cache
+      - name: Align hermetic E2E with current UI
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('tests/functional/run.mjs')
+          s = p.read_text()
+
+          replacements = []
+
+          old = '''async function fillCreateSlot(page, index, { date, time, location }) {
+            const slot = page.locator("form .slot").nth(index);
+            await slot.locator('input[type="date"]').fill(date);
+            await slot.locator('input[type="time"]').fill(time);
+            await slot.locator(".field--wide input").fill(location);
+          }
+          '''
+          new = '''async function closeLocationSearchIfOpen(page) {
+            const closeSearch = page.getByRole("button", { name: "Fermer la recherche" });
+            if (await closeSearch.isVisible().catch(() => false)) {
+              await closeSearch.click();
+            }
+          }
+
+          async function fillCreateSlot(page, index, { date, time, location }) {
+            const slot = page.locator("form .slot").nth(index);
+            await slot.locator('input[type="date"]').fill(date);
+            await slot.locator('input[type="time"]').fill(time);
+            await slot.locator(".field--wide input").fill(location);
+            await closeLocationSearchIfOpen(page);
+          }
+          '''
+          replacements.append((old, new, 'location helper'))
+
+          old = '''async function voteOnInvite(page, inviteUrl, { blaze, votes, comment }) {
+          '''
+          helper = '''async function openDisclosure(page, title) {
+            const disclosure = page.locator("details.disclose").filter({ hasText: title }).first();
+            await disclosure.waitFor({ state: "visible", timeout: 15_000 });
+            if (!(await disclosure.getAttribute("open"))) {
+              await disclosure.locator("summary").click();
+            }
+            return disclosure;
+          }
+
+          async function voteOnInvite(page, inviteUrl, { blaze, votes, comment }) {
+          '''
+          replacements.append((old, helper, 'disclosure helper'))
+
+          old = '''    await cards.nth(index).getByText(votes[index], { exact: true }).click();'''
+          new = '''    await cards.nth(index).getByRole("radio", { name: votes[index] }).check();'''
+          replacements.append((old, new, 'radio vote'))
+
+          old = '''  await page.getByRole("button", { name: "Répondre à l’invitation" }).click();'''
+          new = '''  await page.getByRole("button", { name: /^(Envoyer|Enregistrer) ma réponse$/ }).click();'''
+          replacements.append((old, new, 'submit label'))
+
+          old = '''  await page.locator(".vote-form .slot").nth(1).getByText(VOTE_YES, { exact: true }).click();
+            await page.getByRole("button", { name: "Répondre à l’invitation" }).click();'''
+          new = '''  await page.locator(".vote-form .slot").nth(1).getByRole("radio", { name: VOTE_YES }).check();
+            await page.getByRole("button", { name: "Enregistrer ma réponse" }).click();'''
+          replacements.append((old, new, 'edit vote'))
+
+          old = '''  const voteFormCount = await page.getByRole("button", { name: "Répondre à l’invitation" }).count();'''
+          new = '''  const voteFormCount = await page.locator(".vote-form").count();'''
+          replacements.append((old, new, 'readonly vote form'))
+
+          old = '''  await waitVisible(
+            page,
+            page.locator(".person__name", { hasText: ORGANIZER }),'''
+          new = '''  await openDisclosure(page, "Qui vient ?");
+            await waitVisible(
+            page,
+            page.locator(".person__name", { hasText: ORGANIZER }),'''
+          replacements.append((old, new, 'organizer participant disclosure'))
+
+          old = '''  await waitVisible(
+            page,
+            page.locator(".person__name", { hasText: GUEST_BOB }),'''
+          new = '''  await openDisclosure(page, "Qui vient ?");
+            await waitVisible(
+            page,
+            page.locator(".person__name", { hasText: GUEST_BOB }),'''
+          replacements.append((old, new, 'bob participant disclosure'))
+
+          old = '''  await waitVisible(
+            page,
+            page.locator(".person__name", { hasText: GUEST_CHANTAL }),'''
+          new = '''  await openDisclosure(page, "Qui vient ?");
+            await waitVisible(
+            page,
+            page.locator(".person__name", { hasText: GUEST_CHANTAL }),'''
+          replacements.append((old, new, 'chantal participant disclosure'))
+
+          old = '''  await form.locator(".field--wide input").fill("La Buvette Clandestine");
+            await page.getByRole("button", { name: "Proposer cette date" }).click();'''
+          new = '''  await form.locator(".field--wide input").fill("La Buvette Clandestine");
+            await closeLocationSearchIfOpen(page);
+            await page.getByRole("button", { name: "Proposer cette date" }).click();'''
+          replacements.append((old, new, 'counterproposal location'))
+
+          old = '''  const deleteButton = page.getByRole("button", { name: "Annuler l’apéro" });'''
+          new = '''  await openDisclosure(page, "Coulisses de l’organisation");
+            const deleteButton = page.getByRole("button", { name: "Annuler l’apéro" });'''
+          replacements.append((old, new, 'organizer tools disclosure'))
+
+          for old, new, label in replacements:
+            if old not in s:
+              raise SystemExit(f'marker not found: {label}')
+            s = s.replace(old, new)
+
+          p.write_text(s)
+          PY
+
+          git diff --check
+          git diff -- tests/functional/run.mjs
+
+      - name: Commit E2E alignment
+        shell: bash
+        run: |
+          if git diff --quiet -- tests/functional/run.mjs; then
+            echo "No changes needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/functional/run.mjs
+          git commit -m "test: align functional E2E with current UI"
+          git push origin HEAD:fix/stale-github-read-cache
