@@ -525,12 +525,12 @@ await scenario("3. Vote d'un invité, puis modification de son vote", async () =
 await scenario("4. Contre-proposition : un invité ajoute un créneau", async () => {
   const page = pageBob;
   await page.getByRole("button", { name: "Proposer un autre créneau" }).click();
-  const form = page.locator("section", { hasText: "Proposer une autre date" });
+  const form = page.getByRole("dialog", { name: "Proposer un autre créneau" });
   await form.locator('input[type="date"]').fill(futureDate(6));
   await form.locator('input[type="time"]').fill("21:00");
   await form.locator(".field--wide input").fill("La Buvette Clandestine");
   await closeLocationSearchIfOpen(page);
-  await page.getByRole("button", { name: "Proposer cette date" }).click();
+  await form.getByRole("button", { name: "Proposer ce créneau" }).click();
 
   // Le formulaire se referme sans message depuis que le bouton déclencheur vit
   // dans la barre d'action : la preuve d'acceptation, c'est le créneau qui
