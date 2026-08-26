@@ -23,19 +23,10 @@ jobs:
           from pathlib import Path
           p = Path('tests/functional/run.mjs')
           s = p.read_text()
-          old = '''  if (comment) {
-            await page
-              .getByPlaceholder("Je viendrai si le monde ne s’est pas arrêté de tourner d’ici là.")
-              .fill(comment);
-          }'''
-          new = '''  if (comment) {
-            await openDisclosure(page, "Ajouter des détails");
-            await page
-              .getByPlaceholder("Je viendrai si le monde ne s’est pas arrêté de tourner d’ici là.")
-              .fill(comment);
-          }'''
-          if old not in s:
-              raise SystemExit('comment block marker not found')
+          old = '  if (comment) {'
+          new = '  if (comment) {\n    await openDisclosure(page, "Ajouter des détails");'
+          if s.count(old) != 1:
+              raise SystemExit(f'expected one comment marker, found {s.count(old)}')
           p.write_text(s.replace(old, new, 1))
           PY
           git diff --check
