@@ -1,0 +1,47 @@
+name: Patch functional counterproposal
+
+on:
+  push:
+    branches:
+      - fix/stale-github-read-cache
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/stale-github-read-cache
+      - name: Align counterproposal selectors
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tests/functional/run.mjs')
+          s = p.read_text()
+          replacements = {
+            '  const form = page.locator("section", { hasText: "Proposer une autre date" });':
+              '  const form = page.getByRole("dialog", { name: "Proposer un autre créneau" });',
+            '  await page.getByRole("button", { name: "Proposer cette date" }).click();':
+              '  await form.getByRole("button", { name: "Proposer ce créneau" }).click();',
+          }
+          for old, new in replacements.items():
+              if old not in s:
+                  raise SystemExit(f'marker not found: {old}')
+              s = s.replace(old, new, 1)
+          p.write_text(s)
+          PY
+          git diff --check
+          git diff -- tests/functional/run.mjs
+      - name: Commit patch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/functional/run.mjs
+          git commit -m "test: align counterproposal E2E with form sheet"
+          git push origin HEAD:fix/stale-github-read-cache
