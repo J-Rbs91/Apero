@@ -78,3 +78,110 @@ en gardant l'item 2 (mention `requirement` sur « Proposé par ») comme correct
 bas risque à inclure si le temps le permet. Ne pas toucher à l'ordre des
 champs ni à l'architecture générale des trois formulaires : l'audit ne l'a pas
 justifié (`DECISIONS.md` D3).
+
+## Itération 2 — 29/08/2026
+
+**Périmètre audité :** relecture ciblée de `LocationField.tsx` (mécanique de
+l'overlay de recherche, `MIN_QUERY_LENGTH`, priming géolocalisation),
+`AlternativeOptionForm.tsx` (champ « Proposé par »), `src/styles/global.css`
+(`.feedback` vs `.field__error`), et `docs/DESIGN-SYSTEM.md` pour la
+cohérence documentaire de l'exemple du champ lieu. Preuve `code` pour
+l'analyse, preuve `exécution` pour la validation (voir Vérifications) : les
+71 vérifications de `npm run test:functional` exercent réellement
+`LocationField` dans Chromium (viewport 420×900, recherche Photon
+interceptée), et les 23 de `npm run test:nav` confirment qu'aucune régression
+de navigation n'a été introduite. Aucune capture visuelle inspectée
+(`references/browser-evidence-protocol.md`) : preuve `exécution`
+comportementale uniquement, pas de preuve `visuelle`.
+
+**Constats retenus :** avant d'implémenter la piste D3 (« repenser le passage
+par l'overlay plein écran »), relecture du code a montré que cet overlay
+porte une justification fonctionnelle documentée dans le composant lui-même
+(suggestions ancrées qui tomberaient derrière le clavier virtuel mobile sans
+lui). Le retirer sans preuve d'exécution sur un rendu mobile réel aurait
+rouvert un choix déjà motivé sans élément nouveau qui le justifie — la Phase 0
+recompte N contre N₀ et ne trouve aucune régression du corpus, donc rien
+n'indique que ce choix ait cessé d'être valable. Décision : garder l'overlay,
+réduire le coût par deux leviers vérifiables sans dépendre du rendu du
+clavier virtuel (`DECISIONS.md` D4).
+
+**Modifications effectuées :**
+- `src/components/LocationField.tsx` — `MIN_QUERY_LENGTH` 3 → 2 (première
+  suggestion une lettre de frappe plus tôt) ; ajout de la sélection au
+  clavier (Entrée sélectionne la première suggestion quand la liste n'est
+  pas vide), pour retrouver le rythme « taper puis valider » de jour/heure
+  quand le premier résultat est le bon.
+- `src/pages/CreateEventPage.tsx`, `src/components/AlternativeOptionForm.tsx`,
+  `docs/DESIGN-SYSTEM.md` — le hint fonctionnel « Tape trois lettres… » →
+  « Tape deux lettres… », pour rester exact après le changement ci-dessus
+  (ce texte est du vocabulaire fonctionnel, hors corpus gelé — voir `TON.md`
+  §0).
+- `src/components/AlternativeOptionForm.tsx` — ajout de
+  `requirement="required"` sur le champ « Proposé par » (`AUDIT-1.md` §3.1,
+  backlog item 2) : le champ est réellement obligatoire (`isReady`,
+  `AlternativeOptionForm.tsx`) mais ne le disait pas avant l'échec.
+- `src/styles/global.css` — `.feedback` : `font-weight: 700` → `600`, un cran
+  sous `.field__error` (`700`, inchangé), conformément à la piste retenue par
+  `DECISIONS.md` D1 pour les 6 erreurs génériques du palier A (A1, A2, A3,
+  A5, A6, A7). Aucun texte modifié.
+
+**Justification :** le coût de saisie du champ lieu est structurellement plus
+élevé que jour/heure parce qu'il exige une recherche en texte libre plutôt
+qu'une sélection native (`AUDIT-1.md` §3.5) — cet écart ne disparaît pas sans
+changer cette nature, mais les deux gestes ajoutés par-dessus (attendre trois
+lettres, puis obligatoirement taper une suggestion du doigt) pouvaient l'être.
+Références UXER mobilisées : `reference-packs/mobile-field-agent/` (densité
+et saisie au pouce — a confirmé que raccourcir le geste de confirmation prime
+sur raccourcir le debounce réseau, qui ne change rien au ressenti) et
+`references/color-and-type-protocol.md` §2, déjà cité en itération 1 pour la
+piste de graisse, maintenant appliqué.
+
+**Ton — déplacements :** aucun déplacement cette itération (aucune tournure
+n'a changé d'écran, de zone ou de moment d'apparition). Le levier utilisé
+pour A1, A2, A3, A5, A6, A7 est la **hiérarchie typographique**, pas
+l'emplacement — voir `DECISIONS.md` D5 et `TON.md` §4. Prochain déplacement
+prévu : itération 4 (A8/A9, `SwitchRow.state` → `SwitchRow.hint`,
+`DECISIONS.md` D1).
+
+**Ton — compteur :** N = 25 / N₀ = 25 · manifestations sur le parcours par
+défaut sans erreur : 2 (création, volet réglages ouvert) → 2 (inchangé,
+aucune tournure du chemin heureux touchée cette itération) ; 1 (vote, message
+de succès) → 1 (inchangé).
+
+**Vérifications :**
+- `npm install` à la racine et dans `server/` (dépendances absentes au
+  démarrage du conteneur, comme en itération 1) — installées sans erreur.
+- `npm run build` — succès, `tsc -b && vite build` sans erreur.
+- `npm test` (`vitest run`) — 227 tests, 28 fichiers, tous passés (222/27 en
+  itération 1 ; l'écart vient de tests ajoutés au dépôt entre-temps, hors
+  périmètre de cette routine).
+- `npm run test:functional` — 71/71 vérifications réussies, y compris la
+  création d'un apéro avec `LocationField` réellement rempli dans Chromium
+  (Photon interceptée et neutralisée, conformément au banc d'essai existant).
+  C'est la première itération de cette routine où un rendu change réellement
+  et où la preuve `exécution` s'applique (voir itération 1, « Écarté cette
+  fois »).
+- `npm run test:nav` — 23/23 contrôles passés, aucune régression de
+  navigation.
+- Contrôle grep du corpus (Phase 0 avant modification, Phase 4 après) : les
+  25 chaînes de `TON.md` recherchées une à une (par sous-chaîne pour B3 et
+  B15, qui s'étendent sur plusieurs lignes JSX) — les 25 retrouvées telles
+  quelles dans les deux passes. Détail dans `TON.md` §5.
+
+**Écarté cette fois :** la suppression de l'overlay plein écran pour la
+recherche texte (formulation d'origine de l'item 1 du backlog) — voir
+« Constats retenus » ci-dessus et `BACKLOG.md`, section « Écarté cette
+itération ». Item 4 (`useShakeInvalid` dans `AlternativeOptionForm`), item 6
+(documenter l'exception des trois champs de créneau) et item 7 (signifiant
+visuel sur `LocationField`) — laissés à `à faire`, hors du lot retenu pour
+cette itération (`DECISIONS.md` D3, trajectoire itération 3).
+
+**Reste à faire / point de reprise exact pour l'itération 3 :** commencer par
+la Phase 0 (relire ce journal, `BACKLOG.md`, `DECISIONS.md`, `TON.md`,
+recompter N contre N₀ = 25). Puis, selon la trajectoire indicative de D3 :
+états et progression (vide, en cours, erreur, succès, brouillon repris),
+saisie au pouce et cibles tactiles — et dans ce lot, l'item 4 du backlog
+(`useShakeInvalid` absent de `AlternativeOptionForm`, puisqu'il s'agit
+précisément d'un état d'erreur). Les items 6 et 7 restent disponibles comme
+correctifs bas risque à inclure si le temps le permet, comme l'a été l'item 2
+cette itération.
