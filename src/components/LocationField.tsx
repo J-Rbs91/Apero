@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import { LocationPickerMap } from "./LocationPickerMap";
 import { OsmAttribution } from "./OsmAttribution";
@@ -9,7 +10,11 @@ import { fetchNearbyPlaces, formatDistance } from "../utils/nearbyPlaces";
 import { Field, type FieldRequirement } from "./ui";
 
 const SEARCH_DEBOUNCE_MS = 300;
-const MIN_QUERY_LENGTH = 3;
+// 2 lettres plutôt que 3 : le lieu est le champ le plus coûteux du parcours
+// de saisie de créneau (audit itération 1, deux à quatre fois plus de gestes
+// que jour ou heure) — une lettre de moins avant le premier retour visuel
+// réduit ce coût sans dégrader la pertinence des résultats Photon.
+const MIN_QUERY_LENGTH = 2;
 const GEOLOCATION_TIMEOUT_MS = 12_000;
 
 export type LocationValue = {
@@ -160,6 +165,17 @@ export function LocationField({
     // Montre immédiatement le point sur la carte : confirmation visuelle du
     // lieu choisi, et possibilité de l'ajuster dans la foulée.
     setIsPickerOpen(true);
+  }
+
+  // Le lieu est le seul champ obligatoire du créneau qui exige une frappe
+  // libre plutôt qu'une sélection native (jour, heure) : Entrée sur le
+  // premier résultat évite le tap de sélection quand la suggestion en tête
+  // est la bonne, sans retirer la liste pour les autres cas.
+  function handleOverlayKeyDown(keyEvent: ReactKeyboardEvent<HTMLInputElement>) {
+    if (keyEvent.key === "Enter" && !isSearching && suggestions.length > 0) {
+      keyEvent.preventDefault();
+      handleSelect(suggestions[0]);
+    }
   }
 
   function handleSelectNearby(place: NearbyPlace) {
@@ -334,6 +350,7 @@ export function LocationField({
                   className="locsearch__input"
                   value={value.location}
                   onChange={(eventChange) => handleInput(eventChange.target.value)}
+                  onKeyDown={handleOverlayKeyDown}
                   placeholder={placeholder}
                   autoComplete="off"
                   autoFocus

@@ -128,3 +128,48 @@ existant plutôt que sur l'ordonnancement de l'écran :
 Cette trajectoire reste indicative, comme le prévoit le prompt de routine : la
 Phase 1 de chaque itération peut la faire bouger si un nouvel audit ciblé le
 justifie, mais elle ne se rouvre pas sans preuve nouvelle.
+
+---
+
+## Itération 2 — 29/08/2026
+
+### D4. Réduction du coût du champ lieu — piste tranchée (D3 « à instruire »)
+
+D3 laissait la piste ouverte : « proposer les résultats de recherche sans
+passer par l'overlay plein écran ». Avant d'implémenter, relecture du code de
+`LocationField.tsx` : l'overlay plein écran porte une justification
+fonctionnelle documentée dans le composant (commentaire ligne 61-63,
+`isSearchOpen`) — sans lui, les suggestions ancrées sous le champ tombent
+derrière le clavier virtuel mobile. Retirer l'overlay sans vérifier sur un
+rendu mobile réel qu'un remplacement ne recrée pas ce problème serait
+rediscuter un choix déjà motivé sans preuve nouvelle qui le justifie
+(section 3 du prompt de routine, principe de non-rediscussion appliqué par
+analogie à un choix d'architecture documenté).
+
+Décision : **garder l'overlay**, et réduire le coût par deux leviers
+vérifiables sans dépendre d'un rendu de clavier virtuel :
+
+1. `MIN_QUERY_LENGTH` : 3 → 2 lettres avant le premier retour visuel
+   (`LocationField.tsx`). Un caractère de moins avant la première suggestion,
+   sans perte de pertinence Photon documentée.
+2. **Sélection au clavier** : Entrée sur le champ de recherche sélectionne la
+   première suggestion quand la liste n'est pas vide. Le lieu redevient un
+   champ « taper puis valider », au même rythme que jour/heure, pour le cas
+   où le premier résultat est le bon — le tap sur une suggestion reste
+   disponible pour les autres cas.
+
+Le retrait de l'overlay reste une piste possible pour une itération
+ultérieure, mais seulement sur preuve d'exécution réelle (viewport mobile,
+clavier virtuel ouvert) qui montre qu'un remplacement ne recrée pas le
+problème que l'overlay résout aujourd'hui. Voir `BACKLOG.md`, « Écarté cette
+itération ».
+
+### D5. `.feedback` : hiérarchie appliquée (D1)
+
+La piste retenue par D1 pour les erreurs génériques du palier A (A1, A2, A3,
+A5, A6, A7) est appliquée : `.feedback` passe de `font-weight: 700` à `600`
+dans `src/styles/global.css`, un cran sous `.field__error` (`700`, inchangé).
+Aucun texte modifié, aucune tournure déplacée — c'est le levier « hiérarchie
+typographique », pas « emplacement » (D1 les traite déjà comme deux leviers
+distincts pour cette zone). Les 6 chaînes concernées restent `en place` au
+sens de `TON.md`.

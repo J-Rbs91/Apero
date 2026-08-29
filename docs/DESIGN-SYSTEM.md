@@ -33,7 +33,7 @@ libellé, l'aide et l'erreur.
 <TextField
   label="Le troquet"
   requirement="required"
-  hint="Tape trois lettres, la liste te propose les rades du coin."
+  hint="Tape deux lettres, la liste te propose les rades du coin."
   error={showErrors ? "Indique où on se retrouve." : undefined}
   value={location}
   onChange={setLocation}

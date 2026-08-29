@@ -398,7 +398,7 @@ export function CreateEventPage() {
                     />
                     <LocationField
                       label="Le troquet"
-                      hint="Tape trois lettres, la liste te propose les rades du coin."
+                      hint="Tape deux lettres, la liste te propose les rades du coin."
                       error={
                         showErrors && missing.includes("location")
                           ? "Indique où on se retrouve."

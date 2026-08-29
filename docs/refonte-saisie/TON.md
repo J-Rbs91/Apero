@@ -108,8 +108,20 @@ dans N :
 *(vide à l'itération 1 — aucune tournure déplacée cette fois : itération 1 est
 audit, gel et charte, pas application. Voir `DECISIONS.md`.)*
 
+*Itération 2 :* aucun déplacement (aucune tournure n'a changé d'écran ni de
+zone). A1, A2, A3, A5, A6, A7 ont reçu le traitement de **hiérarchie**
+(pas de déplacement) prévu par D1 : `.feedback` passe de `font-weight: 700`
+à `600` dans `src/styles/global.css`, un cran sous `.field__error` — voir
+`DECISIONS.md` D5. Statut inchangé : `en place`.
+
 ## 5. Contrôle de non-régression
 
 À chaque fin d'itération, chaque texte exact ci-dessus doit se retrouver tel
 quel par `grep` dans le code. Voir la commande et son résultat dans l'entrée du
 `JOURNAL.md` de l'itération correspondante.
+
+**Itération 2 :** les 25 tournures ont été recomptées avant (Phase 0) et
+après (Phase 4) modification — les 25 sont retrouvées telles quelles dans les
+deux cas (deux d'entre elles, B3 et B15, s'étendent sur plusieurs lignes JSX ;
+retrouvées par recherche de sous-chaîne, pas par une seule ligne `grep`).
+N = 25 / N₀ = 25, aucune régression.

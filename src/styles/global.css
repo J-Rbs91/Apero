@@ -1356,11 +1356,15 @@ input[type="range"] {
 }
 
 /* ===== Messages ===== */
+/* Graisse 600, un cran sous .field__error (700, ligne 740) : une erreur
+   générique de formulaire ne doit jamais peser visuellement plus qu'une
+   erreur de champ individuel — c'est cette dernière que l'œil doit
+   trouver en premier (DECISIONS.md D1). */
 .feedback {
   margin: 0;
   color: #ffd9d4;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.4;
 }
 

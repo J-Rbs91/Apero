@@ -157,7 +157,7 @@ export function AlternativeOptionForm({
         <LocationField
           label="Le troquet"
           placeholder="Le Bar du Coin"
-          hint="Tape trois lettres, la liste te propose les rades du coin."
+          hint="Tape deux lettres, la liste te propose les rades du coin."
           error={hasTriedSubmit && !trimmedLocation ? "Indique où on se retrouve." : undefined}
           value={locationValue}
           onChange={setLocationValue}
@@ -166,6 +166,7 @@ export function AlternativeOptionForm({
 
       <TextField
         label="Proposé par"
+        requirement="required"
         hint="Pour que la tablée sache qui a bousculé le programme."
         value={createdByName}
         maxLength={80}
