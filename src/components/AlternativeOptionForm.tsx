@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useComptoirName } from "../hooks/useComptoirName";
+import { useShakeInvalid } from "../hooks/useShakeInvalid";
 import type { AperitifOption } from "../types/apero";
 import { createId } from "../utils/createId";
 import { hapticError, hapticSuccess } from "../utils/haptics";
@@ -39,6 +40,9 @@ export function AlternativeOptionForm({
   // Verrou synchrone : disabled={isSaving} ne protège pas deux clics
   // dispatchés dans la même tâche JS, qui créeraient deux créneaux jumeaux.
   const submitLockRef = useRef(false);
+  // Renvoie le regard sur le bloc fautif, comme dans CreateEventPage et
+  // VoteForm (`AUDIT-1.md` §3.3 : ce formulaire en était le seul dépourvu).
+  const { registerNode, shake, shakingId } = useShakeInvalid();
 
   useEffect(() => {
     if (!nameEditedRef.current && !createdByName && comptoirName) {
@@ -59,6 +63,7 @@ export function AlternativeOptionForm({
 
     if (!date || !time || !trimmedLocation) {
       hapticError();
+      shake("slot");
       setFeedback(
         "Quitte à imposer cette contradiction, il s’agirait au moins d’avoir l’élégance d’être précis : un jour, une heure et un lieu, histoire que cette proposition ait meilleure mine que la tienne.",
       );
@@ -67,6 +72,7 @@ export function AlternativeOptionForm({
 
     if (!trimmedName) {
       hapticError();
+      shake("name");
       setFeedback("Indique ton blaze, qu’on sache au moins l’intitulé du fauteur de troubles.");
       return;
     }
@@ -139,7 +145,12 @@ export function AlternativeOptionForm({
     >
       {/* Les trois champs du créneau sont obligatoires : la phrase du pied de
           feuille le dit une fois, inutile de coller une pastille sur chacun. */}
-      <div className="slot__fields">
+      <div
+        ref={registerNode("slot")}
+        className={["slot__fields", shakingId === "slot" ? "is-shaking" : ""]
+          .filter(Boolean)
+          .join(" ")}
+      >
         <TextField
           label="Jour"
           type="date"
@@ -164,19 +175,24 @@ export function AlternativeOptionForm({
         />
       </div>
 
-      <TextField
-        label="Proposé par"
-        requirement="required"
-        hint="Pour que la tablée sache qui a bousculé le programme."
-        value={createdByName}
-        maxLength={80}
-        placeholder="Nadine Diabolo, Jean-Mi Pastaga…"
-        error={hasTriedSubmit && !trimmedName ? "Indique ton blaze." : undefined}
-        onChange={(value) => {
-          nameEditedRef.current = true;
-          setCreatedByName(value);
-        }}
-      />
+      <div
+        ref={registerNode("name")}
+        className={shakingId === "name" ? "is-shaking" : ""}
+      >
+        <TextField
+          label="Proposé par"
+          requirement="required"
+          hint="Pour que la tablée sache qui a bousculé le programme."
+          value={createdByName}
+          maxLength={80}
+          placeholder="Nadine Diabolo, Jean-Mi Pastaga…"
+          error={hasTriedSubmit && !trimmedName ? "Indique ton blaze." : undefined}
+          onChange={(value) => {
+            nameEditedRef.current = true;
+            setCreatedByName(value);
+          }}
+        />
+      </div>
 
       {feedback && (
         // Ce bloc ne porte que des erreurs (validation ou envoi raté) :

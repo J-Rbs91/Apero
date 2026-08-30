@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
 import { useAppNavigation } from "../routes/useAppNavigation";
 import { LocationField } from "../components/LocationField";
@@ -19,6 +19,7 @@ import { AperoApiError } from "../services/aperoApiClient";
 import { createEncryptedApero } from "../services/encryptedAperoRepository";
 import { addAperoToTablee } from "../services/tableeRepository";
 import { useComptoirName } from "../hooks/useComptoirName";
+import { useCreateEventDraft } from "../hooks/useCreateEventDraft";
 import { useShakeInvalid } from "../hooks/useShakeInvalid";
 import type {
   AperitifEvent,
@@ -86,14 +87,28 @@ export function CreateEventPage() {
   const prefill = navigationState?.prefill;
   const linkToTablee = navigationState?.linkToTablee;
 
-  const [ceremonialNameInput, setCeremonialNameInput] = useState(prefill?.ceremonialName ?? "");
-  const [title, setTitle] = useState(prefill?.title ?? "");
-  const [childrenAllowed, setChildrenAllowed] = useState(prefill?.childrenAllowed ?? false);
-  const [recurrence, setRecurrence] = useState<RecurrenceChoice>(prefill?.recurrence ?? "once");
+  // Le pré-remplissage explicite (« Remettre ça ») transporte l'état voulu :
+  // un vieux brouillon abandonné ne doit pas s'y substituer.
+  const { initialDraft, hasRestoredDraft, saveDraft, clearDraft } = useCreateEventDraft(
+    Boolean(prefill),
+  );
+
+  const [ceremonialNameInput, setCeremonialNameInput] = useState(
+    prefill?.ceremonialName ?? initialDraft?.ceremonialNameInput ?? "",
+  );
+  const [title, setTitle] = useState(prefill?.title ?? initialDraft?.title ?? "");
+  const [childrenAllowed, setChildrenAllowed] = useState(
+    prefill?.childrenAllowed ?? initialDraft?.childrenAllowed ?? false,
+  );
+  const [recurrence, setRecurrence] = useState<RecurrenceChoice>(
+    prefill?.recurrence ?? initialDraft?.recurrence ?? "once",
+  );
   const [options, setOptions] = useState<AperitifOption[]>(() =>
     prefill?.options?.length
       ? prefill.options.map((option) => ({ ...option, id: createId("option") }))
-      : [createEmptyOption()],
+      : initialDraft?.options.length
+        ? initialDraft.options.map((option) => ({ ...option, id: createId("option") }))
+        : [createEmptyOption()],
   );
   const [feedback, setFeedback] = useState("");
   // Tant qu'on n'a pas tenté d'envoyer, rien n'est souligné en rouge : la
@@ -106,6 +121,10 @@ export function CreateEventPage() {
   const submitLockRef = useRef(false);
   // Renvoie le regard sur le créneau incomplet quand on tente de créer.
   const { registerNode, shake, shakingId } = useShakeInvalid();
+
+  useEffect(() => {
+    saveDraft({ ceremonialNameInput, title, childrenAllowed, recurrence, options });
+  }, [ceremonialNameInput, title, childrenAllowed, recurrence, options, saveDraft]);
 
   function updateOption(optionId: string, updates: Partial<AperitifOption>) {
     setOptions((currentOptions) =>
@@ -265,6 +284,7 @@ export function CreateEventPage() {
         }
 
         hapticSuccess();
+        clearDraft();
         /* Fin de tunnel : l'apéro créé est au même niveau que le formulaire, la
            navigation REMPLACE donc son entrée. Un appui sur retour ramène d'où
            l'on venait, et ne rouvre pas un parcours terminé. */
@@ -300,6 +320,7 @@ export function CreateEventPage() {
 
       await eventStorage.createEvent(event);
       hapticSuccess();
+      clearDraft();
       aller(`/event/${event.id}`, { state: { createdEvent: event } });
     } catch (error) {
       hapticError();
@@ -334,6 +355,15 @@ export function CreateEventPage() {
             se règle après, ou jamais.
           </p>
         </div>
+
+        {hasRestoredDraft && (
+          // Interruption (page rechargée, appli déchargée) : le formulaire
+          // reprend là où il en était. Annoncé une fois, en tête, avant que
+          // la saisie ne masque la raison des champs déjà remplis.
+          <p className="feedback feedback--info" role="status">
+            Brouillon retrouvé : la saisie reprend là où tu l’avais laissée.
+          </p>
+        )}
 
         <FormSection
           step={1}

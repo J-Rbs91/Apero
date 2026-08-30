@@ -185,3 +185,136 @@ saisie au pouce et cibles tactiles — et dans ce lot, l'item 4 du backlog
 précisément d'un état d'erreur). Les items 6 et 7 restent disponibles comme
 correctifs bas risque à inclure si le temps le permet, comme l'a été l'item 2
 cette itération.
+
+## Itération 3 — 30/08/2026
+
+**Périmètre audité :** relecture ciblée des cinq états de saisie (vide, en
+cours, erreur, succès, brouillon repris) sur `CreateEventPage.tsx`,
+`VoteForm.tsx`, `AlternativeOptionForm.tsx`, `LocationField.tsx`,
+`CompanionsField.tsx`, et des cibles tactiles de `src/styles/global.css`
+(section « Cibles tactiles » et environs). Preuve `code` pour l'analyse,
+preuve `exécution` pour la validation : les 80 vérifications de
+`npm run test:functional` (dont 9 nouvelles, scénario 10, ajouté cette
+itération) et les 23 de `npm run test:nav` exercent réellement Chromium.
+Détail dans `AUDIT-3.md`.
+
+**Constats retenus :** sur les cinq états ciblés par la trajectoire de D3,
+trois étaient déjà correctement couverts (chargement, vide, succès — rien à
+corriger) et deux avaient un résidu réel : l'absence de `useShakeInvalid`
+dans `AlternativeOptionForm` (déjà nommée en `AUDIT-1.md` §3.3, backlog item
+4), et l'absence totale de persistance du formulaire de `CreateEventPage` —
+un rechargement ou une mise en arrière-plan par le système mobile efface un
+formulaire de plusieurs créneaux sans aucun moyen de le retrouver. Ce second
+point n'était pas encore nommé dans le backlog : il rejoint directement
+l'objectif invariant de la routine (section 1 du prompt : « reprise après
+interruption »), et la trajectoire de `DECISIONS.md` D3 le prévoyait pour
+cette itération sous l'intitulé « brouillon repris ». Par ailleurs, la revue
+des cibles tactiles a trouvé trois boutons du parcours de saisie
+(`.stepper__btn`, `.locsearch__back`, `.locsearch__clear`) sous le plancher
+de 44×44 px que `global.css` applique déjà à d'autres boutons de l'app — pas
+un nouvel arbitrage, l'application d'une règle déjà décidée à trois cibles
+qui l'avaient manquée.
+
+**Modifications effectuées :**
+- `src/components/AlternativeOptionForm.tsx` — ajout de `useShakeInvalid` :
+  un `registerNode` sur le bloc des trois champs du créneau et un second sur
+  « Proposé par », `shake(id)` appelé au refus de validation, classe
+  `is-shaking` posée conditionnellement. Comportement identique à
+  `CreateEventPage` et `VoteForm`. Aucun texte modifié.
+- `src/hooks/useCreateEventDraft.ts` (nouveau) — persistance du formulaire de
+  création dans `localStorage` (clé `apero_create_draft_v1`), sur le modèle
+  déjà en place de `useComptoirName.ts` : lecture paresseuse au montage,
+  écriture à chaque changement d'un des cinq champs, jamais d'écriture pour
+  un formulaire vide, priorité au pré-remplissage explicite (« Remettre ça »)
+  sur un vieux brouillon.
+- `src/pages/CreateEventPage.tsx` — branchement du hook : les cinq champs
+  s'initialisent depuis le brouillon restauré (à défaut de `prefill`), un
+  avis (« Brouillon retrouvé : la saisie reprend là où tu l'avais laissée. »)
+  s'affiche en tête de formulaire quand un brouillon non vide a été restauré,
+  et le brouillon est purgé après une création réussie (les deux chemins de
+  stockage, `api-vps` et registre local).
+- `src/styles/global.css` — `.stepper__btn` (42×42 → 44×44 px),
+  `.locsearch__back` (38×40 → 44×44 px), `.locsearch__clear` (34×40 →
+  44×44 px). Padding/dimensions seuls, aucun changement de dessin.
+- `tests/functional/run.mjs` — nouveau scénario 10 : remplissage partiel du
+  formulaire de création, vrai rechargement de page (`page.reload()`),
+  vérification que l'avis de brouillon et les cinq champs sont restaurés,
+  que la création aboutit normalement, et que le brouillon est purgé après
+  coup.
+
+**Justification :** le brouillon persistant répond directement à l'objectif
+invariant de la routine (« reprise après interruption », section 1 du
+prompt) sur le seul des trois formulaires de saisie où l'interruption coûte
+réellement une reprise complète — les deux autres sont plus courts, et l'un
+d'eux (`VoteForm`) protège déjà son état contre un autre type de perte
+(remplacement de l'`event` en props). Références UXER mobilisées :
+`reference-packs/mobile-field-agent/` (coût d'une interruption sur un
+parcours de saisie mobile) et `references/affordance-and-signifiers.md`
+(un état restauré silencieusement ne se distingue pas d'un état pré-rempli
+par erreur — d'où l'avis explicite, plutôt qu'une restauration muette). Le
+choix de ne pas ajouter de tournure pour cet avis, mais de réutiliser le
+placement déjà établi pour l'« info » non bloquante (précédent B5 dans
+`VoteForm`), suit la doctrine D2 : le registre est un actif à replacer, pas
+un réflexe à appliquer à tout nouveau texte. Pour les cibles tactiles,
+`reference-packs/mobile-field-agent/` a de nouveau servi de référence (la
+règle des 44 px n'est pas une invention de cette itération : c'est celle déjà
+choisie ailleurs dans `global.css`, appliquée ici aux cibles qui l'avaient
+manquée).
+
+**Ton — déplacements :** aucun cette itération (voir `TON.md` §4). Le texte
+neuf de l'avis de brouillon n'est pas une tournure au sens de `TON.md` §0 —
+voir `DECISIONS.md` D6. Le prochain déplacement prévu reste celui
+d'itération 4 (A8/A9, `SwitchRow.state` → `SwitchRow.hint`).
+
+**Ton — compteur :** N = 25 / N₀ = 25 · manifestations sur le parcours par
+défaut sans erreur ni interruption : 2 (création, volet réglages ouvert) → 2
+(inchangé) ; 1 (vote, message de succès) → 1 (inchangé). Sur un parcours
+interrompu puis repris (cas nouveau, hors du repère d'itération 1), l'avis
+de brouillon retrouvé s'ajoute — il n'est pas compté ici puisqu'il n'est pas
+une tournure.
+
+**Vérifications :**
+- `npm install` à la racine et dans `server/` (dépendances absentes au
+  démarrage du conteneur, comme aux itérations précédentes) — installées
+  sans erreur.
+- `npm run build` — succès, `tsc -b && vite build` sans erreur.
+- `npm test` (`vitest run`) — 227 tests, 28 fichiers, tous passés (inchangé
+  depuis l'itération 2 : aucun test unitaire nouveau, la persistance de
+  formulaire n'a pas de test au niveau composant dans ce dépôt — voir
+  « Écarté cette fois »).
+- `npm run test:functional` — 80/80 vérifications réussies (71 en itération
+  2 + 9 nouvelles du scénario 10), dont la restauration réelle d'un
+  formulaire de création après un vrai rechargement de page dans Chromium,
+  et la purge du brouillon après création.
+- `npm run test:nav` — 23/23 contrôles passés, aucune régression de
+  navigation.
+- Contrôle grep du corpus (Phase 0 avant modification, Phase 4 après) : les
+  25 chaînes de `TON.md` recherchées une à une (23 par correspondance
+  exacte, B3 et B15 par sous-chaîne) — les 25 retrouvées telles quelles dans
+  les deux passes. Détail dans `TON.md` §5 (note it. 3).
+
+**Écarté cette fois :** un test unitaire au niveau composant pour
+`useCreateEventDraft` — ce dépôt ne porte aucun test de composant React
+(seuls les utils, services et hooks sans DOM sont couverts par `vitest`,
+voir la liste des fichiers `*.test.ts`) ; la validation est donc passée
+entièrement par la preuve `exécution` du scénario fonctionnel 10, cohérent
+avec la pratique déjà établie du projet pour ce type de changement.
+`.locfield__option` (item 12 du backlog) : mesuré sur preuve `code`
+seulement, pas assez pour trancher s'il est réellement sous le plancher de
+44 px — laissé `à faire`, à mesurer sur un rendu réel. Items 6 et 7 du
+backlog : toujours laissés `à faire`, le temps de cette itération est allé
+au brouillon persistant. Item 5 (déplacement A8/A9) : toujours réservé à
+l'itération 4, conformément à `DECISIONS.md` D1 et D3.
+
+**Reste à faire / point de reprise exact pour l'itération 4 :** commencer
+par la Phase 0 (relire ce journal, `BACKLOG.md`, `DECISIONS.md`, `TON.md`,
+recompter N contre N₀ = 25). Puis, selon la trajectoire de `DECISIONS.md`
+D3 : appliquer les déplacements de ton prévus par D1 — migrer A8/A9
+(« Marmaille admise » / « Ce soir c'est sans les mômes » ; « En escadron » /
+« Peinard, en solo ») de `SwitchRow.state` vers `SwitchRow.hint`, avec un
+`state` fonctionnel neuf (backlog item 5). Dans le même lot, ou en correctif
+bas risque si le temps le permet : items 6 et 7 (documentation de
+l'exception des trois champs sans pastille, signifiant visuel sur
+`LocationField`) et item 12 (mesure réelle de `.locfield__option`). Ne pas
+rouvrir la charte de placement du ton (D1) ni le choix de garder l'overlay
+de recherche du lieu (D4) sans preuve nouvelle qui les justifie.

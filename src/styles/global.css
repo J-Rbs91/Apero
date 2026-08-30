@@ -1161,9 +1161,11 @@ input[type="range"] {
 }
 
 .stepper__btn {
-  width: 42px;
-  min-height: 42px;
-  height: 42px;
+  /* 44px minimum : la cible tactile de la section « Cibles tactiles »
+     ci-dessous, appliquée ici aussi — ce bouton en était resté à 42px. */
+  width: 44px;
+  min-height: 44px;
+  height: 44px;
   padding: 0;
   display: flex;
   align-items: center;
@@ -1865,9 +1867,11 @@ textarea:focus-visible {
 }
 
 .locsearch__back {
+  /* 44px minimum, comme la section « Cibles tactiles » plus bas : ce
+     bouton en tête de recherche en était resté à 38×40px. */
   flex: 0 0 auto;
-  width: 38px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border: 0;
   border-radius: 12px;
   background: rgba(255, 247, 230, 0.08);
@@ -1901,9 +1905,11 @@ textarea:focus-visible {
 }
 
 .locsearch__clear {
+  /* 44px minimum, même motif que .locsearch__back ci-dessus : ce bouton
+     en était resté à 34×40px. */
   flex: 0 0 auto;
-  width: 34px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border: 0;
   border-radius: 12px;
   background: transparent;

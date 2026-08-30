@@ -19,6 +19,7 @@
 //      écritures refusées côté API, cloisonnement entre organisateurs)
 //   8. Suppression définitive par l'organisateur
 //   9. Contrat de la mini API (validation, conflits, santé)
+//   10. Brouillon de création : persistance et reprise après interruption
 //
 // Lancement : npm run test:functional
 
@@ -927,6 +928,58 @@ await scenario("9. Contrat de la mini API (validation, conflits, santé)", async
     `HTTP ${unknownDelete.status} ${JSON.stringify(unknownDeleteBody)}`,
   );
 });
+
+await scenario(
+  "10. Brouillon de création : persistance et reprise après interruption",
+  async () => {
+    const page = pageOrganizer;
+    const draftName = "L’Assemblée du Brouillon Test";
+    const draftDate = futureDate(6);
+    const draftTime = "18:30";
+    const draftLocation = "Le Zinc du Brouillon";
+
+    await page.goto(`${APP_URL}/#/create`);
+    const noticeBefore = await page.getByText("Brouillon retrouvé", { exact: false }).count();
+    check("Un formulaire de création vierge n'affiche aucun avis de brouillon", noticeBefore === 0);
+
+    await page.getByPlaceholder("La Grande Tablée des Olives").fill(draftName);
+    await fillCreateSlot(page, 0, { date: draftDate, time: draftTime, location: draftLocation });
+
+    // Interruption simulée : un vrai rechargement (perte de tout état React),
+    // pas une navigation interne qui laisserait le state intact.
+    await page.reload();
+
+    await waitVisible(
+      page,
+      page.getByText("Brouillon retrouvé", { exact: false }),
+      "Après rechargement, l'avis de brouillon retrouvé s'affiche",
+    );
+
+    const restoredName = await page.getByPlaceholder("La Grande Tablée des Olives").inputValue();
+    check("Le nom cérémoniel saisi avant l'interruption est restauré", restoredName === draftName, restoredName);
+
+    const slot = page.locator("form .slot").first();
+    const restoredDate = await slot.locator('input[type="date"]').inputValue();
+    check("La date du créneau est restaurée", restoredDate === draftDate, restoredDate);
+    const restoredTime = await slot.locator('input[type="time"]').inputValue();
+    check("L'heure du créneau est restaurée", restoredTime === draftTime, restoredTime);
+    const restoredLocation = await slot.locator(".field--wide input").inputValue();
+    check("Le lieu du créneau est restauré", restoredLocation === draftLocation, restoredLocation);
+
+    await page.getByRole("button", { name: "Créer l’apéro" }).click();
+    await page.waitForURL(/#\/invite\/apero_/, { timeout: 20_000 });
+    check("Le brouillon restauré aboutit normalement à la création de l'apéro", true);
+
+    const draftCleared = await page.evaluate(
+      () => window.localStorage.getItem("apero_create_draft_v1") === null,
+    );
+    check("Le brouillon est purgé du localStorage après une création réussie", draftCleared);
+
+    await page.goto(`${APP_URL}/#/create`);
+    const noticeAfter = await page.getByText("Brouillon retrouvé", { exact: false }).count();
+    check("Un nouveau formulaire de création n'affiche plus l'ancien brouillon purgé", noticeAfter === 0);
+  },
+);
 
 // ---------------------------------------------------------------------------
 // Bilan

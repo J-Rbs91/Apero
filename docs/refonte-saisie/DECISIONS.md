@@ -173,3 +173,37 @@ Aucun texte modifié, aucune tournure déplacée — c'est le levier « hiérarc
 typographique », pas « emplacement » (D1 les traite déjà comme deux leviers
 distincts pour cette zone). Les 6 chaînes concernées restent `en place` au
 sens de `TON.md`.
+
+---
+
+## Itération 3 — 30/08/2026
+
+### D6. Brouillon persistant — texte de statut neuf, hors corpus gelé
+
+L'avis « Brouillon retrouvé : la saisie reprend là où tu l'avais laissée. »
+(`CreateEventPage.tsx`) est un texte fonctionnel neuf, pas une tournure au
+sens de `TON.md` §0 : il énonce un fait (un brouillon a été restauré), sans
+trait d'esprit au-delà de ce que l'information exige. Il n'entre donc pas
+dans le compte `N`, et la charte de placement du ton (D1) ne s'y applique
+pas — il suit à la place le placement déjà établi pour les annonces non
+bloquantes de ce type : la classe `.feedback.feedback--info`, précédent
+posé par B5 dans `VoteForm` (« Le registre se souvient de toi. »). Décision :
+toute future annonce fonctionnelle de ce genre (état, reprise, statut) suit
+le même principe — texte neutre, zone et style déjà établis pour l'« info »
+— plutôt que d'inventer soit un nouveau registre visuel, soit une nouvelle
+tournure du corpus « Confrérie » pour un message qui n'a pas besoin d'humour
+pour remplir son rôle.
+
+### D7. Cibles tactiles : le plancher de 44 px, déjà choisi ailleurs dans `global.css`, s'applique aux trois cibles manquantes du parcours
+
+`AUDIT-3.md` §4 constate que `global.css` porte déjà une section dédiée aux
+cibles tactiles à 44×44 px minimum, appliquée à plusieurs boutons hors du
+parcours de saisie de créneau, mais pas à trois cibles qui en font partie
+(`.stepper__btn`, `.locsearch__back`, `.locsearch__clear`). Il ne s'agit pas
+d'un nouvel arbitrage : la routine applique une règle que le projet a déjà
+tranchée pour lui-même, à des éléments qu'elle avait manqués. Corrigé par
+padding/dimensions seuls, aucun changement de dessin ni de texte.
+`.locfield__option` reste `non vérifié dans cette exécution` (preuve `code`
+insuffisante pour trancher s'il est réellement sous le plancher) — à
+mesurer sur un rendu réel avant toute correction, pour ne pas resserrer une
+cible qui n'en a pas besoin.

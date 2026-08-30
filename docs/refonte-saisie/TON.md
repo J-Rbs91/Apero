@@ -125,3 +125,15 @@ après (Phase 4) modification — les 25 sont retrouvées telles quelles dans le
 deux cas (deux d'entre elles, B3 et B15, s'étendent sur plusieurs lignes JSX ;
 retrouvées par recherche de sous-chaîne, pas par une seule ligne `grep`).
 N = 25 / N₀ = 25, aucune régression.
+
+**Itération 3 :** même contrôle avant (Phase 0) et après (Phase 4) — les 25
+chaînes retrouvées telles quelles (23 par correspondance exacte, B3 et B15
+par sous-chaîne, comme en itération 2). N = 25 / N₀ = 25, aucune régression.
+Aucun déplacement cette itération : le travail a porté sur un correctif
+d'affordance (`useShakeInvalid` dans `AlternativeOptionForm`), un brouillon
+persistant pour `CreateEventPage`, et trois cibles tactiles — aucune tournure
+du corpus n'a changé d'écran, de zone, de taille ni de moment d'apparition.
+Le nouveau texte de statut « Brouillon retrouvé : la saisie reprend là où tu
+l'avais laissée. » n'entre pas dans ce compte : ce n'est pas une tournure au
+sens de §0 (aucun trait d'esprit au-delà du fait qu'il annonce), voir
+`DECISIONS.md` D6.
