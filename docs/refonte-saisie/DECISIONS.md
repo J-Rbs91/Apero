@@ -173,3 +173,69 @@ Aucun texte modifié, aucune tournure déplacée — c'est le levier « hiérarc
 typographique », pas « emplacement » (D1 les traite déjà comme deux leviers
 distincts pour cette zone). Les 6 chaînes concernées restent `en place` au
 sens de `TON.md`.
+
+---
+
+## Itération 3 — 31/08/2026
+
+### D6. Brouillon repris — périmètre et mécanisme
+
+Le prompt de routine (section 1) nomme la « reprise après interruption »
+comme une dimension propre de la refonte, et le plan indicatif de D3 réserve
+les états « vide, en cours, erreur, succès, brouillon repris » à cette
+itération. L'audit (`AUDIT-3.md` §3) montre qu'aucun des trois formulaires
+n'avait de brouillon au-delà du blaze de l'organisateur (`useComptoirName`,
+transverse, pas spécifique à un formulaire).
+
+Décision : implémenter la persistance uniquement pour `CreateEventPage`, pas
+pour les trois formulaires. Justification :
+
+- c'est le formulaire le plus long (un ou plusieurs créneaux, carte de
+  visite, réglages) — celui où une interruption coûte le plus cher à
+  retaper, et le seul dont l'audit démontre le besoin ;
+- `AperoSettingsForm` (retouche d'un événement existant) repart déjà de
+  valeurs réelles, pas d'un formulaire vierge : un brouillon perdu n'y coûte
+  presque rien (`AUDIT-3.md` §5) ;
+- `AlternativeOptionForm` est une feuille courte (quatre champs), rouverte à
+  la demande depuis `VoteForm` : le coût d'une reprise ratée y est faible, et
+  y ajouter une persistance créerait une troisième implémentation du même
+  mécanisme sans preuve d'un besoin réel (principe « une seule implémentation
+  par mécanisme », déjà appliqué par la couche de conduite d'exécution
+  d'UXER, `references/CLAUDE.md`).
+
+Mécanisme retenu, local à `CreateEventPage.tsx` (pas d'abstraction partagée
+tant qu'un deuxième formulaire n'en a pas réellement besoin) :
+
+- clé `apero_create_draft_v1` dans `localStorage` ;
+- lu une seule fois au montage (`useState` paresseux), jamais recalculé en
+  boucle de rendu ;
+- **« Remettre ça » prime** : si `prefill` est présent (pré-remplissage venu
+  d'un autre événement), le brouillon n'est ni lu ni écrit pour cette visite —
+  deux sources de pré-remplissage qui se disputeraient le même formulaire
+  seraient plus coûteuses à comprendre que l'absence de brouillon dans ce cas
+  précis, qui reste rare ;
+- écrit à chaque changement de champ pertinent (titre, nom cérémoniel,
+  politique mioches, cadence, créneaux) tant que `prefill` est absent ;
+- purgé à la création réussie, sur les deux chemins de stockage (classique et
+  chiffré via API VPS) ;
+- restauration signalée par une phrase neutre, hors zone de décision (juste
+  sous le `lede` d'ouverture) : ce n'est pas une tournure, voir `TON.md` §0 —
+  aucune entrée n'est ajoutée au corpus gelé par cette décision.
+
+### D7. Cibles tactiles — le plancher de 44 px s'applique à tout le parcours de saisie, pas seulement aux contrôles déjà couverts
+
+`global.css` documente déjà un plancher de 44 px (commentaire
+« Cibles tactiles », `global.css:2608-2610`) et l'applique à sept contrôles.
+`AUDIT-3.md` §2 montre que `.stepper__btn` (compteur de renforts,
+`CompanionsField.tsx`, dans le parcours de vote) y échappait à 42×42 px. Ce
+n'est pas un nouveau principe à trancher : c'est l'application d'un principe
+déjà écrit dans le fichier à un contrôle qu'un audit antérieur n'avait pas
+couvert. Corrigé à 44×44 px, sans changement visuel perceptible (2 px), selon
+la même méthode déjà en usage dans cette section (padding et dimension
+minimale, pas de redessin).
+
+`.cheer-btn` (40 px) reste **hors périmètre** : ce n'est pas un contrôle de
+saisie de formulaire (action secondaire de « trinquer »), et rien dans
+l'audit ne démontre qu'il bloque la saisie (section 8 du prompt de routine).
+Consigné dans `BACKLOG.md` pour une itération qui traiterait spécifiquement
+les actions secondaires, si le produit le demande.

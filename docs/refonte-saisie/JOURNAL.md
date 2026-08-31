@@ -185,3 +185,114 @@ saisie au pouce et cibles tactiles — et dans ce lot, l'item 4 du backlog
 précisément d'un état d'erreur). Les items 6 et 7 restent disponibles comme
 correctifs bas risque à inclure si le temps le permet, comme l'a été l'item 2
 cette itération.
+
+## Itération 3 — 31/08/2026
+
+**Périmètre audité :** le parcours de saisie réel sous l'angle « états et
+progression », conformément à la trajectoire indicative de `DECISIONS.md` D3 —
+`CreateEventPage.tsx`, `AperoSettingsForm.tsx`, `VoteForm.tsx`,
+`AlternativeOptionForm.tsx`, `CompanionsField.tsx`,
+`EventOptionMobileCard.tsx` (nouvellement lu, porte le contrôle de vote),
+`useShakeInvalid.ts`, `src/styles/global.css`. Preuve `code` pour l'analyse,
+preuve `exécution` pour la validation (`npm run test:functional`,
+`npm run test:nav`, détail en Vérifications). Aucune capture visuelle
+inspectée.
+
+**Constats retenus (`AUDIT-3.md`) :**
+- Non-régression vérifiée sur les correctifs des itérations 1 et 2 (mention
+  `requirement` sur « Proposé par », `.feedback` à `font-weight: 600`,
+  `MIN_QUERY_LENGTH` et sélection au clavier de `LocationField`) — rien n'a
+  bougé.
+- `AlternativeOptionForm.tsx` était le seul des trois formulaires de saisie
+  sans `useShakeInvalid` : à l'échec de validation, aucun défilement, aucune
+  secousse, aucun focus programmatique sur le champ fautif, contrairement à
+  `CreateEventPage` et `VoteForm` (`AUDIT-3.md` §1.1).
+- `.stepper__btn` (compteur de renforts, `CompanionsField.tsx`) était sous le
+  plancher de cible tactile de 44 px que `global.css` documente et applique
+  déjà à sept autres contrôles (`global.css:2608-2610`) — une incohérence
+  interne au fichier, pas un nouveau principe (`AUDIT-3.md` §2).
+- Sur les cinq états nommés par le prompt de routine (vide, en cours, erreur,
+  succès, brouillon repris), seul le dernier manquait réellement, et
+  seulement sur `CreateEventPage` : aucune persistance au-delà du blaze de
+  l'organisateur (transverse, via `useComptoirName`), alors que c'est le
+  formulaire le plus long des trois et celui où une interruption coûte le
+  plus cher à retaper (`AUDIT-3.md` §3).
+
+**Modifications effectuées :**
+- `src/components/AlternativeOptionForm.tsx` — ajout de `useShakeInvalid` :
+  `shake("slot")` sur l'échec jour/heure/lieu, `shake("name")` sur l'échec du
+  blaze, wrapper `registerNode`/`is-shaking` sur les deux blocs concernés.
+  Aucun texte, aucune structure de champ modifiés.
+- `src/pages/CreateEventPage.tsx` — brouillon repris : lecture d'un éventuel
+  brouillon (`apero_create_draft_v1` dans `localStorage`) au montage, via un
+  état paresseux qui ne s'exécute qu'une fois ; les quatre champs et le
+  tableau de créneaux s'initialisent depuis ce brouillon quand `prefill`
+  (« Remettre ça ») est absent ; sauvegarde à chaque changement pertinent ;
+  purge à la création réussie (chemin classique et chemin chiffré API VPS) ;
+  note neutre de restauration sous le `lede` d'ouverture, hors zone de
+  décision.
+- `src/styles/global.css` — `.stepper__btn` : 42×42 px → 44×44 px (cible
+  tactile). Ajout de `.field__hint--draft` (marge haute de 8 px, la note de
+  brouillon n'étant pas rattachée à un `.field` et n'héritant donc pas du
+  tassement négatif prévu pour suivre un libellé).
+
+**Justification :** les trois correctifs répondent chacun à un écart nommé
+par l'audit entre ce que le code fait réellement et ce que la doctrine
+d'affordance (`DECISIONS.md` D2) ou le plancher de cible tactile déjà écrit
+dans `global.css` exigent — aucun n'est une préférence esthétique nouvelle.
+Références UXER mobilisées : `references/affordance-and-signifiers.md` (le
+retour de focus programmatique après un refus d'envoi comme signifiant de
+correction, appliqué à `AlternativeOptionForm`) et
+`reference-packs/mobile-field-agent/` (le plancher de cible tactile en
+contexte « verre en main », déjà cité dans le commentaire de `global.css`
+lui-même, appliqué ici à `.stepper__btn`).
+
+**Ton — déplacements :** aucun déplacement, aucune tournure touchée. Le lot
+de cette itération porte sur des états et des comportements, pas sur le
+placement du ton (réservé à l'itération 4 par `DECISIONS.md` D3). Une phrase
+neuve apparaît (note de restauration de brouillon) : elle est fonctionnelle,
+pas une tournure, et n'entre donc pas dans le corpus — voir `TON.md` §0 et
+son addendum d'itération 3.
+
+**Ton — compteur :** N = 25 / N₀ = 25 · manifestations sur le parcours par
+défaut sans erreur : 2 (création, volet réglages ouvert) → 2 (inchangé) ; 1
+(vote, message de succès) → 1 (inchangé).
+
+**Vérifications :**
+- `npm install` à la racine et dans `server/` (dépendances absentes au
+  démarrage du conteneur) — installées sans erreur.
+- `npm run build` — succès, `tsc -b && vite build` sans erreur.
+- `npm test` (`vitest run`) — 227 tests, 28 fichiers, tous passés (inchangé
+  depuis l'itération 2 : aucun test unitaire ne couvre directement
+  `CreateEventPage` ou `AlternativeOptionForm`, la logique modifiée est de
+  l'état de composant et de la persistance, exercée par les tests
+  fonctionnels ci-dessous).
+- `npm run test:functional` — 71/71 vérifications réussies, y compris la
+  création d'un apéro (section 1-2) et la contre-proposition de créneau
+  (section 4, qui exerce directement le chemin corrigé de
+  `AlternativeOptionForm`).
+- `npm run test:nav` — 23/23 contrôles passés, aucune régression de
+  navigation.
+- Contrôle grep du corpus (Phase 0 avant modification, Phase 4 après) : les
+  25 chaînes de `TON.md` recherchées une à une (script Python, substring
+  match pour B3 et B15 qui s'étendent sur plusieurs lignes JSX) — les 25
+  retrouvées telles quelles dans les deux passes.
+
+**Écarté cette fois :** `.cheer-btn` (bouton « Trinquer », 40 px) — sous le
+même plancher de cible tactile que `.stepper__btn`, mais c'est une action
+secondaire hors saisie de formulaire ; rien dans l'audit ne démontre qu'elle
+bloque la saisie (`AUDIT-3.md` §2, `BACKLOG.md` item 12). Persistance de
+brouillon pour `AperoSettingsForm` et `AlternativeOptionForm` — écartée avec
+justification en `DECISIONS.md` D6 (coût d'interruption bien plus faible pour
+l'un, formulaire déjà court et rouvert à la demande pour l'autre). Items 6 et
+7 du backlog — laissés `à faire`, le lot retenu étant déjà cohérent sans eux.
+
+**Reste à faire / point de reprise exact pour l'itération 4 :** commencer par
+la Phase 0 (relire ce journal, `BACKLOG.md`, `DECISIONS.md`, `TON.md`,
+recompter N contre N₀ = 25). Puis, selon la trajectoire de `DECISIONS.md` D3 :
+appliquer la charte de placement du ton (D1) — migrer A8/A9
+(`SwitchRow.state` → `SwitchRow.hint`, avec un `state` fonctionnel neuf qui
+n'entre pas dans le corpus) — et, si le temps le permet, les items 6 et 7 du
+backlog (documentation de l'exception de pastille sur les trois champs de
+créneau, signifiant visuel sur `LocationField`). Aucun texte de tournure ne
+doit changer : seul le déplacement et l'échelle typographique sont en jeu.

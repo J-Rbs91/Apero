@@ -125,3 +125,17 @@ après (Phase 4) modification — les 25 sont retrouvées telles quelles dans le
 deux cas (deux d'entre elles, B3 et B15, s'étendent sur plusieurs lignes JSX ;
 retrouvées par recherche de sous-chaîne, pas par une seule ligne `grep`).
 N = 25 / N₀ = 25, aucune régression.
+
+**Itération 3 :** aucune tournure du corpus touchée (le lot de cette
+itération porte sur la secousse de rappel d'erreur, les cibles tactiles et le
+brouillon repris — voir `JOURNAL.md` et `DECISIONS.md` D6/D7, pas sur le
+placement du ton, réservé à l'itération 4 par `DECISIONS.md` D3). Les 25
+tournures recomptées avant et après modification, retrouvées telles quelles
+dans les deux cas. N = 25 / N₀ = 25, aucune régression.
+
+Une phrase neuve apparaît dans `CreateEventPage.tsx` cette itération
+(« Brouillon retrouvé : reprends où tu t'étais arrêté. »). Elle n'entre pas
+dans ce corpus : au sens de la distinction posée en §0, c'est l'information
+fonctionnelle strictement nécessaire pour annoncer une restauration de
+données, sans effet de style, exagération ni aparté au-delà de ce que
+l'information exige. Elle n'est donc ni gelée ni comptée dans N.

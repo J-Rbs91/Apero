@@ -731,6 +731,12 @@ a {
   color: rgba(255, 247, 230, 0.66);
 }
 
+/* Note de reprise de brouillon : hors d'un `.field`, donc sans le tassement
+   négatif prévu pour suivre un libellé. */
+.field__hint--draft {
+  margin-top: 8px;
+}
+
 .field__error {
   display: flex;
   align-items: flex-start;
@@ -1161,9 +1167,9 @@ input[type="range"] {
 }
 
 .stepper__btn {
-  width: 42px;
-  min-height: 42px;
-  height: 42px;
+  width: 44px;
+  min-height: 44px;
+  height: 44px;
   padding: 0;
   display: flex;
   align-items: center;

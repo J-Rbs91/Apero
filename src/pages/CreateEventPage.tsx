@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
 import { useAppNavigation } from "../routes/useAppNavigation";
 import { LocationField } from "../components/LocationField";
@@ -56,6 +56,72 @@ function createEmptyOption(): AperitifOption {
   };
 }
 
+// Reprise après interruption : le formulaire vierge (hors « Remettre ça »,
+// qui a déjà sa propre source de pré-remplissage) se sauvegarde tout seul,
+// pour qu'un onglet fermé par erreur ou un rechargement ne fasse pas
+// retaper un créneau déjà entré.
+const CREATE_DRAFT_STORAGE_KEY = "apero_create_draft_v1";
+
+type CreateEventDraft = {
+  ceremonialNameInput: string;
+  title: string;
+  childrenAllowed: boolean;
+  recurrence: RecurrenceChoice;
+  options: AperitifOption[];
+};
+
+function hasDraftContent(draft: CreateEventDraft): boolean {
+  return Boolean(
+    draft.ceremonialNameInput.trim() ||
+      draft.title.trim() ||
+      draft.options.some((option) => option.date || option.time || option.location),
+  );
+}
+
+function readCreateDraft(): CreateEventDraft | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const raw = window.localStorage.getItem(CREATE_DRAFT_STORAGE_KEY);
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<CreateEventDraft>;
+    if (!Array.isArray(parsed.options)) {
+      return null;
+    }
+    const draft: CreateEventDraft = {
+      ceremonialNameInput: parsed.ceremonialNameInput ?? "",
+      title: parsed.title ?? "",
+      childrenAllowed: Boolean(parsed.childrenAllowed),
+      recurrence: parsed.recurrence ?? "once",
+      options: parsed.options.length ? parsed.options : [createEmptyOption()],
+    };
+    return hasDraftContent(draft) ? draft : null;
+  } catch {
+    // Brouillon illisible (format d'une version antérieure, stockage
+    // altéré) : on repart d'un formulaire vierge plutôt que de planter.
+    return null;
+  }
+}
+
+function writeCreateDraft(draft: CreateEventDraft) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  window.localStorage.setItem(CREATE_DRAFT_STORAGE_KEY, JSON.stringify(draft));
+}
+
+function clearCreateDraft() {
+  if (typeof window === "undefined") {
+    return;
+  }
+  window.localStorage.removeItem(CREATE_DRAFT_STORAGE_KEY);
+}
+
 /** Ce qui manque dans un créneau, champ par champ. */
 function missingFieldsOf(option: AperitifOption): Array<"date" | "time" | "location"> {
   const missing: Array<"date" | "time" | "location"> = [];
@@ -86,14 +152,25 @@ export function CreateEventPage() {
   const prefill = navigationState?.prefill;
   const linkToTablee = navigationState?.linkToTablee;
 
-  const [ceremonialNameInput, setCeremonialNameInput] = useState(prefill?.ceremonialName ?? "");
-  const [title, setTitle] = useState(prefill?.title ?? "");
-  const [childrenAllowed, setChildrenAllowed] = useState(prefill?.childrenAllowed ?? false);
-  const [recurrence, setRecurrence] = useState<RecurrenceChoice>(prefill?.recurrence ?? "once");
+  // « Remettre ça » a déjà sa source de pré-remplissage : elle prime, et rien
+  // n'est lu ni écrit dans le brouillon pour cette visite (pas de conflit
+  // entre deux formulaires antérieurs).
+  const [storedDraft] = useState(() => (prefill ? null : readCreateDraft()));
+
+  const [ceremonialNameInput, setCeremonialNameInput] = useState(
+    prefill?.ceremonialName ?? storedDraft?.ceremonialNameInput ?? "",
+  );
+  const [title, setTitle] = useState(prefill?.title ?? storedDraft?.title ?? "");
+  const [childrenAllowed, setChildrenAllowed] = useState(
+    prefill?.childrenAllowed ?? storedDraft?.childrenAllowed ?? false,
+  );
+  const [recurrence, setRecurrence] = useState<RecurrenceChoice>(
+    prefill?.recurrence ?? storedDraft?.recurrence ?? "once",
+  );
   const [options, setOptions] = useState<AperitifOption[]>(() =>
     prefill?.options?.length
       ? prefill.options.map((option) => ({ ...option, id: createId("option") }))
-      : [createEmptyOption()],
+      : (storedDraft?.options ?? [createEmptyOption()]),
   );
   const [feedback, setFeedback] = useState("");
   // Tant qu'on n'a pas tenté d'envoyer, rien n'est souligné en rouge : la
@@ -106,6 +183,13 @@ export function CreateEventPage() {
   const submitLockRef = useRef(false);
   // Renvoie le regard sur le créneau incomplet quand on tente de créer.
   const { registerNode, shake, shakingId } = useShakeInvalid();
+
+  useEffect(() => {
+    if (prefill) {
+      return;
+    }
+    writeCreateDraft({ ceremonialNameInput, title, childrenAllowed, recurrence, options });
+  }, [prefill, ceremonialNameInput, title, childrenAllowed, recurrence, options]);
 
   function updateOption(optionId: string, updates: Partial<AperitifOption>) {
     setOptions((currentOptions) =>
@@ -265,6 +349,7 @@ export function CreateEventPage() {
         }
 
         hapticSuccess();
+        clearCreateDraft();
         /* Fin de tunnel : l'apéro créé est au même niveau que le formulaire, la
            navigation REMPLACE donc son entrée. Un appui sur retour ramène d'où
            l'on venait, et ne rouvre pas un parcours terminé. */
@@ -300,6 +385,7 @@ export function CreateEventPage() {
 
       await eventStorage.createEvent(event);
       hapticSuccess();
+      clearCreateDraft();
       aller(`/event/${event.id}`, { state: { createdEvent: event } });
     } catch (error) {
       hapticError();
@@ -333,6 +419,11 @@ export function CreateEventPage() {
             Une seule chose est obligatoire : au moins un créneau complet. Tout le reste
             se règle après, ou jamais.
           </p>
+          {storedDraft && (
+            <p className="field__hint field__hint--draft">
+              Brouillon retrouvé : reprends où tu t’étais arrêté.
+            </p>
+          )}
         </div>
 
         <FormSection

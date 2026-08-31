@@ -7,12 +7,15 @@ Statuts : `à faire` / `en cours` / `fait` / `abandonné + motif`.
 | 1 | Réduire le coût du champ lieu (`LocationField`) | `AUDIT-1.md` §3.5 | Élevé — champ le plus coûteux des trois formulaires de saisie de créneau | fait — it. 2, voir `DECISIONS.md` D4 (approche différente du libellé d'origine, voir « Écarté cette itération ») |
 | 2 | Ajouter `requirement="required"` (ou équivalent) sur le champ « Proposé par » de `AlternativeOptionForm.tsx:167-178` | `AUDIT-1.md` §3.1 | Moyen — un aller-retour évitable sur un formulaire secondaire | fait — it. 2 |
 | 3 | Alléger la hiérarchie typographique de `.feedback` (erreurs génériques) pour qu'elle ne dépasse jamais le poids d'une `.field__error`, sans toucher au texte | `DECISIONS.md` D1 | Moyen — condition pour reloger A1, A2, A3, A5, A6, A7 sans perdre l'info utile | fait — it. 2, voir `DECISIONS.md` D5 |
-| 4 | Ajouter `useShakeInvalid` à `AlternativeOptionForm.tsx` pour rejoindre le comportement de `CreateEventPage` et `VoteForm` | `AUDIT-1.md` §3.3 | Faible à moyen — cohérence, formulaire court | à faire |
+| 4 | Ajouter `useShakeInvalid` à `AlternativeOptionForm.tsx` pour rejoindre le comportement de `CreateEventPage` et `VoteForm` | `AUDIT-1.md` §3.3 | Faible à moyen — cohérence, formulaire court | fait — it. 3 |
 | 5 | Déplacer A8/A9 (« Marmaille admise » / « Ce soir c'est sans les mômes » ; « En escadron » / « Peinard, en solo ») de `SwitchRow.state` vers `SwitchRow.hint`, avec un `state` fonctionnel neuf | `DECISIONS.md` D1 | Moyen — libère la zone de décision de ces deux réglages | à faire |
 | 6 | Documenter dans `docs/DESIGN-SYSTEM.md` l'exception des trois champs de créneau sans pastille `Obligatoire`/`Facultatif` | `AUDIT-1.md` §3.2 | Faible — cohérence documentaire | à faire |
 | 7 | Ajouter un signifiant visuel (icône) à `LocationField` pour annoncer le comportement enrichi (recherche, carte, géolocalisation) avant le premier tap | `AUDIT-1.md` §3.4 | Faible — amélioration de découvrabilité, pas bloquant | à faire |
 | 8 | Revue QA finale, accessibilité, responsive, cohérence, purge des restes | Trajectoire itération 5 | — | à faire |
 | 9 | Double mesure finale (vitesse de saisie, présence du ton) vs itération 1 | Trajectoire itération 5 | — | à faire |
+| 10 | Cible tactile de `.stepper__btn` (compteur de renforts) portée à 44×44 px, alignée sur le plancher déjà documenté dans `global.css` | `AUDIT-3.md` §2 | Faible à moyen — cohérence d'un plancher déjà en vigueur ailleurs | fait — it. 3, voir `DECISIONS.md` D7 |
+| 11 | Brouillon repris (persistance + restauration) pour `CreateEventPage` | `AUDIT-3.md` §3 | Élevé — évite de retaper le formulaire le plus long après une interruption | fait — it. 3, voir `DECISIONS.md` D6 |
+| 12 | `.cheer-btn` (40 px, action « Trinquer ») sous le plancher de 44 px | `AUDIT-3.md` §2 | Faible — action secondaire, hors saisie de formulaire | à faire — hors périmètre tant qu'aucun audit ne démontre un blocage de la saisie |
 
 ## Écarté cette itération
 
