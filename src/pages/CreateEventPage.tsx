@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
 import { useAppNavigation } from "../routes/useAppNavigation";
 import { LocationField } from "../components/LocationField";
@@ -16,6 +16,11 @@ import {
 import { getAperoStorageMode } from "../config/aperoApiConfig";
 import { eventStorage } from "../services";
 import { AperoApiError } from "../services/aperoApiClient";
+import {
+  clearCreateEventDraft,
+  readCreateEventDraft,
+  saveCreateEventDraft,
+} from "../services/createEventDraft";
 import { createEncryptedApero } from "../services/encryptedAperoRepository";
 import { addAperoToTablee } from "../services/tableeRepository";
 import { useComptoirName } from "../hooks/useComptoirName";
@@ -39,6 +44,16 @@ import {
 import { buildInvitePath } from "../utils/inviteLink";
 
 type RecurrenceChoice = AperoRecurrence | "once";
+
+/** Identifiant du bloc « message d'erreur » auprès de `useShakeInvalid`. Aucun
+ *  créneau ne peut le porter : les identifiants de créneau viennent tous de
+ *  `createId("option")`. */
+const FEEDBACK_NODE_ID = "feedback";
+
+/** Le brouillon s'écrit après une accalmie de frappe, pas à chaque caractère :
+ *  `localStorage` est synchrone, et une écriture par touche se sent sur un
+ *  téléphone d'entrée de gamme. */
+const DRAFT_SAVE_DEBOUNCE_MS = 400;
 
 const recurrenceChoices: ChoiceOption<RecurrenceChoice>[] = [
   { value: "once", label: "Une seule fois", description: "On verra bien après." },
@@ -86,15 +101,28 @@ export function CreateEventPage() {
   const prefill = navigationState?.prefill;
   const linkToTablee = navigationState?.linkToTablee;
 
-  const [ceremonialNameInput, setCeremonialNameInput] = useState(prefill?.ceremonialName ?? "");
-  const [title, setTitle] = useState(prefill?.title ?? "");
-  const [childrenAllowed, setChildrenAllowed] = useState(prefill?.childrenAllowed ?? false);
-  const [recurrence, setRecurrence] = useState<RecurrenceChoice>(prefill?.recurrence ?? "once");
-  const [options, setOptions] = useState<AperitifOption[]>(() =>
-    prefill?.options?.length
-      ? prefill.options.map((option) => ({ ...option, id: createId("option") }))
-      : [createEmptyOption()],
+  // Brouillon relu une seule fois, au montage. Arriver par « Remettre ça »
+  // (prefill) est une intention explicite et récente : elle passe devant un
+  // brouillon dormant, qui reste en réserve tant qu'aucun apéro n'est créé.
+  const [restoredDraft] = useState(() => (prefill ? null : readCreateEventDraft()));
+  const [isDraftRestored, setIsDraftRestored] = useState(() => Boolean(restoredDraft));
+
+  const [ceremonialNameInput, setCeremonialNameInput] = useState(
+    prefill?.ceremonialName ?? restoredDraft?.ceremonialName ?? "",
   );
+  const [title, setTitle] = useState(prefill?.title ?? restoredDraft?.title ?? "");
+  const [childrenAllowed, setChildrenAllowed] = useState(
+    prefill?.childrenAllowed ?? restoredDraft?.childrenAllowed ?? false,
+  );
+  const [recurrence, setRecurrence] = useState<RecurrenceChoice>(
+    prefill?.recurrence ?? restoredDraft?.recurrence ?? "once",
+  );
+  const [options, setOptions] = useState<AperitifOption[]>(() => {
+    if (prefill?.options?.length) {
+      return prefill.options.map((option) => ({ ...option, id: createId("option") }));
+    }
+    return restoredDraft?.options?.length ? restoredDraft.options : [createEmptyOption()];
+  });
   const [feedback, setFeedback] = useState("");
   // Tant qu'on n'a pas tenté d'envoyer, rien n'est souligné en rouge : la
   // barre du bas se contente d'annoncer ce qui reste à remplir.
@@ -104,8 +132,33 @@ export function CreateEventPage() {
   // dispatchés dans la même tâche JS (avant que React ne commit l'état),
   // qui créeraient deux apéros identiques.
   const submitLockRef = useRef(false);
-  // Renvoie le regard sur le créneau incomplet quand on tente de créer.
-  const { registerNode, shake, shakingId } = useShakeInvalid();
+  // Renvoie le regard sur le créneau incomplet — ou, quand le refus ne vise
+  // aucun champ en particulier, sur le message qui l'explique.
+  const { registerNode, shake, bringIntoView, shakingId } = useShakeInvalid();
+
+  // Sauvegarde continue : la saisie survit à un rechargement, à un appel
+  // entrant, à une bascule d'application. Elle n'est effacée qu'une fois
+  // l'apéro réellement créé, ou sur demande explicite.
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      saveCreateEventDraft({ ceremonialName: ceremonialNameInput, title, childrenAllowed, recurrence, options });
+    }, DRAFT_SAVE_DEBOUNCE_MS);
+    return () => window.clearTimeout(timer);
+  }, [ceremonialNameInput, title, childrenAllowed, recurrence, options]);
+
+  /** Porte de sortie du brouillon restauré : une saisie qu'on ne peut pas
+   *  vider est pire que pas de restauration du tout. */
+  function startFromScratch() {
+    clearCreateEventDraft();
+    setCeremonialNameInput("");
+    setTitle("");
+    setChildrenAllowed(false);
+    setRecurrence("once");
+    setOptions([createEmptyOption()]);
+    setFeedback("");
+    setHasTriedSubmit(false);
+    setIsDraftRestored(false);
+  }
 
   function updateOption(optionId: string, updates: Partial<AperitifOption>) {
     setOptions((currentOptions) =>
@@ -127,13 +180,19 @@ export function CreateEventPage() {
 
   // La barre du bas parle toujours de la prochaine chose à faire, jamais en
   // langage de validation.
-  const actionStatus = isReady
-    ? completeOptions.length > 1
-      ? `${completeOptions.length} créneaux prêts. La tablée tranchera.`
-      : "Le créneau est prêt. La tablée n’a plus qu’à répondre."
-    : incompleteCount === options.length
-      ? "Remplis jour, heure et troquet du créneau 1."
-      : `Encore ${incompleteCount} créneau${incompleteCount > 1 ? "x" : ""} à compléter (ou à retirer).`;
+  //
+  // Un refus vient d'être opposé : la barre est le seul élément que le pouce a
+  // sous les yeux, elle ne peut pas continuer d'annoncer que tout est prêt.
+  // Elle renvoie au message, qui vient d'être ramené dans le champ de vision.
+  const actionStatus = feedback
+    ? "L’envoi a été refusé. L’explication est juste au-dessus."
+    : isReady
+      ? completeOptions.length > 1
+        ? `${completeOptions.length} créneaux prêts. La tablée tranchera.`
+        : "Le créneau est prêt. La tablée n’a plus qu’à répondre."
+      : incompleteCount === options.length
+        ? "Remplis jour, heure et troquet du créneau 1."
+        : `Encore ${incompleteCount} créneau${incompleteCount > 1 ? "x" : ""} à compléter (ou à retirer).`;
 
   async function handleSubmit(formEvent: React.FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
@@ -173,10 +232,13 @@ export function CreateEventPage() {
     });
 
     if (!hasFutureSlot) {
+      // Aucun champ n'est fautif — les créneaux sont complets, ils sont juste
+      // passés. Le bloc à montrer est donc le message, pas un champ.
       hapticError();
       setFeedback(
         "Tous tes créneaux sont déjà passés. Joli exploit temporel, zéro convive. La machine à remonter le temps est en réparation : vise l’avenir.",
       );
+      bringIntoView(FEEDBACK_NODE_ID);
       return;
     }
 
@@ -195,6 +257,7 @@ export function CreateEventPage() {
         setFeedback(
           "Ce nom d’apéro est déjà pris par un événement en cours. Trouve-en un autre, ou laisse le champ vide pour un tirage au sort.",
         );
+        bringIntoView(FEEDBACK_NODE_ID);
         return;
       }
 
@@ -265,6 +328,8 @@ export function CreateEventPage() {
         }
 
         hapticSuccess();
+        // L'apéro existe : le brouillon n'a plus rien à protéger.
+        clearCreateEventDraft();
         /* Fin de tunnel : l'apéro créé est au même niveau que le formulaire, la
            navigation REMPLACE donc son entrée. Un appui sur retour ramène d'où
            l'on venait, et ne rouvre pas un parcours terminé. */
@@ -300,6 +365,7 @@ export function CreateEventPage() {
 
       await eventStorage.createEvent(event);
       hapticSuccess();
+      clearCreateEventDraft();
       aller(`/event/${event.id}`, { state: { createdEvent: event } });
     } catch (error) {
       hapticError();
@@ -316,6 +382,7 @@ export function CreateEventPage() {
                   ? error.message
                   : "Le service a fait une bêtise. On ne veut pas savoir laquelle. Deux secondes, ça se répare tout seul.",
       );
+      bringIntoView(FEEDBACK_NODE_ID);
     } finally {
       submitLockRef.current = false;
       setIsSubmitting(false);
@@ -334,6 +401,22 @@ export function CreateEventPage() {
             se règle après, ou jamais.
           </p>
         </div>
+
+        {isDraftRestored && (
+          // Accusé de réception à l'entrée, hors de la ligne de regard de la
+          // saisie et hors du chemin du pouce : il se lit une fois, puis il
+          // s'oublie. Il ne s'affiche que sur un brouillon réellement relu,
+          // jamais sur la foi d'une sauvegarde supposée.
+          <div className="draft-resume" role="status">
+            <p className="feedback feedback--info">
+              Ta saisie précédente a été retrouvée sur cet appareil. Reprends où tu en
+              étais.
+            </p>
+            <button type="button" className="ghost-link" onClick={startFromScratch}>
+              Repartir de zéro
+            </button>
+          </div>
+        )}
 
         <FormSection
           step={1}
@@ -482,14 +565,18 @@ export function CreateEventPage() {
         </Disclosure>
 
         {feedback && (
-          <p className="feedback" role="alert">
+          // Enregistré auprès de `useShakeInvalid` : sur un formulaire plus
+          // long que l'écran, ce message se rendait sous le pli et personne
+          // ne le voyait. Il est maintenant ramené sous les yeux au moment du
+          // refus (DECISIONS.md D6).
+          <p className="feedback" role="alert" ref={registerNode(FEEDBACK_NODE_ID)}>
             {feedback}
           </p>
         )}
 
         <ActionBar
           status={actionStatus}
-          tone={isReady ? "ready" : hasTriedSubmit ? "blocked" : "neutral"}
+          tone={feedback ? "blocked" : isReady ? "ready" : hasTriedSubmit ? "blocked" : "neutral"}
         >
           <button className="button button--primary" type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Création de l’apéro…" : "Créer l’apéro"}

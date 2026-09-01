@@ -11,6 +11,10 @@ import { ActionBar, Disclosure, FormSection, TextAreaField, TextField } from "./
 
 type DraftVotes = Record<string, VoteStatus | "">;
 
+/** Identifiant du bloc « message » auprès de `useShakeInvalid`. Il ne peut
+ *  entrer en collision ni avec `"name"` ni avec un identifiant de créneau. */
+const FEEDBACK_NODE_ID = "feedback";
+
 type VoteFormProps = {
   event: AperitifEvent;
   isSaving: boolean;
@@ -104,8 +108,10 @@ export function VoteForm({
   // touché ; après une première frappe, le champ lui appartient (il doit
   // pouvoir le vider pour répondre sous un autre nom).
   const nameEditedRef = useRef(false);
-  // Renvoie le regard sur le bloc qui coince quand on tente d'émarger.
-  const { registerNode, shake, shakingId } = useShakeInvalid();
+  // Renvoie le regard sur le bloc qui coince quand on tente d'émarger — ou,
+  // pour un échec d'envoi qui ne vise aucun champ, sur le message qui
+  // l'explique.
+  const { registerNode, shake, bringIntoView, shakingId } = useShakeInvalid();
 
   const existingParticipant = useMemo(() => {
     // Même clé de normalisation que la fusion au registre (upsertParticipant) :
@@ -187,15 +193,22 @@ export function VoteForm({
   const isNameMissing = !trimmedName;
   const isComplete = missingSlots.length === 0 && !isNameMissing;
 
+  // Un envoi vient d'échouer : la barre ne peut pas continuer d'annoncer que
+  // tout est prêt pendant qu'un message dit le contraire (DECISIONS.md D7).
+  // `feedbackTone` n'est pas remis à zéro avec le message : on teste les deux.
+  const hasErrorFeedback = Boolean(feedback) && feedbackTone === "error";
+
   // Ce que dit la barre d'action : jamais « erreur », toujours « il manque
   // ceci ». Le convive sait quoi faire sans avoir à deviner.
-  const actionStatus = isNameMissing
-    ? "Il manque ton blaze en haut du formulaire."
-    : missingSlots.length > 0
-      ? `Encore ${missingSlots.length} créneau${missingSlots.length > 1 ? "x" : ""} à trancher.`
-      : existingParticipant
-        ? "Tout est rempli. Plus qu’à corriger le registre."
-        : "Tout est rempli. Plus qu’à émarger.";
+  const actionStatus = hasErrorFeedback
+    ? "L’envoi a échoué. L’explication est juste au-dessus."
+    : isNameMissing
+      ? "Il manque ton blaze en haut du formulaire."
+      : missingSlots.length > 0
+        ? `Encore ${missingSlots.length} créneau${missingSlots.length > 1 ? "x" : ""} à trancher.`
+        : existingParticipant
+          ? "Tout est rempli. Plus qu’à corriger le registre."
+          : "Tout est rempli. Plus qu’à émarger.";
 
   async function handleSubmit(formEvent: React.FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
@@ -254,6 +267,9 @@ export function VoteForm({
           ? submitError.message
           : "L’envoi a raté. Ta réponse reste sous le coude, réessaie.",
       );
+      // Le formulaire ne se replie pas sur un échec : le message reste donc au
+      // pied d'une liste de créneaux plus longue que l'écran. On l'y amène.
+      bringIntoView(FEEDBACK_NODE_ID);
     }
   }
 
@@ -431,6 +447,7 @@ export function VoteForm({
           <p
             className={`feedback${feedbackTone === "ok" ? " feedback--ok" : ""}${feedbackTone === "info" ? " feedback--info" : ""}`}
             role={feedbackTone === "error" ? "alert" : "status"}
+            ref={registerNode(FEEDBACK_NODE_ID)}
           >
             {feedback}
           </p>
@@ -438,7 +455,15 @@ export function VoteForm({
 
         <ActionBar
           status={actionStatus}
-          tone={isComplete ? "ready" : hasTriedSubmit ? "blocked" : "neutral"}
+          tone={
+            hasErrorFeedback
+              ? "blocked"
+              : isComplete
+                ? "ready"
+                : hasTriedSubmit
+                  ? "blocked"
+                  : "neutral"
+          }
           secondary={
             existingParticipant ? (
               <button

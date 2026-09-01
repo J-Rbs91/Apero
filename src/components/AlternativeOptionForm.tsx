@@ -1,10 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { useComptoirName } from "../hooks/useComptoirName";
+import { useShakeInvalid } from "../hooks/useShakeInvalid";
 import type { AperitifOption } from "../types/apero";
 import { createId } from "../utils/createId";
 import { hapticError, hapticSuccess } from "../utils/haptics";
 import { LocationField, type LocationValue } from "./LocationField";
 import { ActionBar, FormSheet, TextField } from "./ui";
+
+/** Les trois blocs que `useShakeInvalid` peut ramener sous les yeux. */
+const SLOT_NODE_ID = "slot";
+const NAME_NODE_ID = "name";
+const FEEDBACK_NODE_ID = "feedback";
 
 type AlternativeOptionFormProps = {
   isSaving: boolean;
@@ -39,6 +45,9 @@ export function AlternativeOptionForm({
   // Verrou synchrone : disabled={isSaving} ne protège pas deux clics
   // dispatchés dans la même tâche JS, qui créeraient deux créneaux jumeaux.
   const submitLockRef = useRef(false);
+  // Même retour au bloc fautif que dans les deux autres formulaires de saisie :
+  // c'était la dernière incohérence entre les trois (AUDIT-1.md §3.3).
+  const { registerNode, shake, bringIntoView, shakingId } = useShakeInvalid();
 
   useEffect(() => {
     if (!nameEditedRef.current && !createdByName && comptoirName) {
@@ -57,17 +66,22 @@ export function AlternativeOptionForm({
     }
     setHasTriedSubmit(true);
 
+    // Un champ précis est en faute : le regard va au champ, pas au message.
+    // Le message reste affiché — c'est lui qui dit pourquoi — mais il n'entre
+    // pas en concurrence avec la secousse (DECISIONS.md D6).
     if (!date || !time || !trimmedLocation) {
       hapticError();
       setFeedback(
         "Quitte à imposer cette contradiction, il s’agirait au moins d’avoir l’élégance d’être précis : un jour, une heure et un lieu, histoire que cette proposition ait meilleure mine que la tienne.",
       );
+      shake(SLOT_NODE_ID);
       return;
     }
 
     if (!trimmedName) {
       hapticError();
       setFeedback("Indique ton blaze, qu’on sache au moins l’intitulé du fauteur de troubles.");
+      shake(NAME_NODE_ID);
       return;
     }
 
@@ -96,6 +110,8 @@ export function AlternativeOptionForm({
           ? submitError.message
           : "La contre-proposition n’est pas arrivée au registre. Ta saisie reste là, réessaie.",
       );
+      // Aucun champ n'est en faute ici : c'est le message qu'il faut lire.
+      bringIntoView(FEEDBACK_NODE_ID);
       return;
     } finally {
       submitLockRef.current = false;
@@ -120,11 +136,13 @@ export function AlternativeOptionForm({
       footer={
         <ActionBar
           status={
-            isReady
-              ? "Prêt à rejoindre la liste des créneaux."
-              : "Jour, heure et troquet sont obligatoires."
+            feedback
+              ? "L’envoi a été refusé. L’explication est juste au-dessus."
+              : isReady
+                ? "Prêt à rejoindre la liste des créneaux."
+                : "Jour, heure et troquet sont obligatoires."
           }
-          tone={isReady ? "ready" : hasTriedSubmit ? "blocked" : "neutral"}
+          tone={feedback ? "blocked" : isReady ? "ready" : hasTriedSubmit ? "blocked" : "neutral"}
           secondary={
             <button type="button" className="ghost-link" onClick={onClose}>
               Laisser tomber
@@ -139,7 +157,10 @@ export function AlternativeOptionForm({
     >
       {/* Les trois champs du créneau sont obligatoires : la phrase du pied de
           feuille le dit une fois, inutile de coller une pastille sur chacun. */}
-      <div className="slot__fields">
+      <div
+        className={`slot__fields${shakingId === SLOT_NODE_ID ? " is-shaking" : ""}`}
+        ref={registerNode(SLOT_NODE_ID)}
+      >
         <TextField
           label="Jour"
           type="date"
@@ -164,24 +185,29 @@ export function AlternativeOptionForm({
         />
       </div>
 
-      <TextField
-        label="Proposé par"
-        requirement="required"
-        hint="Pour que la tablée sache qui a bousculé le programme."
-        value={createdByName}
-        maxLength={80}
-        placeholder="Nadine Diabolo, Jean-Mi Pastaga…"
-        error={hasTriedSubmit && !trimmedName ? "Indique ton blaze." : undefined}
-        onChange={(value) => {
-          nameEditedRef.current = true;
-          setCreatedByName(value);
-        }}
-      />
+      <div
+        className={shakingId === NAME_NODE_ID ? "is-shaking" : undefined}
+        ref={registerNode(NAME_NODE_ID)}
+      >
+        <TextField
+          label="Proposé par"
+          requirement="required"
+          hint="Pour que la tablée sache qui a bousculé le programme."
+          value={createdByName}
+          maxLength={80}
+          placeholder="Nadine Diabolo, Jean-Mi Pastaga…"
+          error={hasTriedSubmit && !trimmedName ? "Indique ton blaze." : undefined}
+          onChange={(value) => {
+            nameEditedRef.current = true;
+            setCreatedByName(value);
+          }}
+        />
+      </div>
 
       {feedback && (
         // Ce bloc ne porte que des erreurs (validation ou envoi raté) :
         // annonce assertive, comme les erreurs du formulaire de vote.
-        <p className="feedback" role="alert">
+        <p className="feedback" role="alert" ref={registerNode(FEEDBACK_NODE_ID)}>
           {feedback}
         </p>
       )}
