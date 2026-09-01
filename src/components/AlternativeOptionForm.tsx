@@ -7,6 +7,11 @@ import { hapticError, hapticSuccess } from "../utils/haptics";
 import { LocationField, type LocationValue } from "./LocationField";
 import { ActionBar, FormSheet, TextField } from "./ui";
 
+/** Les trois blocs que `useShakeInvalid` peut ramener sous les yeux. */
+const SLOT_NODE_ID = "slot";
+const NAME_NODE_ID = "name";
+const FEEDBACK_NODE_ID = "feedback";
+
 type AlternativeOptionFormProps = {
   isSaving: boolean;
   /** Ouverture pilotée par le parent : le bouton déclencheur vit dans le
@@ -40,9 +45,9 @@ export function AlternativeOptionForm({
   // Verrou synchrone : disabled={isSaving} ne protège pas deux clics
   // dispatchés dans la même tâche JS, qui créeraient deux créneaux jumeaux.
   const submitLockRef = useRef(false);
-  // Renvoie le regard sur le bloc fautif, comme dans les deux autres
-  // formulaires de saisie (CreateEventPage, VoteForm).
-  const { registerNode, shake, shakingId } = useShakeInvalid();
+  // Même retour au bloc fautif que dans les deux autres formulaires de saisie :
+  // c'était la dernière incohérence entre les trois (AUDIT-1.md §3.3).
+  const { registerNode, shake, bringIntoView, shakingId } = useShakeInvalid();
 
   useEffect(() => {
     if (!nameEditedRef.current && !createdByName && comptoirName) {
@@ -61,19 +66,22 @@ export function AlternativeOptionForm({
     }
     setHasTriedSubmit(true);
 
+    // Un champ précis est en faute : le regard va au champ, pas au message.
+    // Le message reste affiché — c'est lui qui dit pourquoi — mais il n'entre
+    // pas en concurrence avec la secousse (DECISIONS.md D6).
     if (!date || !time || !trimmedLocation) {
       hapticError();
       setFeedback(
         "Quitte à imposer cette contradiction, il s’agirait au moins d’avoir l’élégance d’être précis : un jour, une heure et un lieu, histoire que cette proposition ait meilleure mine que la tienne.",
       );
-      shake("slot");
+      shake(SLOT_NODE_ID);
       return;
     }
 
     if (!trimmedName) {
       hapticError();
       setFeedback("Indique ton blaze, qu’on sache au moins l’intitulé du fauteur de troubles.");
-      shake("name");
+      shake(NAME_NODE_ID);
       return;
     }
 
@@ -102,6 +110,8 @@ export function AlternativeOptionForm({
           ? submitError.message
           : "La contre-proposition n’est pas arrivée au registre. Ta saisie reste là, réessaie.",
       );
+      // Aucun champ n'est en faute ici : c'est le message qu'il faut lire.
+      bringIntoView(FEEDBACK_NODE_ID);
       return;
     } finally {
       submitLockRef.current = false;
@@ -126,11 +136,13 @@ export function AlternativeOptionForm({
       footer={
         <ActionBar
           status={
-            isReady
-              ? "Prêt à rejoindre la liste des créneaux."
-              : "Jour, heure et troquet sont obligatoires."
+            feedback
+              ? "L’envoi a été refusé. L’explication est juste au-dessus."
+              : isReady
+                ? "Prêt à rejoindre la liste des créneaux."
+                : "Jour, heure et troquet sont obligatoires."
           }
-          tone={isReady ? "ready" : hasTriedSubmit ? "blocked" : "neutral"}
+          tone={feedback ? "blocked" : isReady ? "ready" : hasTriedSubmit ? "blocked" : "neutral"}
           secondary={
             <button type="button" className="ghost-link" onClick={onClose}>
               Laisser tomber
@@ -146,8 +158,8 @@ export function AlternativeOptionForm({
       {/* Les trois champs du créneau sont obligatoires : la phrase du pied de
           feuille le dit une fois, inutile de coller une pastille sur chacun. */}
       <div
-        ref={registerNode("slot")}
-        className={`slot__fields${shakingId === "slot" ? " is-shaking" : ""}`}
+        className={`slot__fields${shakingId === SLOT_NODE_ID ? " is-shaking" : ""}`}
+        ref={registerNode(SLOT_NODE_ID)}
       >
         <TextField
           label="Jour"
@@ -174,8 +186,8 @@ export function AlternativeOptionForm({
       </div>
 
       <div
-        ref={registerNode("name")}
-        className={shakingId === "name" ? "is-shaking" : ""}
+        className={shakingId === NAME_NODE_ID ? "is-shaking" : undefined}
+        ref={registerNode(NAME_NODE_ID)}
       >
         <TextField
           label="Proposé par"
@@ -195,7 +207,7 @@ export function AlternativeOptionForm({
       {feedback && (
         // Ce bloc ne porte que des erreurs (validation ou envoi raté) :
         // annonce assertive, comme les erreurs du formulaire de vote.
-        <p className="feedback" role="alert">
+        <p className="feedback" role="alert" ref={registerNode(FEEDBACK_NODE_ID)}>
           {feedback}
         </p>
       )}

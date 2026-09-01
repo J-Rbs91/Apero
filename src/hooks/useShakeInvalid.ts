@@ -19,10 +19,20 @@ function prefersReducedMotion(): boolean {
  * Le geste est déclenché depuis le gestionnaire d'envoi, mais exécuté dans un
  * effet : au moment du clic, React n'a pas encore posé les `aria-invalid` que
  * l'on cherche. Passer par un état garantit qu'on agit sur le DOM à jour.
+ *
+ * Deux portes d'entrée, un seul mécanisme :
+ * - `shake(id)` quand un champ précis est en faute — secousse comprise ;
+ * - `bringIntoView(id)` quand le refus est global (créneaux passés, nom déjà
+ *   pris, échec réseau) et que le bloc à montrer est le message qui
+ *   l'explique. Rien à secouer : il n'y a pas de champ à corriger, seulement
+ *   quelque chose à lire.
+ *
+ * Les deux ne se déclenchent jamais pour un même refus : deux défilements
+ * concurrents choisiraient l'un pour l'autre où l'utilisateur doit regarder.
  */
 export function useShakeInvalid() {
   const nodes = useRef(new Map<string, HTMLElement>());
-  const [target, setTarget] = useState<{ id: string } | null>(null);
+  const [target, setTarget] = useState<{ id: string; withShake: boolean } | null>(null);
   const [shakingId, setShakingId] = useState<string | null>(null);
 
   /** Callback de ref à poser sur chaque bloc secouable. */
@@ -41,7 +51,15 @@ export function useShakeInvalid() {
   const shake = useCallback((id: string) => {
     // Objet neuf à chaque appel : deux refus d'affilée sur le même bloc
     // doivent rejouer la secousse.
-    setTarget({ id });
+    setTarget({ id, withShake: true });
+  }, []);
+
+  /**
+   * Même remontée du regard, sans secousse : pour un bloc qu'il faut lire, pas
+   * corriger. Objet neuf à chaque appel, pour la même raison que `shake`.
+   */
+  const bringIntoView = useCallback((id: string) => {
+    setTarget({ id, withShake: false });
   }, []);
 
   useEffect(() => {
@@ -60,10 +78,17 @@ export function useShakeInvalid() {
     // premier champ du bloc : on atterrit là où il y a quelque chose à taper.
     node.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus({ preventScroll: true });
 
+    if (!target.withShake) {
+      // Un message d'explication ne tremble pas : on l'amène sous les yeux et
+      // on le laisse se lire.
+      setShakingId(null);
+      return;
+    }
+
     setShakingId(target.id);
     const timer = window.setTimeout(() => setShakingId(null), SHAKE_MS);
     return () => window.clearTimeout(timer);
   }, [target]);
 
-  return { registerNode, shake, shakingId };
+  return { registerNode, shake, bringIntoView, shakingId };
 }

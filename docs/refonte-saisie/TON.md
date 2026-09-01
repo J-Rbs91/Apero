@@ -114,11 +114,43 @@ zone). A1, A2, A3, A5, A6, A7 ont reçu le traitement de **hiérarchie**
 à `600` dans `src/styles/global.css`, un cran sous `.field__error` — voir
 `DECISIONS.md` D5. Statut inchangé : `en place`.
 
+*Itération 3 :* aucun déplacement d'écran, aucune retouche d'échelle, aucun
+texte touché. Le levier employé pour A1, A2, A3, A4 (`CreateEventPage`), B8
+(`VoteForm`) et A6, A7 (`AlternativeOptionForm`) est le **moment et le lieu
+d'apparition** — celui que D1 avait réservé à cette zone en écartant le
+déplacement d'écran. Ces tournures restent au même endroit du code, au même
+rôle, à la même taille et à la même graisse ; elles sont désormais ramenées
+dans le champ de vision au moment du refus, alors qu'elles se rendaient
+jusqu'ici sous le pli d'un formulaire plus long que l'écran
+(`AUDIT-3.md` §2, `DECISIONS.md` D6). Statut inchangé : `en place`.
+
+Une précision de placement, pour B2 (« La tablée tranchera. ») : sur le seul
+chemin d'erreur, la ligne de statut de `ActionBar` cède la place à un renvoi
+fonctionnel vers le message (`DECISIONS.md` D7). B2 ne change ni de texte ni
+d'emplacement et reste affichée telle quelle sur le chemin heureux — c'est le
+seul état où elle a du sens. Statut inchangé : `en place`.
+
+Zone nouvelle, ouverte et laissée libre : le bandeau de reprise de brouillon
+du formulaire de création (`CreateEventPage`, sous la ligne d'introduction).
+Accusé de réception à l'entrée, hors ligne de regard et hors chemin du pouce —
+exactement ce que la charte D1 privilégie. L'itération 3 l'écrit en
+vocabulaire fonctionnel neutre et ne s'en sert pas ; l'itération 4 décidera
+si une tournure du corpus y prend place (`BACKLOG.md` item 13).
+
 ## 5. Contrôle de non-régression
 
 À chaque fin d'itération, chaque texte exact ci-dessus doit se retrouver tel
-quel par `grep` dans le code. Voir la commande et son résultat dans l'entrée du
-`JOURNAL.md` de l'itération correspondante.
+quel dans le code. Depuis l'itération 3, le contrôle est **exécutable** plutôt
+que réécrit à chaque fois :
+
+```bash
+python3 docs/refonte-saisie/verifier-ton.py
+```
+
+Il sort en 1 si une tournure manque, et dit laquelle. Le résultat de chaque
+passe est consigné dans l'entrée du `JOURNAL.md` de l'itération correspondante.
+En cas de divergence entre le script et ce fichier, **c'est ce fichier qui fait
+foi** : le script est un outil de vérification, pas la source du corpus.
 
 **Itération 2 :** les 25 tournures ont été recomptées avant (Phase 0) et
 après (Phase 4) modification — les 25 sont retrouvées telles quelles dans les
@@ -126,16 +158,19 @@ deux cas (deux d'entre elles, B3 et B15, s'étendent sur plusieurs lignes JSX ;
 retrouvées par recherche de sous-chaîne, pas par une seule ligne `grep`).
 N = 25 / N₀ = 25, aucune régression.
 
-**Itération 3 :** aucune tournure du corpus touchée (le lot de cette
-itération porte sur la secousse de rappel d'erreur, les cibles tactiles et le
-brouillon repris — voir `JOURNAL.md` et `DECISIONS.md` D6/D7, pas sur le
-placement du ton, réservé à l'itération 4 par `DECISIONS.md` D3). Les 25
-tournures recomptées avant et après modification, retrouvées telles quelles
-dans les deux cas. N = 25 / N₀ = 25, aucune régression.
+**Itération 3 :** les 25 tournures recomptées avant (Phase 0) et après
+(Phase 4) modification — les 25 retrouvées telles quelles dans les deux
+passes. N = 25 / N₀ = 25, aucune régression. Deux précisions de méthode, pour
+que l'itération suivante n'ait pas à les redécouvrir :
 
-Une phrase neuve apparaît dans `CreateEventPage.tsx` cette itération
-(« Brouillon retrouvé : reprends où tu t'étais arrêté. »). Elle n'entre pas
-dans ce corpus : au sens de la distinction posée en §0, c'est l'information
-fonctionnelle strictement nécessaire pour annoncer une restauration de
-données, sans effet de style, exagération ni aparté au-delà de ce que
-l'information exige. Elle n'est donc ni gelée ni comptée dans N.
+- le contrôle normalise **l'apostrophe** avant de comparer : le code emploie
+  l'apostrophe typographique « ’ », et un `grep` sur l'apostrophe droite fait
+  remonter faussement 14 tournures sur 25 comme absentes ;
+- il normalise aussi **les espaces**, B3 et B15 s'étendant sur plusieurs
+  lignes JSX.
+
+Contrôle complémentaire cette itération : relecture du `git diff` de `src/`
+filtré sur les 25 chaînes. Deux occurrences seulement y apparaissent, et les
+deux sont des changements d'indentation JSX à texte strictement identique
+(le `hint` de « Proposé par », la branche `actionStatus` qui porte B2). Aucun
+caractère de corpus modifié.

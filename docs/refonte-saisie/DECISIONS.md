@@ -176,66 +176,164 @@ sens de `TON.md`.
 
 ---
 
-## Itération 3 — 31/08/2026
+## Itération 3 — 01/09/2026
 
-### D6. Brouillon repris — périmètre et mécanisme
+### D6. Un refus d'envoi doit se voir, et le regard va à un seul endroit
 
-Le prompt de routine (section 1) nomme la « reprise après interruption »
-comme une dimension propre de la refonte, et le plan indicatif de D3 réserve
-les états « vide, en cours, erreur, succès, brouillon repris » à cette
-itération. L'audit (`AUDIT-3.md` §3) montre qu'aucun des trois formulaires
-n'avait de brouillon au-delà du blaze de l'organisateur (`useComptoirName`,
-transverse, pas spécifique à un formulaire).
+`AUDIT-3.md` §2 établit sur preuve d'exécution que le message d'erreur
+générique de `CreateEventPage` est rendu 1229 px sous le bas de l'écran sur un
+formulaire à trois créneaux, sans défilement automatique. Le mécanisme qui fait
+exactement ce travail existe déjà dans le dépôt : `useShakeInvalid` — il n'est
+simplement branché que sur le chemin « créneau incomplet ».
 
-Décision : implémenter la persistance uniquement pour `CreateEventPage`, pas
-pour les trois formulaires. Justification :
+**Décision : une seule implémentation, celle qui existe.** `useShakeInvalid`
+gagne une seconde porte d'entrée, `bringIntoView(id)`, qui partage le même
+effet de remontée du regard sans déclencher la secousse. Pas de second hook :
+deux implémentations d'un même mécanisme divergent toujours.
 
-- c'est le formulaire le plus long (un ou plusieurs créneaux, carte de
-  visite, réglages) — celui où une interruption coûte le plus cher à
-  retaper, et le seul dont l'audit démontre le besoin ;
-- `AperoSettingsForm` (retouche d'un événement existant) repart déjà de
-  valeurs réelles, pas d'un formulaire vierge : un brouillon perdu n'y coûte
-  presque rien (`AUDIT-3.md` §5) ;
-- `AlternativeOptionForm` est une feuille courte (quatre champs), rouverte à
-  la demande depuis `VoteForm` : le coût d'une reprise ratée y est faible, et
-  y ajouter une persistance créerait une troisième implémentation du même
-  mécanisme sans preuve d'un besoin réel (principe « une seule implémentation
-  par mécanisme », déjà appliqué par la couche de conduite d'exécution
-  d'UXER, `references/CLAUDE.md`).
+**Règle de destination — un refus ne réveille qu'une seule zone :**
 
-Mécanisme retenu, local à `CreateEventPage.tsx` (pas d'abstraction partagée
-tant qu'un deuxième formulaire n'en a pas réellement besoin) :
+| Nature du refus | Où va le regard |
+|---|---|
+| Un champ précis est en faute (créneau incomplet, blaze manquant) | Le bloc fautif — secousse, focus sur le champ refusé. Inchangé |
+| Le refus est global (créneaux passés, nom d'apéro pris, échec réseau, erreur du service) | Le message qui l'explique — remontée dans le champ de vision, sans secousse |
 
-- clé `apero_create_draft_v1` dans `localStorage` ;
-- lu une seule fois au montage (`useState` paresseux), jamais recalculé en
-  boucle de rendu ;
-- **« Remettre ça » prime** : si `prefill` est présent (pré-remplissage venu
-  d'un autre événement), le brouillon n'est ni lu ni écrit pour cette visite —
-  deux sources de pré-remplissage qui se disputeraient le même formulaire
-  seraient plus coûteuses à comprendre que l'absence de brouillon dans ce cas
-  précis, qui reste rare ;
-- écrit à chaque changement de champ pertinent (titre, nom cérémoniel,
-  politique mioches, cadence, créneaux) tant que `prefill` est absent ;
-- purgé à la création réussie, sur les deux chemins de stockage (classique et
-  chiffré via API VPS) ;
-- restauration signalée par une phrase neutre, hors zone de décision (juste
-  sous le `lede` d'ouverture) : ce n'est pas une tournure, voir `TON.md` §0 —
-  aucune entrée n'est ajoutée au corpus gelé par cette décision.
+Elles ne se déclenchent jamais ensemble : deux `scrollIntoView` concurrents
+choisissent l'un pour l'autre où l'utilisateur doit regarder, ce qui est pire
+que ne rien faire.
 
-### D7. Cibles tactiles — le plancher de 44 px s'applique à tout le parcours de saisie, pas seulement aux contrôles déjà couverts
+Fondement UXER : `references/affordance-and-signifiers.md` §4 (« Après —
+feedback et nouvel état » : après l'action, sait-on ce qui s'est passé ?) et
+§12, anti-pattern « feedback global quand l'utilisateur attend un changement
+local ». `reference-packs/mobile-field-agent/PACK.md`, table des états :
+« Erreur de saisie — sous le champ, **visible** malgré le clavier virtuel ».
 
-`global.css` documente déjà un plancher de 44 px (commentaire
-« Cibles tactiles », `global.css:2608-2610`) et l'applique à sept contrôles.
-`AUDIT-3.md` §2 montre que `.stepper__btn` (compteur de renforts,
-`CompanionsField.tsx`, dans le parcours de vote) y échappait à 42×42 px. Ce
-n'est pas un nouveau principe à trancher : c'est l'application d'un principe
-déjà écrit dans le fichier à un contrôle qu'un audit antérieur n'avait pas
-couvert. Corrigé à 44×44 px, sans changement visuel perceptible (2 px), selon
-la même méthode déjà en usage dans cette section (padding et dimension
-minimale, pas de redessin).
+**Ce que cette décision fait au ton, et pourquoi elle relève de la charte D1
+sans la rouvrir.** A1, A2, A3, A4 sont quatre tournures du corpus posées dans
+cette zone. Elles ne changent ni de texte, ni d'écran, ni de rôle, ni
+d'échelle : elles arrivent simplement sous les yeux de qui vient de les
+déclencher. C'est le levier « moment et lieu d'apparition » que D1 avait
+réservé pour cette zone en écartant le déplacement d'écran — il est appliqué,
+pas redéfini. Une tournure hors du champ de vision ne se manifeste pas :
+cette correction **augmente** la présence effective du registre.
+
+### D7. La barre d'action ne dit jamais « prêt » pendant un refus
+
+`AUDIT-3.md` §3 : `isReady` ne regarde que la complétude des champs, alors que
+A1, A4 et les erreurs du `catch` surviennent toutes sur un formulaire complet.
+Au moment du refus, la barre collante — le seul élément que l'utilisateur a
+effectivement sous les yeux — affiche l'état `ready` en vert. C'est une fausse
+affordance au sens de la matrice réel × perçu de
+`references/affordance-and-signifiers.md` §2 : l'écran promet un état que le
+produit ne fournit pas.
+
+**Décision :** tant qu'un message d'erreur générique est affiché, la barre
+d'action passe en tonalité `blocked` et sa ligne de statut renvoie au message
+au lieu d'annoncer l'état de complétude. Vaut pour les trois formulaires.
+
+Le texte de cette ligne est du **vocabulaire fonctionnel**, jamais une
+tournure : D1 interdit explicitement le ton dans la phrase de statut de
+`ActionBar` en tonalité `blocked`, et cette décision ne fait qu'y ajouter un
+cas d'application.
+
+Conséquence assumée sur le corpus, consignée ici pour qu'aucune itération
+ultérieure n'ait à la redécouvrir : sur le seul chemin d'erreur, B2
+(« La tablée tranchera. ») cède la ligne de statut au renvoi vers le message.
+B2 ne change pas de texte, ne change pas d'emplacement, et reste affichée
+telle quelle sur le chemin heureux — son statut `TON.md` reste `en place`,
+N reste à 25.
+
+Le bilan de manifestations sur ce seul chemin d'erreur reste de **1 visible
+avant, 1 visible après** : ce n'est pas la quantité qui change, c'est laquelle
+des deux. Avant, la tournure visible était B2, qui annonce que tout va bien
+au moment d'un refus ; après, c'est A1, qui dit ce qui coince. Une itération
+ultérieure qui voudrait « récupérer » B2 sur ce chemin doit d'abord expliquer
+comment deux messages contradictoires coexistent sans que l'un annule
+l'autre — c'est cette question, et non le goût, qui a tranché ici.
+
+### D8. La saisie survit à l'interruption
+
+`AUDIT-3.md` §4 : un rechargement de page vide intégralement le formulaire de
+création. `reference-packs/mobile-field-agent/PACK.md` classe « sauvegarde
+uniquement à la validation » parmi ses anti-patterns, avec pour correction
+« sauvegarde locale continue », et pose en règle de navigation : « à la
+réouverture, l'application revient là où l'utilisateur était, avec sa saisie
+intacte ».
+
+**Décision :** brouillon local du formulaire de création, dans un module dédié
+(`src/services/createEventDraft.ts`), sur le patron des autres registres
+locaux du dépôt (`localAperoRegistry.ts`) — un seul endroit qui lit, écrit et
+valide.
+
+Bornes, pour que la commodité ne devienne pas un piège :
+
+1. **Rien de sensible.** Le brouillon ne contient que ce que l'utilisateur a
+   tapé dans le formulaire. Aucune clé, aucun identifiant d'apéro : ces
+   objets-là n'existent pas encore au moment où le brouillon vit.
+2. **Péremption à 24 h.** Au-delà, il est ignoré et effacé. Un brouillon d'il
+   y a trois semaines qui repeuple un formulaire est une surprise, pas un
+   service.
+3. **Le pré-remplissage prime.** Arriver par « Remettre ça » (`prefill` dans
+   l'état de navigation) est une intention explicite et récente : elle passe
+   devant un brouillon dormant. Conséquence à connaître : il n'existe qu'un
+   seul emplacement de brouillon, donc la saisie de cette visite-là remplace
+   le brouillon précédent. C'est la sémantique voulue — le travail le plus
+   récent est celui qu'on protège — mais elle mérite d'être écrite plutôt que
+   découverte. Un brouillon par point d'entrée coûterait plus de complexité
+   qu'il ne rendrait de service : les deux chemins mènent au même formulaire,
+   et personne ne remplit deux créations d'apéro en parallèle.
+4. **Effacé dès que l'apéro existe.** La création réussie purge le brouillon,
+   avant la navigation de sortie.
+5. **Toujours une porte de sortie.** Un brouillon restauré s'annonce et offre
+   « Repartir de zéro ». Une saisie restaurée qu'on ne peut pas vider est
+   pire que pas de restauration du tout.
+6. **Aucune promesse de sauvegarde non tenue.** Si `localStorage` est
+   indisponible ou plein, l'écriture échoue en silence et le formulaire
+   continue de fonctionner — il n'affiche alors aucun message de restauration,
+   puisqu'il n'y a rien à restaurer.
+
+**Ce que cette décision ouvre pour l'itération 4.** Le message de reprise de
+brouillon est écrit ici en vocabulaire fonctionnel neutre, délibérément. Il
+crée une **zone hors saisie neuve** — un accusé de réception à l'entrée dans
+le formulaire, hors de la ligne de regard et hors du chemin du pouce — qui est
+exactement le type d'emplacement que la charte D1 privilégie. L'itération 4,
+qui a mandat sur les déplacements, décidera si une tournure du corpus y trouve
+sa place. Cette itération ne le fait pas et n'écrit aucune tournure neuve : le
+corpus est gelé, et en inventer relève d'une décision du propriétaire du
+produit, pas d'une itération.
+
+### D9. Cibles tactiles — le plancher de 44 px s'applique à tout le parcours de saisie, pas seulement aux contrôles déjà couverts
+
+Décision issue d'une passe parallèle de cette même itération (31/08/2026,
+preuve `code`), fusionnée ici ; elle complète le §1 de `AUDIT-3.md`, dont la
+sonde ne mesurait que l'écran de création.
+
+Le bloc « Cibles tactiles » de `global.css` (`global.css:2623-2625`) documente
+déjà un plancher de 44 px et l'applique à `.bk`, `.slot__x`, `.share .cp`,
+`.ghost-link` et `.minimap__expand`. `AUDIT-3.md` §1 (complément) montre que
+`.stepper__btn` (compteur de renforts, `CompanionsField.tsx`, dans les
+parcours de vote et de contre-proposition) y échappait à 42 × 42 px. Ce n'est
+pas un nouveau principe à trancher : c'est l'application d'un principe déjà
+écrit dans le fichier à un contrôle qu'aucun audit n'avait encore couvert.
+Corrigé à 44 × 44 px, sans changement visuel perceptible (2 px), selon la
+méthode déjà en usage dans cette section (dimension minimale, pas de
+redessin).
 
 `.cheer-btn` (40 px) reste **hors périmètre** : ce n'est pas un contrôle de
-saisie de formulaire (action secondaire de « trinquer »), et rien dans
-l'audit ne démontre qu'il bloque la saisie (section 8 du prompt de routine).
-Consigné dans `BACKLOG.md` pour une itération qui traiterait spécifiquement
+saisie de formulaire (action secondaire de « trinquer »), et rien dans l'audit
+ne démontre qu'il bloque la saisie (section 8 du prompt de routine). Consigné
+dans `BACKLOG.md` (item 16) pour une itération qui traiterait spécifiquement
 les actions secondaires, si le produit le demande.
+
+**Ce que la fusion de cette passe parallèle a écarté, et pourquoi.** La même
+passe avait aussi branché `useShakeInvalid` sur `AlternativeOptionForm` et
+écrit un brouillon local du formulaire de création directement dans
+`CreateEventPage.tsx`, sous la même clé `apero_create_draft_v1`. Les deux
+étaient déjà couverts par D6 et D8, avec un périmètre plus large (remontée du
+message d'erreur pour les refus globaux, péremption à 24 h, porte de sortie
+« Repartir de zéro », tests unitaires du brouillon). Garder les deux versions
+aurait fait cohabiter deux implémentations du même mécanisme sur la même clé
+de stockage — exactement ce que D6 refuse. Seule la version de D6/D8 est
+conservée ; la note de reprise « Brouillon retrouvé : reprends où tu t'étais
+arrêté. » et la règle `.field__hint--draft` qui l'accompagnait ne sont pas
+entrées dans le code.
