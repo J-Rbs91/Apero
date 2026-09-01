@@ -1368,6 +1368,21 @@ input[type="range"] {
   line-height: 1.4;
 }
 
+/* Reprise d'un brouillon : un accusé de réception à l'entrée du formulaire,
+   au-dessus de la première étape. Il se lit une fois et ne coûte rien à la
+   saisie — il n'est ni dans la ligne de regard entre deux champs, ni dans le
+   chemin du pouce, qui vit en bas de l'écran avec la barre d'action. */
+.draft-resume {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  background: var(--fill-soft);
+}
+
 /* Le rose-rouge est réservé aux problèmes : un succès se dit en vert,
    une simple information en crème. */
 .feedback--ok {
