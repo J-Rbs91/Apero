@@ -58,6 +58,36 @@ routine (« zone tactile trop petite ») est **infirmé sur preuve d'exécution*
 pour l'écran de création — comme l'avait déjà été, sur preuve `code`,
 l'essentiel du volet affordance en itération 1.
 
+### Complément, sur preuve `code` : le compteur de renforts
+
+La sonde ci-dessus ne mesure que l'écran de création. Une passe parallèle de
+cette même itération (31/08/2026, preuve `code`, fusionnée dans ce document)
+a relu le plancher contrôle par contrôle sur le reste du parcours de saisie :
+
+| Cible | Valeur dans le CSS | Plancher 44 px |
+|---|---|---|
+| `.choice` (les trois pastilles de vote, `global.css:2832`) | `min-height: 52px` | OK |
+| `.switchrow__button` (`global.css:1073`) | `min-height: 58px` | OK |
+| `.stepper__btn` (compteur de renforts, `CompanionsField.tsx` — parcours de vote et contre-proposition) | `42 × 42 px` (`global.css:1163-1166`, avant correction) | **sous le plancher** |
+| `.cheer-btn` (« Trinquer à ce créneau ») | `min-height: 40px` | sous le plancher — hors périmètre, voir ci-dessous |
+
+Le bloc « Cibles tactiles » (`global.css:2623-2625`) documente lui-même ce
+plancher et l'applique déjà à `.bk`, `.slot__x`, `.share .cp`, `.ghost-link`
+et `.minimap__expand`. C'est une incohérence interne au fichier, pas un
+jugement esthétique : un seul contrôle du parcours de saisie y échappait.
+
+**Corrigé** : `.stepper__btn` passe à 44 × 44 px (`DECISIONS.md` D9). Le
+changement ne grossit pas visiblement le bouton (2 px), conformément au
+principe déjà en vigueur dans cette section (« le rendu reste inchangé à
+l'œil »).
+
+**Laissé de côté, hors périmètre** : `.cheer-btn` n'est pas un contrôle de
+saisie de formulaire — c'est une micro-approbation optionnelle en dehors du
+geste de vote lui-même. Le corriger sortirait du périmètre que la routine fixe
+(section 8 du prompt : « elle ne refond pas… sauf si l'audit démontre qu'elles
+bloquent la saisie ») ; rien ici ne le démontre. Consigné dans `BACKLOG.md`
+(item 16).
+
 ---
 
 ## 2. Constat central de cette itération : l'erreur générique tombe hors de l'écran
@@ -270,7 +300,10 @@ inchangée : 2 (volet réglages ouvert), 1 sur le parcours de vote.
    Même famille que §2 (retour du regard sur ce qui coince), formulaire court
    donc impact pratique faible, mais c'est la dernière incohérence entre les
    trois formulaires.
-5. Items 6 et 7 du backlog (documentation de l'exception des trois champs de
+5. **§1, complément — `.stepper__btn` sous le plancher de 44 px.** Cohérence
+   d'un plancher déjà écrit dans le fichier ; correction de 2 px, sans effet
+   visuel, sur le compteur de renforts du parcours de vote.
+6. Items 6 et 7 du backlog (documentation de l'exception des trois champs de
    créneau ; signifiant visuel sur `LocationField`) — inchangés, hors du lot.
 
 ---

@@ -403,3 +403,48 @@ par D1) — et l'arbitrage, ouvert par D8, de savoir si une tournure du corpus
 prend place dans le bandeau de reprise de brouillon désormais disponible. Les
 items 6 et 7 restent les correctifs bas risque à inclure si le temps le
 permet, comme l'ont été l'item 2 en itération 2 et l'item 4 cette fois.
+
+### Complément d'itération 3 — fusion d'une passe parallèle (menée le 31/08/2026, fusionnée le 01/09/2026)
+
+**Ce qui s'est passé :** deux passes de l'itération 3 ont été menées en
+parallèle depuis le même point de départ (fin d'itération 2). Celle du 01/09,
+ci-dessus, a été intégrée la première. Celle du 31/08, sur preuve `code`
+uniquement, portait trois correctifs : `useShakeInvalid` dans
+`AlternativeOptionForm`, un brouillon local de `CreateEventPage` écrit dans la
+page elle-même, et la cible tactile de `.stepper__btn`. La fusion tranche
+correctif par correctif, pas fichier par fichier.
+
+**Conservé de la passe parallèle :**
+- `src/styles/global.css` — `.stepper__btn` : 42 × 42 px → 44 × 44 px
+  (`AUDIT-3.md` §1 complément, `DECISIONS.md` D9, `BACKLOG.md` items 15
+  et 16). C'est le seul constat que la sonde du 01/09 ne couvrait pas : elle
+  mesurait l'écran de création, et le compteur de renforts vit dans le
+  parcours de vote.
+
+**Écarté de la passe parallèle, avec le motif :**
+- sa version de `useShakeInvalid` dans `AlternativeOptionForm` — déjà couverte
+  ci-dessus (D6), avec en plus la remontée du message sur l'échec d'envoi et
+  la barre d'action alignée sur les deux autres formulaires ;
+- son brouillon local écrit dans `CreateEventPage.tsx` sous la clé
+  `apero_create_draft_v1` — déjà couvert par `createEventDraft.ts` (D8), sous
+  la même clé : garder les deux aurait fait cohabiter deux écritures
+  concurrentes du même emplacement de stockage. Avec lui disparaissent la note
+  « Brouillon retrouvé : reprends où tu t'étais arrêté. » et la règle
+  `.field__hint--draft` qui ne servait qu'à elle ;
+- son `AUDIT-3.md`, son entrée de journal et ses D6/D7 — remplacés par les
+  présents documents ; son constat propre est reporté dans `AUDIT-3.md` §1
+  (complément) et `DECISIONS.md` D9, son item de backlog renuméroté 15 (et 16
+  pour `.cheer-btn`, laissé hors périmètre).
+
+**Ton :** aucune tournure touchée par la fusion. Contrôle
+`python3 docs/refonte-saisie/verifier-ton.py` après fusion : N = 25 / N₀ = 25.
+
+**Vérifications après fusion :**
+- `npm run build` — succès, `tsc -b && vite build` sans erreur.
+- `npm test` (`vitest run`) — 236 tests, 29 fichiers, tous passés.
+- `npm run test:functional` — **71/71 vérifications réussies** (après
+  `npm ci` dans `server/` : la mini API de test démarre avec `tsx`, absent
+  tant que les dépendances serveur ne sont pas installées).
+- `npm run test:nav` — **23/23 contrôles passés**.
+
+**Point de reprise pour l'itération 4 :** inchangé, voir ci-dessus.

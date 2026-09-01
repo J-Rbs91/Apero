@@ -301,3 +301,39 @@ qui a mandat sur les déplacements, décidera si une tournure du corpus y trouve
 sa place. Cette itération ne le fait pas et n'écrit aucune tournure neuve : le
 corpus est gelé, et en inventer relève d'une décision du propriétaire du
 produit, pas d'une itération.
+
+### D9. Cibles tactiles — le plancher de 44 px s'applique à tout le parcours de saisie, pas seulement aux contrôles déjà couverts
+
+Décision issue d'une passe parallèle de cette même itération (31/08/2026,
+preuve `code`), fusionnée ici ; elle complète le §1 de `AUDIT-3.md`, dont la
+sonde ne mesurait que l'écran de création.
+
+Le bloc « Cibles tactiles » de `global.css` (`global.css:2623-2625`) documente
+déjà un plancher de 44 px et l'applique à `.bk`, `.slot__x`, `.share .cp`,
+`.ghost-link` et `.minimap__expand`. `AUDIT-3.md` §1 (complément) montre que
+`.stepper__btn` (compteur de renforts, `CompanionsField.tsx`, dans les
+parcours de vote et de contre-proposition) y échappait à 42 × 42 px. Ce n'est
+pas un nouveau principe à trancher : c'est l'application d'un principe déjà
+écrit dans le fichier à un contrôle qu'aucun audit n'avait encore couvert.
+Corrigé à 44 × 44 px, sans changement visuel perceptible (2 px), selon la
+méthode déjà en usage dans cette section (dimension minimale, pas de
+redessin).
+
+`.cheer-btn` (40 px) reste **hors périmètre** : ce n'est pas un contrôle de
+saisie de formulaire (action secondaire de « trinquer »), et rien dans l'audit
+ne démontre qu'il bloque la saisie (section 8 du prompt de routine). Consigné
+dans `BACKLOG.md` (item 16) pour une itération qui traiterait spécifiquement
+les actions secondaires, si le produit le demande.
+
+**Ce que la fusion de cette passe parallèle a écarté, et pourquoi.** La même
+passe avait aussi branché `useShakeInvalid` sur `AlternativeOptionForm` et
+écrit un brouillon local du formulaire de création directement dans
+`CreateEventPage.tsx`, sous la même clé `apero_create_draft_v1`. Les deux
+étaient déjà couverts par D6 et D8, avec un périmètre plus large (remontée du
+message d'erreur pour les refus globaux, péremption à 24 h, porte de sortie
+« Repartir de zéro », tests unitaires du brouillon). Garder les deux versions
+aurait fait cohabiter deux implémentations du même mécanisme sur la même clé
+de stockage — exactement ce que D6 refuse. Seule la version de D6/D8 est
+conservée ; la note de reprise « Brouillon retrouvé : reprends où tu t'étais
+arrêté. » et la règle `.field__hint--draft` qui l'accompagnait ne sont pas
+entrées dans le code.

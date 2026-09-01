@@ -16,6 +16,8 @@ Statuts : `à faire` / `en cours` / `fait` / `abandonné + motif`.
 | 7 | Ajouter un signifiant visuel (icône) à `LocationField` pour annoncer le comportement enrichi (recherche, carte, géolocalisation) avant le premier tap | `AUDIT-1.md` §3.4 | Faible — amélioration de découvrabilité, pas bloquant | à faire |
 | 13 | Décider si une tournure du corpus prend place dans le bandeau de reprise de brouillon (zone hors saisie neuve, ouverte par D8) | `DECISIONS.md` D8 | Moyen — c'est du placement de ton, mandat de l'itération 4 | à faire — it. 4 |
 | 14 | Étendre la persistance de brouillon à `VoteForm` et `AlternativeOptionForm` | `AUDIT-3.md` §4, écarté it. 3 | Faible — formulaires courts, dans une page déjà chargée | à faire |
+| 15 | Cible tactile de `.stepper__btn` (compteur de renforts) portée à 44×44 px, alignée sur le plancher déjà documenté dans `global.css` | `AUDIT-3.md` §1 (complément) | Faible à moyen — cohérence d'un plancher déjà en vigueur ailleurs | fait — it. 3, voir `DECISIONS.md` D9 |
+| 16 | `.cheer-btn` (40 px, action « Trinquer ») sous le plancher de 44 px | `AUDIT-3.md` §1 (complément) | Faible — action secondaire, hors saisie de formulaire | à faire — hors périmètre tant qu'aucun audit ne démontre un blocage de la saisie |
 | 8 | Revue QA finale, accessibilité, responsive, cohérence, purge des restes | Trajectoire itération 5 | — | à faire |
 | 9 | Double mesure finale (vitesse de saisie, présence du ton) vs itération 1 | Trajectoire itération 5 | — | à faire |
 
