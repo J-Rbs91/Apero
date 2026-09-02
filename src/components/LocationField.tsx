@@ -304,17 +304,40 @@ export function LocationField({
         className="field--wide"
       >
         {(control) => (
-          <input
-            {...control}
-            value={value.location}
-            onChange={(eventChange) => handleInput(eventChange.target.value)}
-            onFocus={() => setIsSearchOpen(true)}
-            placeholder={placeholder}
-            autoComplete="off"
-            role="combobox"
-            aria-expanded={isSearchOpen}
-            aria-autocomplete="list"
-          />
+          // Le champ ouvre une recherche, une carte et une géolocalisation :
+          // plus qu'une zone de texte. La sémantique le disait déjà
+          // (role="combobox", aria-expanded) ; la loupe le dit aussi à qui
+          // regarde, avant le premier tap. Elle s'ajoute au libellé, elle ne
+          // le remplace pas.
+          <span className="locfield__control">
+            <svg
+              className="locfield__glyph"
+              viewBox="0 0 24 24"
+              width="17"
+              height="17"
+              fill="none"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="6.25" stroke="currentColor" strokeWidth="2" />
+              <path
+                d="M15.6 15.6 20 20"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+            <input
+              {...control}
+              value={value.location}
+              onChange={(eventChange) => handleInput(eventChange.target.value)}
+              onFocus={() => setIsSearchOpen(true)}
+              placeholder={placeholder}
+              autoComplete="off"
+              role="combobox"
+              aria-expanded={isSearchOpen}
+              aria-autocomplete="list"
+            />
+          </span>
         )}
       </Field>
       {value.locationAddress && (

@@ -448,3 +448,208 @@ correctif par correctif, pas fichier par fichier.
 - `npm run test:nav` — **23/23 contrôles passés**.
 
 **Point de reprise pour l'itération 4 :** inchangé, voir ci-dessus.
+
+## Itération 4 — 02/09/2026
+
+**Périmètre audité :** la **géographie et l'échelle typographique du registre**
+dans le parcours de saisie — c'est-à-dire la zone que les trois premières
+itérations avaient préparée sans y toucher — plus la non-régression des
+corrections de l'itération 3. Fichiers lus : `src/components/ui/SwitchRow.tsx`,
+`src/components/ui/Field.tsx`, `src/pages/CreateEventPage.tsx`,
+`src/components/AperoSettingsForm.tsx`, `src/components/CompanionsField.tsx`,
+`src/components/LocationField.tsx`, `src/styles/global.css`,
+`docs/DESIGN-SYSTEM.md`. Détail dans `AUDIT-4.md`.
+
+Nature des preuves : **`code`** pour l'analyse, **`exécution`** pour toutes les
+mesures de géométrie, de typographie et de contraste (sonde Playwright dédiée,
+Chromium headless, viewport 390 × 780, `vite dev` réel, Photon et l'API GitHub
+interceptées, blaze pré-posé dans `localStorage` comme le fait le banc d'essai
+du dépôt), et **`visuelle`** pour deux captures du rendu après modification,
+réellement regardées — la ligne de réglage et le champ du troquet.
+
+**Constats retenus :**
+
+1. **`AUDIT-4.md` §1 — les corrections de l'itération 3 tiennent.** Vérifié
+   avant toute modification, sur le scénario de `AUDIT-3.md` §2 : le message
+   A1 est rendu à `top = 553 px` pour un écran de 780 px, `visible = true`, le
+   conteneur ayant défilé de 0 à 1809 px ; la barre passe de
+   « 3 créneaux prêts. La tablée tranchera. » (`--ready`) à « L'envoi a été
+   refusé. L'explication est juste au-dessus. » (`--blocked`). D6 et D7 se
+   comportent comme le journal de l'itération 3 les décrit.
+2. **`AUDIT-4.md` §2 — A8 n'est pas *près* de la zone de décision, elle est
+   *dedans*.** Mesuré : la tournure est rendue à l'intérieur de
+   `.switchrow__button`, la cible tactile de 60 px — elle est la seconde ligne
+   de la chose sur laquelle on appuie, et fait partie du nom accessible du
+   bouton (`« Les mioches sont-ils conviés ?Ce soir c'est sans les mômes »`).
+   À 13 px/600 contre 13.5 px/700 pour le libellé de champ voisin, elle est à
+   **96 % de la taille d'un libellé** : l'échelle annonce un pair, pas un
+   aparté. Coût réel : le seul texte de la ligne qui change quand on bascule
+   est une phrase de 28 caractères, relue à chaque passage, là où la question
+   posée est fermée.
+3. **`AUDIT-4.md` §3 — constat neuf : la charte D1 s'applique à trois points
+   d'appel, pas deux, et le troisième est déjà occupé.** D1 écrit que
+   `SwitchRow.hint` est « actuellement vide dans ces deux usages ». Vrai pour
+   `CreateEventPage` et `CompanionsField` ; faux pour
+   `AperoSettingsForm.tsx:138-142`, qui passe un `hint` conditionnel depuis le
+   commit `9738a47`, **antérieur à l'itération 1**. La prémisse de D1 était
+   inexacte au moment où elle a été écrite, sans que personne le voie.
+4. **`AUDIT-4.md` §5 — les deux derniers résidus nommés par D2 sont toujours
+   ouverts** : `DESIGN-SYSTEM.md` se contredit sur la mention obligatoire
+   (3.2), et `LocationField` reste visuellement indiscernable d'un `TextField`
+   avant le premier tap (3.4).
+
+**Modifications effectuées :**
+
+- `src/components/ui/SwitchRow.tsx` — prop `aside`, rendue **sous** la ligne,
+  hors du bouton, à côté de `hint` et sans le remplacer. Le composant tient
+  désormais quatre rôles séparés : `title` (la question), `state` (la
+  réponse), `aside` (le commentaire de la maison), `hint` (la précision
+  fonctionnelle).
+- `src/pages/CreateEventPage.tsx:545`,
+  `src/components/AperoSettingsForm.tsx:136`,
+  `src/components/CompanionsField.tsx:46` — A8 et A9 passent de `state` à
+  `aside`, **par recopie exacte de la chaîne** ; `state` reçoit `Oui` / `Non`,
+  qui est la réponse littérale à la question du titre et du vocabulaire
+  fonctionnel.
+- `src/styles/global.css` — règle `.switchrow__aside` : 12.5 px, graisse 500,
+  `rgba(255, 247, 230, 0.72)`.
+- `src/components/LocationField.tsx`, `src/styles/global.css` — loupe de 17 px
+  posée dans le contrôle (`.locfield__glyph`, `pointer-events: none`, à 8 px du
+  début du texte saisi), qui vire au rouge avec le contour quand le champ est
+  en faute (résidu 3.4).
+- `docs/DESIGN-SYSTEM.md` — l'exception des trois champs de créneau est écrite
+  avec son motif et sa borne (résidu 3.2) ; la description de `SwitchRow` est
+  mise à jour, et le signifiant du champ lieu documenté.
+
+Pour l'utilisateur : la ligne de réglage répond maintenant `Oui` ou `Non` à la
+question qu'elle pose, et la tournure se lit juste en dessous, hors du bouton.
+Le champ du troquet annonce qu'il est autre chose qu'une zone de texte avant
+qu'on le touche.
+
+**Justification :** `references/affordance-and-signifiers.md` §5.5 (« les états
+doivent rester distinguables… deux états qui signifient des choses différentes
+ne doivent pas dépendre d'une nuance visuelle impossible à distinguer dans les
+conditions réelles d'usage ») et §5.4 (« agrandir la cible ne rend pas l'action
+découvrable — un signal cohérent doit porter l'intention ») pour le constat 2 :
+c'est la bascule, pas la phrase, qui porte l'état. §7 (« sémantique et
+apparence sont deux obligations distinctes ») et §5.3 (« une icône seule est
+une exception ») pour le résidu 3.4 — l'icône s'ajoute au libellé, elle ne le
+remplace pas. `references/color-and-type-protocol.md` §2 pour la graisse comme
+levier de hiérarchie le moins coûteux en densité, déjà mobilisé par D1 et D5.
+
+**Ton — déplacements :** **le premier déplacement d'emplacement de la
+routine.**
+
+| Tournure | Ancien emplacement | Nouvel emplacement | Nouvelle échelle |
+|---|---|---|---|
+| A8 — « Marmaille admise » / « Ce soir c'est sans les mômes » | `SwitchRow.state`, **dans** le bouton de 60 px (`CreateEventPage`, `AperoSettingsForm`) | `SwitchRow.aside`, sous la ligne, hors du bouton | 13 px/600 → 12.5 px/500, opacité 0.62 → 0.72 |
+| A9 — « En escadron » / « Peinard, en solo » | `SwitchRow.state`, **dans** le bouton (`CompanionsField`) | `SwitchRow.aside`, sous la ligne, hors du bouton | idem |
+
+**Pourquoi ce point ne coûte rien à la saisie.** Le nouvel emplacement est
+immédiatement sous la ligne de réglage, dans le flux de lecture, mais hors de
+la cible tactile et hors du nom accessible du bouton (`asideInsideButton:
+false` à la mesure). Il n'est pas dans la ligne de regard entre deux champs :
+il est *sous* le contrôle qu'il commente, avant le champ suivant, exactement
+comme un `hint` — et la charte D1 range les hints en tête de ses zones
+autorisées. Le pouce ne le rencontre jamais : la barre d'action occupe 653 →
+752 px, l'aparté vit dans le flux du formulaire. Et il gagne 96 px de largeur
+disponible en sortant du bouton, ce qui lui évite de se replier sur deux
+lignes.
+
+**Le ton n'est pas rendu plus discret, il est rendu plus lisible.** Contraste
+mesuré sur pixels réellement rendus (capture 1 × 1 décodée, pas un calcul sur
+le CSS) : **7.94 : 1**, contre un plancher AA de 4.5 : 1. Il *monte* — l'opacité
+passe de 0.62 à 0.72 et le texte quitte le fond éclairci du bouton
+(`--fill-soft`, surcouche crème à 6 %) pour le fond de page, plus sombre.
+
+**Ton — compteur :** N = 25 / N₀ = 25.
+
+Manifestations sur le parcours, mesurées à l'écran (`AUDIT-4.md` §7) :
+
+- création, chemin heureux, volet réglages ouvert : 2 → 2 ;
+- création, chemin d'erreur à trois créneaux : 1 → 1 ;
+- vote, message de succès : 1 → 1 ;
+- vote / contre-proposition, bloc renforts : 1 (+1 conditionnel) → identique.
+
+**Le registre ne recule sur aucun chemin.** Ce que l'itération change est
+l'endroit et l'échelle de deux manifestations, jamais leur nombre ni leur
+texte.
+
+**Vérifications :**
+
+- `npm install` à la racine et dans `server/` — dépendances absentes au
+  démarrage du conteneur, comme aux trois itérations précédentes. Installées
+  sans erreur.
+- `npm run build` — succès, `tsc -b && vite build` sans erreur.
+- `npm test` (`vitest run`) — **236 tests, 29 fichiers, tous passés** (même
+  compte qu'en itération 3 : aucun test ajouté ni retiré cette fois).
+- `npm run test:functional` — **71/71 vérifications réussies**, dont les
+  scénarios de création, de vote et de contre-proposition, qui exercent
+  réellement les trois points d'appel modifiés et le champ lieu dans Chromium.
+- `npm run test:nav` — **23/23 contrôles passés**.
+- **Sonde d'exécution, avant modification** — non-régression de l'itération 3,
+  chiffres au constat 1 ci-dessus.
+- **Sonde d'exécution, après modification** — `state` rend « Non » ; `aside`
+  rend « Ce soir c'est sans les mômes » à 12.5 px/500,
+  `rgba(255, 247, 230, 0.72)`, 294 px de large, `top = 1226` pour un bouton qui
+  finit à 1221 ; `asideInsideButton: false` ; nom accessible du bouton devenu
+  « Les mioches sont-ils conviés ?Non ». Loupe : 17 × 17 px, dans l'input
+  (`glypheDansLInput: true`), 8 px avant le début du texte, `padding-left` de
+  38 px.
+- **Captures réellement inspectées** (et non seulement produites) : la ligne de
+  réglage montre « Les mioches sont-ils conviés ? / Non » dans le bouton et la
+  tournure lisible juste sous le cadre ; le champ du troquet montre la loupe à
+  gauche du placeholder, sans chevauchement.
+- **Contrôle du corpus** : `python3 docs/refonte-saisie/verifier-ton.py` en
+  Phase 0 et en Phase 4 — **N = 25 / N₀ = 25** dans les deux passes, sortie 0.
+  Doublé, parce que c'est la première itération où des chaînes du corpus
+  changent de ligne et de prop, d'une relecture du `git diff` sur les trois
+  lignes concernées : la ligne retirée et la ligne ajoutée ne diffèrent que par
+  le nom de la prop, les deux littéraux étant reportés caractère pour
+  caractère ; les trois `state=` neufs ne portent que `"Oui"` et `"Non"`.
+
+**Écarté cette fois :**
+
+- **Écrire une tournure neuve pour le bandeau de reprise de brouillon.** La
+  question de l'item 13 est **tranchée**, pas reportée : aucune des 25
+  tournures ne peut y être déplacée sans vider le chemin d'où elle viendrait
+  (`AUDIT-4.md` §4, `DECISIONS.md` D12). En écrire une ferait monter N₀, ce qui
+  appartient au propriétaire du produit. La proposition lui est adressée dans
+  D12, avec le cahier des charges de l'emplacement.
+- **Mesurer A9 séparément sur le parcours de vote.** Elle partage le composant
+  et reçoit le même traitement ; ses valeurs de rendu sont celles de A8 par
+  construction. Une mesure propre demanderait de créer un apéro réel dans la
+  sonde. Consigné comme une mesure non faite, pas comme une mesure implicite.
+- **Le clavier virtuel mobile réel** — Chromium headless n'en ouvre toujours
+  pas. La question de l'overlay de recherche de lieu reste fermée, à la même
+  condition qu'aux itérations 2 et 3.
+- **Items 14 et 16 du backlog** (brouillon de `VoteForm` /
+  `AlternativeOptionForm` ; `.cheer-btn` à 40 px) — inchangés, hors du lot.
+
+**Reste à faire / point de reprise exact pour l'itération 5 :** commencer par
+la Phase 0 (relire ce journal, `BACKLOG.md`, `DECISIONS.md`, `TON.md`,
+recompter N contre N₀ = 25 avec
+`python3 docs/refonte-saisie/verifier-ton.py`). L'itération 5 est la dernière,
+et son mandat est fixé par D3 : **revue QA finale** (`skills/ui-review-qa/` de
+UXER, `references/ux-review-framework.md`), accessibilité et responsive comme
+plancher, cohérence, purge des restes de l'ancien parcours — puis la **double
+mesure** exigée par la section 9 du prompt de routine : gain de vitesse de
+saisie contre l'itération 1, et présence du ton contre l'itération 1, les deux
+chiffres lus ensemble.
+
+Trois points concrets l'attendent, dans cet ordre d'impact :
+
+1. La double mesure demande un point de comparaison chiffré avec l'itération 1.
+   `AUDIT-1.md` §3.5 donne le coût par champ en lecture de code ; les
+   itérations 3 et 4 mesurent à l'exécution. Établir la comparaison sur ce qui
+   est réellement comparable, et dire ce qui ne l'est pas plutôt que de
+   fabriquer un écart.
+2. Vérifier que les trois points d'appel de `SwitchRow` rendent bien `aside`
+   sur le parcours de vote et de contre-proposition — A9 n'a pas été mesurée
+   séparément cette fois (voir « Écarté »).
+3. Les items 14 et 16 du backlog restent les seuls correctifs bas risque
+   disponibles si le temps le permet ; le périmètre affordance nommé par D2 est
+   clos et ne se rouvre pas.
+
+Rien dans `DECISIONS.md` n'est à rouvrir : D1 est appliquée et close pour ce
+qui concerne A8/A9, D12 clôt l'item 13, D11 clôt le périmètre de D2.

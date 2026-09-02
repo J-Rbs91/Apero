@@ -29,6 +29,21 @@ Le composant fabrique lui-même les identifiants et le câblage
 `aria-describedby` / `aria-invalid` : impossible d'oublier le lien entre le
 libellé, l'aide et l'erreur.
 
+**Une exception, et une seule : les trois champs d'un créneau.** Jour, heure et
+troquet ne portent pas de pastille `Obligatoire`, dans `CreateEventPage` comme
+dans `AlternativeOptionForm`. Trois pastilles identiques sur une ligne serrée
+répètent trois fois la même chose et poussent le troquet à passer à la ligne ;
+la phrase de statut du bloc porte l'information une fois pour les trois
+(« Remplis jour, heure et troquet du créneau 1. »), et le contour rouge la
+reprend champ par champ en cas d'échec. L'exception vaut pour ce bloc précis et
+ne s'étend à aucun autre champ : partout ailleurs, la mention est due.
+
+Le champ du troquet est un `LocationField` et non un `TextField` : il ouvre une
+recherche, une carte et une géolocalisation. Il porte donc, en plus du libellé,
+une **loupe persistante dans le contrôle** — visible avant le premier tap, là
+où `role="combobox"` ne l'est que pour les lecteurs d'écran. Le signifiant
+s'ajoute au libellé ; il ne le remplace jamais.
+
 ```tsx
 <TextField
   label="Le troquet"
@@ -56,8 +71,21 @@ Les `<select>` natifs restants (aucun dans le parcours principal) gardent un
 chevron visible pour ne pas se confondre avec un champ de saisie.
 
 Un réglage oui/non passe par `SwitchRow` : la ligne entière est cliquable et
-annonce son état en toutes lettres (« Marmaille admise » / « Ce soir c'est sans
-les mômes »).
+annonce son état. Trois textes, trois rôles distincts, et il ne faut pas les
+confondre :
+
+- `title` — la question posée (« Les mioches sont-ils conviés ? ») ;
+- `state` — **la réponse**, dans le bouton, tenue courte (`Oui` / `Non`).
+  C'est le seul texte de la ligne qui change quand on bascule : il se relit à
+  chaque passage, et une réponse d'un mot se vérifie d'un coup d'œil là où une
+  phrase demande d'être lue ;
+- `aside` — le commentaire de la maison sur l'état courant (« Marmaille
+  admise » / « Ce soir c'est sans les mômes »), posé **sous** la ligne, hors du
+  bouton, un cran sous l'aide en graisse. Il accompagne le réglage sans être ce
+  qu'on lit pour décider.
+
+`hint` reste disponible pour une précision fonctionnelle, et cohabite avec
+`aside` sans se confondre avec lui.
 
 ### 3. Le bouton qui enregistre reste sous le pouce
 

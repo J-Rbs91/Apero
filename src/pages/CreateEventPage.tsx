@@ -541,7 +541,8 @@ export function CreateEventPage() {
         >
           <SwitchRow
             title="Les mioches sont-ils conviés ?"
-            state={childrenAllowed ? "Marmaille admise" : "Ce soir c’est sans les mômes"}
+            state={childrenAllowed ? "Oui" : "Non"}
+            aside={childrenAllowed ? "Marmaille admise" : "Ce soir c’est sans les mômes"}
             checked={childrenAllowed}
             onChange={setChildrenAllowed}
           />

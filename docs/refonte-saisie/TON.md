@@ -79,8 +79,8 @@ dans N :
 | A5 | « Un apéro sans nom, ça ne se convoque pas. Garde l'ancien ou trouve mieux. » | `src/components/AperoSettingsForm.tsx:58` | Retoucher l'apéro | erreur (validation) | en place |
 | A6 | « Quitte à imposer cette contradiction, il s'agirait au moins d'avoir l'élégance d'être précis : un jour, une heure et un lieu, histoire que cette proposition ait meilleure mine que la tienne. » | `src/components/AlternativeOptionForm.tsx:63` | Proposer un créneau | erreur (validation) | en place |
 | A7 | « Indique ton blaze, qu'on sache au moins l'intitulé du fauteur de troubles. » | `src/components/AlternativeOptionForm.tsx:70` | Proposer un créneau | erreur (validation) | en place |
-| A8 | « Marmaille admise » / « Ce soir c'est sans les mômes » | `src/pages/CreateEventPage.tsx:461` et `src/components/AperoSettingsForm.tsx:135` | Créer un apéro · Retoucher l'apéro | état d'un `SwitchRow` (lu à chaque passage) | en place *(compté une fois : même paire de textes, deux points d'appel)* |
-| A9 | « En escadron » / « Peinard, en solo » | `src/components/CompanionsField.tsx:45` | Répondre (vote), Proposer un créneau | état d'un `SwitchRow` (lu à chaque passage) | en place |
+| A8 | « Marmaille admise » / « Ce soir c'est sans les mômes » | `src/pages/CreateEventPage.tsx:545` et `src/components/AperoSettingsForm.tsx:136` | Créer un apéro · Retoucher l'apéro | légende d'un `SwitchRow` (`aside`), sous la ligne | déplacé en it. 4 *(compté une fois : même paire de textes, deux points d'appel)* |
+| A9 | « En escadron » / « Peinard, en solo » | `src/components/CompanionsField.tsx:46` | Répondre (vote), Proposer un créneau | légende d'un `SwitchRow` (`aside`), sous la ligne | déplacé en it. 4 |
 
 ### Palier B — hint / placeholder / succès / chemin secondaire
 
@@ -137,6 +137,40 @@ exactement ce que la charte D1 privilégie. L'itération 3 l'écrit en
 vocabulaire fonctionnel neutre et ne s'en sert pas ; l'itération 4 décidera
 si une tournure du corpus y prend place (`BACKLOG.md` item 13).
 
+*Itération 4 :* **premier déplacement d'emplacement de la routine.** A8 et A9
+quittent le `state` d'un `SwitchRow` — c'est-à-dire l'intérieur du bouton, la
+seconde ligne de la cible tactile de 60 px — pour le nouveau support `aside`,
+posé **sous** la ligne, hors du bouton. Le `state` reçoit à leur place la
+réponse à la question du titre (`Oui` / `Non`), qui est du vocabulaire
+fonctionnel et n'entre pas au corpus. Détail et fondement : `DECISIONS.md`
+D10, mesures dans `AUDIT-4.md` §2 et §3.
+
+Ce que le déplacement change, mesuré sur le rendu (Chromium, 390 × 780) :
+
+| | Avant (dans le bouton) | Après (sous la ligne) |
+|---|---|---|
+| Taille | 13 px | 12.5 px |
+| Graisse | 600 | 500 |
+| Couleur | `rgba(255, 247, 230, 0.62)` | `rgba(255, 247, 230, 0.72)` |
+| Largeur disponible | 198 px | 294 px |
+| Dans la cible tactile | oui | **non** (`asideInsideButton: false`) |
+| Dans le nom accessible du bouton | oui | non — le bouton s'annonce désormais « Les mioches sont-ils conviés ?Non » |
+| Contraste mesuré sur pixels rendus | — | **7.94 : 1** (plancher AA : 4.5 : 1) |
+
+Aucun caractère n'est modifié : les deux paires de chaînes sont recopiées
+telles quelles dans la prop `aside`. Le contraste **monte** au lieu de baisser
+— l'opacité passe de 0.62 à 0.72, et le texte quitte le fond éclairci du
+bouton (`--fill-soft`, une surcouche crème à 6 %) pour le fond de page, plus
+sombre. Une tournure plus petite n'est pas une tournure plus discrète si elle
+gagne en lisibilité : c'est le sens de la ligne « Le ton peut être petit et
+rester présent » du prompt de routine.
+
+Zone du bandeau de reprise de brouillon : **question tranchée, aucune tournure
+n'y est déplacée.** Le raisonnement, entrée par entrée sur les 25, est dans
+`AUDIT-4.md` §4 ; la décision et la proposition adressée au propriétaire du
+produit sont dans `DECISIONS.md` D12. Ce n'est pas un report : l'item 13 du
+backlog est clos.
+
 ## 5. Contrôle de non-régression
 
 À chaque fin d'itération, chaque texte exact ci-dessus doit se retrouver tel
@@ -174,3 +208,18 @@ filtré sur les 25 chaînes. Deux occurrences seulement y apparaissent, et les
 deux sont des changements d'indentation JSX à texte strictement identique
 (le `hint` de « Proposé par », la branche `actionStatus` qui porte B2). Aucun
 caractère de corpus modifié.
+
+**Itération 4 :** `python3 docs/refonte-saisie/verifier-ton.py` lancé en
+Phase 0 (avant toute modification) et en Phase 4 (après) — **N = 25 / N₀ = 25
+dans les deux passes**, sortie 0, aucune tournure absente.
+
+C'est l'itération où ce contrôle compte le plus depuis qu'il existe : c'est la
+première où des chaînes du corpus **changent de ligne et de prop**. Le contrôle
+seul ne suffirait pourtant pas à prouver qu'aucun texte n'a bougé — il cherche
+des sous-chaînes, et une chaîne allongée le satisferait encore. Il a donc été
+doublé d'une relecture du `git diff` de `src/` sur les trois lignes concernées
+(`CreateEventPage.tsx:545`, `AperoSettingsForm.tsx:136`,
+`CompanionsField.tsx:46`) : dans les trois, la ligne retirée et la ligne
+ajoutée ne diffèrent que par le nom de la prop (`state=` → `aside=`), l'expression
+ternaire et ses deux littéraux étant reportés caractère pour caractère. Les
+trois lignes `state=` neuves ne portent que `"Oui"` et `"Non"`.
