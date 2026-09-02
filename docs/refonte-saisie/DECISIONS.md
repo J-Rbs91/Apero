@@ -337,3 +337,131 @@ de stockage — exactement ce que D6 refuse. Seule la version de D6/D8 est
 conservée ; la note de reprise « Brouillon retrouvé : reprends où tu t'étais
 arrêté. » et la règle `.field__hint--draft` qui l'accompagnait ne sont pas
 entrées dans le code.
+
+---
+
+## Itération 4 — 02/09/2026
+
+### D10. A8/A9 sortent du bouton : application de la charte D1, avec le support qu'elle n'avait pas prévu
+
+C'est le déplacement que D1 avait réservé à cette itération. Il est appliqué,
+pas rediscuté : la destination (sous la ligne, hors du bouton, un cran plus
+bas), le mécanisme (la chaîne migre telle quelle, `state` reçoit un libellé
+fonctionnel neutre) et le motif sont ceux de D1. Ce que cette décision ajoute
+est le **support**, parce que l'audit a montré que celui nommé par D1 n'est pas
+libre.
+
+**Ce que l'audit établit, et que D1 ne pouvait pas savoir** (`AUDIT-4.md` §3) :
+D1 écrit que `SwitchRow.hint` est « actuellement vide dans ces deux usages ».
+C'est exact pour `CreateEventPage` et `CompanionsField`, faux pour
+`AperoSettingsForm.tsx:138-142`, qui passe un `hint` conditionnel depuis le
+commit `9738a47` — antérieur à l'itération 1. Appliquer D1 à la lettre y ferait
+cohabiter, dans un même paragraphe, une tournure du registre et une note qui
+prévient d'une conséquence de l'enregistrement. Les deux y perdraient :
+l'information de conséquence deviendrait la fin d'une phrase drôle, et la
+tournure le préambule d'un avertissement.
+
+**Décision : un support nommé pour l'aparté, distinct de l'aide fonctionnelle.**
+`SwitchRow` reçoit une prop `aside`, rendue sous la ligne, à côté de `hint` et
+sans le remplacer. Trois textes, trois rôles, et le composant les tient
+séparés :
+
+| Prop | Rôle | Où |
+|---|---|---|
+| `title` | la question posée | dans le bouton |
+| `state` | **la réponse** à cette question, tenue courte | dans le bouton |
+| `aside` | le commentaire de la maison sur l'état courant | sous la ligne, hors du bouton |
+| `hint` | une précision fonctionnelle, quand il en faut une | sous la ligne, hors du bouton |
+
+Ce n'est pas une réouverture de la charte : D1 décide **où le ton va** et à
+quelle échelle, pas par quel nom de prop il y arrive. Sa prémisse factuelle
+était inexacte ; sa destination ne l'était pas.
+
+**Le `state` fonctionnel est `Oui` / `Non`.** C'est le libellé que D1 nomme
+elle-même (« un simple `Oui`/`Non` le remplirait tout aussi bien »). Les deux
+titres sont des questions fermées — « Les mioches sont-ils conviés ? », « Tu
+débarques accompagné·e ? » — donc la réponse d'un mot est littéralement la
+réponse, pas un raccourci. Ce libellé est du vocabulaire fonctionnel : il
+n'entre pas au corpus gelé et ne fait pas monter N₀.
+
+**Ce que la mesure dit du résultat** (`AUDIT-4.md` §2, et la table de
+`TON.md` §4) : la tournure passe de 13 px/600 à 12.5 px/500, sort de la cible
+tactile de 60 px et du nom accessible du bouton, gagne 96 px de largeur
+disponible — et son **contraste mesuré sur pixels rendus est de 7.94 : 1**,
+au-dessus du plancher AA de 4.5 : 1. Le contraste monte au lieu de baisser :
+l'opacité passe de 0.62 à 0.72 et le texte quitte le fond éclairci du bouton
+pour le fond de page, plus sombre.
+
+**Ce que ça coûte à la saisie : rien, et ça lui rend quelque chose.** Le seul
+texte de la ligne qui change quand on bascule était une phrase de 28
+caractères ; c'est maintenant un mot. La vérification « la bascule a-t-elle
+pris ? » cesse de demander une lecture. Fondement UXER :
+`references/affordance-and-signifiers.md` §5.5 (les états doivent rester
+distinguables) et §5.4 (agrandir la cible ne rend pas l'action découvrable —
+c'est un signal cohérent qui porte l'intention, ici la bascule elle-même) ;
+`references/color-and-type-protocol.md` §2 pour la graisse comme levier de
+hiérarchie le moins coûteux en densité, déjà mobilisé par D1 et D5.
+
+### D11. Les deux derniers résidus nommés par D2 sont clos
+
+D2 fixe le périmètre affordance de la routine aux quatre résidus de
+`AUDIT-1.md` §3 — « corriger les résidus nommés, pas en chercher de nouveaux
+par principe ». 3.1 est clos en itération 2, 3.3 en itération 3. Les deux
+derniers le sont ici, ce qui ferme ce périmètre sans l'élargir.
+
+**3.4 — `LocationField` porte un signifiant persistant.** Le champ ouvre une
+recherche, une carte et une géolocalisation ; `role="combobox"` et
+`aria-expanded` le disaient déjà, mais seulement aux lecteurs d'écran. Une
+loupe de 17 px est posée **dans** le contrôle (`.locfield__glyph`, mesurée à
+8 px du début du texte saisi, `pointer-events: none`), et vire au rouge avec le
+contour quand le champ est en faute. C'est le cas que
+`references/affordance-and-signifiers.md` §7 sépare en deux obligations
+distinctes — sémantique et apparence — dont une seule était tenue. §5.3 en fixe
+la limite, et elle est respectée : l'icône **s'ajoute** au libellé « Le
+troquet » et à sa mention `Obligatoire`, elle ne les remplace pas. Une icône
+seule aurait été l'exception que cette règle proscrit.
+
+**3.2 — `docs/DESIGN-SYSTEM.md` documente son exception.** Le document exigeait
+« une mention explicite `Obligatoire` ou `Facultatif` » sur tout champ, alors
+que les trois champs d'un créneau y dérogent délibérément — la raison étant
+écrite en commentaire dans le code, et nulle part dans le document. Il se
+contredisait donc pour qui le lit sans ouvrir le code. L'exception est
+maintenant énoncée avec son motif (trois pastilles identiques sur une ligne
+serrée répètent la même chose et poussent le troquet à passer à la ligne ; la
+phrase de statut du bloc porte l'information une fois pour les trois) **et sa
+borne** : elle vaut pour ce bloc et ne s'étend à aucun autre champ.
+
+La même mise à jour corrige ce que D10 rend inexact dans ce document, qui
+décrivait `SwitchRow` comme annonçant « son état en toutes lettres
+(« Marmaille admise » / « Ce soir c'est sans les mômes ») ». Les deux
+tournures y restent citées, à leur nouveau rôle.
+
+### D12. Le bandeau de reprise de brouillon reste en vocabulaire fonctionnel — question tranchée
+
+D8 avait ouvert la question et l'avait explicitement remise à cette itération,
+qui a mandat sur les déplacements. Elle est tranchée, pas reportée.
+
+**Décision : aucune tournure du corpus ne se déplace vers ce bandeau.** Le
+raisonnement porte sur les 25 entrées, une par une (`AUDIT-4.md` §4). Il se
+résume à ceci : chaque tournure du corpus est déjà **attachée** à un champ, à
+un chemin ou à un moment qui n'existe pas dans un bandeau de reprise. Aucune
+n'est disponible ; toutes sont occupées. La seule dont le sens conviendrait,
+B5 (« Le registre se souvient de toi. Retouche, si le cœur t'en dit. »), est
+l'accueil du chemin de vote — l'y prendre ne serait pas un déplacement mais un
+transfert, qui viderait un chemin pour meubler l'autre.
+
+L'emplacement reste donc ce que l'itération 3 en a fait : un bon emplacement,
+libre, en vocabulaire neutre. Ce n'est pas un échec du placement — c'est le
+constat que le corpus, tel qu'il est, n'a pas de tournure qui lui corresponde.
+
+**Proposition adressée au propriétaire du produit, et à lui seul.** Donner à
+ce bandeau une couleur de registre demande d'y **écrire une tournure neuve**.
+Cela fait monter N₀, et étendre le corpus n'est pas une décision d'itération
+— symétriquement à ce qui vaut pour une suppression (sections 2 et 3 du prompt
+de routine). Si le propriétaire le souhaite, l'emplacement est prêt et son
+cahier des charges est écrit : un accusé de réception à l'entrée du formulaire,
+au registre de la maison, à poser en remplacement de « Ta saisie précédente a
+été retrouvée sur cet appareil. Reprends où tu en étais. » (`.draft-resume`,
+`CreateEventPage.tsx`), et qui doit continuer à dire deux choses — que la
+saisie a été retrouvée, et qu'on peut repartir de zéro. Aucune itération de
+cette routine ne l'écrira d'elle-même.

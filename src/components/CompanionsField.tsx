@@ -42,7 +42,8 @@ export function CompanionsField({
     <div className="setting">
       <SwitchRow
         title="Tu débarques accompagné·e ?"
-        state={accompanied ? "En escadron" : "Peinard, en solo"}
+        state={accompanied ? "Oui" : "Non"}
+        aside={accompanied ? "En escadron" : "Peinard, en solo"}
         checked={accompanied}
         onChange={setAccompanied}
       />

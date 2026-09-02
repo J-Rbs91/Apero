@@ -11,10 +11,10 @@ Statuts : `à faire` / `en cours` / `fait` / `abandonné + motif`.
 | 10 | Ramener le message d'erreur générique dans le champ de vision au moment du refus (les trois formulaires) | `AUDIT-3.md` §2 | **Élevé** — le refus était invisible sur tout formulaire plus long que l'écran, et quatre tournures du corpus avec lui | fait — it. 3, voir `DECISIONS.md` D6 |
 | 11 | La barre d'action cesse d'annoncer « prêt » pendant qu'un refus est affiché | `AUDIT-3.md` §3 | Moyen à élevé — le seul élément visible au moment du refus disait le contraire | fait — it. 3, voir `DECISIONS.md` D7 |
 | 12 | Brouillon local du formulaire de création : la saisie survit à un rechargement | `AUDIT-3.md` §4 | Élevé par occurrence — jusqu'à trois recherches de lieu perdues d'un coup | fait — it. 3, voir `DECISIONS.md` D8 |
-| 5 | Déplacer A8/A9 (« Marmaille admise » / « Ce soir c'est sans les mômes » ; « En escadron » / « Peinard, en solo ») de `SwitchRow.state` vers `SwitchRow.hint`, avec un `state` fonctionnel neuf | `DECISIONS.md` D1 | Moyen — libère la zone de décision de ces deux réglages | à faire |
-| 6 | Documenter dans `docs/DESIGN-SYSTEM.md` l'exception des trois champs de créneau sans pastille `Obligatoire`/`Facultatif` | `AUDIT-1.md` §3.2 | Faible — cohérence documentaire | à faire |
-| 7 | Ajouter un signifiant visuel (icône) à `LocationField` pour annoncer le comportement enrichi (recherche, carte, géolocalisation) avant le premier tap | `AUDIT-1.md` §3.4 | Faible — amélioration de découvrabilité, pas bloquant | à faire |
-| 13 | Décider si une tournure du corpus prend place dans le bandeau de reprise de brouillon (zone hors saisie neuve, ouverte par D8) | `DECISIONS.md` D8 | Moyen — c'est du placement de ton, mandat de l'itération 4 | à faire — it. 4 |
+| 5 | Déplacer A8/A9 (« Marmaille admise » / « Ce soir c'est sans les mômes » ; « En escadron » / « Peinard, en solo ») de `SwitchRow.state` vers une légende sous la ligne, avec un `state` fonctionnel neuf | `DECISIONS.md` D1 | Moyen — libère la zone de décision de ces deux réglages | fait — it. 4, voir `DECISIONS.md` D10 (support `aside` et non `hint` : voir `AUDIT-4.md` §3) |
+| 6 | Documenter dans `docs/DESIGN-SYSTEM.md` l'exception des trois champs de créneau sans pastille `Obligatoire`/`Facultatif` | `AUDIT-1.md` §3.2 | Faible — cohérence documentaire | fait — it. 4, voir `DECISIONS.md` D11 |
+| 7 | Ajouter un signifiant visuel (icône) à `LocationField` pour annoncer le comportement enrichi (recherche, carte, géolocalisation) avant le premier tap | `AUDIT-1.md` §3.4 | Faible — amélioration de découvrabilité, pas bloquant | fait — it. 4, voir `DECISIONS.md` D11 |
+| 13 | Décider si une tournure du corpus prend place dans le bandeau de reprise de brouillon (zone hors saisie neuve, ouverte par D8) | `DECISIONS.md` D8 | Moyen — c'est du placement de ton, mandat de l'itération 4 | fait — it. 4 : **tranché, aucune tournure n'y est déplacée** (`DECISIONS.md` D12). Une proposition d'extension du corpus est adressée au propriétaire du produit ; elle ne se décide pas en itération |
 | 14 | Étendre la persistance de brouillon à `VoteForm` et `AlternativeOptionForm` | `AUDIT-3.md` §4, écarté it. 3 | Faible — formulaires courts, dans une page déjà chargée | à faire |
 | 15 | Cible tactile de `.stepper__btn` (compteur de renforts) portée à 44×44 px, alignée sur le plancher déjà documenté dans `global.css` | `AUDIT-3.md` §1 (complément) | Faible à moyen — cohérence d'un plancher déjà en vigueur ailleurs | fait — it. 3, voir `DECISIONS.md` D9 |
 | 16 | `.cheer-btn` (40 px, action « Trinquer ») sous le plancher de 44 px | `AUDIT-3.md` §1 (complément) | Faible — action secondaire, hors saisie de formulaire | à faire — hors périmètre tant qu'aucun audit ne démontre un blocage de la saisie |
@@ -49,3 +49,21 @@ ultérieure, mais seulement sur cette preuve, jamais par défaut.
    (item 14). Ces deux formulaires sont courts et vivent dans une page déjà
    chargée ; le coût d'une reprise perdue y est sans commune mesure avec celui
    du formulaire de création. Reportée par priorité, pas par difficulté.
+
+**Itération 4 :** deux choses écartées.
+
+1. **Écrire une tournure neuve pour le bandeau de reprise de brouillon.** La
+   question de l'item 13 est tranchée : aucune tournure existante ne peut y
+   être déplacée sans vider le chemin d'où elle viendrait (`DECISIONS.md` D12,
+   raisonnement entrée par entrée dans `AUDIT-4.md` §4). Donner au bandeau une
+   couleur de registre demanderait d'en **écrire** une, ce qui fait monter N₀ ;
+   c'est une décision du propriétaire du produit, jamais d'une itération. La
+   proposition lui est adressée dans D12, avec le cahier des charges de
+   l'emplacement.
+2. **Rejouer les mesures de A9 sur le parcours de vote.** A9 partage le
+   composant `SwitchRow` avec A8 et reçoit exactement le même traitement ; ses
+   valeurs de rendu sont celles mesurées sur A8, par construction. Une mesure
+   propre demanderait de créer un apéro réel dans la sonde. Les 71
+   vérifications de `npm run test:functional` exercent bien ce parcours et ne
+   régressent pas — mais elles ne mesurent pas la typographie. Consigné comme
+   une mesure non faite, pas comme une mesure implicite.
