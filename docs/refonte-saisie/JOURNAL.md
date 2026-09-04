@@ -653,3 +653,260 @@ Trois points concrets l'attendent, dans cet ordre d'impact :
 
 Rien dans `DECISIONS.md` n'est à rouvrir : D1 est appliquée et close pour ce
 qui concerne A8/A9, D12 clôt l'item 13, D11 clôt le périmètre de D2.
+
+## Itération 5 — 04/09/2026
+
+**Périmètre audité :** la **revue QA finale** du parcours de saisie selon les
+treize axes de `skills/ui-review-qa/` de UXER — accessibilité et responsive
+comme plancher, cohérence, purge des restes de l'ancien parcours — plus la
+non-régression des itérations 2 à 4 et les deux points laissés ouverts par le
+point de reprise de l'itération 4. Fichiers lus : `src/components/ui/SwitchRow.tsx`,
+`Field.tsx`, `ChoiceGroup.tsx`, `src/components/CompanionsField.tsx`,
+`AlternativeOptionForm.tsx`, `VoteForm.tsx`, `LocationField.tsx`,
+`TraquenardGauge.tsx`, `src/styles/global.css`, `docs/DESIGN-SYSTEM.md`. Détail
+dans `AUDIT-5.md`.
+
+Nature des preuves : **`code`** pour l'analyse et le recensement des sélecteurs
+CSS ; **`exécution`** pour toutes les mesures (sonde Playwright sur le banc
+d'essai du dépôt — vraie API `server/`, vrai `vite dev`, faux GitHub in-memory,
+Photon intercepté — aux viewports 420 × 900 et 320 × 640, avec un apéro réel
+créé puis vote et contre-proposition réellement exercés) ; **`visuelle`** pour
+les contrastes, calculés sur **pixels réellement décodés** par un décodeur PNG
+minimal écrit dans la sonde, et pour deux captures réellement regardées.
+
+**Constats retenus :**
+
+1. **`AUDIT-5.md` §1 — les itérations 2 à 4 tiennent.** Vérifié avant toute
+   modification : `MIN_QUERY_LENGTH = 2` (`LocationField.tsx:17`), Entrée
+   sélectionne la première suggestion (`LocationField.tsx:174-179`), A8/A9 hors
+   du bouton sur les trois rendus, loupe du champ lieu en place. 236 tests,
+   71 vérifications fonctionnelles, 23 contrôles de navigation — tous au vert,
+   mêmes comptes qu'en itération 4.
+2. **`AUDIT-5.md` §3 — constat neuf, et il touche au registre :
+   `SwitchRow` n'annonçait ni son `aside` ni son `hint`.** `Field.tsx:49-51,70`
+   et `ChoiceGroup.tsx:68` relient leur aide au contrôle par
+   `aria-describedby` ; `SwitchRow.tsx:57-58` rendait deux `<p>` nus, sans `id`,
+   sur un bouton sans `aria-describedby`. Mesuré : `description accessible:
+   null` sur les trois rendus, aux deux viewports. Conséquence : depuis
+   l'itération 4 — qui a eu raison de sortir A8/A9 du nom accessible — **la
+   tournure n'était ni dans le nom, ni dans une description**. Pour qui navigue
+   de contrôle en contrôle, le registre avait disparu de la ligne de réglage,
+   sans que le compte visuel bouge et sans que le contrôle exécutable puisse le
+   voir : il cherche la chaîne dans le code, où elle était bien présente.
+3. **`AUDIT-5.md` §4 — l'anneau de focus du champ de recherche du lieu.**
+   `global.css` donne à quinze sélecteurs un anneau de 3 px ;
+   `.locsearch__input:focus` en était la seule exception du parcours
+   (`outline: none`). **Le plancher normatif était tenu** — l'indicateur de
+   remplacement mesurait 3.74 : 1, au-dessus des 3 : 1 de WCAG 1.4.11 — donc
+   **pas un bloquant**. Ce qui le rend opposable est ailleurs : D4 a fait de ce
+   champ le chemin clavier rapide du champ le plus coûteux du parcours.
+4. **`AUDIT-5.md` §5 — 19 classes CSS orphelines**, dont `vote-chip__*` (12,
+   dont le balisage a été retiré par le commit `cb8e9c2` de la refonte
+   d'interface) et `locfield__list` (la liste ancrée sous le champ, c'est-à-dire
+   l'architecture que D4 a tranchée). Des restes de l'ancien parcours au sens
+   littéral du mandat.
+5. **`AUDIT-5.md` §2.1 — `TON.md` attribuait A9, B11, B12 et B13 à un écran où
+   elles ne s'affichent pas.** `CompanionsField` n'est monté qu'en
+   `VoteForm.tsx:427` ; `AlternativeOptionForm` ne l'importe pas et ne l'a
+   jamais importé (`git log -S`, aucun commit), et la feuille de
+   contre-proposition réellement ouverte contient 0 `SwitchRow`. Inexactitude
+   portée depuis l'itération 1, de la même nature que celle trouvée dans la
+   prémisse de D1 par l'itération 4.
+
+**Modifications effectuées :**
+
+- `src/components/ui/SwitchRow.tsx` — le composant fabrique ses identifiants et
+  relie `aside` puis `hint` au bouton par `aria-describedby`, comme `Field` et
+  `ChoiceGroup` le font déjà. Une seule implémentation du mécanisme, pas une
+  seconde.
+- `src/styles/global.css` — retrait du `outline: none` sur
+  `.locsearch__input:focus` ; le raffermissement de bordure reste et s'ajoute à
+  l'anneau commun au lieu de le remplacer.
+- `src/styles/global.css` — purge de 19 classes mortes. `button--secondary`
+  partageait deux règles avec `button--ghost`, bien vivant : seul le sélecteur
+  mort est retiré, pas le bloc.
+- `docs/refonte-saisie/TON.md` — colonne « Écran » corrigée pour A9, B11, B12,
+  B13. Aucun texte, aucun `fichier:ligne`, aucun compteur touché.
+
+Pour l'utilisateur : la ligne de réglage annonce désormais son aparté à qui
+l'écoute au lieu de le réserver à qui le voit ; le champ de recherche du
+troquet dit où l'on est quand on y arrive au clavier.
+
+**Justification :** `references/affordance-and-signifiers.md` §7 (« sémantique
+et apparence sont deux obligations distinctes ») pour le constat 2 —
+l'itération 4 avait réglé l'apparence, pas la sémantique. La grille des treize
+axes de `skills/ui-review-qa/references/review-grid.md` pour la conduite de la
+revue, et ses règles de gravité pour n'avoir classé **aucun** constat bloquant :
+les deux constats retenus tiennent le plancher normatif, et c'est dit plutôt que
+gonflé. La règle « ne jamais présenter une préférence esthétique comme un défaut
+objectif » a servi deux fois — pour écarter l'anneau par défaut du navigateur
+sur `a.notif-bell`, et pour ne fonder le constat 3 que sur des faits (épaisseur,
+contraste mesuré, unicité de l'exception, statut de chemin clavier rapide donné
+par D4), jamais sur le goût.
+
+**Ton — déplacements :** **aucun.** A8 et A9 restent exactement où l'itération 4
+les a posées : 12.5 px, graisse 500, `rgba(255, 247, 230, 0.72)`,
+`asideDansBouton: false`, remesurés sur les trois rendus et aux deux viewports.
+Aucune retouche d'échelle, aucun texte touché.
+
+Le seul changement qui concerne le registre est un **gain de support**, et il
+va dans le sens du cliquet :
+
+| Tournure | Support ajouté | Avant | Après |
+|---|---|---|---|
+| A8, A9 | Description accessible du bouton (`aria-describedby`) | `null` — ni dans le nom, ni dans une description | « Ce soir c'est sans les mômes » · « Peinard, en solo » · « En escadron », mot pour mot |
+
+**Pourquoi ce point ne coûte rien à la saisie.** Une description accessible
+n'occupe aucun pixel, ne déplace aucun champ, n'allonge aucune ligne de regard
+et ne touche pas au chemin du pouce. Elle n'est pas non plus le *nom* du
+contrôle : ce que le lecteur d'écran annonce en premier reste
+« Tu débarques accompagné·e ? Non », c'est-à-dire la question et sa réponse.
+L'aparté vient après, comme à l'écran il vient sous la ligne. Les zones que D1
+interdit au ton restent interdites — aucune tournure n'entre dans un libellé,
+un bouton primaire ou une erreur de champ.
+
+**Ton — compteur :** **N = 25 / N₀ = 25.**
+
+Manifestations mesurées à l'écran (texte réellement rendu, pas déduit du code) :
+
+- création, volet réglages ouvert : **3** ;
+- vote, volet « Ajouter des détails » ouvert, réglage « accompagné » : **3** ;
+- vote, volet replié — état par défaut : **0** ;
+- vote + feuille de contre-proposition ouverte, total de page : **4**.
+
+Deux précisions qui corrigent une lecture trop favorable des itérations
+précédentes, et qui sont écrites parce qu'elles sont vraies, pas parce qu'elles
+arrangent : le compte se fait **par page et non par panneau** (le total de 4
+inclut ce qui est derrière la feuille ; la feuille elle-même n'apporte que B10),
+et **sur le parcours de vote par défaut le registre est à 0**, A9 et les hints
+du bloc renforts vivant derrière un volet replié (`VoteForm.tsx:423-444`). Le
+chiffre « 1 (+1 conditionnel) » de l'itération 4 n'est pas contredit — il valait
+volet ouvert, et l'itération 4 mesurait bien cet état. Sa condition est
+simplement rendue explicite. Ni régression, ni recul : ce volet est antérieur à
+la routine, aucune itération ne l'a replié.
+
+### La double mesure exigée par la section 9 du prompt de routine
+
+**1. Vitesse de saisie, itération 1 → itération 5.**
+
+Il n'existe **aucun chiffre agrégé** du type « la saisie est N % plus rapide »,
+et il n'en sera pas fabriqué un : l'itération 1 a établi son coût par **lecture
+de code** (chaînes de gestes par champ, `AUDIT-1.md` §3.5), les itérations 3 à 5
+mesurent **à l'exécution**. Les deux ne sont pas commensurables. Ce qui est
+comparable, c'est la chaîne d'interactions, champ par champ :
+
+| Ce qui a changé | It. 1 | It. 5 | Fondement |
+|---|---|---|---|
+| Chaîne minimale du champ lieu | tap (ouvre) + **3** frappes + tap sur une suggestion | tap (ouvre) + **2** frappes + **Entrée** | D4 |
+| Refus d'envoi sur un formulaire plus long que l'écran | message rendu sous le pli, invisible | ramené dans le champ de vision (mesuré it. 4 : `top = 553` pour un écran de 780, conteneur défilé de 1 809 px) | D6 |
+| Barre d'action pendant un refus | annonçait « 3 créneaux prêts. La tablée tranchera. » | passe en `--blocked` : « L'envoi a été refusé. L'explication est juste au-dessus. » | D7 |
+| Saisie perdue à un rechargement | perdue, jusqu'à trois recherches de lieu d'un coup | brouillon local repris | D8 |
+| « Proposé par » | rien n'annonçait le champ obligatoire | mention `Obligatoire` | it. 2 |
+| Compteur de renforts | cible sous le plancher | 44 × 44 px | D9 |
+| Repère de focus du chemin clavier rapide du lieu | 1 px, 3.74 : 1 | anneau commun 3 px, **11.14 : 1** | D14 |
+
+Le gain porte donc sur **une frappe et un geste de pointage en moins sur le
+champ le plus coûteux**, et surtout sur trois pertes de temps supprimées — un
+refus qu'on ne voyait pas, une barre qui disait le contraire de ce qui se
+passait, et une saisie qui disparaissait à un rechargement. Ce sont les postes
+où le temps se perdait vraiment ; aucun ne se lit sur un chronomètre de champ.
+
+**2. Présence du ton, itération 1 → itération 5.**
+
+| | It. 1 | It. 5 |
+|---|---|---|
+| Corpus | N₀ = 25 | **N = 25** |
+| Tournures réécrites, raccourcies, atténuées ou remplacées | — | **0** |
+| Tournures supprimées | — | **0** |
+| Tournures déplacées | 0 | 2 (A8, A9 — it. 4, sorties du bouton) |
+| Contraste des tournures déplacées | 13 px/600 à 0.62 d'opacité, dans la cible tactile | 12.5 px/500 à 0.72 — **7.94 : 1** (création) et **9.31 : 1** (vote), plancher AA 4.5 : 1 |
+| Supports où le registre se manifeste | écran | écran **+ description accessible** |
+
+**Les deux chiffres se lisent ensemble, et c'est le point.** La saisie a gagné
+une frappe, un geste et trois pertes de temps ; le registre n'a pas reculé d'une
+seule tournure, il est devenu **plus lisible** là où il a bougé (le contraste
+monte, il ne baisse pas) et il a gagné un support qu'il n'avait pas. Aucune des
+cinq itérations n'a échangé l'un contre l'autre — ce qui était précisément le
+mode d'échec que le cliquet de la section 3 existe pour empêcher.
+
+**Vérifications :**
+
+- `npm install` à la racine et dans `server/` — dépendances absentes au
+  démarrage du conteneur, comme aux quatre itérations précédentes.
+- `npm run build` — succès, `tsc -b && vite build` sans erreur. CSS livré :
+  61 420 → **59 913 octets** ; `global.css` 72 119 → **70 289 octets** ; 326 →
+  **307 classes**, 0 orpheline restante.
+- `npm test` — **236 tests, 29 fichiers, tous passés** (même compte qu'en
+  itérations 3 et 4).
+- `npm run test:functional` — **71/71 vérifications réussies**.
+- `npm run test:nav` — **23/23 contrôles passés**.
+- **Sonde d'exécution, avant modification** : `aria-describedby` absent et
+  description accessible `null` sur les trois rendus ; `.locsearch__input`
+  focalisé sans contour, indicateur à 3.74 : 1 ; 0 débordement horizontal à
+  320 px sur les trois écrans.
+- **Sonde d'exécution, après modification** : **9/9**. Description accessible =
+  « Peinard, en solo » / « En escadron » / « Ce soir c'est sans les mômes » ;
+  `.locsearch__input` à `3px solid rgb(244, 197, 66)`, indicateur mesuré à
+  **11.14 : 1** sur pixels décodés ; typographie, largeur, position et
+  `asideDansBouton: false` **inchangés**.
+- **Captures réellement inspectées** (et non seulement produites) : la ligne de
+  réglage montre « Les mioches sont-ils conviés ? / Non » dans le bouton et
+  « Ce soir c'est sans les mômes » lisible sous le cadre ; le champ de recherche
+  montre l'anneau pastis complet, sans débordement sur le bouton retour ni hors
+  du panneau.
+- **Inspection menée puis classée sans suite** : l'`aside` passant derrière la
+  barre d'action fixe. Première mesure alarmante (`elementFromPoint` renvoyait
+  `button.button`), puis balayage de cinq positions de défilement — à
+  `scrollTop` 589 et en fin de course l'`aside` est entièrement dégagé et au
+  premier plan. Transitoire d'une barre fixe, pas un défaut (`AUDIT-5.md` §6.4).
+  Consigné parce que la question méritait d'être tranchée sur mesure.
+- **Contrôle du corpus** : `python3 docs/refonte-saisie/verifier-ton.py` en
+  Phase 0 et en Phase 4 — **N = 25 / N₀ = 25** dans les deux passes, sortie 0.
+  Doublé d'une relecture du `git diff` de `src/` : deux fichiers touchés
+  (`SwitchRow.tsx`, `global.css`), **zéro ligne du corpus dans le diff** ; les
+  trois points d'appel qui portent A8 et A9 ne sont pas modifiés du tout.
+
+**Écarté cette fois :**
+
+- **La traversée clavier du champ lieu** (`AUDIT-5.md` §6.5) — établi à
+  l'exécution : `LocationField.tsx:333` ouvre l'overlay plein écran sur
+  `onFocus`, donc un utilisateur au clavier est éjecté une fois par créneau.
+  C'est le constat le plus lourd trouvé par cette itération et **non corrigé** :
+  le corriger, c'est toucher à l'ouverture de l'overlay, que D4 et l'« Écarté »
+  de l'itération 2 réservent à une preuve d'exécution sur rendu mobile réel,
+  clavier virtuel ouvert. Chromium headless n'en ouvre pas. **Adressé au
+  propriétaire du produit** (`BACKLOG.md` item 22), pas traité en douce.
+- **A8 sur « Retoucher l'apéro »** (`AperoSettingsForm.tsx:136`) — non atteint
+  par la sonde, donc **non mesuré**, et surtout pas déduit de A8 sur la
+  création : ce serait l'erreur que l'itération 4 s'est refusé à commettre pour
+  A9. `BACKLOG.md` item 21.
+- **`a.notif-bell` (42 × 42) et son anneau par défaut du navigateur** — hors
+  parcours de saisie. L'anneau `outline: auto` de Chromium est un anneau bitonal
+  visible : ce n'est pas un constat de focus invisible, et il n'est pas classé
+  comme défaut.
+- **Items 14 et 16** — inchangés. L'audit confirme que `.cheer-btn` reste hors
+  périmètre : « Trinquer » n'est pas une étape du remplissage.
+- **Le zoom à 200 %, un appareil tactile réel, un lecteur d'écran réel** — non
+  exercés, dits en `AUDIT-5.md` §9 plutôt que passés sous silence.
+
+**Reste à faire / point de reprise :** **la routine est arrivée à son terme.**
+Les cinq itérations prévues sont faites, la trajectoire de D3 est parcourue en
+entier, et les items 8 et 9 du backlog — revue QA finale et double mesure —
+sont clos.
+
+Ce qui reste ouvert n'appartient plus à cette routine et attend une décision du
+propriétaire du produit :
+
+1. **Item 22 — la traversée clavier du champ lieu.** Le seul constat important
+   que l'audit final ait laissé non corrigé, et il l'est pour une raison de
+   méthode, pas de difficulté. Il demande une preuve d'exécution sur rendu
+   mobile réel, clavier virtuel ouvert — la condition que les itérations 2 à 5
+   n'ont jamais pu remplir.
+2. **La proposition d'extension du corpus** adressée en `DECISIONS.md` D12 : le
+   bandeau de reprise de brouillon reste en vocabulaire fonctionnel, et lui
+   donner la couleur de la maison demanderait d'**écrire** une tournure neuve,
+   ce qui fait monter N₀ — une décision qui n'appartient à aucune itération.
+3. **Items 14, 16, 21, 23** — correctifs bas risque, aucun ne bloque la saisie.
+
+Le cliquet ferme sur **N = 25 / N₀ = 25**, aucune tournure réécrite,
+raccourcie, atténuée ni supprimée en cinq itérations.

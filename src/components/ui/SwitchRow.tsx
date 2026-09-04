@@ -35,6 +35,13 @@ export function SwitchRow({
   hint,
 }: SwitchRowProps) {
   const switchId = `switch-${useId()}`;
+  // Comme Field et ChoiceGroup : le composant fabrique les identifiants et
+  // relie lui-même ce qui est posé sous la ligne au contrôle. Sans ce lien,
+  // l'aparté et la précision sont lisibles à l'œil mais muets pour qui
+  // navigue de contrôle en contrôle, ce qui est le mode normal de remplissage.
+  const asideId = aside ? `${switchId}-aside` : undefined;
+  const hintId = hint ? `${switchId}-hint` : undefined;
+  const describedBy = [asideId, hintId].filter(Boolean).join(" ") || undefined;
 
   return (
     <div className="switchrow">
@@ -43,6 +50,7 @@ export function SwitchRow({
         id={switchId}
         role="switch"
         aria-checked={checked}
+        aria-describedby={describedBy}
         className={`switchrow__button${checked ? " switchrow__button--on" : ""}`}
         onClick={() => onChange(!checked)}
       >
@@ -54,8 +62,16 @@ export function SwitchRow({
           <span className="switch__knob" />
         </span>
       </button>
-      {aside && <p className="switchrow__aside">{aside}</p>}
-      {hint && <p className="field__hint">{hint}</p>}
+      {aside && (
+        <p className="switchrow__aside" id={asideId}>
+          {aside}
+        </p>
+      )}
+      {hint && (
+        <p className="field__hint" id={hintId}>
+          {hint}
+        </p>
+      )}
     </div>
   );
 }

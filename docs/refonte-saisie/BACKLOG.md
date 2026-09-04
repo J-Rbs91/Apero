@@ -18,8 +18,15 @@ Statuts : `à faire` / `en cours` / `fait` / `abandonné + motif`.
 | 14 | Étendre la persistance de brouillon à `VoteForm` et `AlternativeOptionForm` | `AUDIT-3.md` §4, écarté it. 3 | Faible — formulaires courts, dans une page déjà chargée | à faire |
 | 15 | Cible tactile de `.stepper__btn` (compteur de renforts) portée à 44×44 px, alignée sur le plancher déjà documenté dans `global.css` | `AUDIT-3.md` §1 (complément) | Faible à moyen — cohérence d'un plancher déjà en vigueur ailleurs | fait — it. 3, voir `DECISIONS.md` D9 |
 | 16 | `.cheer-btn` (40 px, action « Trinquer ») sous le plancher de 44 px | `AUDIT-3.md` §1 (complément) | Faible — action secondaire, hors saisie de formulaire | à faire — hors périmètre tant qu'aucun audit ne démontre un blocage de la saisie |
-| 8 | Revue QA finale, accessibilité, responsive, cohérence, purge des restes | Trajectoire itération 5 | — | à faire |
-| 9 | Double mesure finale (vitesse de saisie, présence du ton) vs itération 1 | Trajectoire itération 5 | — | à faire |
+| 8 | Revue QA finale, accessibilité, responsive, cohérence, purge des restes | Trajectoire itération 5 | — | fait — it. 5, voir `AUDIT-5.md` et `DECISIONS.md` D13 à D16 |
+| 9 | Double mesure finale (vitesse de saisie, présence du ton) vs itération 1 | Trajectoire itération 5 | — | fait — it. 5, voir `JOURNAL.md` |
+| 17 | `SwitchRow` relie `aside` et `hint` au bouton par `aria-describedby` | `AUDIT-5.md` §3 | Élevé sur le chemin assistif — le registre y avait disparu de la ligne de réglage | fait — it. 5, voir `DECISIONS.md` D13 |
+| 18 | Rendre son anneau de focus au champ de recherche du lieu | `AUDIT-5.md` §4 | Moyen — chemin clavier rapide du champ le plus coûteux | fait — it. 5, voir `DECISIONS.md` D14 |
+| 19 | Purger les 19 classes CSS orphelines de l'ancien parcours | `AUDIT-5.md` §5 | Faible — maintenabilité et poids | fait — it. 5, voir `DECISIONS.md` D15 |
+| 20 | Corriger dans `TON.md` l'écran attribué à A9, B11, B12, B13 | `AUDIT-5.md` §2.1 | Moyen — exactitude du suivi, N inchangé | fait — it. 5, voir `DECISIONS.md` D16 |
+| 21 | Mesurer A8 sur « Retoucher l'apéro » (`AperoSettingsForm.tsx:136`) | `AUDIT-5.md` §2.2 et §9 | Faible — seul point d'appel jamais mesuré à l'exécution | à faire — non atteint par la sonde, jamais déduit |
+| 22 | Traversée clavier du champ lieu : `onFocus` ouvre l'overlay plein écran (`LocationField.tsx:333`) | `AUDIT-5.md` §6.5 | Élevé pour un utilisateur au clavier — trois éjections sur un formulaire à trois créneaux | à faire — **bloqué par D4** : demande une preuve d'exécution sur rendu mobile réel, clavier virtuel ouvert. Décision du propriétaire du produit |
+| 23 | `a.notif-bell` à 42 × 42 px, et anneau de focus par défaut du navigateur | `AUDIT-5.md` §6.2, §6.3 | Faible — en-tête de navigation, hors parcours de saisie | à faire — hors périmètre de la routine |
 
 ## Écarté cette itération
 
@@ -67,3 +74,29 @@ ultérieure, mais seulement sur cette preuve, jamais par défaut.
    vérifications de `npm run test:functional` exercent bien ce parcours et ne
    régressent pas — mais elles ne mesurent pas la typographie. Consigné comme
    une mesure non faite, pas comme une mesure implicite.
+
+**Itération 5 :** trois choses écartées, et la routine s'arrête.
+
+1. **La traversée clavier du champ lieu** (item 22). L'audit l'établit à
+   l'exécution : `LocationField.tsx:333` ouvre l'overlay plein écran sur
+   `onFocus`, donc un utilisateur au clavier est éjecté une fois par créneau.
+   C'est le constat le plus lourd que l'itération 5 ait trouvé et qu'elle ne
+   corrige pas — parce que le corriger, c'est toucher à l'ouverture de
+   l'overlay, ce que D4 et l'« Écarté » de l'itération 2 réservent à une preuve
+   d'exécution sur rendu mobile réel, clavier virtuel ouvert. Chromium headless
+   n'en ouvre pas, aux itérations 2, 3, 4 comme à celle-ci. **Consigné pour le
+   propriétaire du produit, pas traité en douce.**
+2. **Les items 14 et 16** (brouillon de `VoteForm` / `AlternativeOptionForm` ;
+   `.cheer-btn` à 40 px). Inchangés. L'audit de cette itération confirme que
+   `.cheer-btn` reste hors périmètre : « Trinquer » n'est pas une étape du
+   remplissage, et rien ne démontre qu'elle bloque la saisie.
+3. **L'item 21** (A8 sur « Retoucher l'apéro »). Non atteint par la sonde, donc
+   **non mesuré** — et surtout pas déduit de A8 sur la création, ce qui serait
+   l'erreur que l'itération 4 s'était refusé à commettre pour A9.
+
+Une inspection a par ailleurs été menée puis **classée sans suite** :
+l'`aside` passant derrière la barre d'action fixe. Le balayage de cinq
+positions de défilement montre qu'il existe des positions — dont la fin de
+course — où il est entièrement dégagé et au premier plan. Le masquage n'est que
+le transitoire qu'une barre fixe impose à tout contenu qui défile derrière
+elle. Ce n'est pas un défaut (`AUDIT-5.md` §6.4).
