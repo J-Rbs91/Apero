@@ -465,3 +465,116 @@ au registre de la maison, à poser en remplacement de « Ta saisie précédente 
 `CreateEventPage.tsx`), et qui doit continuer à dire deux choses — que la
 saisie a été retrouvée, et qu'on peut repartir de zéro. Aucune itération de
 cette routine ne l'écrira d'elle-même.
+
+---
+
+## Itération 5 — 04/09/2026
+
+### D13. Ce qui est posé sous une ligne de réglage doit être annoncé avec elle
+
+**Le constat.** `Field` et `ChoiceGroup` relient leur `hint` et leur `error` au
+contrôle par `aria-describedby` ; `Field.tsx:3-8` en fait une promesse de
+composant (« impossible d'oublier le lien libellé/aide/erreur »). `SwitchRow`
+ne le faisait pas : `aside` et `hint` étaient deux `<p>` sans `id`, et le bouton
+ne portait aucun `aria-describedby` (`AUDIT-5.md` §3, mesuré sur les trois
+rendus et aux deux viewports).
+
+**La décision.** `SwitchRow` fabrique désormais ses identifiants et relie
+`aside` puis `hint` au bouton, dans l'ordre de lecture. Un seul mécanisme, celui
+que les deux autres composants appliquaient déjà — pas une seconde
+implémentation.
+
+**Pourquoi cette décision appartient à la couche « ton » autant qu'à
+l'accessibilité.** L'itération 4 a sorti A8 et A9 du nom accessible du bouton,
+et elle a eu raison : un nom accessible qui récitait
+« Les mioches sont-ils conviés ?Ce soir c'est sans les mômes » était bavard.
+Mais rien n'avait pris le relais. Le résultat net, sur le chemin assistif,
+était que **la tournure avait disparu du contrôle** — ni dans le nom, ni dans
+une description. Le contrôle de ton de la routine ne pouvait pas le voir : il
+cherche la chaîne dans le code, où elle était bien présente.
+
+C'est donc la lecture stricte du cliquet de la section 3 du prompt de routine,
+appliquée à un chemin que la routine n'avait pas encore regardé : **une
+itération qui fait disparaître le registre d'un parcours a échoué, même sans
+toucher au texte.** Ce correctif est le seul de l'itération qui touche au
+registre, et il l'augmente : il repose la tournure sur le chemin assistif sans
+écrire un caractère, sans la déplacer, sans changer son échelle. C'est du
+placement au sens exact de D1.
+
+Fondement UXER : `references/affordance-and-signifiers.md` §7 (« sémantique et
+apparence sont deux obligations distinctes ») — l'apparence était réglée par
+l'itération 4, la sémantique ne l'était pas.
+
+**Ce que la décision ne fait pas.** Elle ne met aucune tournure dans un nom
+accessible, ni dans un libellé, ni dans une erreur bloquante : les zones que D1
+interdit restent interdites. Une description accompagne un contrôle, elle ne le
+nomme pas.
+
+### D14. Le champ promu en chemin clavier rapide garde l'anneau commun
+
+`global.css` porte une règle unique donnant à quinze sélecteurs — dont
+`input:focus-visible` — un anneau `3px solid var(--pastis)`. `.locsearch__input`
+en était **la seule exception du parcours de saisie** : `outline: none`,
+remplacé par un raffermissement de bordure de 1 px.
+
+**Le plancher normatif était tenu**, et c'est dit sans détour : l'indicateur
+existait et mesurait 3.74 : 1 contre le dehors, au-dessus des 3 : 1 de WCAG
+1.4.11. Ce constat n'a donc jamais été classé bloquant, et il ne se plaide pas
+sur le goût.
+
+Ce qui le rend opposable est un fait, pas une préférence : **D4 a fait de ce
+champ le chemin clavier rapide du champ le plus coûteux du parcours** — Entrée
+valide la première suggestion, « le lieu redevient un champ taper puis
+valider ». Le contrôle qui porte le gain de vitesse au clavier de l'itération 2
+était celui dont le repère de focus était le plus faible du parcours, et le
+seul à déroger à la convention du produit.
+
+Décision : retirer le `outline: none`. La bordure raffermie reste — elle
+s'ajoute à l'anneau, elle ne le remplace plus. Mesuré après : trait
+`[244,197,66]`, **11.14 : 1** contre le dehors (contre 3.74 avant), et
+vérification visuelle faite — l'anneau ne déborde ni sur le bouton retour ni
+hors du panneau.
+
+**D4 n'est pas rouverte.** L'overlay est conservé, sa justification
+fonctionnelle intacte. Le changement porte sur le repère de focus de son input,
+pas sur son existence.
+
+### D15. Les restes de l'ancien parcours sortent du CSS
+
+19 classes sans aucune occurrence dans le dépôt hors `global.css` sont
+retirées (`AUDIT-5.md` §5), dont deux familles qui sont littéralement des restes
+du parcours d'avant :
+
+- `vote-chip__*` (12 classes) — la chip récapitulative d'avant la refonte
+  d'interface. Le balisage a été retiré par le commit `cb8e9c2` ; le CSS a
+  survécu. L'implémentation vivante est `.recap__*`, structurellement jumelle ;
+- `locfield__list` — la liste de suggestions **ancrée sous le champ**, c'est-à-dire
+  l'architecture que D4 a explicitement tranchée en faveur de l'overlay.
+
+Méthode, pour que le contrôle soit rejouable : recensement des 326 sélecteurs de
+classe confrontés à `src/**/*.ts(x)`, puis **vérification une par une** des 21
+correspondances manquantes qui sont en réalité des modificateurs construits par
+gabarit (`recap__answer--${vote}`, `field__req--${requirement}`…). Une purge qui
+se fierait au seul recensement littéral casserait ces sept familles.
+
+`button--secondary` partageait deux règles avec `button--ghost`, qui est bien
+utilisé : seul le sélecteur mort a été retiré, pas le bloc.
+
+Résultat : 326 → 307 classes, `global.css` 72 119 → 70 289 octets, CSS livré
+61 420 → 59 913 octets. Aucun rendu ne change — la vérification est que la
+suite complète passe à l'identique.
+
+### D16. Une localisation fausse dans `TON.md` se corrige, et ce n'est pas toucher au corpus
+
+`TON.md` attribuait A9, B11, B12 et B13 à l'écran « Proposer un créneau ». Or
+`CompanionsField` n'est monté qu'en `VoteForm.tsx:427` ; `AlternativeOptionForm`
+ne l'importe pas et ne l'a jamais importé (`git log -S`, aucun commit). Vérifié
+à l'exécution : la feuille de contre-proposition contient 0 `SwitchRow`.
+
+La correction porte sur la colonne « Écran », jamais sur un texte ni sur le
+compteur : les quatre tournures existent, au `fichier:ligne` déclaré, **N reste
+25**. `TON.md` est « gelé sur le contenu, vivant sur le placement » — une
+position mal décrite est exactement ce que la routine doit tenir à jour, et la
+laisser fausse ferait travailler la prochaine itération sur une carte inexacte.
+C'est la même nature d'erreur que celle trouvée dans la prémisse de D1 par
+l'itération 4 (`AUDIT-4.md` §3).

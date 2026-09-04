@@ -80,7 +80,7 @@ dans N :
 | A6 | « Quitte à imposer cette contradiction, il s'agirait au moins d'avoir l'élégance d'être précis : un jour, une heure et un lieu, histoire que cette proposition ait meilleure mine que la tienne. » | `src/components/AlternativeOptionForm.tsx:63` | Proposer un créneau | erreur (validation) | en place |
 | A7 | « Indique ton blaze, qu'on sache au moins l'intitulé du fauteur de troubles. » | `src/components/AlternativeOptionForm.tsx:70` | Proposer un créneau | erreur (validation) | en place |
 | A8 | « Marmaille admise » / « Ce soir c'est sans les mômes » | `src/pages/CreateEventPage.tsx:545` et `src/components/AperoSettingsForm.tsx:136` | Créer un apéro · Retoucher l'apéro | légende d'un `SwitchRow` (`aside`), sous la ligne | déplacé en it. 4 *(compté une fois : même paire de textes, deux points d'appel)* |
-| A9 | « En escadron » / « Peinard, en solo » | `src/components/CompanionsField.tsx:46` | Répondre (vote), Proposer un créneau | légende d'un `SwitchRow` (`aside`), sous la ligne | déplacé en it. 4 |
+| A9 | « En escadron » / « Peinard, en solo » | `src/components/CompanionsField.tsx:46` | Répondre (vote) *(corrigé en it. 5)* | légende d'un `SwitchRow` (`aside`), sous la ligne | déplacé en it. 4 |
 
 ### Palier B — hint / placeholder / succès / chemin secondaire
 
@@ -97,9 +97,9 @@ dans N :
 | B8 | « L'envoi a raté. Ta réponse reste sous le coude, réessaie. » | `src/components/VoteForm.tsx:255` | Répondre (vote) | erreur (échec réseau, pas une erreur de validation) | en place |
 | B9 | « Je viendrai si le monde ne s'est pas arrêté de tourner d'ici là. » | `src/components/VoteForm.tsx:425` | Répondre (vote) | placeholder d'un champ facultatif | en place — bon exemple |
 | B10 | « Pour que la tablée sache qui a bousculé le programme. » | `src/components/AlternativeOptionForm.tsx:169` | Proposer un créneau | hint d'un champ | en place |
-| B11 | « Les mioches comptent dans le lot. » | `src/components/CompanionsField.tsx:37` | Répondre (vote), Proposer un créneau | hint conditionnel (mioches admis) | en place |
-| B12 | « C'est sans les mioches ce coup-ci : on parle de renforts en âge de trinquer. » | `src/components/CompanionsField.tsx:38` | Répondre (vote), Proposer un créneau | hint conditionnel (mioches refusés) | en place |
-| B13 | « Le nombre de bouches en plus, qu'on prévoie assez de cacahuètes. » | `src/components/CompanionsField.tsx:79` | Répondre (vote), Proposer un créneau | hint du compteur de renforts | en place |
+| B11 | « Les mioches comptent dans le lot. » | `src/components/CompanionsField.tsx:37` | Répondre (vote) *(corrigé en it. 5)* | hint conditionnel (mioches admis) | en place |
+| B12 | « C'est sans les mioches ce coup-ci : on parle de renforts en âge de trinquer. » | `src/components/CompanionsField.tsx:38` | Répondre (vote) *(corrigé en it. 5)* | hint conditionnel (mioches refusés) | en place |
+| B13 | « Le nombre de bouches en plus, qu'on prévoie assez de cacahuètes. » | `src/components/CompanionsField.tsx:79` | Répondre (vote) *(corrigé en it. 5)* | hint du compteur de renforts | en place |
 | B14 | « Position refusée : pas de tournée du quartier sans ton feu vert. La recherche et la carte restent là. » | `src/components/LocationField.tsx:231` | Créer un apéro · Répondre · Proposer un créneau (partout où `LocationField` est monté) | note d'erreur (chemin secondaire, géolocalisation refusée) | en place |
 | B15 | « Aucun comptoir recensé à moins de 800 m. Soit le désert, soit une carte OpenStreetMap à compléter. La recherche reste là. » | `src/components/LocationField.tsx:454-455` | idem | note (résultat vide d'un chemin secondaire) | en place |
 
@@ -171,6 +171,42 @@ n'y est déplacée.** Le raisonnement, entrée par entrée sur les 25, est dans
 produit sont dans `DECISIONS.md` D12. Ce n'est pas un report : l'item 13 du
 backlog est clos.
 
+*Itération 5 :* **aucun déplacement d'écran, aucune retouche d'échelle, aucun
+texte touché.** A8 et A9 restent exactement où l'itération 4 les a posées, à la
+même taille, à la même graisse, à la même couleur — remesuré : 12.5 px /
+graisse 500 / `rgba(255, 247, 230, 0.72)`, `asideDansBouton: false` sur les
+trois rendus et aux deux viewports.
+
+Le levier employé cette fois est un **support** que la charte D1 n'avait pas
+regardé : le chemin assistif. `SwitchRow` relie désormais son `aside` au bouton
+par `aria-describedby` (`DECISIONS.md` D13). Mesuré avant / après :
+
+| | Avant | Après |
+|---|---|---|
+| `aria-describedby` du bouton | *(absent)* | `switch-…-aside` |
+| Description accessible | `null` | « Peinard, en solo » / « En escadron » / « Ce soir c'est sans les mômes » |
+| Nom accessible | « Tu débarques accompagné·e ?Non » | inchangé |
+| Taille, graisse, couleur, largeur, position | — | **inchangées** |
+
+Ce que cela corrige : depuis l'itération 4 — à raison — les deux tournures
+avaient quitté le nom accessible du bouton, et rien n'avait pris le relais.
+Elles n'étaient donc **ni dans le nom, ni dans une description** : pour qui
+navigue de contrôle en contrôle, le registre avait disparu de la ligne de
+réglage, alors que le compte visuel, lui, n'avait pas bougé. Le contrôle
+exécutable ne pouvait pas le voir : il cherche la chaîne dans le code, où elle
+était bien présente.
+
+**C'est donc un gain de présence du registre, pas un déplacement**, et il est
+obtenu sans écrire ni déplacer un seul caractère.
+
+**Correction de localisation (`DECISIONS.md` D16).** A9, B11, B12 et B13
+portaient la colonne « Répondre (vote), Proposer un créneau ». C'est faux
+depuis l'itération 1 : `CompanionsField` n'est monté qu'en `VoteForm.tsx:427`,
+`AlternativeOptionForm` ne l'importe pas et ne l'a jamais importé (`git log -S`,
+aucun commit ; et 0 `SwitchRow` mesuré dans la feuille de contre-proposition
+réellement ouverte). La colonne est corrigée en « Répondre (vote) ». **Aucun
+texte, aucun `fichier:ligne` et aucun compteur ne changent : N reste 25.**
+
 ## 5. Contrôle de non-régression
 
 À chaque fin d'itération, chaque texte exact ci-dessus doit se retrouver tel
@@ -223,3 +259,20 @@ doublé d'une relecture du `git diff` de `src/` sur les trois lignes concernées
 ajoutée ne diffèrent que par le nom de la prop (`state=` → `aside=`), l'expression
 ternaire et ses deux littéraux étant reportés caractère pour caractère. Les
 trois lignes `state=` neuves ne portent que `"Oui"` et `"Non"`.
+
+**Itération 5 :** `python3 docs/refonte-saisie/verifier-ton.py` lancé en Phase 0
+(avant toute modification) et en Phase 4 (après) — **N = 25 / N₀ = 25 dans les
+deux passes**, sortie 0, aucune tournure absente.
+
+Doublé, comme en itération 4, d'une relecture du `git diff` de `src/` : le seul
+fichier du parcours touché par cette itération est `src/components/ui/SwitchRow.tsx`,
+qui ne contient aucune chaîne du corpus — il n'en transporte que les props. Les
+trois points d'appel (`CreateEventPage.tsx:545`, `AperoSettingsForm.tsx:136`,
+`CompanionsField.tsx:46`) ne sont **pas** modifiés cette itération : `git diff`
+ne les mentionne pas. Le risque qu'une chaîne bouge était donc structurellement
+nul, et il est vérifié plutôt que supposé.
+
+Deux mesures d'exécution complètent le contrôle, parce qu'un `grep` ne dit pas
+si une tournure est *rendue* : les trois `aside` ont été relus à l'écran après
+modification (texte exact, typographie, contraste), et la description accessible
+de chaque bouton restitue désormais la tournure mot pour mot.

@@ -317,11 +317,6 @@ a {
   background: var(--pastis);
 }
 
-.accent--wide {
-  width: 100%;
-  background: rgba(255, 247, 230, 0.14);
-}
-
 /* ===== Brand pill + animated wine glass ===== */
 .brandpill {
   align-self: flex-start;
@@ -564,15 +559,13 @@ a {
 }
 
 /* Action secondaire : contour net, jamais rempli. */
-.button--ghost,
-.button--secondary {
+.button--ghost {
   color: var(--cream);
   background: rgba(255, 247, 230, 0.04);
   border: 1.5px solid var(--line-strong);
 }
 
-.button--ghost:hover,
-.button--secondary:hover {
+.button--ghost:hover {
   background: var(--fill);
 }
 
@@ -591,10 +584,6 @@ a {
 .button--danger {
   color: var(--cream);
   background: var(--danger-strong);
-}
-
-.button--large {
-  min-height: 56px;
 }
 
 .button--block {
@@ -1266,12 +1255,6 @@ input[type="range"] {
 }
 
 /* ===== Share ===== */
-.share-box {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 .share {
   display: flex;
   align-items: center;
@@ -1586,14 +1569,6 @@ input[type="range"] {
   }
 }
 
-/* ===== Home links ===== */
-.home-links {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-
 /* ===== Palmarès ===== */
 .palmares-head {
   display: flex;
@@ -1822,26 +1797,6 @@ textarea:focus-visible {
   color: rgba(255, 247, 230, 0.62);
 }
 
-.locfield__list {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  z-index: 30;
-  margin: 0;
-  padding: 6px;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  background: rgba(10, 30, 24, 0.96);
-  border: 1px solid rgba(255, 247, 230, 0.22);
-  border-radius: 14px;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
-  max-height: 240px;
-  overflow-y: auto;
-}
-
 .locfield__option {
   display: flex;
   flex-direction: column;
@@ -1949,8 +1904,11 @@ textarea:focus-visible {
   font-weight: 600;
 }
 
+/* Pas de « outline: none » ici : c'est le champ que la sélection au clavier a
+   promu en chemin rapide (Entrée valide la première suggestion), donc celui où
+   savoir qu'on y est compte le plus. Il garde l'anneau commun de 3 px ; le
+   raffermissement de la bordure s'y ajoute, il ne le remplace pas. */
 .locsearch__input:focus {
-  outline: none;
   border-color: rgba(255, 247, 230, 0.5);
 }
 
@@ -2474,13 +2432,6 @@ textarea:focus-visible {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
-/* Le badge peut aussi s'afficher inline (hors cloche). */
-.notif-badge--inline {
-  position: static;
-  border-width: 0;
-  margin-left: 6px;
-}
-
 /* Centre de notifications. */
 .notif-list {
   display: flex;
@@ -2709,81 +2660,6 @@ textarea:focus-visible {
   letter-spacing: 0.22em;
   text-transform: uppercase;
   transform: rotate(-8deg);
-}
-
-/* ===== Chip récapitulative après vote (le formulaire se replie) ===== */
-.vote-chip {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-}
-
-.vote-chip__check {
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  background: var(--green-600);
-  color: var(--cream);
-}
-
-.vote-chip__body {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.vote-chip__name {
-  font-size: 14.5px;
-  font-weight: 800;
-  color: var(--cream);
-}
-
-.vote-chip__vote {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--muted);
-}
-
-.vote-chip__votes {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 10px 12px;
-  border: 1px solid rgba(255, 247, 230, 0.14);
-  border-radius: 13px;
-  background: rgba(255, 247, 230, 0.05);
-}
-
-.vote-chip__row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 13px;
-}
-
-.vote-chip__slot {
-  color: rgba(255, 247, 230, 0.82);
-  font-weight: 600;
-}
-
-.vote-chip__answer {
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.vote-chip__answer--yes {
-  color: var(--pastis);
-}
-
-.vote-chip__answer--maybe {
-  color: rgba(255, 247, 230, 0.75);
-}
-
-.vote-chip__answer--no {
-  color: #ff9d94;
 }
 
 /* Curseur de pronostic pas encore touché : la jauge s'efface, l'invitation
