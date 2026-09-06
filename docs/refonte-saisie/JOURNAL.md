@@ -910,3 +910,55 @@ propriétaire du produit :
 
 Le cliquet ferme sur **N = 25 / N₀ = 25**, aucune tournure réécrite,
 raccourcie, atténuée ni supprimée en cinq itérations.
+
+---
+
+## Contrôle post-clôture — 06/09/2026
+
+**Ce que c'est, et ce que ce n'est pas.** La routine `APÉRO - UX UI` est
+programmée quotidiennement ; elle s'est déclenchée une sixième fois alors que
+les cinq itérations prévues sont faites et consignées. Cette entrée **n'est pas
+une itération 6** : la section 2 du prompt de routine borne la série à cinq
+passes, et la section 3 interdit de rouvrir la charte de placement du ton une
+fois écrite. Ouvrir une itération de plus reviendrait à raboter une sixième
+fois un travail déclaré clos — exactement le mode d'échec que le cliquet existe
+pour empêcher. Aucune modification de `src/` n'a donc été faite.
+
+Ce qui a été fait, en revanche, c'est le **contrôle du cliquet qu'impose la
+phase 0 à chaque déclenchement**, plus une revérification complète de l'état
+livré.
+
+**État du dépôt :** arbre propre. `HEAD`, `origin/main` et
+`origin/claude/admiring-dirac-ociw0d` sont sur le même commit `7ab7b7f` — le
+travail des cinq itérations est fusionné, rien n'est en attente.
+
+**Contrôle du corpus :** `python3 docs/refonte-saisie/verifier-ton.py` →
+**N = 25 / N₀ = 25**, sortie 0. Les 27 entrées de chaînes sont présentes à
+l'identique, aux `fichier:ligne` consignés. Aucune tournure réécrite,
+raccourcie, atténuée, déplacée ni supprimée depuis la clôture.
+
+**Revérification de l'état livré** (dépendances réinstallées, absentes au
+démarrage du conteneur) :
+
+| Commande | Résultat | Compte de l'itération 5 |
+|---|---|---|
+| `npm run build` | succès, `tsc -b && vite build` sans erreur | idem |
+| `npm test` | **236 tests, 29 fichiers, tous passés** | 236 / 29 |
+| `npm run test:functional` | **71/71 vérifications réussies** | 71/71 |
+| `npm run test:nav` | **23/23 contrôles passés** | 23/23 |
+
+Les quatre comptes sont identiques à ceux consignés le 04/09. L'état livré ne
+s'est pas dégradé.
+
+**Ce qui reste ouvert appartient au propriétaire du produit**, et cette entrée
+ne le tranche pas plus que ne l'a fait l'itération 5 : item 22 (traversée
+clavier du champ lieu, `LocationField.tsx:333` — demande une preuve
+d'exécution sur rendu mobile réel, clavier virtuel ouvert), la proposition
+d'extension du corpus adressée en `DECISIONS.md` D12 (elle ferait monter N₀,
+donc elle ne s'écrit pas sans accord), et les items 14, 16, 21, 23.
+
+**Point de reprise :** aucun, pour cette routine. La série est close. Un
+déclenchement ultérieur qui lirait ce journal doit s'arrêter au même endroit :
+refaire le contrôle du cliquet, ne rien modifier, et signaler que la routine
+tourne encore à vide. Reprendre le travail demande une nouvelle instruction du
+propriétaire du produit — soit la levée de l'item 22, soit un mandat neuf.
