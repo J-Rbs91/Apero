@@ -42,7 +42,7 @@ export function ComptoirNameOnboarding({
   }
 
   return (
-    <main className="onboarding-screen registre">
+    <main className="onboarding-screen">
       <div className="screen-overlay screen-overlay--scene" aria-hidden />
       <div className="onboarding-screen__inner">
         <div className="brandpill">

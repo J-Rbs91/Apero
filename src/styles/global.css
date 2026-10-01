@@ -52,15 +52,7 @@
   --ink: #241a12;
   --muted: rgba(255, 247, 230, 0.6);
 
-  --overlay-scene: linear-gradient(
-    180deg,
-    rgba(7, 28, 20, 0) 0%,
-    rgba(7, 28, 20, 0.12) 50%,
-    rgba(7, 28, 20, 0.62) 100%
-  );
   --overlay-deep: linear-gradient(180deg, rgba(7, 28, 20, 0.18), rgba(7, 28, 20, 0.52));
-
-  --sheet-shadow: 0 24px 56px rgba(0, 0, 0, 0.4);
 
   /* ---- Socle de la refonte -------------------------------------------
      Une seule couleur d'accent (le pastis) pilote tout ce sur quoi on peut
@@ -91,11 +83,9 @@
   --t-body: 15px;
   --t-lede: 15.5px;
 
-  /* ---- Refonte visuelle : le registre de zinc -------------------------
-     Fondations ajoutées, aucun jeton existant remplacé. Un écran migre en
-     posant .registre sur sa section (bloc « Rôles de surface » en fin de
-     feuille). Le pourquoi : docs/refonte-visuelle/IDENTITE.md. Les valeurs
-     ne vivent qu'ici. */
+  /* ---- Le registre de zinc --------------------------------------------
+     Jetons de surface de la refonte visuelle. Le pourquoi :
+     docs/refonte-visuelle/IDENTITE.md. Les valeurs ne vivent qu'ici. */
 
   /* Espacement : sept pas, rien entre deux. */
   --space-1: 4px;
@@ -239,27 +229,13 @@ a {
   pointer-events: none;
 }
 
-.screen-overlay--scene {
-  background: var(--overlay-scene);
-}
+
 
 .screen-overlay--deep {
   background: var(--overlay-deep);
 }
 
-/* Voile du plan (toute page au registre) : uniforme sous la colonne de
-   lecture, où le texte peut être posé à même le plan ; allégé de part et
-   d'autre sur grand écran, où il ne porte aucun texte. Sur téléphone, la
-   colonne couvre tout l'écran. */
-.registre > .screen-overlay {
-  background: linear-gradient(
-    90deg,
-    var(--bg-page-edge) calc(50% - 288px),
-    var(--bg-page) calc(50% - 240px),
-    var(--bg-page) calc(50% + 240px),
-    var(--bg-page-edge) calc(50% + 288px)
-  );
-}
+
 
 /* ===== Screen layout ===== */
 /* Hauteur fixée au viewport + défilement interne : le décor et le
@@ -346,7 +322,7 @@ a {
 
 .meta {
   margin: 0;
-  color: rgba(255, 247, 230, 0.74);
+  color: var(--text-soft);
   font-size: 13px;
   font-weight: 600;
   line-height: 1.4;
@@ -358,7 +334,7 @@ a {
 
 .hint {
   margin: 0;
-  color: rgba(255, 247, 230, 0.68);
+  color: var(--text-soft);
   font-size: 13px;
   font-weight: 500;
   line-height: 1.4;
@@ -554,24 +530,19 @@ a {
 
 /* ===== Frosted glass sheet — signature container ===== */
 .sheet {
-  background: rgba(16, 38, 30, 0.52);
-  backdrop-filter: blur(20px) saturate(1.15);
-  -webkit-backdrop-filter: blur(20px) saturate(1.15);
-  border: 1px solid rgba(255, 247, 230, 0.2);
-  border-radius: var(--r-lg);
-  padding: 18px 16px;
+  padding: 0;
   color: var(--cream);
-  box-shadow: var(--sheet-shadow);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--space-4);
+  margin-block: var(--space-3);
 }
 
 /* Carte de tête d'une page : c'est elle qui porte le nom de l'apéro et son
    état. Une seule par écran, sinon plus rien ne domine. */
 .sheet--hero {
-  gap: 10px;
-  border-color: rgba(244, 197, 66, 0.28);
+  padding-bottom: var(--space-5);
+  border-bottom: 3px double var(--filet-fort-color);
 }
 
 /* ===== Boutons =====
@@ -636,8 +607,8 @@ a {
 /* Action de service (copier, ouvrir) : discrète, sans contour appuyé. */
 .button--quiet {
   color: var(--cream);
-  background: var(--fill);
-  border: 1px solid var(--line-soft);
+  background: var(--bg-field);
+  border: 1px solid var(--filet-fort-color);
   font-weight: 700;
 }
 
@@ -673,7 +644,7 @@ a {
   padding: 8px 12px;
   border: 0;
   background: none;
-  color: rgba(255, 247, 230, 0.62);
+  color: var(--text-soft);
   font-size: 12.5px;
   font-weight: 600;
   text-decoration: underline;
@@ -760,20 +731,21 @@ a {
   flex: 0 0 auto;
   padding: 2px 8px;
   border-radius: var(--r-pill);
-  font-size: 10.5px;
+  font-size: var(--t-micro);
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  background: none;
+  border: 1px solid currentColor;
 }
 
 .field__req--required {
-  background: rgba(244, 197, 66, 0.18);
   color: var(--pastis-soft);
+  border-color: var(--pastis);
 }
 
 .field__req--optional {
-  background: var(--fill);
-  color: rgba(255, 247, 230, 0.6);
+  color: var(--text-soft);
 }
 
 .field__hint {
@@ -781,7 +753,7 @@ a {
   font-size: 13px;
   font-weight: 500;
   line-height: 1.38;
-  color: rgba(255, 247, 230, 0.66);
+  color: var(--text-soft);
 }
 
 .field__error {
@@ -792,7 +764,7 @@ a {
   font-size: 13px;
   font-weight: 700;
   line-height: 1.35;
-  color: var(--danger);
+  color: #ffd9d4;
 }
 
 .field__error::before {
@@ -815,11 +787,11 @@ textarea,
 select {
   width: 100%;
   min-height: 50px;
-  border: 1.5px solid var(--line);
-  border-radius: var(--r-sm);
+  border: 1.5px solid var(--filet-fort-color);
+  border-radius: var(--radius-field);
   padding: 12px 14px;
   color: var(--cream);
-  background: rgba(255, 247, 230, 0.09);
+  background: var(--bg-field);
   font-size: 16px;
   transition: border-color 140ms ease, background 140ms ease;
 }
@@ -886,9 +858,9 @@ input[type="range"] {
 
 .wall-item {
   padding: 10px 12px;
-  border: 1px solid rgba(255, 247, 230, 0.14);
-  border-radius: 13px;
-  background: rgba(255, 247, 230, 0.05);
+  border: var(--filet);
+  border-radius: var(--radius-object);
+  background: var(--bg-field);
 }
 
 .wall-item__head {
@@ -905,8 +877,8 @@ input[type="range"] {
 }
 
 .wall-item__when {
-  font-size: 11px;
-  color: var(--muted);
+  font-size: var(--t-micro);
+  color: var(--text-soft);
 }
 
 .wall-item__body {
@@ -933,11 +905,11 @@ input[type="range"] {
 /* Trinquer est un clin d'œil, pas le geste attendu : il reste en retrait
    pour ne pas concurrencer le bouton qui enregistre la réponse. */
 .cheer-btn {
-  border: 1px solid var(--line-soft);
+  border: 1px solid rgba(255, 247, 230, 0.45);
   border-radius: var(--r-pill);
   padding: 6px 12px;
   background: transparent;
-  color: rgba(255, 247, 230, 0.68);
+  color: var(--text-soft);
   font-size: 13px;
   font-weight: 700;
 }
@@ -959,35 +931,36 @@ input[type="range"] {
 
 .cheer-count {
   font-size: 12.5px;
-  color: var(--muted);
+  color: var(--text-soft);
 }
 
 /* ===== Slots (créneaux) ===== */
 .slot-stack {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 0;
 }
 
 .slot {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 14px;
-  border: 1.5px solid var(--line-soft);
-  border-radius: var(--r-md);
-  background: var(--fill-soft);
+  gap: var(--space-3);
+  padding: var(--space-1) 0 var(--space-1) var(--space-4);
+  border: 0;
+  border-radius: 0;
+  background: none;
+  position: relative;
+  border-left: 2px solid var(--filet-fort-color);
 }
 
 /* Créneau en cours de saisie dans le formulaire de création : il porte son
    propre numéro et son propre état, on ne les confond pas entre eux. */
 .slot--editable {
-  gap: 14px;
-  border-style: solid;
 }
 
 .slot--incomplete {
-  border-color: rgba(244, 197, 66, 0.42);
+  border-left-style: dashed;
+  border-left-color: rgba(244, 197, 66, 0.8);
 }
 
 .slot__top {
@@ -1009,21 +982,21 @@ input[type="range"] {
 .slot__state {
   flex: 0 0 auto;
   padding: 3px 9px;
-  border-radius: var(--r-pill);
-  background: var(--fill);
-  font-size: 11px;
+  background: none;
+  font-size: var(--t-micro);
   font-weight: 800;
   white-space: nowrap;
   color: rgba(255, 247, 230, 0.66);
+  border: 1px solid currentColor;
+  border-radius: var(--radius-pill);
 }
 
 .slot__state--todo {
-  background: rgba(244, 197, 66, 0.2);
   color: var(--pastis-soft);
+  border-color: var(--pastis);
 }
 
 .slot__state--done {
-  background: rgba(159, 220, 174, 0.18);
   color: var(--ok);
 }
 
@@ -1039,7 +1012,7 @@ input[type="range"] {
   margin-top: 3px;
   font-size: 13.5px;
   font-weight: 600;
-  color: rgba(255, 247, 230, 0.68);
+  color: var(--text-soft);
 }
 
 /* Retirer un créneau : c'était une croix nue de 15px, on ne savait ni que
@@ -1058,6 +1031,7 @@ input[type="range"] {
   font-size: 12.5px;
   font-weight: 700;
   line-height: 1;
+  border-color: var(--filet-fort-color);
 }
 
 .slot__x:hover {
@@ -1124,17 +1098,14 @@ input[type="range"] {
   gap: 14px;
   width: 100%;
   min-height: 58px;
-  padding: 10px 14px;
-  border: 1.5px solid var(--line-soft);
-  border-radius: var(--r-sm);
-  background: var(--fill-soft);
+  padding: 10px 0;
+  border: 0;
   text-align: left;
   transition: border-color 140ms ease, background 140ms ease;
+  background: none;
 }
 
 .switchrow__button--on {
-  border-color: rgba(244, 197, 66, 0.5);
-  background: rgba(244, 197, 66, 0.1);
 }
 
 .switchrow__button:active {
@@ -1156,7 +1127,7 @@ input[type="range"] {
 .switchrow__state {
   font-size: 13px;
   font-weight: 600;
-  color: rgba(255, 247, 230, 0.62);
+  color: var(--text-soft);
 }
 
 .switchrow__button--on .switchrow__state {
@@ -1173,7 +1144,7 @@ input[type="range"] {
   font-weight: 500;
   line-height: 1.38;
   letter-spacing: 0.01em;
-  color: rgba(255, 247, 230, 0.72);
+  color: var(--text-soft);
 }
 
 .switch {
@@ -1185,7 +1156,7 @@ input[type="range"] {
   min-height: 0;
   padding: 0;
   border-radius: var(--r-pill);
-  border: 1px solid var(--line);
+  border: 1px solid var(--filet-fort-color);
   background: var(--fill);
   transition: background 0.16s ease, border-color 0.16s ease;
 }
@@ -1267,13 +1238,11 @@ input[type="range"] {
 .verdict {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 12px 14px;
+  gap: var(--space-2);
+  padding: var(--space-4);
   border: 1px solid rgba(244, 197, 66, 0.5);
-  border-radius: 16px;
-  background: rgba(244, 197, 66, 0.16);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  border-radius: var(--radius-object);
+  background: rgba(244, 197, 66, 0.1);
   color: var(--cream);
 }
 
@@ -1296,10 +1265,9 @@ input[type="range"] {
   display: flex;
   flex-direction: column;
   gap: 1px;
-  padding: 6px 4px;
-  border-radius: 9px;
-  background: rgba(255, 247, 230, 0.08);
+  padding: 6px 0;
   text-align: center;
+  min-width: 0;
 }
 
 .cnt b {
@@ -1311,11 +1279,11 @@ input[type="range"] {
 }
 
 .cnt span {
-  font-size: 9.5px;
+  font-size: var(--t-micro);
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
   text-transform: uppercase;
-  color: rgba(255, 247, 230, 0.6);
+  color: var(--cream);
 }
 
 /* ===== Share ===== */
@@ -1324,9 +1292,9 @@ input[type="range"] {
   align-items: center;
   gap: 9px;
   padding: 8px 8px 8px 13px;
-  border: 1px solid rgba(255, 247, 230, 0.22);
-  border-radius: 14px;
-  background: rgba(255, 247, 230, 0.08);
+  border: 1px solid var(--filet-fort-color);
+  border-radius: var(--radius-object);
+  background: var(--bg-field);
 }
 
 .share code {
@@ -1336,7 +1304,7 @@ input[type="range"] {
   white-space: nowrap;
   font-family: "DM Mono", ui-monospace, monospace;
   font-size: 12px;
-  color: rgba(255, 247, 230, 0.72);
+  color: var(--text-soft);
 }
 
 /* Copier est un service, pas le geste du moment : fond neutre, pour laisser
@@ -1345,7 +1313,7 @@ input[type="range"] {
   flex: 0 0 auto;
   min-height: 34px;
   padding: 0 14px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--filet-fort-color);
   border-radius: var(--r-xs);
   background: var(--fill);
   color: var(--cream);
@@ -1379,7 +1347,7 @@ input[type="range"] {
   border-radius: 50%;
   background: rgba(255, 247, 230, 0.16);
   color: var(--cream);
-  font-size: 11px;
+  font-size: var(--t-micro);
   font-weight: 800;
   font-style: normal;
 }
@@ -1398,9 +1366,9 @@ input[type="range"] {
 }
 
 .person__sub {
-  font-size: 12px;
+  font-size: var(--t-micro);
   font-weight: 600;
-  color: rgba(255, 247, 230, 0.6);
+  color: var(--text-soft);
 }
 
 .person__sub--quote {
@@ -1412,7 +1380,7 @@ input[type="range"] {
 .vote-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-6);
 }
 
 /* ===== Messages ===== */
@@ -1437,10 +1405,9 @@ input[type="range"] {
   flex-direction: column;
   align-items: flex-start;
   gap: 2px;
-  padding: 10px 12px;
-  border: 1px solid var(--line-soft);
-  border-radius: var(--r-sm);
-  background: var(--fill-soft);
+  padding: var(--space-1) 0 var(--space-1) var(--space-4);
+  border: 0;
+  border-left: 2px solid var(--filet-fort-color);
 }
 
 /* Le rose-rouge est réservé aux problèmes : un succès se dit en vert,
@@ -1500,6 +1467,11 @@ input[type="range"] {
 
 .modal-sheet {
   width: min(100%, 420px);
+  margin: 0;
+  padding: 18px var(--space-4);
+  border-radius: var(--radius-object);
+  background: var(--bg-panel);
+  box-shadow: var(--elev-2);
 }
 
 /* ===== Loading ===== */
@@ -1666,7 +1638,7 @@ input[type="range"] {
   border-radius: 999px;
   background: var(--pastis);
   color: var(--ink);
-  font-size: 9.5px;
+  font-size: var(--t-micro);
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1684,10 +1656,8 @@ input[type="range"] {
   display: flex;
   align-items: flex-start;
   gap: 11px;
-  padding: 10px 11px;
-  border: 1px solid rgba(255, 247, 230, 0.16);
-  border-radius: 14px;
-  background: rgba(255, 247, 230, 0.05);
+  padding: var(--space-2) 0;
+  border: 0;
 }
 
 .badge-medal__disc {
@@ -1698,6 +1668,8 @@ input[type="range"] {
   height: 38px;
   border-radius: 50%;
   color: var(--cream);
+  outline: 1.5px solid currentColor;
+  outline-offset: 2px;
 }
 
 .badge-medal__body {
@@ -1714,9 +1686,9 @@ input[type="range"] {
 
 .badge-medal__desc {
   margin: 0;
-  font-size: 11.5px;
+  font-size: var(--t-micro);
   line-height: 1.35;
-  color: rgba(255, 247, 230, 0.62);
+  color: var(--text-soft);
 }
 
 .badge-medal--legendary .badge-medal__disc {
@@ -1747,7 +1719,7 @@ input[type="range"] {
   border-radius: 999px;
   background: var(--pastis);
   color: var(--ink);
-  font-size: 9.5px;
+  font-size: var(--t-micro);
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1764,7 +1736,7 @@ input[type="range"] {
   border-radius: 999px;
   border: 1px solid rgba(255, 247, 230, 0.22);
   background: rgba(255, 247, 230, 0.08);
-  font-size: 11.5px;
+  font-size: var(--t-micro);
   font-weight: 700;
   color: rgba(255, 247, 230, 0.88);
 }
@@ -1788,7 +1760,7 @@ input[type="range"] {
   border-radius: 999px;
   background: rgba(244, 197, 66, 0.18);
   color: var(--pastis-soft);
-  font-size: 10.5px;
+  font-size: var(--t-micro);
   font-weight: 800;
   white-space: nowrap;
 }
@@ -1856,9 +1828,9 @@ textarea:focus-visible {
 
 .locfield__picked {
   margin: 0;
-  font-size: 11.5px;
+  font-size: var(--t-micro);
   font-weight: 600;
-  color: rgba(255, 247, 230, 0.62);
+  color: var(--text-soft);
 }
 
 .locfield__option {
@@ -2114,7 +2086,7 @@ textarea:focus-visible {
   border-radius: 999px;
   background: transparent;
   color: rgba(255, 247, 230, 0.8);
-  font-size: 11px;
+  font-size: var(--t-micro);
   font-weight: 800;
   letter-spacing: 0.02em;
 }
@@ -2168,7 +2140,7 @@ textarea:focus-visible {
 }
 
 .traq__title {
-  font-size: 10px;
+  font-size: var(--t-micro);
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -2177,7 +2149,7 @@ textarea:focus-visible {
 }
 
 .traq__value {
-  font-size: 11px;
+  font-size: var(--t-micro);
   font-weight: 600;
   line-height: 1.2;
   color: var(--traq-color);
@@ -2286,7 +2258,7 @@ textarea:focus-visible {
   border: 0;
   background: transparent;
   padding: 0;
-  color: rgba(255, 247, 230, 0.72);
+  color: var(--text-soft);
   font-size: 12.5px;
   font-weight: 600;
   text-align: left;
@@ -2353,6 +2325,7 @@ textarea:focus-visible {
 .locfield__nearby-toggle {
   align-self: flex-start;
   padding-left: 0;
+  font-size: var(--t-micro);
 }
 
 .locfield__nearby-toggle:disabled {
@@ -2372,9 +2345,9 @@ textarea:focus-visible {
    condition d'usage de la donnée. */
 .osm-credit {
   margin: 6px 2px 0;
-  font-size: 10.5px;
+  font-size: var(--t-micro);
   font-weight: 600;
-  color: rgba(255, 247, 230, 0.45);
+  color: var(--text-soft);
 }
 
 .osm-credit a {
@@ -2490,7 +2463,7 @@ textarea:focus-visible {
   background: var(--bar-red);
   border: 2px solid var(--green-900);
   color: #fff;
-  font-size: 11px;
+  font-size: var(--t-micro);
   font-weight: 800;
   line-height: 1;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
@@ -2508,13 +2481,16 @@ textarea:focus-visible {
   width: 100%;
   text-align: left;
   cursor: pointer;
-  border: 1px solid rgba(255, 247, 230, 0.22);
+  border: var(--filet-fort);
   color: var(--cream);
+  margin-block: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-object);
+  background: var(--bg-field);
 }
 
 .notif-item--unread {
-  border-color: rgba(244, 197, 66, 0.55);
-  background: rgba(20, 84, 59, 0.35);
+  border-color: var(--pastis);
 }
 
 .notif-item__head {
@@ -2687,7 +2663,7 @@ textarea:focus-visible {
 }
 
 .cheer-btn {
-  min-height: 40px;
+  min-height: 44px;
 }
 
 .share .cp {
@@ -2708,22 +2684,24 @@ textarea:focus-visible {
 /* ===== Verdict d'un apéro passé : grisé, tamponné « Servi » ===== */
 .verdict--past {
   position: relative;
-  opacity: 0.75;
+  border-style: dashed;
+  background: none;
 }
 
 .verdict__stamp {
   position: absolute;
-  top: 14px;
-  right: 14px;
+  top: calc(var(--space-3) * -1);
+  right: var(--space-3);
   padding: 4px 12px;
-  border: 2px solid var(--bar-red);
+  border: 2px solid var(--danger);
   border-radius: 8px;
-  color: var(--bar-red);
+  color: #ffd9d4;
   font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   transform: rotate(-8deg);
+  background: var(--bg-panel);
 }
 
 /* Curseur de pronostic pas encore touché : la jauge s'efface, l'invitation
@@ -2737,14 +2715,12 @@ textarea:focus-visible {
 }
 
 .traq__value--empty {
-  color: var(--muted);
+  color: var(--text-soft);
   font-style: italic;
 }
 
 /* Tournées passées de l'ardoise : présentes mais en retrait. */
-.sheet--past {
-  opacity: 0.85;
-}
+
 
 /* ===== Navigation d'en-tête (cloche + menu, sur toutes les pages) ===== */
 .header-nav {
@@ -2812,10 +2788,11 @@ textarea:focus-visible {
   padding: 10px 12px;
   border: 1.5px solid var(--line);
   border-radius: var(--r-sm);
-  background: rgba(255, 247, 230, 0.05);
+  background: var(--bg-field);
   color: var(--cream);
   cursor: pointer;
   transition: border-color 140ms ease, background 140ms ease, transform 120ms ease;
+  border-color: var(--filet-fort-color);
 }
 
 .choice:hover {
@@ -2925,28 +2902,24 @@ textarea:focus-visible {
 }
 
 .choicegroup--invalid .choice {
-  border-color: rgba(255, 143, 133, 0.55);
+  border-color: var(--danger);
 }
 
 /* ---- Bloc de formulaire numéroté ---- */
 .formsec {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 16px 14px;
-  border: 1.5px solid var(--line-soft);
-  border-radius: var(--r-md);
-  background: rgba(9, 30, 22, 0.32);
+  gap: var(--space-4);
 }
 
-.formsec--done {
-  border-color: rgba(159, 220, 174, 0.3);
-}
+
 
 .formsec__head {
   display: flex;
   align-items: flex-start;
-  gap: 11px;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: var(--filet);
 }
 
 .formsec__step {
@@ -2973,14 +2946,18 @@ textarea:focus-visible {
   flex-direction: column;
   gap: 3px;
   min-width: 0;
+  align-self: baseline;
 }
 
 .formsec__title {
   margin: 0;
-  font-size: 17px;
+  font-size: 19px;
   font-weight: 800;
   line-height: 1.15;
   color: var(--cream);
+  font-variant-caps: all-small-caps;
+  font-synthesis-small-caps: auto;
+  letter-spacing: 0.07em;
 }
 
 .formsec__lead {
@@ -2988,18 +2965,17 @@ textarea:focus-visible {
   font-size: 13.5px;
   font-weight: 500;
   line-height: 1.38;
-  color: rgba(255, 247, 230, 0.7);
+  color: var(--text-soft);
 }
 
 .formsec__status {
   flex: 0 0 auto;
-  padding: 3px 9px;
-  border-radius: var(--r-pill);
-  background: var(--fill);
-  font-size: 11px;
+  font-size: var(--t-micro);
   font-weight: 800;
-  color: rgba(255, 247, 230, 0.72);
+  color: var(--cream);
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  align-self: baseline;
 }
 
 .formsec__body {
@@ -3010,36 +2986,22 @@ textarea:focus-visible {
 
 /* ---- Volet repliable ---- */
 .disclose {
-  /* `overflow: hidden` annule la taille minimale automatique d'un enfant
-     flex : sans ce flex-none, le volet replié s'écrase à zéro. */
   flex: 0 0 auto;
-  border: 1px solid rgba(255, 247, 230, 0.18);
-  border-radius: var(--r-lg);
-  background: rgba(16, 38, 30, 0.5);
-  backdrop-filter: blur(20px) saturate(1.15);
-  -webkit-backdrop-filter: blur(20px) saturate(1.15);
-  box-shadow: var(--sheet-shadow);
+  border: 0;
   overflow: hidden;
+  border-block: var(--filet);
 }
 
 /* Rangé DANS une carte (formulaire de réponse) : plus besoin du verre
    dépoli, le volet se contente d'un contour. */
-.sheet .disclose,
-.formsheet__body .disclose {
-  border: 1.5px solid var(--line-soft);
-  border-radius: var(--r-md);
-  background: rgba(9, 30, 22, 0.3);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: none;
-}
+
 
 .disclose__head {
   display: flex;
   align-items: center;
   gap: 10px;
   min-height: 56px;
-  padding: 10px 14px;
+  padding: 10px 0;
   cursor: pointer;
   list-style: none;
   color: var(--cream);
@@ -3069,7 +3031,7 @@ textarea:focus-visible {
 .disclose__summary {
   font-size: 12.5px;
   font-weight: 500;
-  color: rgba(255, 247, 230, 0.6);
+  color: var(--text-soft);
 }
 
 .disclose__badge {
@@ -3077,16 +3039,17 @@ textarea:focus-visible {
   min-width: 24px;
   padding: 2px 8px;
   border-radius: var(--r-pill);
-  background: var(--fill);
+  background: none;
   font-size: 12px;
   font-weight: 800;
   text-align: center;
   color: rgba(255, 247, 230, 0.8);
+  border: 1px solid currentColor;
 }
 
 .disclose__chevron {
   flex: 0 0 auto;
-  color: rgba(255, 247, 230, 0.6);
+  color: var(--text-soft);
   transition: transform 160ms ease;
 }
 
@@ -3097,8 +3060,8 @@ textarea:focus-visible {
 .disclose__body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 2px 14px 16px;
+  gap: var(--space-4);
+  padding: 0 0 var(--space-4);
 }
 
 /* ---- Barre d'action collante ----
@@ -3106,19 +3069,16 @@ textarea:focus-visible {
    vivait au fond d'un long défilement. Il est maintenant toujours là. */
 .actionbar {
   position: sticky;
-  bottom: 8px;
+  bottom: 0;
   z-index: 15;
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-top: 4px;
-  padding: 10px;
-  border: 1px solid var(--line-soft);
-  border-radius: var(--r-md);
-  background: rgba(9, 30, 22, 0.88);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.36);
+  padding: 10px 10px calc(var(--space-3) + env(safe-area-inset-bottom));
+  border-radius: var(--radius-object) var(--radius-object) 0 0;
+  background: var(--bg-panel);
+  box-shadow: var(--elev-2);
 }
 
 .actionbar__status {
@@ -3177,10 +3137,8 @@ textarea:focus-visible {
   flex-direction: column;
   width: min(100%, 480px);
   max-height: 94dvh;
-  border-radius: var(--r-lg) var(--r-lg) 0 0;
-  border: 1px solid rgba(255, 247, 230, 0.22);
-  border-bottom: 0;
-  background: rgba(12, 34, 25, 0.96);
+  border-radius: var(--radius-object) var(--radius-object) 0 0;
+  background: var(--bg-panel);
   box-shadow: 0 -18px 60px rgba(0, 0, 0, 0.5);
   overflow: hidden;
 }
@@ -3190,7 +3148,7 @@ textarea:focus-visible {
   align-items: flex-start;
   gap: 12px;
   padding: 18px 16px 12px;
-  border-bottom: 1px solid var(--line-soft);
+  position: relative;
 }
 
 .formsheet__titles {
@@ -3221,10 +3179,10 @@ textarea:focus-visible {
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--r-xs);
-  border: 1px solid var(--line-soft);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-field);
+  border: 1px solid var(--filet-fort-color);
   background: var(--fill);
   color: var(--cream);
 }
@@ -3248,31 +3206,25 @@ textarea:focus-visible {
 .formsheet__foot {
   flex: 0 0 auto;
   padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--line-soft);
-  background: rgba(9, 28, 20, 0.9);
+  position: relative;
 }
 
 .formsheet__foot .actionbar {
   position: static;
   margin: 0;
   padding: 0;
-  border: 0;
-  border-radius: 0;
   background: none;
   box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
 }
 
 /* ---- Récapitulatif de réponse (formulaire replié) ---- */
 .recap {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 14px;
-  border: 1.5px solid rgba(159, 220, 174, 0.32);
-  border-radius: var(--r-md);
-  background: rgba(159, 220, 174, 0.08);
+  gap: var(--space-3);
+  padding: var(--space-1) 0 var(--space-1) var(--space-4);
+  border: 0;
+  border-left: 2px solid var(--ok);
 }
 
 .recap__head {
@@ -3306,13 +3258,13 @@ textarea:focus-visible {
 .recap__vote {
   font-size: 13px;
   font-weight: 600;
-  color: rgba(255, 247, 230, 0.72);
+  color: var(--text-soft);
 }
 
 .recap__rows {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-1);
 }
 
 .recap__row {
@@ -3320,40 +3272,40 @@ textarea:focus-visible {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 8px 10px;
-  border-radius: var(--r-xs);
-  background: rgba(255, 247, 230, 0.05);
+  padding: var(--space-1) 0;
 }
 
 .recap__slot {
   font-size: 13px;
   font-weight: 600;
-  color: rgba(255, 247, 230, 0.78);
+  color: var(--text-soft);
 }
 
 .recap__answer {
   flex: 0 0 auto;
   padding: 2px 9px;
   border-radius: var(--r-pill);
-  background: var(--fill);
+  background: none;
   font-size: 12px;
   font-weight: 800;
   color: rgba(255, 247, 230, 0.72);
+  border: 1px solid currentColor;
 }
 
 .recap__answer--yes {
-  background: rgba(244, 197, 66, 0.24);
   color: var(--pastis-soft);
+  border-color: var(--pastis);
 }
 
 .recap__answer--maybe {
-  background: rgba(255, 247, 230, 0.18);
   color: var(--cream);
+  border-style: dashed;
 }
 
 .recap__answer--no {
-  background: rgba(184, 50, 43, 0.26);
-  color: var(--danger);
+  color: #ffd9d4;
+  border: 3px double var(--danger);
+  padding: 1px 7px;
 }
 
 /* ---- Rangée d'étiquettes sous un titre ---- */
@@ -3374,7 +3326,7 @@ textarea:focus-visible {
   gap: 6px 14px;
   font-size: 13px;
   font-weight: 600;
-  color: rgba(255, 247, 230, 0.7);
+  color: var(--text-soft);
 }
 
 .factline b {
@@ -3385,7 +3337,7 @@ textarea:focus-visible {
 /* Le pied de page respire assez pour que la barre collante ne masque
    jamais le dernier champ. */
 .mobile-page__inner {
-  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  padding-bottom: 0;
 }
 
 /* ---- Mouvement : tout reste sage si le système le demande ---- */
@@ -3411,13 +3363,13 @@ textarea:focus-visible {
    On ne se contente pas d'un message : le formulaire remonte sur le bloc
    fautif, le passe au rouge et le secoue une fois. */
 .slot--error {
-  border-color: var(--danger);
-  background: rgba(184, 50, 43, 0.1);
+  border-left-color: var(--danger);
 }
 
 .slot--error .slot__state--todo {
-  background: rgba(184, 50, 43, 0.26);
-  color: var(--danger);
+  color: #ffd9d4;
+  border: 3px double var(--danger);
+  padding: 1px 7px;
 }
 
 .is-shaking {
@@ -3498,199 +3450,65 @@ textarea:focus-visible {
 /* Message sanitaire : discret mais toujours présent en fin de registre, comme
    le veut l'usage pour tout ce qui touche à l'alcool. */
 .legal-sobriety {
-  margin: 4px 2px 0;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 247, 230, 0.14);
-  background: rgba(7, 28, 20, 0.36);
-  color: rgba(255, 247, 230, 0.72);
+  margin: 4px 0 0;
+  padding: var(--space-1) 0 var(--space-1) var(--space-4);
+  border: 0;
+  color: var(--text-soft);
   font-size: 12px;
   font-weight: 600;
   line-height: 1.5;
-  text-align: center;
-}
-
-/* =====================================================================
-   Rôles de surface : le registre de zinc
-   La page est un plan continu (le voile posé sur le zinc). Trois rôles,
-   pas un de plus :
-   - Section : à plat sur le plan, se lit comme un registre (titre en
-     petites capitales, filet fin, lignes alignées). Aucun fond, aucune
-     bordure enveloppante, aucune ombre.
-   - Item : un objet qu'on manipule (réponse cochable, champ, bouton).
-     Une seule épaisseur, délimitée par un filet franc, jamais d'ombre.
-   - Overlay : ce qui flotte (barre d'action, feuille, menu). Seul à
-     porter une ombre, fond panneau opaque, pas de bordure en plus.
-   Séparer dans cet ordre, sans sauter de marche : espace, titre de
-   section, filet, bordure, ombre. Profondeur maximale : 2 (un objet dans
-   la section, ou un contrôle dans l'overlay). Jamais de carte dans une
-   carte.
-   Migration : un écran passe au registre en posant .registre sur sa
-   section racine. Les classes historiques restent dans le DOM (accroches
-   des tests) et prennent ici leur rôle ; retirer .registre rend l'écran
-   tel qu'il était.
-   ===================================================================== */
-
-/* Ce qui passe à plat : ni fond, ni contour enveloppant, ni ombre, ni
-   flou. Les marges et filets propres à chaque rôle sont posés ensuite. */
-.sheet.registre,
-.registre .sheet:not(.modal-sheet),
-.registre .formsec,
-.registre .slot,
-.registre .draft-resume,
-.registre .switchrow__button,
-.registre .cnt,
-.registre .badge-medal,
-.registre .legal-sobriety,
-.registre .disclose,
-.registre .recap,
-.registre .recap__row {
-  border: 0;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-/* ---- Section ---- */
-.sheet.registre,
-.registre .sheet:not(.modal-sheet) {
-  gap: var(--space-4);
-  margin-block: var(--space-3);
-  padding: 0;
-}
-
-.registre .vote-form,
-.registre form.sheet {
-  gap: var(--space-6);
-}
-
-/* Un surtitre qui ouvre une section du registre porte le même filet. */
-.sheet.registre > .eyebrow,
-.registre .sheet:not(.sheet--hero, .modal-sheet):not(:has(> .accent)) > .eyebrow:first-child,
-.registre .sheet:not(.sheet--hero, .modal-sheet) > div:first-child > .eyebrow:first-child {
-  padding-bottom: var(--space-3);
-  border-bottom: var(--filet);
-}
-
-.registre .formsec {
-  gap: var(--space-4);
-  padding: 0;
-}
-
-/* L'en-tête de registre : numéro d'étape, titre en petites capitales,
-   compteur aligné à droite, et le filet fin qui ouvre la section. */
-.registre .formsec__head {
-  gap: var(--space-3);
-  padding-bottom: var(--space-3);
-  border-bottom: var(--filet);
-}
-
-.registre .formsec__title {
-  font-size: 19px;
-  font-variant-caps: all-small-caps;
-  font-synthesis-small-caps: auto;
-  letter-spacing: 0.07em;
-}
-
-/* Le compteur n/m se lit comme un total de registre, sans pastille, posé
-   sur la même ligne de base que le titre de la section. */
-.registre .formsec__titles,
-.registre .formsec__status {
-  align-self: baseline;
-}
-
-.registre .formsec__status {
-  padding: 0;
-  background: none;
-  color: var(--cream);
-  font-variant-numeric: tabular-nums;
-}
-
-.registre .formsec__lead,
-.registre .field__hint,
-.registre .slot__p,
-.registre .cheer-count,
-.registre .disclose__summary,
-.registre .disclose__chevron,
-.registre .field__req--optional,
-.registre .choicegroup__legend .field__name,
-.registre .recap__vote,
-.registre .recap__slot,
-.registre .switchrow__state,
-.registre .switchrow__aside,
-.registre .locfield__picked,
-.registre .osm-credit,
-.registre .ghost-link:not(.ghost-link--danger),
-.registre .hint,
-.registre .meta,
-.registre .traq__value--empty,
-.registre .maplinks__trigger,
-.registre .badge-medal__desc,
-.registre .legal-sobriety,
-.registre .factline,
-.registre .person__sub,
-.registre .wall-item__when,
-.registre .share code {
-  color: var(--text-soft);
-}
-
-/* Plancher de 12 px sur tout ce que le registre affiche. */
-.registre .formsec__status,
-.registre .field__req,
-.registre .slot__state,
-.registre .agenda-lead,
-.registre .notif-badge,
-.registre .traq__title,
-.registre .traq__value,
-.registre .locfield__picked,
-.registre .locfield__nearby-toggle,
-.registre .osm-credit,
-.registre .tag,
-.registre .person > i,
-.registre .person__tag,
-.registre .wall-item__when,
-.registre .cnt span,
-.registre .palmares-tag,
-.registre .minimap__expand,
-.registre .badge-medal__desc {
-  font-size: var(--t-micro);
-}
-
-/* Une ligne de registre par créneau : pas de carte. La marge de gauche
-   porte l'état du créneau, comme la marge d'un registre qu'on émarge :
-   en pointillés tant qu'il reste à remplir, en trait plein une fois
-   répondu, en rouge s'il a été refusé à l'envoi. Le libellé d'état et
-   le message d'erreur disent la même chose sans la couleur. */
-.registre .slot-stack {
-  gap: 0;
-}
-
-.registre .slot,
-.registre .recap {
-  position: relative;
-  gap: var(--space-3);
-  padding: var(--space-1) 0 var(--space-1) var(--space-4);
+  text-align: left;
   border-left: 2px solid var(--filet-fort-color);
 }
 
-.registre .slot--incomplete {
-  border-left-style: dashed;
-  border-left-color: rgba(244, 197, 66, 0.8);
+/* =====================================================================
+   Le registre de zinc : ce qui n'a pas d'équivalent dans les règles de
+   base, réécrites en place (voir docs/refonte-visuelle/IDENTITE.md).
+   La page est un plan continu ; trois rôles seulement : Section à plat
+   (.sheet, .formsec, .slot, .disclose, .recap), Item à filet franc
+   (.choice, champs, .share, .notif-item, boutons), Overlay opaque à ombre
+   (.actionbar, .modal-sheet, .formsheet__panel). Profondeur 2 au plus.
+   ===================================================================== */
+
+/* Voile du plan : uniforme sous la colonne de lecture (calibré pour que le
+   texte posé à même le plan tienne 4,5:1 à toute position de défilement),
+   allégé de part et d'autre sur grand écran. */
+.mobile-page > .screen-overlay,
+.onboarding-screen > .screen-overlay {
+  background: linear-gradient(
+    90deg,
+    var(--bg-page-edge) calc(50% - 288px),
+    var(--bg-page) calc(50% - 240px),
+    var(--bg-page) calc(50% + 240px),
+    var(--bg-page-edge) calc(50% + 288px)
+  );
 }
 
-.registre .slot--error {
-  border-left-color: var(--danger);
+/* La barre d'action se colle au ras du bas : le retrait de fin de page
+   passe du padding à un espaceur en fin de flux. */
+.mobile-page__inner::after {
+  flex: 0 0 calc(var(--space-4) + env(safe-area-inset-bottom));
+  content: "";
 }
 
-/* Deux créneaux se séparent d'abord par l'espace (au moins le double de
-   l'écart interne), puis par un filet fin au milieu de cet espace. */
-.registre .slot + .slot {
+form.sheet {
+  gap: var(--space-6);
+}
+
+/* Un surtitre qui ouvre une section porte le filet du registre. */
+.sheet:not(.sheet--hero, .modal-sheet):not(:has(> .accent)) > .eyebrow:first-child,
+.sheet:not(.sheet--hero, .modal-sheet) > div:first-child > .eyebrow:first-child {
+  padding-bottom: var(--space-3);
+  border-bottom: var(--filet);
+}
+
+/* Deux créneaux : l'espace d'abord (au moins le double de l'écart
+   interne), puis un filet fin au milieu de cet espace. */
+.slot + .slot {
   margin-top: var(--space-6);
 }
 
-.registre .slot + .slot::before {
+.slot + .slot::before {
   position: absolute;
   top: calc(var(--space-4) * -1);
   left: -2px;
@@ -3699,86 +3517,20 @@ textarea:focus-visible {
   content: "";
 }
 
-.registre .choicegroup__legend .field__name {
+.choicegroup__legend .field__name {
   font-size: var(--t-label);
   font-weight: 600;
-}
-
-/* ---- Item : la réponse cochable, le champ ----
-   Le filet franc délimite ce qu'on manipule (3:1 au pire pixel). */
-.registre .choice:not(.choice--on) {
-  border-color: var(--filet-fort-color);
-  background: var(--bg-field);
-}
-
-.registre .choice:not(.choice--on):hover {
-  background: var(--fill);
-}
-
-.registre .choicegroup--invalid .choice:not(.choice--on) {
-  border-color: var(--danger);
-}
-
-.registre :is(input:not([type="radio"], [type="range"], [type="checkbox"]), textarea) {
-  border-color: var(--filet-fort-color);
-  border-radius: var(--radius-field);
-  background: var(--bg-field);
-}
-
-.registre :is(input, textarea)[aria-invalid="true"] {
-  border-color: var(--danger);
-}
-
-/* Trinquer reste en retrait, mais se lit comme un bouton : contour à
-   3:1, cible au pouce, anneau de focus commun. */
-.registre .cheer-btn {
-  min-height: 44px;
-}
-
-.registre .cheer-btn:not(.cheer-btn--on) {
-  border-color: rgba(255, 247, 230, 0.45);
   color: var(--text-soft);
 }
 
-.registre .cheer-btn:focus-visible,
-.registre .maplinks__trigger:focus-visible {
-  outline: 3px solid var(--pastis);
-  outline-offset: 2px;
+.disclose + .disclose {
+  margin-top: calc(var(--space-3) * -1);
+  border-top: 0;
 }
 
-/* Volet replié dans la section : une ligne de registre entre deux filets,
-   le chevron dit qu'elle s'ouvre. */
-.registre .disclose {
-  border-block: var(--filet);
-}
-
-.registre .disclose__head {
-  padding-inline: 0;
-}
-
-.registre .disclose__body {
-  gap: var(--space-4);
-  padding: 0 0 var(--space-4);
-}
-
-/* ---- Overlay : la barre d'action ----
-   Elle flotte au-dessus du registre qui défile : fond panneau opaque et
-   ombre, sans bordure ni flou (un seul matériau, aucun verre dessous). */
-.registre .actionbar {
-  bottom: 0;
-  padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
-  border: 0;
-  border-radius: var(--radius-object) var(--radius-object) 0 0;
-  background: var(--bg-panel);
-  box-shadow: var(--elev-2);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-/* Posée au ras du bas, elle ne laisse plus passer le registre dessous ; au
-   bord haut, un fondu efface les lignes qui glissent sous elle au lieu de
-   les couper net à mi-hauteur. */
-.registre .actionbar::before {
+/* Au bord haut de la barre, un fondu efface les lignes qui glissent
+   dessous au lieu de les couper net. */
+.actionbar::before {
   position: absolute;
   right: 0;
   bottom: 100%;
@@ -3789,264 +3541,62 @@ textarea:focus-visible {
   content: "";
 }
 
-/* ---- Récapitulatif : la réponse émargée ----
-   Même grammaire que le créneau : marge en trait plein vert, lignes
-   alignées, la réponse en pastille au bout de chaque ligne. */
-.registre .recap {
-  border-left-color: var(--ok);
+.formsheet__foot .actionbar::before {
+  display: none;
 }
 
-.registre .recap__rows {
-  gap: var(--space-1);
-}
-
-.registre .recap__row {
-  padding: var(--space-1) 0;
-}
-
-/* Les états posés à même le plan se lisent en tampon : contour de la
-   couleur d'état, sans aplat teinté (l'aplat éclaircissait le fond sous
-   le texte et le faisait passer sous 4,5:1 au pire pixel du décor). Le
-   rouge d'état y prend sa nuance claire, déjà en usage pour le texte. */
-.registre .slot__state,
-.registre .recap__answer,
-.registre .disclose__badge {
-  border: 1px solid currentColor;
-  background: none;
-}
-
-.registre .slot--error .slot__state--todo,
-.registre .recap__answer--no,
-.registre .field__error {
-  background: none;
-  color: #ffd9d4;
-}
-
-/* Le contour porte la couleur d'état franche, le texte reste clair. La
-   forme double la couleur : trait plein pour un oui, pointillé pour un
-   « je me tâte » (pas tranché, comme la marge d'un créneau à remplir),
-   trait double pour un refus. */
-.registre .recap__answer--yes,
-.registre .slot__state--todo {
-  border-color: var(--pastis);
-}
-
-.registre .recap__answer--maybe {
-  border-style: dashed;
-}
-
-.registre .recap__answer--no,
-.registre .slot--error .slot__state--todo {
-  border: 3px double var(--danger);
-}
-
-/* Le trait double prend la place du padding : la pastille garde sa taille. */
-.registre .slot--error .slot__state--todo {
-  padding: 1px 7px;
-}
-
-.registre .recap__answer--no {
-  padding: 1px 7px;
-}
-
-/* ---- Formulaire de création ----
-   Le créneau éditable est une ligne de registre comme le créneau à voter ;
-   « Retirer » reste un objet (contour franc). Le réglage oui/non perd sa
-   carte : la ligne entière reste le bouton, la bascule est le signifiant. */
-.registre .slot__x,
-.registre .switch {
-  border-color: var(--filet-fort-color);
-}
-
-.registre .switchrow__button {
-  padding-inline: 0;
-}
-
-.registre .draft-resume {
-  padding: var(--space-1) 0 var(--space-1) var(--space-4);
-  border-left: 2px solid var(--filet-fort-color);
-}
-
-/* Les mentions Obligatoire / Facultatif en tampon, comme les états. */
-.registre .field__req {
-  border: 1px solid currentColor;
-  background: none;
-}
-
-.registre .field__req--required {
-  border-color: var(--pastis);
-}
-
-/* Page au registre : la barre d'action se colle au ras du bas de l'écran.
-   Le retrait de fin de page passe du padding (qui la décollait et laissait
-   voir le registre dessous) à un espaceur en fin de flux. */
-.registre > .mobile-page__inner {
-  padding-bottom: 0;
-}
-
-.registre > .mobile-page__inner::after {
-  flex: 0 0 calc(var(--space-4) + env(safe-area-inset-bottom));
+/* Séparateurs de la feuille : un filet entre l'en-tête, le corps et le
+   pied, pas une bordure de bloc. */
+.formsheet__head::after,
+.formsheet__foot::before {
+  position: absolute;
+  right: 0;
+  left: 0;
+  border-top: var(--filet);
   content: "";
 }
 
-/* ---- Page d'apéro ----
-   La carte de tête devient l'en-tête du registre : à plat, close par un
-   double filet (la page de garde). Le verdict est le seul objet teinté
-   pastis de la page. Les volets se suivent en lignes de registre. */
-.registre .sheet.sheet--hero {
-  padding-bottom: var(--space-5);
-  border-bottom: 3px double var(--filet-fort-color);
+.formsheet__head::after {
+  bottom: 0;
 }
 
-.registre .verdict {
-  gap: var(--space-2);
-  padding: var(--space-4);
-  border-radius: var(--radius-object);
-  background: rgba(244, 197, 66, 0.1);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+.formsheet__foot::before {
+  top: 0;
 }
 
-/* Sur la teinte pastis, le texte secondaire passe en crème plein : le
-   plancher calibré pour le plan ne suffit plus. */
-.registre .verdict .eyebrow {
+.cheer-btn:focus-visible,
+.maplinks__trigger:focus-visible {
+  outline: 3px solid var(--pastis);
+  outline-offset: 2px;
+}
+
+/* Sur la teinte pastis du verdict, le secondaire passe en crème plein. */
+.verdict .eyebrow {
   color: var(--pastis-soft);
 }
 
-.registre .verdict .meta,
-.registre .verdict .traq__value--empty,
-.registre .cnt span {
+.verdict .meta,
+.verdict .traq__value--empty {
   color: var(--cream);
 }
 
-/* Les trois compteurs : colonnes d'un registre, séparées par un filet.
-   À 12 px, « Désertions » ne tient dans un tiers de 320 px qu'en
-   resserrant l'interlettrage et la marge interne. */
-.registre .cnt {
-  min-width: 0;
-  padding-inline: 0;
-}
-
-.registre .cnt + .cnt {
+.cnt + .cnt {
   border-left: var(--filet);
 }
 
-.registre .cnt span {
-  letter-spacing: 0;
+.badge-medal + .badge-medal {
+  border-top: var(--filet);
 }
 
-.registre .disclose + .disclose {
-  margin-top: calc(var(--space-3) * -1);
-  border-top: 0;
-}
-
-/* Un mot du mur est un objet posé (un niveau) : fond champ et filet fin,
-   pas le filet franc, qui promettrait un clic qu'il n'offre pas. */
-.registre .wall-item {
-  border: var(--filet);
-  border-radius: var(--radius-object);
-  background: var(--bg-field);
-}
-
-/* Le lien à partager est un objet (on le copie) ; « Copier » un bouton. */
-.registre .share {
-  border-color: var(--filet-fort-color);
-  border-radius: var(--radius-object);
-  background: var(--bg-field);
-}
-
-.registre .share .cp,
-.registre .button--quiet {
-  border-color: var(--filet-fort-color);
-}
-
-.registre .button--quiet {
-  background: var(--bg-field);
-}
-
-/* ---- Overlays de la page : modale et feuille de saisie ----
-   Panneau opaque et ombre, sans bordure ni verre. */
-.registre .modal-sheet,
-.registre .formsheet__panel {
-  border: 0;
-  background: var(--bg-panel);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-.registre .modal-sheet {
-  box-shadow: var(--elev-2);
-}
-
-/* ---- Listes de pages : ardoise, carnet, tablées ----
-   Une entrée par apéro, une section : le surtitre ouvre l'entrée avec son
-   filet, l'espace sépare les entrées. Plus de carte par apéro. */
-.registre .event-stack {
-  gap: var(--space-6);
-}
-
-/* La notification est un objet qu'on ouvre : filet franc, fond champ ;
-   non lue, son filet passe au pastis (la pastille rouge reste). */
-.registre .sheet.notif-item {
-  padding: var(--space-3) var(--space-4);
-  border: var(--filet-fort);
-  border-radius: var(--radius-object);
-  background: var(--bg-field);
-}
-
-.registre .sheet.notif-item--unread {
-  border-color: var(--pastis);
-}
-
-/* ---- Palmarès : moment rare, intensité maximale de la même matière ----
-   Chaque lauréat s'ouvre sur le double filet de la page de garde ; chaque
-   breloque est une ligne du registre, son disque frappé comme un tampon
-   (double cercle). Aucune autre dimension n'est dépensée. */
-.registre .event-stack > .sheet:has(.palmares-head) {
+/* Palmarès (moment rare) : chaque lauréat s'ouvre sur le double filet de
+   la page de garde. */
+.event-stack > .sheet:has(.palmares-head) {
   padding-top: var(--space-4);
   border-top: 3px double var(--filet-fort-color);
 }
 
-.registre .badge-medal {
-  padding: var(--space-2) 0;
-}
-
-.registre .badge-medal + .badge-medal {
-  border-top: var(--filet);
-}
-
-.registre .badge-medal__disc {
-  outline: 1.5px solid currentColor;
-  outline-offset: 2px;
-}
-
-/* Mention sanitaire : une note en marge, comme les autres. */
-.registre .legal-sobriety {
-  padding: var(--space-1) 0 var(--space-1) var(--space-4);
-  border-left: 2px solid var(--filet-fort-color);
-  text-align: left;
-}
-
-/* ---- Passé : en retrait par la forme, pas par la transparence ----
-   L'opacité réduite faisait tomber tout le texte du verdict passé sous
-   4,5:1 (le tampon « Servi » à 1:1). Le retrait passe désormais par le
-   contour pointillé sans teinte pastis, et le tampon garde sa couleur
-   d'état en nuance claire. */
-.registre .verdict--past,
-.registre .sheet--past {
-  opacity: 1;
-}
-
-.registre .verdict--past {
-  border-style: dashed;
-  background: none;
-}
-
-.registre .verdict__stamp {
-  border-color: var(--danger);
-  color: #ffd9d4;
-}
-
-.registre .sheet--past > .eyebrow {
+/* Tournée passée : en retrait par la couleur du surtitre, pas par
+   l'opacité (qui faisait tomber le texte sous 4,5:1). */
+.sheet--past > .eyebrow {
   color: var(--text-soft);
 }
