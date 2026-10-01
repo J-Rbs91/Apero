@@ -126,15 +126,16 @@
   --filet-fort: 1.5px solid var(--filet-fort-color);
 
   /* Fonds : la page (voile posé sur le zinc), le panneau (ce qui flotte,
-     opaque), le champ (ce qui se remplit ou se coche). Le voile de page
+     opaque), le champ (ce qui se remplit ou se coche, quasi opaque : la
+     photo ne passe pas sous ce qu'on lit en saisissant). Le voile de page
      est calibré sur le pixel le plus clair de la photo (la fenêtre) :
      le texte posé à même le plan tient 4,5:1 à toute position de
      défilement s'il est au moins à --text-soft. Hors de la colonne de
      lecture (grand écran), le voile s'allège et le décor reparaît. */
   --bg-page: rgba(7, 28, 20, 0.75);
   --bg-page-edge: rgba(7, 28, 20, 0.38);
-  --bg-panel: rgba(12, 34, 25, 0.96);
-  --bg-field: rgba(255, 247, 230, 0.07);
+  --bg-panel: rgb(12, 34, 25);
+  --bg-field: rgba(17, 52, 42, 0.92);
 
   /* Texte secondaire posé à même le plan : plancher de luminance. */
   --text-soft: rgba(255, 247, 230, 0.8);
@@ -3532,8 +3533,11 @@ textarea:focus-visible {
 /* Ce qui passe à plat : ni fond, ni contour enveloppant, ni ombre, ni
    flou. Les marges et filets propres à chaque rôle sont posés ensuite. */
 .sheet.registre,
+.registre .sheet:not(.modal-sheet),
 .registre .formsec,
 .registre .slot,
+.registre .draft-resume,
+.registre .switchrow__button,
 .registre .disclose,
 .registre .recap,
 .registre .recap__row {
@@ -3546,16 +3550,15 @@ textarea:focus-visible {
 }
 
 /* ---- Section ---- */
-.sheet.registre {
+.sheet.registre,
+.registre .sheet:not(.modal-sheet) {
+  gap: var(--space-4);
   margin-block: var(--space-3);
   padding: 0;
 }
 
-.sheet.registre {
-  gap: var(--space-4);
-}
-
-.registre .vote-form {
+.registre .vote-form,
+.registre form.sheet {
   gap: var(--space-6);
 }
 
@@ -3608,7 +3611,12 @@ textarea:focus-visible {
 .registre .field__req--optional,
 .registre .choicegroup__legend .field__name,
 .registre .recap__vote,
-.registre .recap__slot {
+.registre .recap__slot,
+.registre .switchrow__state,
+.registre .switchrow__aside,
+.registre .locfield__picked,
+.registre .osm-credit,
+.registre .ghost-link:not(.ghost-link--danger) {
   color: var(--text-soft);
 }
 
@@ -3617,8 +3625,12 @@ textarea:focus-visible {
 .registre .field__req,
 .registre .slot__state,
 .registre .agenda-lead,
+.registre .notif-badge,
 .registre .traq__title,
-.registre .traq__value {
+.registre .traq__value,
+.registre .locfield__picked,
+.registre .locfield__nearby-toggle,
+.registre .osm-credit {
   font-size: var(--t-micro);
 }
 
@@ -3670,12 +3682,9 @@ textarea:focus-visible {
 
 /* ---- Item : la réponse cochable, le champ ----
    Le filet franc délimite ce qu'on manipule (3:1 au pire pixel). */
-.registre .choice {
-  background: var(--bg-field);
-}
-
 .registre .choice:not(.choice--on) {
   border-color: var(--filet-fort-color);
+  background: var(--bg-field);
 }
 
 .registre .choice:not(.choice--on):hover {
@@ -3732,12 +3741,28 @@ textarea:focus-visible {
    Elle flotte au-dessus du registre qui défile : fond panneau opaque et
    ombre, sans bordure ni flou (un seul matériau, aucun verre dessous). */
 .registre .actionbar {
+  bottom: 0;
+  padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
   border: 0;
-  border-radius: var(--radius-object);
+  border-radius: var(--radius-object) var(--radius-object) 0 0;
   background: var(--bg-panel);
   box-shadow: var(--elev-2);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+}
+
+/* Posée au ras du bas, elle ne laisse plus passer le registre dessous ; au
+   bord haut, un fondu efface les lignes qui glissent sous elle au lieu de
+   les couper net à mi-hauteur. */
+.registre .actionbar::before {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  left: 0;
+  height: var(--space-5);
+  background: linear-gradient(transparent, var(--bg-panel));
+  pointer-events: none;
+  content: "";
 }
 
 /* ---- Récapitulatif : la réponse émargée ----
@@ -3797,4 +3822,44 @@ textarea:focus-visible {
 
 .registre .recap__answer--no {
   padding: 0 7px;
+}
+
+/* ---- Formulaire de création ----
+   Le créneau éditable est une ligne de registre comme le créneau à voter ;
+   « Retirer » reste un objet (contour franc). Le réglage oui/non perd sa
+   carte : la ligne entière reste le bouton, la bascule est le signifiant. */
+.registre .slot__x,
+.registre .switch {
+  border-color: var(--filet-fort-color);
+}
+
+.registre .switchrow__button {
+  padding-inline: 0;
+}
+
+.registre .draft-resume {
+  padding: var(--space-1) 0 var(--space-1) var(--space-4);
+  border-left: 2px solid var(--filet-fort-color);
+}
+
+/* Les mentions Obligatoire / Facultatif en tampon, comme les états. */
+.registre .field__req {
+  border: 1px solid currentColor;
+  background: none;
+}
+
+.registre .field__req--required {
+  border-color: var(--pastis);
+}
+
+/* Page au registre : la barre d'action se colle au ras du bas de l'écran.
+   Le retrait de fin de page passe du padding (qui la décollait et laissait
+   voir le registre dessous) à un espaceur en fin de flux. */
+.registre > .mobile-page__inner {
+  padding-bottom: 0;
+}
+
+.registre > .mobile-page__inner::after {
+  flex: 0 0 calc(var(--space-4) + env(safe-area-inset-bottom));
+  content: "";
 }

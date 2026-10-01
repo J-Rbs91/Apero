@@ -390,7 +390,7 @@ export function CreateEventPage() {
   }
 
   return (
-    <MobilePage className="create-mobile" overlay="deep">
+    <MobilePage className="create-mobile registre" overlay="registre">
       <MobileHeader eyebrow="Nouvelle assemblée" />
 
       <form className="sheet" onSubmit={handleSubmit}>
