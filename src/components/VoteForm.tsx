@@ -284,7 +284,7 @@ export function VoteForm({
         : "Sans moi";
 
     return (
-      <section className="sheet">
+      <section className="sheet registre">
         <p className="eyebrow">Ta réponse est au registre</p>
 
         <div className="recap">
@@ -360,7 +360,7 @@ export function VoteForm({
   }
 
   return (
-    <section className="sheet">
+    <section className="sheet registre">
       <form className="vote-form" onSubmit={handleSubmit}>
         <FormSection
           step={1}

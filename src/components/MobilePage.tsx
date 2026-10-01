@@ -3,7 +3,8 @@ import type { ReactNode } from "react";
 type MobilePageProps = {
   children: ReactNode;
   className?: string;
-  overlay?: "scene" | "deep";
+  /** « registre » : voile du plan calibré, pour les écrans migrés au registre. */
+  overlay?: "scene" | "deep" | "registre";
 };
 
 export function MobilePage({ children, className = "", overlay = "scene" }: MobilePageProps) {

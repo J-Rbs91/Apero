@@ -526,7 +526,7 @@ export function InvitePage() {
     ) : null;
 
   return (
-    <MobilePage className="event-mobile" overlay="deep">
+    <MobilePage className="event-mobile" overlay="registre">
       <MobileHeader eyebrow={isOrganizer ? "Ta convocation" : "Invitation"} />
 
       <section className="sheet sheet--hero">

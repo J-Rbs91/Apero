@@ -246,6 +246,20 @@ a {
   background: var(--overlay-deep);
 }
 
+/* Voile du plan (écrans migrés au registre) : uniforme sous la colonne de
+   lecture, où le texte peut être posé à même le plan ; allégé de part et
+   d'autre sur grand écran, où il ne porte aucun texte. Sur téléphone, la
+   colonne couvre tout l'écran. */
+.screen-overlay--registre {
+  background: linear-gradient(
+    90deg,
+    var(--bg-page-edge) calc(50% - 288px),
+    var(--bg-page) calc(50% - 240px),
+    var(--bg-page) calc(50% + 240px),
+    var(--bg-page-edge) calc(50% + 288px)
+  );
+}
+
 /* ===== Screen layout ===== */
 /* Hauteur fixée au viewport + défilement interne : le décor et le
    dégradé fixes restent parfaitement calés même si le contenu de la
@@ -3492,4 +3506,262 @@ textarea:focus-visible {
   font-weight: 600;
   line-height: 1.5;
   text-align: center;
+}
+
+/* =====================================================================
+   Rôles de surface : le registre de zinc
+   La page est un plan continu (le voile posé sur le zinc). Trois rôles,
+   pas un de plus :
+   - Section : à plat sur le plan, se lit comme un registre (titre en
+     petites capitales, filet fin, lignes alignées). Aucun fond, aucune
+     bordure enveloppante, aucune ombre.
+   - Item : un objet qu'on manipule (réponse cochable, champ, bouton).
+     Une seule épaisseur, délimitée par un filet franc, jamais d'ombre.
+   - Overlay : ce qui flotte (barre d'action, feuille, menu). Seul à
+     porter une ombre, fond panneau opaque, pas de bordure en plus.
+   Séparer dans cet ordre, sans sauter de marche : espace, titre de
+   section, filet, bordure, ombre. Profondeur maximale : 2 (un objet dans
+   la section, ou un contrôle dans l'overlay). Jamais de carte dans une
+   carte.
+   Migration : un écran passe au registre en posant .registre sur sa
+   section racine. Les classes historiques restent dans le DOM (accroches
+   des tests) et prennent ici leur rôle ; retirer .registre rend l'écran
+   tel qu'il était.
+   ===================================================================== */
+
+/* Ce qui passe à plat : ni fond, ni contour enveloppant, ni ombre, ni
+   flou. Les marges et filets propres à chaque rôle sont posés ensuite. */
+.sheet.registre,
+.registre .formsec,
+.registre .slot,
+.registre .disclose,
+.registre .recap,
+.registre .recap__row {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* ---- Section ---- */
+.sheet.registre {
+  margin-block: var(--space-3);
+  padding: 0;
+}
+
+.sheet.registre {
+  gap: var(--space-4);
+}
+
+.registre .vote-form {
+  gap: var(--space-6);
+}
+
+/* Un surtitre qui ouvre une section du registre porte le même filet. */
+.registre > .eyebrow {
+  padding-bottom: var(--space-3);
+  border-bottom: var(--filet);
+}
+
+.registre .formsec {
+  gap: var(--space-4);
+  padding: 0;
+}
+
+/* L'en-tête de registre : numéro d'étape, titre en petites capitales,
+   compteur aligné à droite, et le filet fin qui ouvre la section. */
+.registre .formsec__head {
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: var(--filet);
+}
+
+.registre .formsec__title {
+  font-size: 19px;
+  font-variant-caps: all-small-caps;
+  font-synthesis-small-caps: auto;
+  letter-spacing: 0.07em;
+}
+
+/* Le compteur n/m se lit comme un total de registre, sans pastille. */
+.registre .formsec__status {
+  padding: 0;
+  background: none;
+  color: var(--cream);
+  font-variant-numeric: tabular-nums;
+}
+
+.registre .formsec__lead,
+.registre .field__hint,
+.registre .slot__p,
+.registre .cheer-count,
+.registre .disclose__summary,
+.registre .disclose__chevron,
+.registre .field__req--optional,
+.registre .choicegroup__legend .field__name,
+.registre .recap__vote,
+.registre .recap__slot {
+  color: var(--text-soft);
+}
+
+/* Plancher de 12 px sur tout ce que le registre affiche. */
+.registre .formsec__status,
+.registre .field__req,
+.registre .slot__state,
+.registre .agenda-lead,
+.registre .traq__title,
+.registre .traq__value {
+  font-size: var(--t-micro);
+}
+
+/* Une ligne de registre par créneau : pas de carte. La marge de gauche
+   porte l'état du créneau, comme la marge d'un registre qu'on émarge :
+   en pointillés tant qu'il reste à remplir, en trait plein une fois
+   répondu, en rouge s'il a été refusé à l'envoi. Le libellé d'état et
+   le message d'erreur disent la même chose sans la couleur. */
+.registre .slot-stack {
+  gap: 0;
+}
+
+.registre .slot,
+.registre .recap {
+  position: relative;
+  gap: var(--space-3);
+  padding: var(--space-1) 0 var(--space-1) var(--space-4);
+  border-left: 2px solid var(--filet-fort-color);
+}
+
+.registre .slot--incomplete {
+  border-left-style: dashed;
+  border-left-color: rgba(244, 197, 66, 0.8);
+}
+
+.registre .slot--error {
+  border-left-color: var(--danger);
+}
+
+/* Deux créneaux se séparent d'abord par l'espace (au moins le double de
+   l'écart interne), puis par un filet fin au milieu de cet espace. */
+.registre .slot + .slot {
+  margin-top: var(--space-6);
+}
+
+.registre .slot + .slot::before {
+  position: absolute;
+  top: calc(var(--space-4) * -1);
+  left: -2px;
+  right: 0;
+  border-top: var(--filet);
+  content: "";
+}
+
+.registre .choicegroup__legend .field__name {
+  font-size: var(--t-label);
+  font-weight: 600;
+}
+
+/* ---- Item : la réponse cochable, le champ ----
+   Le filet franc délimite ce qu'on manipule (3:1 au pire pixel). */
+.registre .choice {
+  background: var(--bg-field);
+}
+
+.registre .choice:not(.choice--on) {
+  border-color: var(--filet-fort-color);
+}
+
+.registre .choice:not(.choice--on):hover {
+  background: var(--fill);
+}
+
+.registre .choicegroup--invalid .choice:not(.choice--on) {
+  border-color: var(--danger);
+}
+
+.registre :is(input:not([type="radio"], [type="range"], [type="checkbox"]), textarea) {
+  border-color: var(--filet-fort-color);
+  border-radius: var(--radius-field);
+  background: var(--bg-field);
+}
+
+.registre :is(input, textarea)[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+/* Trinquer reste en retrait, mais se lit comme un bouton : contour à
+   3:1, cible au pouce, anneau de focus commun. */
+.registre .cheer-btn {
+  min-height: 44px;
+}
+
+.registre .cheer-btn:not(.cheer-btn--on) {
+  border-color: rgba(255, 247, 230, 0.45);
+  color: var(--text-soft);
+}
+
+.registre .cheer-btn:focus-visible,
+.registre .maplinks__trigger:focus-visible {
+  outline: 3px solid var(--pastis);
+  outline-offset: 2px;
+}
+
+/* Volet replié dans la section : une ligne de registre entre deux filets,
+   le chevron dit qu'elle s'ouvre. */
+.registre .disclose {
+  border-block: var(--filet);
+}
+
+.registre .disclose__head {
+  padding-inline: 0;
+}
+
+.registre .disclose__body {
+  gap: var(--space-4);
+  padding: 0 0 var(--space-4);
+}
+
+/* ---- Overlay : la barre d'action ----
+   Elle flotte au-dessus du registre qui défile : fond panneau opaque et
+   ombre, sans bordure ni flou (un seul matériau, aucun verre dessous). */
+.registre .actionbar {
+  border: 0;
+  border-radius: var(--radius-object);
+  background: var(--bg-panel);
+  box-shadow: var(--elev-2);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* ---- Récapitulatif : la réponse émargée ----
+   Même grammaire que le créneau : marge en trait plein vert, lignes
+   alignées, la réponse en pastille au bout de chaque ligne. */
+.registre .recap {
+  border-left-color: var(--ok);
+}
+
+.registre .recap__rows {
+  gap: var(--space-1);
+}
+
+.registre .recap__row {
+  padding: var(--space-1) 0;
+}
+
+/* Les états posés à même le plan se lisent en tampon : contour de la
+   couleur d'état, sans aplat teinté (l'aplat éclaircissait le fond sous
+   le texte et le faisait passer sous 4,5:1 au pire pixel du décor). Le
+   rouge d'état y prend sa nuance claire, déjà en usage pour le texte. */
+.registre .slot__state,
+.registre .recap__answer {
+  border: 1px solid currentColor;
+  background: none;
+}
+
+.registre .slot--error .slot__state--todo,
+.registre .recap__answer--no,
+.registre .field__error {
+  background: none;
+  color: #ffd9d4;
 }
