@@ -8,8 +8,8 @@
 > `:root` et bloc « Rôles de surface » en fin de feuille. Ne recopier aucune
 > valeur ici.
 
-Mise à jour : 01/10/2026 · Statut : en vigueur pour l'écran pilote (formulaire
-de vote de `/invite`), à étendre écran par écran.
+Mise à jour : 01/10/2026 · Statut : en vigueur sur toutes les pages (le
+registre est le défaut ; seul le rideau d'ouverture garde son verre).
 
 ## 1. Essence
 
@@ -95,10 +95,25 @@ décoratives `aria-hidden` sont exclues. Maximum 2.
 
 | Surface | Ce qui porte l'identité | Ce qui est relâché |
 |---|---|---|
-| Formulaire de vote (pilote) | Registre, marge d'état, filet franc des réponses | Verre dépoli, blocs encadrés, aplats teintés d'état |
-| Carte de tête, verdict | Restent les deux zones dominantes (PO P1, P2) ; à migrer : en-tête de registre pour la tête, unique Item teinté pastis pour le verdict | Rien avant validation |
-| Feuilles et modales | Overlay : panneau opaque + ombre | Bordure doublant l'ombre |
-| Création `/create` | Mêmes rôles que le vote (prochain écran) | Carte de créneau éditable : devient ligne de registre ; le bouton « Retirer » reste un Item |
+| Formulaires (vote, création, feuilles) | Registre, marge d'état, filet franc des réponses et des champs | Verre dépoli, blocs encadrés, aplats teintés d'état |
+| Page d'apéro | En-tête de registre (double filet) ; verdict, seul objet teinté pastis | Cartes de section |
+| Listes (ardoise, carnet, tablées) | Une section par entrée, ouverte par le filet du surtitre | Une carte par apéro autour de ses créneaux |
+| Moments rares (palmarès, verdict passé) | Intensité maximale **de la même matière** : double filet par lauréat, breloques en tampon, tampon « Servi » frappé sur le bord du verdict | Aucune autre dimension (ni police, ni mouvement) |
+| Feuilles, modales, menus | Overlay : panneau opaque + ombre ; voile sombre sans flou | Bordure doublant l'ombre, verre |
+| Accueil et onboarding | Même plan, même voile ; le décor reparaît en bord d'écran large | Verre du bloc d'accueil |
+| Rideau d'ouverture | Inchangé (son verre est le seul conservé : moment unique, hors page) | — |
+
+**Tranché en migration (01/10/2026).**
+- Un mot du mur est un objet posé (fond champ, **filet fin**) et non un objet à
+  filet franc : le filet franc promettrait un clic que le mur n'offre pas.
+- Le passé se dit par la forme (contour pointillé, surtitre non pastis, tampon),
+  jamais par l'opacité, qui faisait tomber tout le texte sous 4,5:1.
+- Le bouton plein garde l'élévation 1 (ombre sombre) au lieu de son halo pastis :
+  il reste le seul aplat pastis de l'écran, ce qui suffit à le distinguer.
+- Mesure de profondeur : un filet séparateur entre deux blocs frères (posé en
+  pseudo-élément) et le voile d'une modale ne sont pas des surfaces
+  enveloppantes ; ils ne comptent pas. Les cartes Leaflet sont des images de
+  donnée et sont exclues, comme les jauges `role="img"`.
 
 ## 8. Interdits
 
@@ -118,15 +133,16 @@ décoratives `aria-hidden` sont exclues. Maximum 2.
   `PO-VISION.md` §5.1).
 - Dérives génériques : voir `UXER/references/generic-ai-design-antipatterns.md`.
 
-## 9. Migrer un écran
+## 9. Ajouter un écran ou un composant
 
-1. Poser `registre` sur la section racine de l'écran (à côté de `sheet`), et
-   `overlay="registre"` sur sa `MobilePage` si du texte se pose sur le plan.
-2. Vérifier que les classes de l'écran ont leur rôle dans le bloc « Rôles de
-   surface » ; ajouter le rôle manquant **là**, jamais en surcharge locale.
+Les rôles vivent dans les règles de base de `src/styles/global.css` (la classe
+d'adhésion `.registre` de la migration a disparu). Pour un nouvel écran :
+
+1. `MobilePage` pose le voile du plan ; ne pas ajouter de fond ni de carte de
+   section. Une section est un `.sheet` (à plat), un objet manipulable prend
+   le filet franc, ce qui flotte prend `--bg-panel` et `--elev-2`.
+2. Toute valeur passe par un jeton (taille, rayon, ombre, espacement, filet,
+   fond) ; aucune taille sous `--t-micro`.
 3. Mesurer : profondeur ≤ 2, contraste texte ≥ 4,5:1 et filets fonctionnels
-   ≥ 3:1 sur pixels décodés à trois positions de défilement, cibles ≥ 44 px,
-   `innerText` inchangé, un seul bouton plein.
-4. Quand tous les écrans sont migrés : faire de `.registre` le défaut et
-   supprimer les règles de surface historiques (c'est là que le poids CSS se
-   récupère).
+   ≥ 3:1 sur pixels décodés à plusieurs positions de défilement, cibles
+   ≥ 44 px, `innerText` inchangé, un seul bouton plein, CSS livré ≤ R13.
