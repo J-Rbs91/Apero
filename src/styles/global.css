@@ -69,19 +69,21 @@
   --fill-soft: rgba(255, 247, 230, 0.06);
   --fill: rgba(255, 247, 230, 0.1);
 
-  /* Une seule échelle d'arrondis pour toute l'app. */
-  --r-xs: 10px;
-  --r-sm: 14px;
-  --r-md: 18px;
-  --r-lg: 24px;
-  --r-pill: 999px;
 
   /* Texte : plus rien sous 12px, les libellés de champ passent à 13.5px.
      L'ancienne interface descendait à 9.5px, illisible au comptoir. */
   --t-micro: 12px;
+  --t-small: 13px;
   --t-label: 13.5px;
+  --t-ui: 14px;
   --t-body: 15px;
   --t-lede: 15.5px;
+  --t-strong: 16px;
+  --t-title: 19px;
+  --t-h2: 20px;
+  --t-h1-sm: 26px;
+  --t-display: 30px;
+  --t-h1: 32px;
 
   /* ---- Le registre de zinc --------------------------------------------
      Jetons de surface de la refonte visuelle. Le pourquoi :
@@ -288,17 +290,17 @@ a {
 }
 
 .h1 {
-  font-size: 32px;
+  font-size: var(--t-h1);
   font-weight: 800;
   text-shadow: 0 1px 14px rgba(0, 0, 0, 0.4);
 }
 
 .h1--sm {
-  font-size: 26px;
+  font-size: var(--t-h1-sm);
 }
 
 .h2 {
-  font-size: 20px;
+  font-size: var(--t-h2);
 }
 
 /* Le surtitre reste rare : une seule ligne de ce genre par bloc, sinon la
@@ -323,7 +325,7 @@ a {
 .meta {
   margin: 0;
   color: var(--text-soft);
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 600;
   line-height: 1.4;
 }
@@ -335,7 +337,7 @@ a {
 .hint {
   margin: 0;
   color: var(--text-soft);
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 500;
   line-height: 1.4;
 }
@@ -363,12 +365,10 @@ a {
   gap: 8px;
   align-items: center;
   padding: 6px 13px 6px 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 247, 230, 0.26);
   background: rgba(10, 36, 29, 0.5);
-  backdrop-filter: blur(7px);
-  -webkit-backdrop-filter: blur(7px);
-  font-size: 12px;
+  font-size: var(--t-micro);
   font-weight: 800;
   color: var(--cream);
 }
@@ -449,12 +449,9 @@ a {
   flex-direction: column;
   min-width: 244px;
   padding: 6px;
-  border: 1px solid rgba(255, 247, 230, 0.22);
-  border-radius: 16px;
-  background: linear-gradient(180deg, rgba(23, 50, 40, 0.97), rgba(11, 28, 22, 0.95));
-  backdrop-filter: blur(20px) saturate(1.15);
-  -webkit-backdrop-filter: blur(20px) saturate(1.15);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  border-radius: var(--radius-object);
+  background: var(--bg-panel);
+  box-shadow: var(--elev-2);
   animation: brand-menu-pop-in 160ms ease;
 }
 
@@ -476,10 +473,10 @@ a {
   width: 100%;
   padding: 9px 12px;
   border: 0;
-  border-radius: 11px;
+  border-radius: var(--radius-field);
   background: transparent;
   color: var(--cream);
-  font-size: 13.5px;
+  font-size: var(--t-label);
   font-weight: 700;
   text-align: left;
   text-decoration: none;
@@ -524,7 +521,7 @@ a {
 
 .brand-menu__item--sub {
   padding: 8px 10px;
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 600;
 }
 
@@ -557,7 +554,7 @@ a {
   min-height: 52px;
   padding: 0 20px;
   border: 0;
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-pill);
   font-size: var(--t-body);
   font-weight: 800;
   text-align: center;
@@ -582,7 +579,7 @@ a {
 .button--primary {
   color: var(--ink);
   background: var(--pastis);
-  box-shadow: 0 10px 24px rgba(244, 197, 66, 0.24);
+  box-shadow: var(--elev-1);
 }
 
 .button--primary:hover {
@@ -645,11 +642,14 @@ a {
   border: 0;
   background: none;
   color: var(--text-soft);
-  font-size: 12.5px;
+  font-size: var(--t-small);
   font-weight: 600;
   text-decoration: underline;
   text-decoration-style: dotted;
   text-underline-offset: 3px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 
 .ghost-link:hover {
@@ -686,10 +686,12 @@ a {
   place-items: center;
   width: 34px;
   height: 34px;
-  border-radius: 11px;
+  border-radius: var(--radius-field);
   border: 1px solid rgba(255, 247, 230, 0.22);
   background: rgba(255, 247, 230, 0.14);
   color: var(--cream);
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .screen-head__title {
@@ -730,7 +732,7 @@ a {
 .field__req {
   flex: 0 0 auto;
   padding: 2px 8px;
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-pill);
   font-size: var(--t-micro);
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -750,7 +752,7 @@ a {
 
 .field__hint {
   margin: -1px 0 0;
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 500;
   line-height: 1.38;
   color: var(--text-soft);
@@ -761,7 +763,7 @@ a {
   align-items: flex-start;
   gap: 6px;
   margin: 0;
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 700;
   line-height: 1.35;
   color: #ffd9d4;
@@ -778,7 +780,7 @@ a {
   border-radius: 50%;
   background: var(--danger);
   color: #3a0f0c;
-  font-size: 11px;
+  font-size: var(--t-micro);
   font-weight: 900;
 }
 
@@ -792,7 +794,7 @@ select {
   padding: 12px 14px;
   color: var(--cream);
   background: var(--bg-field);
-  font-size: 16px;
+  font-size: var(--t-strong);
   transition: border-color 140ms ease, background 140ms ease;
 }
 
@@ -871,7 +873,7 @@ input[type="range"] {
 }
 
 .wall-item__author {
-  font-size: 12px;
+  font-size: var(--t-micro);
   font-weight: 800;
   color: var(--pastis-soft);
 }
@@ -883,7 +885,7 @@ input[type="range"] {
 
 .wall-item__body {
   margin: 4px 0 0;
-  font-size: 14px;
+  font-size: var(--t-ui);
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
@@ -906,12 +908,15 @@ input[type="range"] {
    pour ne pas concurrencer le bouton qui enregistre la réponse. */
 .cheer-btn {
   border: 1px solid rgba(255, 247, 230, 0.45);
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-pill);
   padding: 6px 12px;
   background: transparent;
   color: var(--text-soft);
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 700;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease,
+    color 160ms ease;
+  min-height: 44px;
 }
 
 .cheer-btn:hover {
@@ -930,7 +935,7 @@ input[type="range"] {
 }
 
 .cheer-count {
-  font-size: 12.5px;
+  font-size: var(--t-small);
   color: var(--text-soft);
 }
 
@@ -955,8 +960,7 @@ input[type="range"] {
 
 /* Créneau en cours de saisie dans le formulaire de création : il porte son
    propre numéro et son propre état, on ne les confond pas entre eux. */
-.slot--editable {
-}
+
 
 .slot--incomplete {
   border-left-style: dashed;
@@ -1003,14 +1007,14 @@ input[type="range"] {
 .slot__d {
   font-family: "Manrope", system-ui, sans-serif;
   font-weight: 800;
-  font-size: 16px;
+  font-size: var(--t-strong);
   line-height: 1.2;
   color: var(--cream);
 }
 
 .slot__p {
   margin-top: 3px;
-  font-size: 13.5px;
+  font-size: var(--t-label);
   font-weight: 600;
   color: var(--text-soft);
 }
@@ -1022,16 +1026,16 @@ input[type="range"] {
   align-items: center;
   gap: 6px;
   flex: 0 0 auto;
-  min-height: 36px;
   padding: 0 12px;
   border: 1px solid var(--line-soft);
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-pill);
   background: transparent;
   color: rgba(255, 247, 230, 0.7);
-  font-size: 12.5px;
+  font-size: var(--t-small);
   font-weight: 700;
   line-height: 1;
   border-color: var(--filet-fort-color);
+  min-height: 44px;
 }
 
 .slot__x:hover {
@@ -1060,10 +1064,10 @@ input[type="range"] {
   width: 100%;
   min-height: 50px;
   border: 1.5px dashed var(--line-strong);
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-object);
   background: transparent;
   color: var(--cream);
-  font-size: 14px;
+  font-size: var(--t-ui);
   font-weight: 800;
 }
 
@@ -1105,8 +1109,7 @@ input[type="range"] {
   background: none;
 }
 
-.switchrow__button--on {
-}
+
 
 .switchrow__button:active {
   transform: scale(0.995);
@@ -1125,7 +1128,7 @@ input[type="range"] {
 }
 
 .switchrow__state {
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 600;
   color: var(--text-soft);
 }
@@ -1140,7 +1143,7 @@ input[type="range"] {
    se lit plus comme la réponse à la question posée par le titre. */
 .switchrow__aside {
   margin: -1px 0 0;
-  font-size: 12.5px;
+  font-size: var(--t-small);
   font-weight: 500;
   line-height: 1.38;
   letter-spacing: 0.01em;
@@ -1155,7 +1158,7 @@ input[type="range"] {
   height: 30px;
   min-height: 0;
   padding: 0;
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-pill);
   border: 1px solid var(--filet-fort-color);
   background: var(--fill);
   transition: background 0.16s ease, border-color 0.16s ease;
@@ -1205,11 +1208,11 @@ input[type="range"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: var(--radius-field);
   border: 1px solid rgba(255, 247, 230, 0.28);
   background: rgba(255, 247, 230, 0.08);
   color: var(--cream);
-  font-size: 22px;
+  font-size: var(--t-h2);
   font-weight: 800;
   line-height: 1;
 }
@@ -1221,7 +1224,7 @@ input[type="range"] {
 .stepper__val {
   min-width: 34px;
   text-align: center;
-  font-size: 19px;
+  font-size: var(--t-title);
   font-weight: 800;
   color: var(--cream);
   font-variant-numeric: tabular-nums;
@@ -1229,7 +1232,7 @@ input[type="range"] {
 
 .stepper__unit {
   margin-left: 2px;
-  font-size: 11.5px;
+  font-size: var(--t-micro);
   font-weight: 600;
   color: rgba(255, 247, 230, 0.55);
 }
@@ -1249,7 +1252,7 @@ input[type="range"] {
 .verdict__title {
   font-family: "Manrope", system-ui, sans-serif;
   font-weight: 700;
-  font-size: 18px;
+  font-size: var(--t-title);
   line-height: 1.12;
   color: var(--cream);
 }
@@ -1273,7 +1276,7 @@ input[type="range"] {
 .cnt b {
   font-family: "Manrope", system-ui, sans-serif;
   font-weight: 800;
-  font-size: 18px;
+  font-size: var(--t-title);
   line-height: 1;
   color: var(--cream);
 }
@@ -1303,7 +1306,7 @@ input[type="range"] {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: "DM Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: var(--t-micro);
   color: var(--text-soft);
 }
 
@@ -1311,14 +1314,14 @@ input[type="range"] {
    le jaune au seul bouton qui enregistre. */
 .share .cp {
   flex: 0 0 auto;
-  min-height: 34px;
   padding: 0 14px;
   border: 1px solid var(--filet-fort-color);
-  border-radius: var(--r-xs);
+  border-radius: var(--radius-field);
   background: var(--fill);
   color: var(--cream);
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 800;
+  min-height: 44px;
 }
 
 .share .cp:hover {
@@ -1360,7 +1363,7 @@ input[type="range"] {
 }
 
 .person__name {
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 700;
   color: var(--cream);
 }
@@ -1391,7 +1394,7 @@ input[type="range"] {
 .feedback {
   margin: 0;
   color: #ffd9d4;
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 600;
   line-height: 1.4;
 }
@@ -1423,8 +1426,8 @@ input[type="range"] {
 .page-message {
   margin: 0;
   padding: 10px 14px;
-  border-radius: 14px;
-  font-size: 13px;
+  border-radius: var(--radius-object);
+  font-size: var(--t-small);
   font-weight: 700;
   color: var(--cream);
 }
@@ -1443,11 +1446,11 @@ input[type="range"] {
   margin: 2px 0;
   padding: 13px;
   border: 1px dashed rgba(255, 247, 230, 0.4);
-  border-radius: 14px;
+  border-radius: var(--radius-object);
   background: rgba(255, 247, 230, 0.06);
   font-family: "Manrope", system-ui, sans-serif;
   font-weight: 700;
-  font-size: 19px;
+  font-size: var(--t-title);
   text-align: center;
   color: var(--cream);
 }
@@ -1461,8 +1464,6 @@ input[type="range"] {
   place-items: center;
   padding: 16px;
   background: rgba(7, 28, 20, 0.62);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
 }
 
 .modal-sheet {
@@ -1532,9 +1533,9 @@ input[type="range"] {
 
 .splash__eyebrow {
   margin: 6px 0 0;
-  font-size: 10.5px;
+  font-size: var(--t-micro);
   font-weight: 700;
-  letter-spacing: 0.26em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--pastis);
   animation: splash-fade 640ms ease 220ms both;
@@ -1543,7 +1544,7 @@ input[type="range"] {
 .splash__name {
   margin: 0;
   font-family: "Manrope", system-ui, sans-serif;
-  font-size: 30px;
+  font-size: var(--t-display);
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: -0.01em;
@@ -1555,7 +1556,7 @@ input[type="range"] {
 .splash__tagline {
   margin: 4px 0 0;
   max-width: 340px;
-  font-size: 15px;
+  font-size: var(--t-body);
   line-height: 1.45;
   font-style: italic;
   color: color-mix(in srgb, var(--cream) 82%, transparent);
@@ -1567,7 +1568,7 @@ input[type="range"] {
   max-width: 320px;
   padding-top: 12px;
   border-top: 1px solid color-mix(in srgb, var(--pastis) 34%, transparent);
-  font-size: 12.5px;
+  font-size: var(--t-small);
   line-height: 1.4;
   color: color-mix(in srgb, var(--cream) 58%, transparent);
   animation: splash-fade 820ms ease 620ms both;
@@ -1621,7 +1622,7 @@ input[type="range"] {
   border-radius: 50%;
   background: rgba(255, 247, 230, 0.16);
   color: var(--cream);
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 800;
   font-style: normal;
 }
@@ -1635,7 +1636,7 @@ input[type="range"] {
 .palmares-tag {
   margin-left: 7px;
   padding: 1px 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--pastis);
   color: var(--ink);
   font-size: var(--t-micro);
@@ -1679,7 +1680,7 @@ input[type="range"] {
 }
 
 .badge-medal__name {
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 800;
   color: var(--cream);
 }
@@ -1716,7 +1717,7 @@ input[type="range"] {
   flex: 0 0 auto;
   align-self: center;
   padding: 2px 9px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--pastis);
   color: var(--ink);
   font-size: var(--t-micro);
@@ -1733,7 +1734,7 @@ input[type="range"] {
   align-self: flex-start;
   margin-top: 9px;
   padding: 5px 11px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 247, 230, 0.22);
   background: rgba(255, 247, 230, 0.08);
   font-size: var(--t-micro);
@@ -1757,7 +1758,7 @@ input[type="range"] {
 .person__tag {
   margin-left: 7px;
   padding: 1px 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(244, 197, 66, 0.18);
   color: var(--pastis-soft);
   font-size: var(--t-micro);
@@ -1840,7 +1841,7 @@ textarea:focus-visible {
   width: 100%;
   padding: 8px 10px;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--radius-field);
   background: transparent;
   color: var(--cream);
   text-align: left;
@@ -1853,12 +1854,12 @@ textarea:focus-visible {
 }
 
 .locfield__name {
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 700;
 }
 
 .locfield__addr {
-  font-size: 11.5px;
+  font-size: var(--t-micro);
   font-weight: 600;
   color: rgba(255, 247, 230, 0.6);
 }
@@ -1880,8 +1881,6 @@ textarea:focus-visible {
   border: 0;
   padding: 0;
   background: rgba(7, 28, 20, 0.62);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
   cursor: pointer;
 }
 
@@ -1900,7 +1899,7 @@ textarea:focus-visible {
   border-bottom-right-radius: 20px;
   border: 1px solid rgba(255, 247, 230, 0.16);
   border-top: 0;
-  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--elev-2);
 }
 
 .locsearch__bar {
@@ -1914,10 +1913,10 @@ textarea:focus-visible {
   width: 38px;
   height: 40px;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--radius-field);
   background: rgba(255, 247, 230, 0.08);
   color: var(--cream);
-  font-size: 20px;
+  font-size: var(--t-h2);
   line-height: 1;
   cursor: pointer;
 }
@@ -1932,11 +1931,11 @@ textarea:focus-visible {
   min-width: 0;
   height: 40px;
   padding: 0 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-field);
   border: 1px solid rgba(255, 247, 230, 0.24);
   background: rgba(10, 30, 24, 0.9);
   color: var(--cream);
-  font-size: 15px;
+  font-size: var(--t-body);
   font-weight: 600;
 }
 
@@ -1953,10 +1952,10 @@ textarea:focus-visible {
   width: 34px;
   height: 40px;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--radius-field);
   background: transparent;
   color: rgba(255, 247, 230, 0.7);
-  font-size: 14px;
+  font-size: var(--t-ui);
   cursor: pointer;
 }
 
@@ -1974,7 +1973,7 @@ textarea:focus-visible {
 
 .locsearch__hint {
   margin: 8px 4px;
-  font-size: 12.5px;
+  font-size: var(--t-small);
   font-weight: 600;
   color: rgba(255, 247, 230, 0.6);
   line-height: 1.4;
@@ -2001,7 +2000,7 @@ textarea:focus-visible {
 .locsearch__skel-line {
   display: block;
   height: 11px;
-  border-radius: 6px;
+  border-radius: var(--radius-field);
   background: linear-gradient(
     90deg,
     rgba(255, 247, 230, 0.08) 25%,
@@ -2051,7 +2050,7 @@ textarea:focus-visible {
   position: relative;
   isolation: isolate;
   height: 150px;
-  border-radius: 14px;
+  border-radius: var(--radius-object);
   border: 1px solid rgba(255, 247, 230, 0.22);
   overflow: hidden;
 }
@@ -2083,12 +2082,14 @@ textarea:focus-visible {
   flex: 0 0 auto;
   padding: 6px 10px;
   border: 1px solid rgba(255, 247, 230, 0.26);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: rgba(255, 247, 230, 0.8);
   font-size: var(--t-micro);
   font-weight: 800;
   letter-spacing: 0.02em;
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .minimap__expand:hover {
@@ -2117,7 +2118,7 @@ textarea:focus-visible {
   border-radius: 50%;
   background: transparent;
   color: rgba(255, 247, 230, 0.8);
-  font-size: 13px;
+  font-size: var(--t-small);
   line-height: 1;
 }
 
@@ -2158,34 +2159,41 @@ textarea:focus-visible {
 
 .traq__track {
   position: relative;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--traq-track);
   border: 1px solid rgba(255, 247, 230, 0.16);
   overflow: hidden;
+  width: 100%;
+  height: 10px;
 }
 
 .traq__fill {
   position: absolute;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--traq-color);
-  transition:
-    width 0.18s ease,
+  transition: width 0.18s ease,
     height 0.18s ease,
     background-color 0.18s ease;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(var(--traq-ratio) * 100%);
 }
 
 .traq__thumb {
   position: absolute;
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--cream);
   border: 4px solid var(--traq-color);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
-  transition:
-    bottom 0.18s ease,
+  box-shadow: var(--elev-1);
+  transition: bottom 0.18s ease,
     left 0.18s ease,
     border-color 0.18s ease;
+  width: 16px;
+  height: 16px;
+  border-width: 3px;
+  left: clamp(8px, calc(var(--traq-ratio) * 100%), calc(100% - 8px));
+  transform: translateX(-50%);
 }
 
 .traq__head {
@@ -2201,25 +2209,11 @@ textarea:focus-visible {
   align-items: center;
 }
 
-.traq__track {
-  width: 100%;
-  height: 10px;
-}
 
-.traq__fill {
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: calc(var(--traq-ratio) * 100%);
-}
 
-.traq__thumb {
-  width: 16px;
-  height: 16px;
-  border-width: 3px;
-  left: clamp(8px, calc(var(--traq-ratio) * 100%), calc(100% - 8px));
-  transform: translateX(-50%);
-}
+
+
+
 
 /* --- Interactive : piste et curseur élargis pour le doigt, curseur natif
    invisible superposé qui capte le glissement. --- */
@@ -2259,7 +2253,7 @@ textarea:focus-visible {
   background: transparent;
   padding: 0;
   color: var(--text-soft);
-  font-size: 12.5px;
+  font-size: var(--t-small);
   font-weight: 600;
   text-align: left;
   text-decoration: underline;
@@ -2279,17 +2273,14 @@ textarea:focus-visible {
   flex-direction: column;
   min-width: 200px;
   padding: 6px;
-  border: 1px solid rgba(255, 247, 230, 0.22);
-  border-radius: 16px;
-  background: rgba(16, 38, 30, 0.92);
-  backdrop-filter: blur(20px) saturate(1.15);
-  -webkit-backdrop-filter: blur(20px) saturate(1.15);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
+  border-radius: var(--radius-object);
+  background: var(--bg-panel);
+  box-shadow: var(--elev-2);
 }
 
 .maplinks__eyebrow {
   margin: 4px 8px 2px;
-  font-size: 10.5px;
+  font-size: var(--t-micro);
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -2301,10 +2292,10 @@ textarea:focus-visible {
   width: 100%;
   padding: 10px 10px;
   border: 0;
-  border-radius: 11px;
+  border-radius: var(--radius-field);
   background: transparent;
   color: var(--cream);
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 700;
   text-align: left;
   text-decoration: none;
@@ -2335,7 +2326,7 @@ textarea:focus-visible {
 
 .locfield__nearby-note {
   margin: 0;
-  font-size: 11.5px;
+  font-size: var(--t-micro);
   font-weight: 600;
   color: rgba(255, 247, 230, 0.62);
 }
@@ -2367,12 +2358,12 @@ textarea:focus-visible {
   padding: 12px;
   background: rgba(10, 30, 24, 0.7);
   border: 1px solid rgba(255, 247, 230, 0.22);
-  border-radius: 14px;
+  border-radius: var(--radius-object);
 }
 
 .locfield__nearby-prime-text {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--t-micro);
   font-weight: 600;
   line-height: 1.45;
   color: rgba(255, 247, 230, 0.78);
@@ -2389,7 +2380,7 @@ textarea:focus-visible {
   gap: 2px;
   background: rgba(10, 30, 24, 0.7);
   border: 1px solid rgba(255, 247, 230, 0.22);
-  border-radius: 14px;
+  border-radius: var(--radius-object);
   max-height: 240px;
   overflow-y: auto;
 }
@@ -2404,7 +2395,7 @@ textarea:focus-visible {
   position: relative;
   isolation: isolate;
   height: 190px;
-  border-radius: 14px;
+  border-radius: var(--radius-object);
   border: 1px solid rgba(255, 247, 230, 0.22);
   overflow: hidden;
 }
@@ -2434,7 +2425,7 @@ textarea:focus-visible {
   width: 44px;
   height: 44px;
   flex: 0 0 auto;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgba(244, 197, 66, 0.4);
   background: rgba(10, 36, 29, 0.68);
   color: var(--cream);
@@ -2459,14 +2450,14 @@ textarea:focus-visible {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--bar-red);
   border: 2px solid var(--green-900);
   color: #fff;
   font-size: var(--t-micro);
   font-weight: 800;
   line-height: 1;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--elev-1);
 }
 
 /* Centre de notifications. */
@@ -2502,21 +2493,21 @@ textarea:focus-visible {
 
 .notif-item__title {
   font-weight: 800;
-  font-size: 15px;
+  font-size: var(--t-body);
 }
 
 .notif-item__dot {
   flex: 0 0 auto;
   width: 9px;
   height: 9px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--bar-red);
 }
 
 .notif-item__body {
   margin: 6px 0 8px;
   color: rgba(255, 247, 230, 0.86);
-  font-size: 14px;
+  font-size: var(--t-ui);
 }
 
 /* Liste des raisons dans l'onboarding notifications. */
@@ -2534,14 +2525,14 @@ textarea:focus-visible {
   align-items: center;
   gap: 10px;
   font-weight: 600;
-  font-size: 14px;
+  font-size: var(--t-ui);
 }
 
 .notif-reasons__mark {
   flex: 0 0 auto;
   width: 8px;
   height: 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--pastis);
 }
 
@@ -2598,10 +2589,7 @@ textarea:focus-visible {
   }
 }
 
-.cheer-btn {
-  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease,
-    color 160ms ease;
-}
+
 
 .cheer-btn:active:not(:disabled) {
   transform: scale(0.95);
@@ -2653,33 +2641,17 @@ textarea:focus-visible {
 /* ===== Cibles tactiles (app de comptoir : on vise le pouce, verre en main) =====
    La zone de tap monte à 44 px minimum sans grossir le dessin : padding et
    min-height font le travail, le rendu reste inchangé à l'œil. */
-.bk {
-  min-width: 44px;
-  min-height: 44px;
-}
 
-.slot__x {
-  min-height: 44px;
-}
 
-.cheer-btn {
-  min-height: 44px;
-}
 
-.share .cp {
-  min-height: 44px;
-}
 
-.ghost-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-}
 
-.minimap__expand {
-  min-width: 44px;
-  min-height: 44px;
-}
+
+
+
+
+
+
 
 /* ===== Verdict d'un apéro passé : grisé, tamponné « Servi » ===== */
 .verdict--past {
@@ -2694,9 +2666,9 @@ textarea:focus-visible {
   right: var(--space-3);
   padding: 4px 12px;
   border: 2px solid var(--danger);
-  border-radius: 8px;
+  border-radius: var(--radius-field);
   color: #ffd9d4;
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 800;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -2787,7 +2759,7 @@ textarea:focus-visible {
   min-height: 52px;
   padding: 10px 12px;
   border: 1.5px solid var(--line);
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-object);
   background: var(--bg-field);
   color: var(--cream);
   cursor: pointer;
@@ -2844,7 +2816,7 @@ textarea:focus-visible {
 }
 
 .choice__desc {
-  font-size: 12.5px;
+  font-size: var(--t-small);
   font-weight: 500;
   line-height: 1.3;
   color: rgba(255, 247, 230, 0.62);
@@ -2931,7 +2903,7 @@ textarea:focus-visible {
   border-radius: 50%;
   background: var(--pastis);
   color: var(--ink);
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 900;
 }
 
@@ -2951,7 +2923,7 @@ textarea:focus-visible {
 
 .formsec__title {
   margin: 0;
-  font-size: 19px;
+  font-size: var(--t-title);
   font-weight: 800;
   line-height: 1.15;
   color: var(--cream);
@@ -2962,7 +2934,7 @@ textarea:focus-visible {
 
 .formsec__lead {
   margin: 0;
-  font-size: 13.5px;
+  font-size: var(--t-label);
   font-weight: 500;
   line-height: 1.38;
   color: var(--text-soft);
@@ -3029,7 +3001,7 @@ textarea:focus-visible {
 }
 
 .disclose__summary {
-  font-size: 12.5px;
+  font-size: var(--t-small);
   font-weight: 500;
   color: var(--text-soft);
 }
@@ -3038,9 +3010,9 @@ textarea:focus-visible {
   flex: 0 0 auto;
   min-width: 24px;
   padding: 2px 8px;
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-pill);
   background: none;
-  font-size: 12px;
+  font-size: var(--t-micro);
   font-weight: 800;
   text-align: center;
   color: rgba(255, 247, 230, 0.8);
@@ -3083,7 +3055,7 @@ textarea:focus-visible {
 
 .actionbar__status {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 700;
   line-height: 1.3;
   text-align: center;
@@ -3127,8 +3099,6 @@ textarea:focus-visible {
   position: absolute;
   inset: 0;
   background: rgba(5, 20, 14, 0.66);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
 }
 
 .formsheet__panel {
@@ -3139,7 +3109,7 @@ textarea:focus-visible {
   max-height: 94dvh;
   border-radius: var(--radius-object) var(--radius-object) 0 0;
   background: var(--bg-panel);
-  box-shadow: 0 -18px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--elev-2);
   overflow: hidden;
 }
 
@@ -3161,7 +3131,7 @@ textarea:focus-visible {
 
 .formsheet__title {
   margin: 0;
-  font-size: 20px;
+  font-size: var(--t-h2);
   font-weight: 800;
   line-height: 1.1;
   color: var(--cream);
@@ -3169,7 +3139,7 @@ textarea:focus-visible {
 
 .formsheet__lead {
   margin: 0;
-  font-size: 13.5px;
+  font-size: var(--t-label);
   font-weight: 500;
   line-height: 1.38;
   color: rgba(255, 247, 230, 0.68);
@@ -3256,7 +3226,7 @@ textarea:focus-visible {
 }
 
 .recap__vote {
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 600;
   color: var(--text-soft);
 }
@@ -3276,7 +3246,7 @@ textarea:focus-visible {
 }
 
 .recap__slot {
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 600;
   color: var(--text-soft);
 }
@@ -3284,9 +3254,9 @@ textarea:focus-visible {
 .recap__answer {
   flex: 0 0 auto;
   padding: 2px 9px;
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-pill);
   background: none;
-  font-size: 12px;
+  font-size: var(--t-micro);
   font-weight: 800;
   color: rgba(255, 247, 230, 0.72);
   border: 1px solid currentColor;
@@ -3324,7 +3294,7 @@ textarea:focus-visible {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 14px;
-  font-size: 13px;
+  font-size: var(--t-small);
   font-weight: 600;
   color: var(--text-soft);
 }
@@ -3414,7 +3384,7 @@ textarea:focus-visible {
 .h3 {
   margin: 14px 0 0;
   font-family: "Manrope", system-ui, sans-serif;
-  font-size: 15px;
+  font-size: var(--t-body);
   font-weight: 700;
   letter-spacing: -0.005em;
   color: var(--pastis-soft);
@@ -3426,7 +3396,7 @@ textarea:focus-visible {
   display: grid;
   gap: 9px;
   color: rgba(255, 247, 230, 0.82);
-  font-size: 13.5px;
+  font-size: var(--t-label);
   font-weight: 500;
   line-height: 1.5;
 }
@@ -3443,7 +3413,7 @@ textarea:focus-visible {
 
 .legal-list code {
   font-family: "DM Mono", ui-monospace, monospace;
-  font-size: 12.5px;
+  font-size: var(--t-small);
   color: var(--pastis-soft);
 }
 
@@ -3454,7 +3424,7 @@ textarea:focus-visible {
   padding: var(--space-1) 0 var(--space-1) var(--space-4);
   border: 0;
   color: var(--text-soft);
-  font-size: 12px;
+  font-size: var(--t-micro);
   font-weight: 600;
   line-height: 1.5;
   text-align: left;
