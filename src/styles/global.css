@@ -247,11 +247,11 @@ a {
   background: var(--overlay-deep);
 }
 
-/* Voile du plan (écrans migrés au registre) : uniforme sous la colonne de
+/* Voile du plan (toute page au registre) : uniforme sous la colonne de
    lecture, où le texte peut être posé à même le plan ; allégé de part et
    d'autre sur grand écran, où il ne porte aucun texte. Sur téléphone, la
    colonne couvre tout l'écran. */
-.screen-overlay--registre {
+.registre > .screen-overlay {
   background: linear-gradient(
     90deg,
     var(--bg-page-edge) calc(50% - 288px),
@@ -409,6 +409,7 @@ a {
 }
 
 .brandpill--button {
+  min-height: 44px;
   cursor: pointer;
   border-color: rgba(244, 197, 66, 0.4);
   background: rgba(10, 36, 29, 0.68);
@@ -2457,8 +2458,8 @@ textarea:focus-visible {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   flex: 0 0 auto;
   border-radius: 999px;
   border: 1px solid rgba(244, 197, 66, 0.4);
@@ -3538,8 +3539,9 @@ textarea:focus-visible {
 .registre .slot,
 .registre .draft-resume,
 .registre .switchrow__button,
-.registre .wall-item,
 .registre .cnt,
+.registre .badge-medal,
+.registre .legal-sobriety,
 .registre .disclose,
 .registre .recap,
 .registre .recap__row {
@@ -3566,7 +3568,7 @@ textarea:focus-visible {
 
 /* Un surtitre qui ouvre une section du registre porte le même filet. */
 .sheet.registre > .eyebrow,
-.registre .sheet:not(.sheet--hero, .modal-sheet) > .eyebrow:first-child,
+.registre .sheet:not(.sheet--hero, .modal-sheet):not(:has(> .accent)) > .eyebrow:first-child,
 .registre .sheet:not(.sheet--hero, .modal-sheet) > div:first-child > .eyebrow:first-child {
   padding-bottom: var(--space-3);
   border-bottom: var(--filet);
@@ -3621,6 +3623,12 @@ textarea:focus-visible {
 .registre .locfield__picked,
 .registre .osm-credit,
 .registre .ghost-link:not(.ghost-link--danger),
+.registre .hint,
+.registre .meta,
+.registre .traq__value--empty,
+.registre .maplinks__trigger,
+.registre .badge-medal__desc,
+.registre .legal-sobriety,
 .registre .factline,
 .registre .person__sub,
 .registre .wall-item__when,
@@ -3643,7 +3651,10 @@ textarea:focus-visible {
 .registre .person > i,
 .registre .person__tag,
 .registre .wall-item__when,
-.registre .cnt span {
+.registre .cnt span,
+.registre .palmares-tag,
+.registre .minimap__expand,
+.registre .badge-medal__desc {
   font-size: var(--t-micro);
 }
 
@@ -3929,12 +3940,12 @@ textarea:focus-visible {
   border-top: 0;
 }
 
+/* Un mot du mur est un objet posé (un niveau) : fond champ et filet fin,
+   pas le filet franc, qui promettrait un clic qu'il n'offre pas. */
 .registre .wall-item {
-  padding: var(--space-2) 0;
-}
-
-.registre .wall-item + .wall-item {
-  border-top: var(--filet);
+  border: var(--filet);
+  border-radius: var(--radius-object);
+  background: var(--bg-field);
 }
 
 /* Le lien à partager est un objet (on le copie) ; « Copier » un bouton. */
@@ -3965,4 +3976,77 @@ textarea:focus-visible {
 
 .registre .modal-sheet {
   box-shadow: var(--elev-2);
+}
+
+/* ---- Listes de pages : ardoise, carnet, tablées ----
+   Une entrée par apéro, une section : le surtitre ouvre l'entrée avec son
+   filet, l'espace sépare les entrées. Plus de carte par apéro. */
+.registre .event-stack {
+  gap: var(--space-6);
+}
+
+/* La notification est un objet qu'on ouvre : filet franc, fond champ ;
+   non lue, son filet passe au pastis (la pastille rouge reste). */
+.registre .sheet.notif-item {
+  padding: var(--space-3) var(--space-4);
+  border: var(--filet-fort);
+  border-radius: var(--radius-object);
+  background: var(--bg-field);
+}
+
+.registre .sheet.notif-item--unread {
+  border-color: var(--pastis);
+}
+
+/* ---- Palmarès : moment rare, intensité maximale de la même matière ----
+   Chaque lauréat s'ouvre sur le double filet de la page de garde ; chaque
+   breloque est une ligne du registre, son disque frappé comme un tampon
+   (double cercle). Aucune autre dimension n'est dépensée. */
+.registre .event-stack > .sheet:has(.palmares-head) {
+  padding-top: var(--space-4);
+  border-top: 3px double var(--filet-fort-color);
+}
+
+.registre .badge-medal {
+  padding: var(--space-2) 0;
+}
+
+.registre .badge-medal + .badge-medal {
+  border-top: var(--filet);
+}
+
+.registre .badge-medal__disc {
+  outline: 1.5px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Mention sanitaire : une note en marge, comme les autres. */
+.registre .legal-sobriety {
+  padding: var(--space-1) 0 var(--space-1) var(--space-4);
+  border-left: 2px solid var(--filet-fort-color);
+  text-align: left;
+}
+
+/* ---- Passé : en retrait par la forme, pas par la transparence ----
+   L'opacité réduite faisait tomber tout le texte du verdict passé sous
+   4,5:1 (le tampon « Servi » à 1:1). Le retrait passe désormais par le
+   contour pointillé sans teinte pastis, et le tampon garde sa couleur
+   d'état en nuance claire. */
+.registre .verdict--past,
+.registre .sheet--past {
+  opacity: 1;
+}
+
+.registre .verdict--past {
+  border-style: dashed;
+  background: none;
+}
+
+.registre .verdict__stamp {
+  border-color: var(--danger);
+  color: #ffd9d4;
+}
+
+.registre .sheet--past > .eyebrow {
+  color: var(--text-soft);
 }
