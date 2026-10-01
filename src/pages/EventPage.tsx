@@ -217,7 +217,7 @@ export function EventPage() {
     normalizeMemberName(comptoirName) === normalizeMemberName(event.organizerName);
 
   return (
-    <MobilePage className="event-mobile" overlay="scene">
+    <MobilePage className="event-mobile registre" overlay="registre">
       <MobileHeader eyebrow="Ton apéro" title={event.ceremonialName} meta={metaText} />
       {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
 

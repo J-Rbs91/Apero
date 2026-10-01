@@ -3538,6 +3538,8 @@ textarea:focus-visible {
 .registre .slot,
 .registre .draft-resume,
 .registre .switchrow__button,
+.registre .wall-item,
+.registre .cnt,
 .registre .disclose,
 .registre .recap,
 .registre .recap__row {
@@ -3563,7 +3565,9 @@ textarea:focus-visible {
 }
 
 /* Un surtitre qui ouvre une section du registre porte le même filet. */
-.registre > .eyebrow {
+.sheet.registre > .eyebrow,
+.registre .sheet:not(.sheet--hero, .modal-sheet) > .eyebrow:first-child,
+.registre .sheet:not(.sheet--hero, .modal-sheet) > div:first-child > .eyebrow:first-child {
   padding-bottom: var(--space-3);
   border-bottom: var(--filet);
 }
@@ -3616,7 +3620,11 @@ textarea:focus-visible {
 .registre .switchrow__aside,
 .registre .locfield__picked,
 .registre .osm-credit,
-.registre .ghost-link:not(.ghost-link--danger) {
+.registre .ghost-link:not(.ghost-link--danger),
+.registre .factline,
+.registre .person__sub,
+.registre .wall-item__when,
+.registre .share code {
   color: var(--text-soft);
 }
 
@@ -3630,7 +3638,12 @@ textarea:focus-visible {
 .registre .traq__value,
 .registre .locfield__picked,
 .registre .locfield__nearby-toggle,
-.registre .osm-credit {
+.registre .osm-credit,
+.registre .tag,
+.registre .person > i,
+.registre .person__tag,
+.registre .wall-item__when,
+.registre .cnt span {
   font-size: var(--t-micro);
 }
 
@@ -3821,7 +3834,7 @@ textarea:focus-visible {
 }
 
 .registre .recap__answer--no {
-  padding: 0 7px;
+  padding: 1px 7px;
 }
 
 /* ---- Formulaire de création ----
@@ -3862,4 +3875,82 @@ textarea:focus-visible {
 .registre > .mobile-page__inner::after {
   flex: 0 0 calc(var(--space-4) + env(safe-area-inset-bottom));
   content: "";
+}
+
+/* ---- Page d'apéro ----
+   La carte de tête devient l'en-tête du registre : à plat, close par un
+   double filet (la page de garde). Le verdict est le seul objet teinté
+   pastis de la page. Les volets se suivent en lignes de registre. */
+.registre .sheet.sheet--hero {
+  padding-bottom: var(--space-5);
+  border-bottom: 3px double var(--filet-fort-color);
+}
+
+.registre .verdict {
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-object);
+  background: rgba(244, 197, 66, 0.1);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* Sur la teinte pastis, le texte secondaire passe en crème plein : le
+   plancher calibré pour le plan ne suffit plus. */
+.registre .verdict .eyebrow {
+  color: var(--pastis-soft);
+}
+
+.registre .verdict .meta,
+.registre .verdict .traq__value--empty,
+.registre .cnt span {
+  color: var(--cream);
+}
+
+/* Les trois compteurs : colonnes d'un registre, séparées par un filet. */
+.registre .cnt + .cnt {
+  border-left: var(--filet);
+}
+
+.registre .disclose + .disclose {
+  margin-top: calc(var(--space-3) * -1);
+  border-top: 0;
+}
+
+.registre .wall-item {
+  padding: var(--space-2) 0;
+}
+
+.registre .wall-item + .wall-item {
+  border-top: var(--filet);
+}
+
+/* Le lien à partager est un objet (on le copie) ; « Copier » un bouton. */
+.registre .share {
+  border-color: var(--filet-fort-color);
+  border-radius: var(--radius-object);
+  background: var(--bg-field);
+}
+
+.registre .share .cp,
+.registre .button--quiet {
+  border-color: var(--filet-fort-color);
+}
+
+.registre .button--quiet {
+  background: var(--bg-field);
+}
+
+/* ---- Overlays de la page : modale et feuille de saisie ----
+   Panneau opaque et ombre, sans bordure ni verre. */
+.registre .modal-sheet,
+.registre .formsheet__panel {
+  border: 0;
+  background: var(--bg-panel);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.registre .modal-sheet {
+  box-shadow: var(--elev-2);
 }
