@@ -3798,7 +3798,8 @@ textarea:focus-visible {
    le texte et le faisait passer sous 4,5:1 au pire pixel du décor). Le
    rouge d'état y prend sa nuance claire, déjà en usage pour le texte. */
 .registre .slot__state,
-.registre .recap__answer {
+.registre .recap__answer,
+.registre .disclose__badge {
   border: 1px solid currentColor;
   background: none;
 }
@@ -3907,9 +3908,20 @@ textarea:focus-visible {
   color: var(--cream);
 }
 
-/* Les trois compteurs : colonnes d'un registre, séparées par un filet. */
+/* Les trois compteurs : colonnes d'un registre, séparées par un filet.
+   À 12 px, « Désertions » ne tient dans un tiers de 320 px qu'en
+   resserrant l'interlettrage et la marge interne. */
+.registre .cnt {
+  min-width: 0;
+  padding-inline: 0;
+}
+
 .registre .cnt + .cnt {
   border-left: var(--filet);
+}
+
+.registre .cnt span {
+  letter-spacing: 0;
 }
 
 .registre .disclose + .disclose {
