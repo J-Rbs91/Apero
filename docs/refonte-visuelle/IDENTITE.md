@@ -105,7 +105,13 @@ décoratives `aria-hidden` sont exclues. Maximum 2.
 - Une carte dans une carte ; un fond ou une ombre sur une section.
 - Du texte posé sur la photo hors du voile calibré, ou sous le plancher de
   texte secondaire.
-- Le pastis en filet, en fond de section ou en titre de section.
+- Le pastis en filet décoratif, en fond de section ou en titre de section.
+  **Tranché (01/10/2026)** : la marge pointillée pastis d'un créneau « à
+  remplir » n'est pas un filet décoratif, c'est l'état « incomplet », porté par
+  un bord pastis avant la refonte (`PO-VISION.md` §5.1, dérive D-3). Elle ne
+  sert à rien d'autre ; le même pastis sur un séparateur ou un titre reste
+  interdit. Même règle pour le contour pastis des pastilles d'état (« À voter »,
+  « J'y serai »).
 - Une seconde police, un nouveau flou, une animation d'entrée : hors budget
   d'écart (une seule dimension : matière et surface).
 - Retirer une classe historique du DOM pour « nettoyer » (accroches des tests,

@@ -3585,7 +3585,13 @@ textarea:focus-visible {
   letter-spacing: 0.07em;
 }
 
-/* Le compteur n/m se lit comme un total de registre, sans pastille. */
+/* Le compteur n/m se lit comme un total de registre, sans pastille, posé
+   sur la même ligne de base que le titre de la section. */
+.registre .formsec__titles,
+.registre .formsec__status {
+  align-self: baseline;
+}
+
 .registre .formsec__status {
   padding: 0;
   background: none;
@@ -3764,4 +3770,31 @@ textarea:focus-visible {
 .registre .field__error {
   background: none;
   color: #ffd9d4;
+}
+
+/* Le contour porte la couleur d'état franche, le texte reste clair. La
+   forme double la couleur : trait plein pour un oui, pointillé pour un
+   « je me tâte » (pas tranché, comme la marge d'un créneau à remplir),
+   trait double pour un refus. */
+.registre .recap__answer--yes,
+.registre .slot__state--todo {
+  border-color: var(--pastis);
+}
+
+.registre .recap__answer--maybe {
+  border-style: dashed;
+}
+
+.registre .recap__answer--no,
+.registre .slot--error .slot__state--todo {
+  border: 3px double var(--danger);
+}
+
+/* Le trait double prend la place du padding : la pastille garde sa taille. */
+.registre .slot--error .slot__state--todo {
+  padding: 1px 7px;
+}
+
+.registre .recap__answer--no {
+  padding: 0 7px;
 }

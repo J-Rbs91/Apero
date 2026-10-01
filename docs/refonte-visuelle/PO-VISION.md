@@ -394,6 +394,7 @@ Chaque critère a une méthode. « Réussie » = tous les critères R tiennent.
 | R11 | **Coup d'œil des parcours** | Pour P1 à P6, capture 390 × 844 du premier écran : les éléments listés en section 3 sont visibles sans défiler (sauf mention). Grille cochée, un élément manquant = échec |
 | R12 | **Identité tenue** (tests de `distinctive-direction.md` §7) | *Substitution* : masquer nom et données sur 3 captures (`/invite`, `/agenda`, `/registre-legal`) et les poser à côté d'une app d'agenda générique : un tiers les rattache au même produit. *Trois écrans* : décor zinc, pastis et voix identifiables sur les trois |
 | R13 | **Pas de nouvelle dépendance, poids maîtrisé** | `git diff package.json` vide ; CSS livré (`npm run build`) ≤ 59 913 octets × 1,05 |
+| R13 bis | **Dette de poids consignée** (ajout du 01/10/2026, seule modification de ce document, faite sur autorisation de l'orchestrateur) | Dépassement accepté pendant la migration : plafond R13 = 62 910 octets, CSS livré ≈ 64 041 octets à la validation du pilote. Cause : les règles de rôle `.registre` coexistent avec les règles de surface historiques. **Remboursement : fin de migration**, par suppression des règles historiques une fois `.registre` devenu le défaut ; R13 redevient alors opposable sans dérogation |
 | R14 | **Mouvement** | Toute animation ajoutée a sa règle `prefers-reduced-motion: reduce` ; vérifié en émulation |
 | R15 | **Navigation intacte** | `npm run test:nav` 23/23 et les six vérifications manuelles de `docs/NAVIGATION.md` §4 sur un vrai téléphone |
 
