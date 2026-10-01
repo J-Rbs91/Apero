@@ -1949,8 +1949,8 @@ textarea:focus-visible {
 
 .locsearch__clear {
   flex: 0 0 auto;
-  width: 34px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border: 0;
   border-radius: var(--radius-field);
   background: transparent;
@@ -2260,6 +2260,7 @@ textarea:focus-visible {
   text-decoration-style: dotted;
   text-underline-offset: 3px;
   cursor: pointer;
+  min-height: 44px;
 }
 
 .maplinks__trigger:hover {
@@ -3548,6 +3549,12 @@ form.sheet {
 .verdict .meta,
 .verdict .traq__value--empty {
   color: var(--cream);
+}
+
+/* Le tampon « Servi » mord sur le haut du verdict : le surtitre lui laisse
+   sa place au lieu de passer dessous. */
+.verdict--past > .eyebrow {
+  padding-right: 104px;
 }
 
 .cnt + .cnt {
