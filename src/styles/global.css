@@ -90,6 +90,54 @@
   --t-label: 13.5px;
   --t-body: 15px;
   --t-lede: 15.5px;
+
+  /* ---- Refonte visuelle : le registre de zinc -------------------------
+     Fondations ajoutées, aucun jeton existant remplacé. Un écran migre en
+     posant .registre sur sa section (bloc « Rôles de surface » en fin de
+     feuille). Le pourquoi : docs/refonte-visuelle/IDENTITE.md. Les valeurs
+     ne vivent qu'ici. */
+
+  /* Espacement : sept pas, rien entre deux. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Rayons : ce qu'on remplit ou qu'on étiquette (champ, chip), ce qu'on
+     manipule ou qui flotte (objet), et la pilule des boutons. */
+  --radius-field: 10px;
+  --radius-object: 14px;
+  --radius-pill: 999px;
+
+  /* Élévation : 0 posé à plat, 1 objet décollé sans bordure, 2 ce qui
+     flotte. Bordure OU ombre pour un même rôle, jamais les deux. */
+  --elev-0: none;
+  --elev-1: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --elev-2: 0 14px 34px rgba(0, 0, 0, 0.42);
+
+  /* Filets : le fin sépare (décoratif), le franc délimite un objet qu'on
+     manipule et tient 3:1 sur le plan au pire pixel du décor. */
+  --filet-color: rgba(255, 247, 230, 0.2);
+  --filet-fort-color: rgba(255, 247, 230, 0.5);
+  --filet: 1px solid var(--filet-color);
+  --filet-fort: 1.5px solid var(--filet-fort-color);
+
+  /* Fonds : la page (voile posé sur le zinc), le panneau (ce qui flotte,
+     opaque), le champ (ce qui se remplit ou se coche). Le voile de page
+     est calibré sur le pixel le plus clair de la photo (la fenêtre) :
+     le texte posé à même le plan tient 4,5:1 à toute position de
+     défilement s'il est au moins à --text-soft. Hors de la colonne de
+     lecture (grand écran), le voile s'allège et le décor reparaît. */
+  --bg-page: rgba(7, 28, 20, 0.75);
+  --bg-page-edge: rgba(7, 28, 20, 0.38);
+  --bg-panel: rgba(12, 34, 25, 0.96);
+  --bg-field: rgba(255, 247, 230, 0.07);
+
+  /* Texte secondaire posé à même le plan : plancher de luminance. */
+  --text-soft: rgba(255, 247, 230, 0.8);
 }
 
 /* Libellé réservé aux lecteurs d'écran (légende d'un groupe déjà titré). */
