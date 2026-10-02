@@ -46,11 +46,9 @@
   --pastis: #f4c542;
   --pastis-soft: #ffe39a;
   --bar-red: #b8322b;
-  --bar-red-dark: #9f2e24;
   --calm-blue: #2f6fb0;
   --cream: #fff7e6;
   --ink: #241a12;
-  --muted: rgba(255, 247, 230, 0.6);
 
   --overlay-deep: linear-gradient(180deg, rgba(7, 28, 20, 0.18), rgba(7, 28, 20, 0.52));
 
@@ -60,6 +58,7 @@
      qu'une chose, « ça coince » ou « c'est passé ». */
   --danger: #ff8f85;
   --danger-strong: #b8322b;
+  --danger-soft: #ffd9d4;
   --ok: #9fdcae;
 
   /* Traits et fonds : trois niveaux, pas un de plus. */
@@ -128,6 +127,9 @@
   --bg-page-edge: rgba(7, 28, 20, 0.38);
   --bg-panel: rgb(12, 34, 25);
   --bg-field: rgba(17, 52, 42, 0.92);
+  /* Voile d'une modale ou d'une feuille : assez dense pour que la page
+     derrière ne se lise plus (il remplace l'ancien flou). */
+  --bg-scrim: rgba(5, 20, 14, 0.82);
 
   /* Texte secondaire posé à même le plan : plancher de luminance. */
   --text-soft: rgba(255, 247, 230, 0.8);
@@ -528,7 +530,6 @@ a {
 /* ===== Frosted glass sheet — signature container ===== */
 .sheet {
   padding: 0;
-  color: var(--cream);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -560,7 +561,7 @@ a {
   text-align: center;
   text-decoration: none;
   color: var(--ink);
-  transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease,
+  transition: transform 140ms ease, background 140ms ease,
     border-color 140ms ease;
 }
 
@@ -579,16 +580,13 @@ a {
 .button--primary {
   color: var(--ink);
   background: var(--pastis);
-  box-shadow: var(--elev-1);
 }
 
 .button--primary:hover {
   background: var(--pastis-soft);
 }
 
-.button--primary:disabled {
-  box-shadow: none;
-}
+
 
 /* Action secondaire : contour net, jamais rempli. */
 .button--ghost {
@@ -661,7 +659,7 @@ a {
 }
 
 .ghost-link--danger:hover {
-  color: #ffd9d4;
+  color: var(--danger-soft);
 }
 
 /* ===== Back row ===== */
@@ -766,7 +764,7 @@ a {
   font-size: var(--t-small);
   font-weight: 700;
   line-height: 1.35;
-  color: #ffd9d4;
+  color: var(--danger-soft);
 }
 
 .field__error::before {
@@ -859,10 +857,11 @@ input[type="range"] {
 }
 
 .wall-item {
-  padding: 10px 12px;
-  border: var(--filet);
-  border-radius: var(--radius-object);
-  background: var(--bg-field);
+  padding: var(--space-1) 0 var(--space-1) var(--space-3);
+  border: 0;
+  border-radius: 0;
+  background: none;
+  border-left: 2px solid var(--filet-color);
 }
 
 .wall-item__head {
@@ -953,7 +952,6 @@ input[type="range"] {
   padding: var(--space-1) 0 var(--space-1) var(--space-4);
   border: 0;
   border-radius: 0;
-  background: none;
   position: relative;
   border-left: 2px solid var(--filet-fort-color);
 }
@@ -1393,7 +1391,7 @@ input[type="range"] {
    trouver en premier (DECISIONS.md D1). */
 .feedback {
   margin: 0;
-  color: #ffd9d4;
+  color: var(--danger-soft);
   font-size: var(--t-small);
   font-weight: 600;
   line-height: 1.4;
@@ -1459,11 +1457,11 @@ input[type="range"] {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 20;
+  z-index: 40;
   display: grid;
   place-items: center;
   padding: 16px;
-  background: rgba(7, 28, 20, 0.62);
+  background: var(--bg-scrim);
 }
 
 .modal-sheet {
@@ -1472,7 +1470,7 @@ input[type="range"] {
   padding: 18px var(--space-4);
   border-radius: var(--radius-object);
   background: var(--bg-panel);
-  box-shadow: var(--elev-2);
+  border: var(--filet);
 }
 
 /* ===== Loading ===== */
@@ -1751,7 +1749,7 @@ input[type="range"] {
 .tag--no {
   border-color: rgba(184, 50, 43, 0.5);
   background: rgba(184, 50, 43, 0.2);
-  color: #ffd9d4;
+  color: var(--danger-soft);
 }
 
 /* Renforts d'un convive, accolés à son blaze dans la liste. */
@@ -1880,7 +1878,7 @@ textarea:focus-visible {
   inset: 0;
   border: 0;
   padding: 0;
-  background: rgba(7, 28, 20, 0.62);
+  background: var(--bg-scrim);
   cursor: pointer;
 }
 
@@ -1895,11 +1893,10 @@ textarea:focus-visible {
   max-height: 100dvh;
   padding: calc(env(safe-area-inset-top, 0px) + 10px) 12px 12px;
   background: rgba(8, 26, 20, 0.98);
-  border-bottom-left-radius: 20px;
-  border-bottom-right-radius: 20px;
-  border: 1px solid rgba(255, 247, 230, 0.16);
+  border-bottom-left-radius: var(--radius-object);
+  border-bottom-right-radius: var(--radius-object);
+  border: var(--filet);
   border-top: 0;
-  box-shadow: var(--elev-2);
 }
 
 .locsearch__bar {
@@ -2345,6 +2342,9 @@ textarea:focus-visible {
 .osm-credit a {
   color: inherit;
   text-decoration: underline;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 
 .locfield__nearby-credit {
@@ -2668,7 +2668,7 @@ textarea:focus-visible {
   padding: 4px 12px;
   border: 2px solid var(--danger);
   border-radius: var(--radius-field);
-  color: #ffd9d4;
+  color: var(--danger);
   font-size: var(--t-small);
   font-weight: 800;
   letter-spacing: 0.22em;
@@ -2924,13 +2924,7 @@ textarea:focus-visible {
 
 .formsec__title {
   margin: 0;
-  font-size: var(--t-title);
-  font-weight: 800;
-  line-height: 1.15;
   color: var(--cream);
-  font-variant-caps: all-small-caps;
-  font-synthesis-small-caps: auto;
-  letter-spacing: 0.07em;
 }
 
 .formsec__lead {
@@ -2960,7 +2954,6 @@ textarea:focus-visible {
 /* ---- Volet repliable ---- */
 .disclose {
   flex: 0 0 auto;
-  border: 0;
   overflow: hidden;
   border-block: var(--filet);
 }
@@ -2996,10 +2989,18 @@ textarea:focus-visible {
   min-width: 0;
 }
 
+/* Titres du registre (section, volet) : petites capitales. */
+.formsec__title,
 .disclose__title {
-  font-size: var(--t-label);
+  font-size: var(--t-title);
+  font-variant-caps: all-small-caps;
+  font-synthesis-small-caps: auto;
+  letter-spacing: 0.07em;
+  line-height: 1.15;
   font-weight: 800;
 }
+
+
 
 .disclose__summary {
   font-size: var(--t-small);
@@ -3099,7 +3100,7 @@ textarea:focus-visible {
 .formsheet__scrim {
   position: absolute;
   inset: 0;
-  background: rgba(5, 20, 14, 0.66);
+  background: var(--bg-scrim);
 }
 
 .formsheet__panel {
@@ -3110,8 +3111,9 @@ textarea:focus-visible {
   max-height: 94dvh;
   border-radius: var(--radius-object) var(--radius-object) 0 0;
   background: var(--bg-panel);
-  box-shadow: var(--elev-2);
   overflow: hidden;
+  border: var(--filet);
+  border-bottom: 0;
 }
 
 .formsheet__head {
@@ -3274,7 +3276,7 @@ textarea:focus-visible {
 }
 
 .recap__answer--no {
-  color: #ffd9d4;
+  color: var(--danger-soft);
   border: 3px double var(--danger);
   padding: 1px 7px;
 }
@@ -3338,7 +3340,7 @@ textarea:focus-visible {
 }
 
 .slot--error .slot__state--todo {
-  color: #ffd9d4;
+  color: var(--danger-soft);
   border: 3px double var(--danger);
   padding: 1px 7px;
 }
@@ -3457,6 +3459,14 @@ textarea:focus-visible {
 
 /* La barre d'action se colle au ras du bas : le retrait de fin de page
    passe du padding à un espaceur en fin de flux. */
+/* Accueil et onboarding : le texte vit en bas de l'écran ; en haut, le
+   voile s'allège pour laisser respirer le zinc. Calibré sur la position
+   réelle du texte (mesure sur pixels décodés). */
+.home-mobile > .screen-overlay,
+.onboarding-screen > .screen-overlay {
+  mask-image: linear-gradient(rgba(0, 0, 0, 0.5), #000 20%);
+}
+
 .mobile-page__inner::after {
   flex: 0 0 calc(var(--space-4) + env(safe-area-inset-bottom));
   content: "";
