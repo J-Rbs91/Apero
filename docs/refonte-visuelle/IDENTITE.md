@@ -108,8 +108,20 @@ décoratives `aria-hidden` sont exclues. Maximum 2.
   filet franc : le filet franc promettrait un clic que le mur n'offre pas.
 - Le passé se dit par la forme (contour pointillé, surtitre non pastis, tampon),
   jamais par l'opacité, qui faisait tomber tout le texte sous 4,5:1.
-- Le bouton plein garde l'élévation 1 (ombre sombre) au lieu de son halo pastis :
-  il reste le seul aplat pastis de l'écran, ce qui suffit à le distinguer.
+- Le bouton plein n'a plus d'ombre (ni halo pastis, ni ombre sombre) : il est
+  le seul aplat pastis de l'écran, ce qui suffit à le distinguer ; l'ombre
+  reste réservée à ce qui flotte, et un halo pastis serait du pastis en décor.
+- Un mot du mur ou du palmarès de tablée est une inscription en marge (filet
+  de marge fin, sans fond) : il ne doit pas ressembler à une notification,
+  qu'on ouvre.
+- Panneau posé sur un voile (modale, feuille, recherche de lieu) : bord net au
+  filet fin, sans ombre (invisible sur voile sombre) ; voile `--bg-scrim`
+  assez dense pour que la page derrière ne se lise plus. Ce qui flotte sans
+  voile (barre d'action, menus) garde l'ombre.
+- Titres de volets en petites capitales, comme les titres de section.
+- Accueil et onboarding : le voile s'allège dans le haut de l'écran, là où il
+  n'y a pas de texte, pour laisser vivre le zinc ; calibré sur la position
+  réelle du texte à 320, 360 et 390 px.
 - Mesure de profondeur : un filet séparateur entre deux blocs frères (posé en
   pseudo-élément) et le voile d'une modale ne sont pas des surfaces
   enveloppantes ; ils ne comptent pas. Les cartes Leaflet sont des images de
