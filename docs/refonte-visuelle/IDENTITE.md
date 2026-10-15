@@ -1,3 +1,5 @@
+> **Historique (01/10/2026).** Cette identité « registre de zinc » est remplacée pour la nouvelle refonte par [La Gazette des Copains](../design/UXER-GAZETTE.md). Les décisions fonctionnelles conservées restent dans docs/DESIGN-SYSTEM.md. Le statut « en vigueur » ci-dessous décrit uniquement l'ancienne migration.
+
 # IDENTITE : le registre de zinc
 
 > Noyau d'identité de la refonte visuelle. **Jetable avec la refonte**, comme
