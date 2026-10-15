@@ -1,3 +1,5 @@
+> **Design 2026-10-15 :** la direction artistique actuelle se trouve dans [La Gazette des Copains](design/UXER-GAZETTE.md), avec les styles dans src/styles/gazette.css après global.css. Les règles fonctionnelles ci-dessous restent en vigueur (libellés, états, affordances, actions), mais les anciennes descriptions de couleur/surface/typographie ne font plus foi.
+
 # Le kit d'interface de la Confrérie
 
 Ce document décrit les règles de l'interface après la refonte. Elles ne sont pas
