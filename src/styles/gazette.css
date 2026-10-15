@@ -494,3 +494,40 @@ input::placeholder, textarea::placeholder { color: #c3afa7; opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
   .brand-menu__panel, .brand-menu__overlay { animation: none; }
 }
+
+/* K. Finish the shared identity at the outer edges of the product. */
+.notif-bell {
+  background: rgba(255, 238, 223, 0.065);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+}
+.notif-bell:hover, .notif-bell:focus-visible {
+  background: var(--fill);
+  border-color: var(--pastis);
+}
+.cheer-btn:hover { border-color: var(--pastis); }
+.cheer-btn--on {
+  background: rgba(244, 188, 138, .13);
+  border-color: var(--pastis);
+}
+.tag--yes, .person__tag {
+  background: rgba(244, 188, 138, .13);
+  border-color: var(--pastis);
+}
+.splash {
+  background-image:
+    radial-gradient(ellipse at 50% 36%, rgba(139, 67, 77, .27), transparent 70%),
+    linear-gradient(155deg, #2c1c26, #1e171b 64%, #151318);
+  background-color: var(--comptoir-open);
+}
+.splash__name {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(37px, 8vw, 55px);
+  line-height: 1.06;
+  font-weight: 500;
+  letter-spacing: -.04em;
+  text-shadow: none;
+}
+.splash__eyebrow { color: var(--pastis); }
+.splash__tagline { color: var(--cream); }
+.splash__aside { color: var(--text-soft); }
