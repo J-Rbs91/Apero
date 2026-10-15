@@ -1,5 +1,3 @@
-> **Mandat supersédé pour la direction artistique (15/10/2026).** La nouvelle carte blanche autorise une autre identité, décrite dans [La Gazette des Copains](../design/UXER-GAZETTE.md). Les parcours, fonctionnalités et invariants de saisie restent protégés. Les prescriptions visuelles de cette ancienne mission ne s'appliquent plus à la nouvelle.
-
 # PO-VISION — garde-fou produit de la refonte visuelle
 
 > **Document temporaire de pilotage de la refonte visuelle — à supprimer une fois la refonte validée.**

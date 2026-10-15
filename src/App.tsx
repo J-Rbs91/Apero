@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
+import comptoirBackground from "./assets/art/Le-zinc.jpg";
 import { ComptoirNameOnboarding } from "./components/onboarding/ComptoirNameOnboarding";
 import { NotificationPermissionOnboarding } from "./components/onboarding/NotificationPermissionOnboarding";
 import { SplashScreen } from "./components/SplashScreen";
@@ -12,6 +13,10 @@ import { getUnreadCount } from "./services/notificationStore";
 import { syncAllMyAperos } from "./services/notificationSync";
 import { registerNotificationServiceWorker } from "./services/systemNotifications";
 import { AppRouter } from "./routes/AppRouter";
+
+const appShellStyle = {
+  "--app-background-image": "url(" + comptoirBackground + ")",
+} as CSSProperties;
 
 export function App() {
   const { comptoirName, setComptoirName } = useComptoirName();
@@ -94,7 +99,7 @@ export function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" style={appShellStyle}>
       <div className="app-shell__content">
         {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
         {shouldShowNameOnboarding ? (
