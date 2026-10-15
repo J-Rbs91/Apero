@@ -206,3 +206,52 @@ Critères d'achèvement : `npm test` et `npm run build` verts ; `npm run test:fu
 | Test sur appareil tactile réel / lecteur d'écran réel | **absent** — non réalisable sur le VPS ; signalé dans le verdict |
 | Tuiles OSM réelles | **absent** (réseau du banc) |
 | Performance (poids, requêtes, CLS) | mesure du build à produire ; pas de test sur réseau dégradé réel |
+
+
+---
+
+## 9. Journal de convergence (construire → rendre → inspecter → critiquer → corriger)
+Captures : `…/scratchpad/shots/{before,u1…u7,after,final,final-dark,final-reduced}/`. Chaque ligne : observation réelle sur capture → correction → recapture.
+
+| # | Unité | Observation (capture) | Correction | Recapture |
+|---|---|---|---|---|
+| 1 | Accueil | Bureau : le texte d'aide et la mention « Propose · partage… » avaient disparu (je les avais masqués en CSS). Mobile : l'ombre de la fenêtre cintrée faisait une barre grise. | Corps d'accueil rétabli et centré ; ombre de la fenêtre supprimée (ce n'est pas un empilement réel). Badge de notification repositionné dans la nav large. | `u1/d-home`, `final/d-10-home` |
+| 2 | Formulaires | **Défaut bloquant** : les modales étaient tronquées au cadre de la page (voile non plein écran). Cause : l'animation d'entrée en `fill-mode: both` laisse un `transform` actif, qui devient le bloc conteneur des éléments `position: fixed`. | `fill-mode: backwards` (aucun transform résiduel). | `after/m-03`, `m-34` |
+| 3 | Formulaires | La liste de suggestions de lieu s'ouvrait sous le lien « Introuvable ? » et chevauchait le bouton suivant. | Liste ancrée au champ (enveloppe `.locfield__box`). | `final/m-22` |
+| 4 | Invitation | Le verdict occupait tout le premier écran mobile : le formulaire de réponse (tâche la plus fréquente) était à ~900 px. | Bouton « Je réponds » (défilement + focus) sous le titre ; carte 128 px ; compteurs plus compacts. | `u3/m-invite-bottom` |
+| 5 | Invitation, bureau | Colonne gauche de l'enseigne vide sous le titre ; jauge à dix ampoules de 50 px. | Verdict recomposé en deux groupes (texte / mesures), pleine largeur sous le titre ; ampoules plafonnées ; 24 ampoules sur la rangée large. | `u5/d-invite` |
+| 6 | Chargement | CLS 0,89 sur l'invitation (le contenu poussait un `main` vide). | Le chargement vit dans l'enseigne ; `main` non rendu tant qu'il n'a pas de contenu. CLS ≈ 0. | `cls.mjs` : 0 |
+| 7 | Chargement | Deux `h1` sur agenda/palmarès pendant le chargement. | `LoadingScreen` en `h2` sauf quand il est seul (invitation). | build + audit |
+| 8 | Thème sombre | Façade `forest-700` plus claire que le fond : hiérarchie inversée, vert « émeraude » plat. | Façade `forest-800`, fond `#071b14`. | `final-dark/*` |
+| 9 | Très étroit | À 320 px la marque passait sur deux lignes et le nom du blaze était tronqué. | Libellé de marque masqué sous 360 px (le lien garde son `aria-label`). | `u7/s-home` |
+| 10 | Billet | Le ticket sans en-tête du formulaire de contre-proposition affichait une perforation sur son bord supérieur. | Perforation supprimée quand `.slot__fields` est le premier enfant. | `final/m-32` |
+| 11 | Spécimen | L'enseigne du spécimen A (cadre doré + sur-titre espacé + titre serif + bouton) tombait dans l'« échec révélateur ». | Cadre et sur-titre supprimés avant même l'implémentation. | `spec/a.png` → `u1` |
+
+Direction artistique : **non rouverte**. Elle a tenu sur les écrans testés ; aucun cycle de correction n'a dépassé deux itérations sans effet.
+
+## 10. Écarts par rapport au contrat initial (as-built)
+- **Ajout non listé au §4 : bouton « Je réponds »** (sous le titre de l'invitation, mobile seulement, caché ≥ 960 px). Il ne supprime rien ; il répond au fait F6. Il fait défiler jusqu'au formulaire et y met le focus. Libellé choisi pour ne pas entrer en collision avec le bouton « Répondre à l'invitation » (sélecteurs de test).
+- **Composant `Dialog`** (focus initial, piège à Tab, Échap, retour du focus) ajouté et appliqué aux 4 modales (blaze, suppression ×2, carte agrandie) : promis au design system §5.
+- **Rosette** : la rareté est écrite (« Légendaire », « Rare », « Commune », « Honteuse »), ce qui n'existait pas.
+- **Constat hors périmètre** : en mode `api-vps`, `readRewardsLedger` renvoie toujours un grand livre vide et `listActiveEvents` ne liste rien : le Palmarès affiche donc toujours « aucune breloque » en production. Ce n'est pas introduit par la refonte (comportement d'avant) ; l'état « avec breloques » n'a été vu qu'avec un grand livre simulé (`h/badges.mjs`).
+- Mention : « 1 réponses » (accord) corrigé en « 1 réponse » dans l'agenda — seul changement de texte.
+
+## 11. Preuves au terme de la mission
+| Preuve | Statut |
+|---|---|
+| Captures avant (115) et après (115 × 3 jeux : clair, sombre mobile, mouvement réduit) | **présentes et inspectées** (≈ 45 images ouvertes et critiquées) |
+| `npm test` | 106/106 |
+| `npm run build` | ✓ (CSS 46,9 ko / 13,1 ko gzip ; JS principal 105,5 ko gzip) |
+| `npm run test:functional` (E2E Chromium, API réelle) | **71/71** |
+| Débordement horizontal 320 / 390 / 1280, 7 écrans | aucun |
+| Cibles tactiles ≥ 44 px | 1 écart corrigé (lien d'adresse du ticket) ; contrôle à rejouer à chaque modification |
+| Mouvement réduit : `document.getAnimations()` | aucune animation active sur invitation, accueil, agenda |
+| Mouvement normal : ampoules du verdict | 12 animations, **terminées après ~6 s** (0 en cours à 7,8 s) |
+| Modale : focus initial / Tab ×5 / Maj+Tab / Échap / retour du focus | ✓ |
+| Polices bloquées (Google Fonts coupé) | rendu avec repli Georgia/système, pas de débordement ; CLS 0 sur l'accueil |
+| Appareil tactile réel, lecteur d'écran réel, Safari/Firefox | **absents** (VPS sans ces environnements) |
+| Tuiles OpenStreetMap réelles | **absentes** (réseau du banc) |
+| Revue humaine du goût | **absente** : le choix du style a été signé par l'agent (carte blanche) |
+
+### Verdict `ui-review-qa`
+**PASS sous réserves** — preuves d'exécution et captures effectivement inspectées pour Chromium (Linux), 320/390/1280, thème clair, thème sombre (mobile) et mouvement réduit ; parcours fonctionnels verts. **Non couvert, à ne pas lire comme validé** : appareils tactiles réels, lecteurs d'écran, autres moteurs de rendu, thème sombre sur grand écran (non capturé), cartes avec fonds de plan réels, rendu des champs date/heure natifs sur téléphone. La CI verte est une preuve technique ; le jugement artistique ci-dessus est celui de l'agent signataire.

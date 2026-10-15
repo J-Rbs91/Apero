@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AlternativeOptionForm } from "../components/AlternativeOptionForm";
+import { Dialog } from "../components/Dialog";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
@@ -161,8 +162,8 @@ export function EventPage() {
 
   if (isLoading) {
     return (
-      <MobilePage className="event-mobile" header={<MobileHeader eyebrow="Apéro" />}>
-        <LoadingScreen />
+      <MobilePage className="event-mobile" header={<MobileHeader eyebrow="Apéro" />} hero={<LoadingScreen heading="h1" />}>
+        {null}
       </MobilePage>
     );
   }
@@ -273,40 +274,33 @@ export function EventPage() {
       </div>
 
       {showDeleteConfirm && (
-        <div className="modal-backdrop" role="presentation">
-          <section
-            className="sheet modal-sheet"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="delete-title"
+        <Dialog labelledBy="delete-title" onClose={() => !isDeleting && setShowDeleteConfirm(false)}>
+          <p className="eyebrow">Suppression</p>
+          <h2 className="h1 h1--sm" id="delete-title">
+            Supprimer cet apéro ?
+          </h2>
+          <p className="lede">
+            Ça efface tout, pour de bon : créneaux, réponses, propositions, tout y passe. Pas de
+            retour en arrière possible.
+          </p>
+          <button
+            type="button"
+            className="button button--danger button--block"
+            onClick={handleDelete}
+            disabled={isDeleting}
           >
-            <p className="eyebrow">Suppression</p>
-            <h2 className="h1 h1--sm" id="delete-title">
-              Supprimer cet apéro ?
-            </h2>
-            <p className="lede">
-              Ça efface tout, pour de bon : créneaux, réponses, propositions, tout y passe. Pas de
-              retour en arrière possible.
-            </p>
-            <button
-              type="button"
-              className="button button--danger button--block"
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? "Suppression…" : "Oui, supprimer"}
-            </button>
-            <button
-              type="button"
-              className="button button--ghost button--block"
-              onClick={() => setShowDeleteConfirm(false)}
-              disabled={isDeleting}
-            >
-              Non, je la garde
-            </button>
-            {error && <p className="feedback">{error}</p>}
-          </section>
-        </div>
+            {isDeleting ? "Suppression…" : "Oui, supprimer"}
+          </button>
+          <button
+            type="button"
+            className="button button--ghost button--block"
+            onClick={() => setShowDeleteConfirm(false)}
+            disabled={isDeleting}
+          >
+            Non, je la garde
+          </button>
+          {error && <p className="feedback">{error}</p>}
+        </Dialog>
       )}
     </MobilePage>
   );

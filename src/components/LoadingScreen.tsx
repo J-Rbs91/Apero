@@ -1,6 +1,8 @@
 type LoadingScreenProps = {
   title?: string;
   subtitle?: string;
+  /** « h1 » quand le chargement est seul à occuper la page (invitation), « h2 » sinon. */
+  heading?: "h1" | "h2";
 };
 
 // Trois ampoules qui s'allument en séquence (design-system §6.1) : le seul
@@ -8,6 +10,7 @@ type LoadingScreenProps = {
 export function LoadingScreen({
   title = "Un instant…",
   subtitle = "La Confrérie ouvre le comptoir…",
+  heading: Heading = "h2",
 }: LoadingScreenProps) {
   return (
     <div className="loading-screen" role="status" aria-live="polite">
@@ -17,7 +20,7 @@ export function LoadingScreen({
           <i />
           <i />
         </div>
-        <h1 className="h1 h1--sm">{title}</h1>
+        <Heading className="h1 h1--sm">{title}</Heading>
         <p className="lede">{subtitle}</p>
       </section>
     </div>

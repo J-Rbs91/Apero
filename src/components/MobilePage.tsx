@@ -25,9 +25,11 @@ export function MobilePage({ children, className = "", header, hero, nav = false
         </div>
         {hero && <div className="facade__hero">{hero}</div>}
       </header>
-      <main className="page">
-        <div className="page__body">{children}</div>
-      </main>
+      {children != null && (
+        <main className="page">
+          <div className="page__body">{children}</div>
+        </main>
+      )}
     </div>
   );
 }

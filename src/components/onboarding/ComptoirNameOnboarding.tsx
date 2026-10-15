@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Dialog } from "../Dialog";
 import { MobilePage } from "../MobilePage";
 import { WineGlassMark } from "../WineGlassMark";
 import { validateComptoirName } from "../../utils/memberName";
@@ -86,34 +87,27 @@ export function ComptoirNameOnboarding({
       </form>
 
       {confirmedName && (
-        <div className="modal-backdrop" role="presentation">
-          <section
-            aria-labelledby="comptoir-confirm-title"
-            aria-modal="true"
-            className="sheet modal-sheet"
-            role="dialog"
+        <Dialog labelledBy="comptoir-confirm-title" onClose={() => setConfirmedName("")}>
+          <p className="eyebrow">On confirme ?</p>
+          <h2 className="h1 h1--sm" id="comptoir-confirm-title">
+            {"Sérieux, c’est ça ton blaze ?"}
+          </h2>
+          <span className="blaze">
+            {"« "}
+            {confirmedName}
+            {" »"}
+          </span>
+          <button className="button button--primary button--block" type="button" onClick={handleConfirm}>
+            {"Oui, grave ça dans le zinc"}
+          </button>
+          <button
+            className="button button--ghost button--block"
+            type="button"
+            onClick={() => setConfirmedName("")}
           >
-            <p className="eyebrow">On confirme ?</p>
-            <h2 className="h1 h1--sm" id="comptoir-confirm-title">
-              {"Sérieux, c’est ça ton blaze ?"}
-            </h2>
-            <span className="blaze">
-              {"« "}
-              {confirmedName}
-              {" »"}
-            </span>
-            <button className="button button--primary button--block" type="button" onClick={handleConfirm}>
-              {"Oui, grave ça dans le zinc"}
-            </button>
-            <button
-              className="button button--ghost button--block"
-              type="button"
-              onClick={() => setConfirmedName("")}
-            >
-              Non, je change de blaze
-            </button>
-          </section>
-        </div>
+            Non, je change de blaze
+          </button>
+        </Dialog>
       )}
     </MobilePage>
   );

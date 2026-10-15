@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AlternativeOptionForm } from "../components/AlternativeOptionForm";
+import { Dialog } from "../components/Dialog";
 import { Icon } from "../components/Icon";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
@@ -283,8 +284,12 @@ export function InvitePage() {
 
   if (state.status === "loading") {
     return (
-      <MobilePage className="event-mobile" header={<MobileHeader eyebrow="Invitation" />}>
-        <LoadingScreen title="On ouvre l’invitation" subtitle="On déchiffre les détails de l’apéro…" />
+      <MobilePage
+        className="event-mobile"
+        header={<MobileHeader eyebrow="Invitation" />}
+        hero={<LoadingScreen heading="h1" title="On ouvre l’invitation" subtitle="On déchiffre les détails de l’apéro…" />}
+      >
+        {null}
       </MobilePage>
     );
   }
@@ -439,40 +444,33 @@ export function InvitePage() {
       </div>
 
       {showDeleteConfirm && (
-        <div className="modal-backdrop" role="presentation">
-          <section
-            className="sheet modal-sheet"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="delete-title"
+        <Dialog labelledBy="delete-title" onClose={() => !isDeleting && setShowDeleteConfirm(false)}>
+          <p className="eyebrow">Annuler l’apéro</p>
+          <h2 className="h1 h1--sm" id="delete-title">
+            Es-tu sûr de vouloir supprimer cet évènement ?
+          </h2>
+          <p className="lede">
+            Cette action est définitive : créneaux, réponses, votes et contre-propositions, tout
+            disparaît pour de bon. Pas de retour en arrière possible.
+          </p>
+          <button
+            type="button"
+            className="button button--danger button--block"
+            onClick={handleDelete}
+            disabled={isDeleting}
           >
-            <p className="eyebrow">Annuler l’apéro</p>
-            <h2 className="h1 h1--sm" id="delete-title">
-              Es-tu sûr de vouloir supprimer cet évènement ?
-            </h2>
-            <p className="lede">
-              Cette action est définitive : créneaux, réponses, votes et contre-propositions, tout
-              disparaît pour de bon. Pas de retour en arrière possible.
-            </p>
-            <button
-              type="button"
-              className="button button--danger button--block"
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? "Suppression…" : "Oui, supprimer définitivement"}
-            </button>
-            <button
-              type="button"
-              className="button button--ghost button--block"
-              onClick={() => setShowDeleteConfirm(false)}
-              disabled={isDeleting}
-            >
-              Non, je le garde
-            </button>
-            {error && <p className="feedback">{error}</p>}
-          </section>
-        </div>
+            {isDeleting ? "Suppression…" : "Oui, supprimer définitivement"}
+          </button>
+          <button
+            type="button"
+            className="button button--ghost button--block"
+            onClick={() => setShowDeleteConfirm(false)}
+            disabled={isDeleting}
+          >
+            Non, je le garde
+          </button>
+          {error && <p className="feedback">{error}</p>}
+        </Dialog>
       )}
     </MobilePage>
   );

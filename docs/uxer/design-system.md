@@ -229,3 +229,16 @@ Budget : uniquement `transform` et `opacity` (compositeur). Aucune animation de 
 **Migration sans second système** : les classes de l'ancien CSS sont **remplacées**, pas recouvertes ; à la fin, aucune occurrence de `backdrop-filter`, `screen-overlay`, `--app-background-image`, `rgba(255, 247, 230`, ni de `text-transform: uppercase` combiné à `letter-spacing` dans `global.css` (contrôle `grep`). Classes de repère conservées : `.notif-badge`, `.notif-bell`, `.notif-list`, `.slot`, `.vote-form`, `.field--wide`, `.share code`, `.person__name`.
 **Contrôles** : (1) contraste : script Python de la §1.4 ré-exécuté sur les tokens finaux ; (2) responsive : 320 / 390 / 1280, `document.documentElement.scrollWidth <= innerWidth` sur chaque écran ; (3) mouvement réduit : captures sous `reducedMotion: 'reduce'` et vérification `getAnimations().length === 0` hors chargement ; (4) clavier : parcours Tab sur accueil, création, invitation (focus visible, ordre logique, Échap) ; (5) réseau dégradé : polices bloquées → rendu avec repli lisible, pas de saut de mise en page > 2 % (mesure CLS dans le navigateur) ; (6) thème sombre : captures de chaque écran ; (7) `npm test`, `npm run build`, `npm run test:functional`.
 **Dégradation réseau** : polices `display=swap` ; l'illustration est un asset local ; aucune dépendance externe nouvelle.
+
+
+---
+
+## 9. Amendements « as-built » (après rendu)
+- **Ampoules** : 24 éléments par rangée ; < 960 px les 12 premières seulement (`nth-child(n+13)`), ≥ 960 px les 24. Chasse : `animation-delay = (index mod 3) × 400 ms`, 1,2 s, `steps(2)`, 5 itérations.
+- **Façade, thème sombre** : reste `--forest-800` ; fond `#071b14`, creux `#04120d` (la hiérarchie sombre/clair ne s'inverse pas).
+- **`.page__body`** : animation d'entrée en `fill-mode: backwards` — jamais `both`/`forwards` : un `transform` résiduel casse tout descendant `position: fixed` (modales).
+- **Composants ajoutés** : `Icon`, `Bulbs`, `SlotLeaf` (calendrier-feuille), `BrandBar`, `TabBar`, `Dialog` (+ hook `useDialogFocus`). Supprimés : `BrandMenu`, `NotificationBell`.
+- **`MobilePage`** : props `header`, `hero`, `nav` ; ne rend pas `<main>` quand `children` est `null` (chargement dans l'enseigne, sans décalage de mise en page).
+- **Bouton `button--facade-ghost`** : action secondaire sur la façade (bordure ivoire, pas de remplissage). **`button--on-facade`** : action principale sur la façade (pastis). Le rouge ne sert plus d'action que sur le papier.
+- **Jauge** : zones d'ampoules par position (1-4 froid, 5-7 tiède, 8-10 chaud) via `--bulb-cold|warm|hot`, redéfinis par contexte (façade/papier/sombre) ; `traquenardColor` reste exporté et testé, mais n'est plus utilisé par le rendu.
+- **Cibles** : un lien d'adresse dans un ticket garde son agencement mais obtient une zone de 44 px par marge négative (`margin-block: -8px`).

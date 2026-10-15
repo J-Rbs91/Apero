@@ -23,11 +23,12 @@ export function WineGlassMark({ size = 28, className = "" }: WineGlassMarkProps)
         return;
       }
 
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       animation = lottieModule.default.loadAnimation({
         container: ref.current,
         renderer: "svg",
-        loop: true,
-        autoplay: true,
+        loop: !reducedMotion,
+        autoplay: !reducedMotion,
         animationData: animationModule.default,
       });
     });

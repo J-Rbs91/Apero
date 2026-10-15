@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import { loadLeaflet, MARKER_STYLE, OSM_ATTRIBUTION, OSM_TILE_URL } from "../utils/leaflet";
+import { Dialog } from "./Dialog";
+import { Icon } from "./Icon";
 import { OpenInMapsButton } from "./OpenInMapsButton";
 
 type MiniMapProps = {
@@ -104,28 +106,25 @@ export function MiniMap({ lat, lng, label, address }: MiniMapProps) {
       </div>
 
       {isExpanded && (
-        <div className="modal-backdrop" role="presentation">
-          <section
-            className="sheet modal-sheet modal-sheet--map"
-            role="dialog"
-            aria-modal="true"
-            aria-label={label ? `Carte agrandie : ${label}` : "Carte agrandie"}
-          >
-            <div className="minimap__expanded-head">
-              <p className="eyebrow">{label ?? "Le repère"}</p>
-              <button
-                type="button"
-                className="minimap__close"
-                onClick={() => setIsExpanded(false)}
-                aria-label="Fermer la carte"
-              >
-                ✕
-              </button>
-            </div>
-            <div ref={expandedContainerRef} className="minimap__canvas minimap__canvas--expanded" />
-            <OpenInMapsButton label={label ?? "ce troquet"} address={address} lat={lat} lng={lng} />
-          </section>
-        </div>
+        <Dialog
+          className="modal-sheet--map"
+          label={label ? `Carte agrandie : ${label}` : "Carte agrandie"}
+          onClose={() => setIsExpanded(false)}
+        >
+          <div className="minimap__expanded-head">
+            <p className="eyebrow">{label ?? "Le repère"}</p>
+            <button
+              type="button"
+              className="minimap__close"
+              onClick={() => setIsExpanded(false)}
+              aria-label="Fermer la carte"
+            >
+              <Icon name="close" size={20} />
+            </button>
+          </div>
+          <div ref={expandedContainerRef} className="minimap__canvas minimap__canvas--expanded" />
+          <OpenInMapsButton label={label ?? "ce troquet"} address={address} lat={lat} lng={lng} />
+        </Dialog>
       )}
     </div>
   );

@@ -185,10 +185,11 @@ Conséquence pour les notifications système : on fait du **best-effort** via l�
 - Export image du verdict du zinc.
 - PWA installable.
 
-## Direction iconographique
+## Direction artistique
 
-L’interface n’utilise aucun emoji. Les pictogrammes doivent être des SVG monochromes de style glyph afin de conserver une direction artistique cohérente.
+La refonte UX/UI (« La Baraque du Petit Jaune », style *Fairground Baroque* / arts forains) est décrite et opposable :
 
-Les icônes locales vivent dans `src/assets/icons/`. Les fichiers actuels sont des placeholders SVG simples, monochromes et recolorables via `currentColor`. Les SVG définitifs doivent être téléchargés depuis IconScout en style glyph avant une mise en production visuelle.
+- [`docs/uxer/refonte-contract.md`](docs/uxer/refonte-contract.md) — exploration du produit, choix du style, contrat fonctionnel, journal de convergence, preuves et limites ;
+- [`docs/uxer/design-system.md`](docs/uxer/design-system.md) — tokens, typographie, mise en page, composants, grammaire d'animation.
 
-Les badges utilisent `iconName` plutôt qu’un champ `icon` en emoji. Le composant `Icon` applique les SVG locaux sous forme de masque CSS, ce qui permet de contrôler la couleur depuis les styles.
+L'interface n'utilise aucun emoji. Les pictogrammes sont des SVG monochromes en ligne (`currentColor`) définis dans `src/components/Icon.tsx`. Les polices (Abril Fatface, Manrope) sont chargées depuis Google Fonts, avec repli système.
