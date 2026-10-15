@@ -94,7 +94,7 @@ export function HomePage() {
         </div>
 
         <p className="home-masthead__eyebrow">La très honorable</p>
-        <h1 className="home-masthead__title" id="home-title">
+        <h1 className="home-masthead__title" id="home-title" aria-label="La Confrérie du Petit Jaune">
           Confrérie <em>du</em><br />
           Petit Jaune<span aria-hidden="true">.</span>
         </h1>
