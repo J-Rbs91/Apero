@@ -283,6 +283,7 @@ a {
   display: inline-flex;
   align-items: center;
   gap: var(--s-2);
+  min-width: 44px;
   min-height: 44px;
   font-weight: 800;
   font-size: 1.0625rem;
