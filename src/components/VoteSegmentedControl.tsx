@@ -1,9 +1,10 @@
 import type { VoteStatus } from "../types/apero";
+import { Icon, type IconName } from "./Icon";
 
-const voteOptions: Array<{ value: VoteStatus; label: string; tone: "y" | "m" | "n" }> = [
-  { value: "yes", label: "J’y serai", tone: "y" },
-  { value: "maybe", label: "J’me tâte", tone: "m" },
-  { value: "no", label: "Sans moi", tone: "n" },
+const voteOptions: Array<{ value: VoteStatus; label: string; tone: "y" | "m" | "n"; icon: IconName }> = [
+  { value: "yes", label: "J’y serai", tone: "y", icon: "check" },
+  { value: "maybe", label: "J’me tâte", tone: "m", icon: "maybe" },
+  { value: "no", label: "Sans moi", tone: "n", icon: "close" },
 ];
 
 type VoteSegmentedControlProps = {
@@ -12,6 +13,8 @@ type VoteSegmentedControlProps = {
   onChange: (status: VoteStatus) => void;
 };
 
+// Trois talons à poinçonner. Le choix n'est jamais porté par la couleur seule :
+// chaque talon a son glyphe (✓ / ? / ✕) et son libellé.
 export function VoteSegmentedControl({
   name,
   value,
@@ -30,6 +33,7 @@ export function VoteSegmentedControl({
             checked={value === option.value}
             onChange={() => onChange(option.value)}
           />
+          <Icon name={option.icon} size={20} />
           <span>{option.label}</span>
         </label>
       ))}

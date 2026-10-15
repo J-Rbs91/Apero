@@ -1,5 +1,6 @@
 import type { AperitifOption, VoteStatus } from "../types/apero";
 import { OpenInMapsButton } from "./OpenInMapsButton";
+import { SlotLeaf, slotDateLabel } from "./SlotLeaf";
 import { VoteSegmentedControl } from "./VoteSegmentedControl";
 
 type EventOptionMobileCardProps = {
@@ -10,18 +11,8 @@ type EventOptionMobileCardProps = {
   isLeading?: boolean;
 };
 
-function formatDateTime(option: AperitifOption): string {
-  const dateLabel = option.date
-    ? new Intl.DateTimeFormat("fr-FR", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-      }).format(new Date(`${option.date}T00:00:00`))
-    : "Date mystère";
-
-  return `${dateLabel} · ${option.time || "heure mystère"}`;
-}
-
+// Le ticket de vote : calendrier-feuille, heure, lieu, puis trois talons à
+// poinçonner (design-system §5).
 export function EventOptionMobileCard({
   option,
   value,
@@ -36,8 +27,12 @@ export function EventOptionMobileCard({
   return (
     <div className="slot">
       <div className="slot__top">
-        <div>
-          <div className="slot__d">{formatDateTime(option)}</div>
+        <SlotLeaf option={option} />
+        <div className="slot__body">
+          <div className="slot__d">
+            <span className="sr-only">{slotDateLabel(option)} · </span>
+            {option.time || "heure mystère"}
+          </div>
           <div className="slot__p">{subtitle}</div>
           {(option.locationAddress || (option.locationLat != null && option.locationLng != null)) && (
             <OpenInMapsButton

@@ -51,7 +51,7 @@ export function MobileShareBox({ url, title, text, displayUrl }: MobileShareBoxP
 
   return (
     <div className="share-box">
-      <p className="eyebrow">Rameuter le comptoir</p>
+      <h2 className="h2">Rameuter le comptoir</h2>
       <button className="button button--primary button--block" type="button" onClick={handleShare}>
         Partager l’invitation
       </button>

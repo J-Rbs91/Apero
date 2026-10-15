@@ -1,5 +1,6 @@
 import type { AperitifEvent, AperitifOption, ResultState } from "../types/apero";
 import { calculateAverageTraquenardLevel } from "../utils/calculateResults";
+import { Bulbs } from "./Bulbs";
 import { MiniMap } from "./MiniMap";
 import { TraquenardGauge } from "./TraquenardGauge";
 
@@ -8,8 +9,8 @@ type MobileResultsPanelProps = {
   result: ResultState;
 };
 
-function formatWinner(option: AperitifOption): string {
-  const dateLabel = option.date
+function splitWinner(option: AperitifOption): { date: string; time: string } {
+  const date = option.date
     ? new Intl.DateTimeFormat("fr-FR", {
         weekday: "short",
         day: "numeric",
@@ -17,7 +18,7 @@ function formatWinner(option: AperitifOption): string {
       }).format(new Date(`${option.date}T00:00:00`))
     : "Date mystère";
 
-  return `${dateLabel} · ${option.time || "?"} — ${option.location}`;
+  return { date, time: option.time || "?" };
 }
 
 function describeEyebrow(result: ResultState): string {
@@ -31,6 +32,8 @@ function describeEyebrow(result: ResultState): string {
   }
 }
 
+// Le panneau de verdict : le seul endroit où le produit « crie » — ampoules,
+// date en chiffres d'affiche, compteurs à arche (design-system §5).
 export function MobileResultsPanel({ event, result }: MobileResultsPanelProps) {
   const highlightedId =
     result.type === "winner"
@@ -50,41 +53,55 @@ export function MobileResultsPanel({ event, result }: MobileResultsPanelProps) {
   const traquenardVoteCount = event.participants.filter(
     (participant) => typeof participant.traquenardLevel === "number",
   ).length;
+  const winner = highlightedOption ? splitWinner(highlightedOption) : null;
 
   return (
     <div className="verdict">
-      <p className="eyebrow">{describeEyebrow(result)}</p>
-      <div className="verdict__title">
-        {highlightedOption ? formatWinner(highlightedOption) : result.message}
-      </div>
-      {highlightedOption && <p className="meta">{result.message}</p>}
-      {highlightedResult && (
-        <div className="counts">
-          <div className="cnt">
-            <b>{highlightedResult.yesCount}</b>
-            <span>Présences</span>
-          </div>
-          <div className="cnt">
-            <b>{highlightedResult.maybeCount}</b>
-            <span>Hésitations</span>
-          </div>
-          <div className="cnt">
-            <b>{highlightedResult.noCount}</b>
-            <span>Désertions</span>
-          </div>
-        </div>
-      )}
-      {highlightedOption &&
-        highlightedOption.locationLat != null &&
-        highlightedOption.locationLng != null && (
-          <MiniMap
-            lat={highlightedOption.locationLat}
-            lng={highlightedOption.locationLng}
-            label={highlightedOption.location}
-            address={highlightedOption.locationAddress}
-          />
+      <Bulbs chase={result.type === "winner"} off={!highlightedOption} />
+      <div className="verdict__main">
+        <p className="verdict__label">{describeEyebrow(result)}</p>
+        {winner && highlightedOption ? (
+          <>
+            <div className="verdict__title">
+              <span className="verdict__date">{winner.date}</span>
+              <span className="verdict__time">{winner.time}</span>
+            </div>
+            <p className="verdict__place">{highlightedOption.location}</p>
+            <p className="meta">{result.message}</p>
+          </>
+        ) : (
+          <div className="verdict__title verdict__title--text">{result.message}</div>
         )}
-      <TraquenardGauge level={averageTraquenardLevel} voteCount={traquenardVoteCount} />
+      </div>
+      <div className="verdict__side">
+        {highlightedResult && (
+          <div className="counts">
+            <div className="cnt">
+              <b>{highlightedResult.yesCount}</b>
+              <span>Présences</span>
+            </div>
+            <div className="cnt">
+              <b>{highlightedResult.maybeCount}</b>
+              <span>Hésitations</span>
+            </div>
+            <div className="cnt">
+              <b>{highlightedResult.noCount}</b>
+              <span>Désertions</span>
+            </div>
+          </div>
+        )}
+        {highlightedOption &&
+          highlightedOption.locationLat != null &&
+          highlightedOption.locationLng != null && (
+            <MiniMap
+              lat={highlightedOption.locationLat}
+              lng={highlightedOption.locationLng}
+              label={highlightedOption.location}
+              address={highlightedOption.locationAddress}
+            />
+          )}
+        <TraquenardGauge level={averageTraquenardLevel} voteCount={traquenardVoteCount} />
+      </div>
     </div>
   );
 }

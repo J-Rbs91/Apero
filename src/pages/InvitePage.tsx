@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AlternativeOptionForm } from "../components/AlternativeOptionForm";
+import { Icon } from "../components/Icon";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { MobileResultsPanel } from "../components/MobileResultsPanel";
 import { MobileShareBox } from "../components/MobileShareBox";
+import { SlotLeaf, slotDateLabel } from "../components/SlotLeaf";
 import { ParticipantList } from "../components/ParticipantList";
 import { TraquenardSlider } from "../components/TraquenardGauge";
 import { VoteForm } from "../components/VoteForm";
@@ -29,7 +31,6 @@ import {
 } from "../services/notificationStore";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
 import { calculateBestOptions } from "../utils/calculateResults";
-import { formatOption } from "../utils/formatOption";
 import { buildInviteUrl, maskInviteUrl, resolveInviteKeys } from "../utils/inviteLink";
 import { buildShareText, buildShareTitle } from "../utils/shareMessage";
 
@@ -268,10 +269,21 @@ export function InvitePage() {
     }
   }
 
+  // Raccourci vers le formulaire de réponse : la réponse est la tâche la plus
+  // fréquente, le verdict occupe le premier écran.
+  function jumpToAnswer() {
+    const target = document.getElementById("reponse");
+    if (!target) {
+      return;
+    }
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    target.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+    target.querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true });
+  }
+
   if (state.status === "loading") {
     return (
-      <MobilePage className="event-mobile" overlay="deep">
-        <MobileHeader eyebrow="Invitation" />
+      <MobilePage className="event-mobile" header={<MobileHeader eyebrow="Invitation" />}>
         <LoadingScreen title="On ouvre l’invitation" subtitle="On déchiffre les détails de l’apéro…" />
       </MobilePage>
     );
@@ -292,12 +304,16 @@ export function InvitePage() {
                 : state.message;
 
     return (
-      <MobilePage className="event-mobile" overlay="deep">
-        <MobileHeader eyebrow="Invitation" />
-        <section className="sheet">
+      <MobilePage
+        className="event-mobile"
+        header={<MobileHeader eyebrow="Invitation" />}
+        hero={
           <h1 className="h1 h1--sm">
             {state.status === "deleted" ? "Apéro annulé" : "Aïe, ce lien coince"}
           </h1>
+        }
+      >
+        <section className="sheet">
           <p className="lede">{message}</p>
           <Link className="button button--ghost button--block" to="/">
             Retour au comptoir
@@ -324,81 +340,103 @@ export function InvitePage() {
   const isOrganizer = localEntry?.role === "creator" && Boolean(localEntry.adminKey || keys.writeKey);
 
   return (
-    <MobilePage className="event-mobile" overlay="deep">
-      <MobileHeader eyebrow="Invitation" />
-
-      <section className="sheet">
-        <p className="eyebrow">Une invitation de {event.organizerName}</p>
-        <h1 className="h1 h1--sm">{event.ceremonialName}</h1>
-        {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
-        {hasLocalEntry && (
-          <p className="meta">C’est noté : tu retrouveras cet apéro dans ton agenda sur cet appareil.</p>
-        )}
-      </section>
-
+    <MobilePage
+      className="event-mobile invite-page"
+      header={<MobileHeader eyebrow="Invitation" />}
+      hero={
+        <div className="invite-hero">
+          <div className="invite-hero__intro">
+            <p className="eyebrow">Une invitation de {event.organizerName}</p>
+            <h1 className="h1 h1--sm">{event.ceremonialName}</h1>
+            {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
+            {hasLocalEntry && (
+              <p className="meta">C’est noté : tu retrouveras cet apéro dans ton agenda sur cet appareil.</p>
+            )}
+            {keys.writeKey && (
+              <button type="button" className="button button--facade-ghost invite-hero__jump" onClick={jumpToAnswer}>
+                Je réponds
+                <Icon name="chevron" size={18} />
+              </button>
+            )}
+          </div>
+          <MobileResultsPanel event={event} result={result} />
+        </div>
+      }
+    >
       {error && (
         <p className="page-message page-message--error" role="alert">
           {error}
         </p>
       )}
 
-      <MobileResultsPanel event={event} result={result} />
-
-      {keys.writeKey ? (
-        <>
-          <VoteForm
-            event={event}
-            isSaving={isSaving}
-            onSubmit={handleVoteSubmit}
-            leadingOptionId={winnerId}
-            extraFields={
-              <TraquenardSlider value={traquenardVote} onChange={setTraquenardVote} />
-            }
-          />
-          <AlternativeOptionForm isSaving={isAddingOption} onSubmit={handleOptionSubmit} />
-        </>
-      ) : (
-        <section className="sheet">
-          <p className="lbl">{event.options.length > 1 ? "Toutes les dates proposées" : "Le créneau proposé"}</p>
-          <div className="slot-stack">
-            {event.options.map((option) => (
-              <div className="slot" key={option.id}>
-                <div className="slot__top">
-                  <div>
-                    <div className="slot__d">{formatOption(option)}</div>
+      <div className="invite-grid">
+        <div className="invite-main">
+          {keys.writeKey ? (
+            <>
+              <VoteForm
+                event={event}
+                isSaving={isSaving}
+                onSubmit={handleVoteSubmit}
+                leadingOptionId={winnerId}
+                extraFields={
+                  <TraquenardSlider value={traquenardVote} onChange={setTraquenardVote} />
+                }
+              />
+              <AlternativeOptionForm isSaving={isAddingOption} onSubmit={handleOptionSubmit} />
+            </>
+          ) : (
+            <section className="sheet">
+              <h2 className="h2">
+                {event.options.length > 1 ? "Toutes les dates proposées" : "Le créneau proposé"}
+              </h2>
+              <div className="slot-stack">
+                {event.options.map((option) => (
+                  <div className="slot" key={option.id}>
+                    <div className="slot__top">
+                      <SlotLeaf option={option} />
+                      <div className="slot__body">
+                        <div className="slot__d">
+                          <span className="sr-only">{slotDateLabel(option)} · </span>
+                          {option.time || "heure mystère"}
+                        </div>
+                        <div className="slot__p">{option.location}</div>
+                      </div>
+                      {option.id === winnerId && <span className="agenda-lead">En tête</span>}
+                    </div>
                   </div>
-                  {option.id === winnerId && <span className="agenda-lead">En tête</span>}
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <p className="lede">
-            Ce lien permet de consulter l’apéro, mais pas d’y répondre : il manque la clé
-            d’écriture. Demande le lien complet à la personne qui t’a invité·e.
-          </p>
-        </section>
-      )}
+              <p className="lede">
+                Ce lien permet de consulter l’apéro, mais pas d’y répondre : il manque la clé
+                d’écriture. Demande le lien complet à la personne qui t’a invité·e.
+              </p>
+            </section>
+          )}
+        </div>
 
-      <ParticipantList participants={event.participants} />
+        <div className="invite-aside">
+          <ParticipantList participants={event.participants} />
 
-      {canShare && (
-        <MobileShareBox
-          url={inviteUrl}
-          displayUrl={maskInviteUrl(inviteUrl)}
-          title={buildShareTitle(event)}
-          text={buildShareText(event)}
-        />
-      )}
+          {canShare && (
+            <MobileShareBox
+              url={inviteUrl}
+              displayUrl={maskInviteUrl(inviteUrl)}
+              title={buildShareTitle(event)}
+              text={buildShareText(event)}
+            />
+          )}
 
-      {isOrganizer && keys.writeKey && (
-        <button
-          type="button"
-          className="ghost-link ghost-link--danger"
-          onClick={() => setShowDeleteConfirm(true)}
-        >
-          Supprimer cet évènement
-        </button>
-      )}
+          {isOrganizer && keys.writeKey && (
+            <button
+              type="button"
+              className="ghost-link ghost-link--danger"
+              onClick={() => setShowDeleteConfirm(true)}
+            >
+              Supprimer cet évènement
+            </button>
+          )}
+        </div>
+      </div>
 
       {showDeleteConfirm && (
         <div className="modal-backdrop" role="presentation">

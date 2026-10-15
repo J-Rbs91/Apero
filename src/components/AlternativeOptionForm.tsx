@@ -62,7 +62,7 @@ export function AlternativeOptionForm({ isSaving, onSubmit }: AlternativeOptionF
 
   return (
     <section className="sheet">
-      <p className="eyebrow">Proposer une autre date</p>
+      <h2 className="h2">Proposer une autre date</h2>
 
       {!isOpen ? (
         <button

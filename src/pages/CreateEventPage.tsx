@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LocationField } from "../components/LocationField";
+import { Icon } from "../components/Icon";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { getAperoStorageMode } from "../config/aperoApiConfig";
@@ -191,12 +192,12 @@ export function CreateEventPage() {
   }
 
   return (
-    <MobilePage className="create-mobile" overlay="deep">
-      <MobileHeader eyebrow="Invitation" />
-
-      <form className="sheet" onSubmit={handleSubmit}>
-        <h1 className="h1 h1--sm">Organiser un apéro</h1>
-
+    <MobilePage
+      className="create-mobile"
+      header={<MobileHeader eyebrow="Invitation" />}
+      hero={<h1 className="h1 h1--sm">Organiser un apéro</h1>}
+    >
+      <form className="vote-form" onSubmit={handleSubmit}>
         <label className="field">
           <span>Nom de l’apéro (optionnel)</span>
           <input
@@ -215,13 +216,11 @@ export function CreateEventPage() {
           />
         </label>
 
-        <hr className="accent accent--wide" />
-
-        <p className="lbl">Les créneaux</p>
+        <h2 className="h2">Les créneaux</h2>
         <div className="slot-stack">
           {options.map((option, index) => (
             <div className="slot" key={option.id}>
-              <div className="slot__top">
+              <div className="slot__top slot__top--plain">
                 <p className="lbl">Créneau {index + 1}</p>
                 <button
                   type="button"
@@ -229,7 +228,7 @@ export function CreateEventPage() {
                   onClick={() => removeOption(option.id)}
                   aria-label="Retirer le créneau"
                 >
-                  ✕
+                  <Icon name="close" size={20} />
                 </button>
               </div>
               <div className="slot__fields">

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { MobileHeader } from "../components/MobileHeader";
+import { BrandBar } from "../components/BrandBar";
 import { MobilePage } from "../components/MobilePage";
 import { getAperoStorageMode } from "../config/aperoApiConfig";
 import { useNotifications } from "../hooks/useNotifications";
@@ -64,29 +64,29 @@ export function NotificationsPage() {
   }
 
   return (
-    <MobilePage className="agenda-mobile" overlay="deep">
-      <MobileHeader eyebrow="Le carnet du comptoir" />
-
-      <section className="sheet">
-        <h1 className="h1 h1--sm">Tes notifications</h1>
-        <p className="lede">
-          Réponses, propositions, confirmations et rappels : tout ce que le zinc a noté pour toi
-          depuis ton dernier passage.
-        </p>
-        {hasNotifications && (
-          <button
-            type="button"
-            className="ghost-link"
-            onClick={() => clearNotifications()}
-          >
-            Vider le carnet
-          </button>
-        )}
-      </section>
-
+    <MobilePage
+      className="agenda-mobile"
+      nav
+      header={<BrandBar />}
+      hero={
+        <div className="page-hero">
+          <p className="eyebrow">Le carnet du comptoir</p>
+          <h1 className="h1 h1--sm">Tes notifications</h1>
+          <p className="lede">
+            Réponses, propositions, confirmations et rappels : tout ce que le zinc a noté pour toi
+            depuis ton dernier passage.
+          </p>
+          {hasNotifications && (
+            <button type="button" className="ghost-link" onClick={() => clearNotifications()}>
+              Vider le carnet
+            </button>
+          )}
+        </div>
+      }
+    >
       {canOfferSystem && (
         <section className="sheet">
-          <p className="lbl">Notifications du téléphone</p>
+          <h2 className="h2">Notifications du téléphone</h2>
           <p className="lede">
             Pour être prévenu même quand l'app est fermée, autorise les notifications système. Sinon,
             pas de panique : le badge rouge reste là dès que tu ouvres la Confrérie.
@@ -121,11 +121,14 @@ export function NotificationsPage() {
               <button
                 type="button"
                 key={notification.id}
-                className={`sheet notif-item${wasUnread ? " notif-item--unread" : ""}`}
+                className={`notif-item${wasUnread ? " notif-item--unread" : ""}`}
                 onClick={() => handleOpen(notification)}
               >
                 <div className="notif-item__head">
-                  <span className="notif-item__title">{notification.title}</span>
+                  <span className="notif-item__title">
+                    {wasUnread && <span className="sr-only">Non lue : </span>}
+                    {notification.title}
+                  </span>
                   {wasUnread && <span className="notif-item__dot" aria-hidden="true" />}
                 </div>
                 <p className="notif-item__body">{notification.body}</p>

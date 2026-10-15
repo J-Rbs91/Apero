@@ -60,7 +60,7 @@ export function ParticipantList({ participants }: ParticipantListProps) {
 
   return (
     <section className="sheet" id="reponses">
-      <p className="eyebrow">Qui vient ?</p>
+      <h2 className="h2">Qui vient ?</h2>
       {participants.length === 0 ? (
         <p className="lede">Personne n’a encore répondu. Sois le premier, ou la première !</p>
       ) : (

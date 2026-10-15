@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { Icon } from "./Icon";
 
 type MobileHeaderProps = {
   eyebrow: string;
@@ -6,6 +7,8 @@ type MobileHeaderProps = {
   meta?: string;
 };
 
+// Rangée « retour » des écrans de tâche (création, invitation) : bouton icône de
+// 44 px + nom de la page. Le titre éventuel est peint sur l'enseigne.
 export function MobileHeader({ eyebrow, title, meta }: MobileHeaderProps) {
   const navigate = useNavigate();
 
@@ -19,23 +22,13 @@ export function MobileHeader({ eyebrow, title, meta }: MobileHeaderProps) {
   }
 
   return (
-    <header className="screen-head">
-      <div className="backrow">
-        <button type="button" className="bk" onClick={handleBack} aria-label="Retour">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
-            <path
-              d="M15 5l-7 7 7 7"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-        <p className="eyebrow">{eyebrow}</p>
-      </div>
+    <div className="backrow">
+      <button type="button" className="bk" onClick={handleBack} aria-label="Retour">
+        <Icon name="back" size={22} />
+      </button>
+      <p className="backrow__label">{eyebrow}</p>
       {title && <h1 className="h1 h1--sm screen-head__title">{title}</h1>}
       {meta && <p className="meta">{meta}</p>}
-    </header>
+    </div>
   );
 }

@@ -139,8 +139,8 @@ export function VoteForm({
   }
 
   return (
-    <section className="sheet">
-      <p className="eyebrow">{existingParticipant ? "Modifier ma réponse" : "Répondre à l’invitation"}</p>
+    <section className="sheet" id="reponse">
+      <h2 className="h2">{existingParticipant ? "Modifier ma réponse" : "Répondre à l’invitation"}</h2>
 
       <form className="vote-form" onSubmit={handleSubmit}>
         <label className="field">

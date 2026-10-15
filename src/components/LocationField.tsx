@@ -150,40 +150,41 @@ export function LocationField({
 
   return (
     <div className="locfield" ref={containerRef}>
-      <label className="field field--wide">
-        <span>{label}</span>
-        <input
-          value={value.location}
-          onChange={(eventChange) => handleInput(eventChange.target.value)}
-          placeholder={placeholder}
-          autoComplete="off"
-          role="combobox"
-          aria-expanded={isOpen}
-          aria-autocomplete="list"
-        />
-      </label>
+      <div className="locfield__box">
+        <label className="field field--wide">
+          <span>{label}</span>
+          <input
+            value={value.location}
+            onChange={(eventChange) => handleInput(eventChange.target.value)}
+            placeholder={placeholder}
+            autoComplete="off"
+            role="combobox"
+            aria-expanded={isOpen}
+            aria-autocomplete="list"
+          />
+        </label>
+        {isOpen && (
+          <ul className="locfield__list" role="listbox">
+            {suggestions.map((place) => (
+              <li key={place.id}>
+                <button
+                  type="button"
+                  className="locfield__option"
+                  role="option"
+                  aria-selected="false"
+                  onClick={() => handleSelect(place)}
+                >
+                  <span className="locfield__name">{place.name}</span>
+                  {place.address && <span className="locfield__addr">{place.address}</span>}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
       {value.locationAddress && (
         <p className="locfield__picked">{value.locationAddress}</p>
       )}
-      {isOpen && (
-        <ul className="locfield__list" role="listbox">
-          {suggestions.map((place) => (
-            <li key={place.id}>
-              <button
-                type="button"
-                className="locfield__option"
-                role="option"
-                aria-selected="false"
-                onClick={() => handleSelect(place)}
-              >
-                <span className="locfield__name">{place.name}</span>
-                {place.address && <span className="locfield__addr">{place.address}</span>}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-
       <button
         type="button"
         className="ghost-link locfield__pin-toggle"

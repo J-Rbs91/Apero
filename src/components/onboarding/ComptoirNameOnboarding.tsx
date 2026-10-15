@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { MobilePage } from "../MobilePage";
 import { WineGlassMark } from "../WineGlassMark";
 import { validateComptoirName } from "../../utils/memberName";
 
@@ -39,18 +40,19 @@ export function ComptoirNameOnboarding({
   }
 
   return (
-    <main className="onboarding-screen">
-      <div className="screen-overlay screen-overlay--scene" aria-hidden />
-      <div className="onboarding-screen__inner">
-        <div className="brandpill">
-          <WineGlassMark size={26} /> La Confrérie
+    <MobilePage
+      className="onboarding-screen"
+      header={
+        <div className="brandbar">
+          <span className="brandbar__mark">
+            <WineGlassMark size={30} />
+            <span>La Confrérie</span>
+          </span>
         </div>
-
-        <div className="grow" />
-
-        <section className="sheet" aria-labelledby="comptoir-title">
+      }
+      hero={
+        <div className="sign__text" aria-labelledby="comptoir-title">
           <p className="eyebrow">{"Entrée dans la Confrérie"}</p>
-          <hr className="accent" />
           <h1 className="h1 h1--sm" id="comptoir-title">
             Il te faut un nom de comptoir
           </h1>
@@ -59,29 +61,29 @@ export function ComptoirNameOnboarding({
               "C’est sous ce blaze que le zinc se souviendra de toi, pour le meilleur et surtout pour le pire. La tablée ne juge pas ce que tu bois, elle grave juste les noms, et ça, ça reste pour toujours."
             }
           </p>
-
-          <form className="vote-form" onSubmit={handleSubmit}>
-            <label className="field">
-              <span>Nom de comptoir</span>
-              <input
-                autoFocus
-                maxLength={48}
-                value={draftName}
-                onChange={(eventChange) => setDraftName(eventChange.target.value)}
-                placeholder="Jean-Michel Pastaga, Gisèle Perrier…"
-              />
-            </label>
-            <button className="button button--primary button--block" type="submit">
-              Valider mon blaze
-            </button>
-            {error && (
-              <p className="feedback" role="alert">
-                {error}
-              </p>
-            )}
-          </form>
-        </section>
-      </div>
+        </div>
+      }
+    >
+      <form className="vote-form" onSubmit={handleSubmit}>
+        <label className="field">
+          <span>Nom de comptoir</span>
+          <input
+            autoFocus
+            maxLength={48}
+            value={draftName}
+            onChange={(eventChange) => setDraftName(eventChange.target.value)}
+            placeholder="Jean-Michel Pastaga, Gisèle Perrier…"
+          />
+        </label>
+        <button className="button button--primary button--block" type="submit">
+          Valider mon blaze
+        </button>
+        {error && (
+          <p className="feedback" role="alert">
+            {error}
+          </p>
+        )}
+      </form>
 
       {confirmedName && (
         <div className="modal-backdrop" role="presentation">
@@ -113,6 +115,6 @@ export function ComptoirNameOnboarding({
           </section>
         </div>
       )}
-    </main>
+    </MobilePage>
   );
 }

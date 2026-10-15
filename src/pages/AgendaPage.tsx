@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { LoadingScreen } from "../components/LoadingScreen";
-import { MobileHeader } from "../components/MobileHeader";
+import { BrandBar } from "../components/BrandBar";
 import { MobilePage } from "../components/MobilePage";
+import { SlotLeaf, slotDateLabel } from "../components/SlotLeaf";
 import { TraquenardGauge } from "../components/TraquenardGauge";
 import { getAperoStorageMode } from "../config/aperoApiConfig";
 import { eventStorage } from "../services";
@@ -19,18 +20,6 @@ function getSlotTime(option: AperitifOption): number {
   }
   const time = new Date(`${option.date}T${option.time}:00`).getTime();
   return Number.isNaN(time) ? Number.NaN : time;
-}
-
-function formatSlot(option: AperitifOption): string {
-  const dateLabel = option.date
-    ? new Intl.DateTimeFormat("fr-FR", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-      }).format(new Date(`${option.date}T00:00:00`))
-    : "Date mystère";
-
-  return `${dateLabel} · ${option.time || "?"}`;
 }
 
 type AgendaItem = {
@@ -115,26 +104,26 @@ export function AgendaPage() {
       .sort((first, second) => first.earliest - second.earliest);
   }, [events]);
 
+  const hero = (
+    <div className="page-hero">
+      <p className="eyebrow">L’agenda du comptoir</p>
+      <h1 className="h1 h1--sm">Les apéros à venir</h1>
+      <p className="lede">
+        Les apéros encore debout, ceux qui tiennent bon, triés par date la plus proche.
+      </p>
+    </div>
+  );
+
   if (isLoading) {
     return (
-      <MobilePage className="agenda-mobile" overlay="deep">
-        <MobileHeader eyebrow="L’agenda du comptoir" />
+      <MobilePage className="agenda-mobile" nav header={<BrandBar />} hero={hero}>
         <LoadingScreen title="On feuillette l’ardoise" subtitle="La Confrérie sort les apéros à venir…" />
       </MobilePage>
     );
   }
 
   return (
-    <MobilePage className="agenda-mobile" overlay="deep">
-      <MobileHeader eyebrow="L’agenda du comptoir" />
-
-      <section className="sheet">
-        <h1 className="h1 h1--sm">Les apéros à venir</h1>
-        <p className="lede">
-          Les apéros encore debout, ceux qui tiennent bon, triés par date la plus proche.
-        </p>
-      </section>
-
+    <MobilePage className="agenda-mobile" nav header={<BrandBar />} hero={hero}>
       {error ? (
         <section className="sheet">
           <p className="feedback">{error}</p>
@@ -151,23 +140,27 @@ export function AgendaPage() {
           </Link>
         </section>
       ) : (
-        <div className="event-stack">
+        <div className="event-stack event-stack--grid">
           {items.map(({ event, upcomingSlots, winnerId }) => (
             <section className="sheet" key={event.id}>
               <p className="eyebrow">
                 {upcomingSlots.length} créneau{upcomingSlots.length > 1 ? "x" : ""} ·{" "}
-                {event.participants.length} réponses
+                {event.participants.length} réponse{event.participants.length > 1 ? "s" : ""}
               </p>
-              <h2 className="h2">{event.ceremonialName}</h2>
+              <h2 className="h2 h2--lg">{event.ceremonialName}</h2>
               {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
               <p className="meta">par {event.organizerName}</p>
 
               <div className="slot-stack">
                 {upcomingSlots.map((option) => (
-                  <div className="slot" key={option.id}>
+                  <div className="slot slot--compact" key={option.id}>
                     <div className="slot__top">
-                      <div>
-                        <div className="slot__d">{formatSlot(option)}</div>
+                      <SlotLeaf option={option} />
+                      <div className="slot__body">
+                        <div className="slot__d">
+                          <span className="sr-only">{slotDateLabel(option)} · </span>
+                          {option.time || "?"}
+                        </div>
                         <div className="slot__p">{option.location}</div>
                       </div>
                       {option.id === winnerId && <span className="agenda-lead">En tête</span>}
