@@ -71,46 +71,49 @@ function formatNextDate(startMs: number): string {
 }
 
 export function HomePage() {
-  // Lecture synchrone du cache local : l'écran est complet au premier paint.
+  // La prochaine assemblée reste prioritaire pour l'habitué, sans appel réseau.
   const [nextApero] = useState(findNextApero);
 
   useEffect(() => {
     eventStorage.purgeExpiredEvents().catch(() => {
-      // La purge ne doit pas empêcher l’accueil de s’afficher.
+      // Une purge indisponible ne doit jamais retenir l'accueil.
     });
   }, []);
 
-  // L’accueil vierge est un écran d’atterrissage tenu sur une seule vue : on
-  // verrouille le défilement le temps qu’on y reste. Dès qu’une carte d’apéro
-  // s’ajoute, le contenu peut déborder : on laisse défiler.
-  useEffect(() => {
-    if (nextApero) {
-      return;
-    }
-    const root = document.documentElement;
-    const { body } = document;
-    root.classList.add("is-locked");
-    body.classList.add("is-locked");
-    return () => {
-      root.classList.remove("is-locked");
-      body.classList.remove("is-locked");
-    };
-  }, [nextApero]);
-
   return (
     <MobilePage className="home-mobile" overlay="scene">
-      <BrandMenu />
+      <header className="home-topline">
+        <BrandMenu />
+        <span className="home-topline__edition" aria-hidden="true">Édition des copains</span>
+      </header>
 
-      <div className="grow" />
+      <section className="home-masthead" aria-labelledby="home-title">
+        <div className="home-masthead__rule">
+          <span>Le bulletin officiel des rendez-vous officieux</span>
+          <span aria-hidden="true">N° 01</span>
+        </div>
 
-      {/* Un apéro en cours passe devant : c'est la seule chose qui attend une
-          action de la part de l'habitué qui rouvre l'app. */}
+        <p className="home-masthead__eyebrow">La très honorable</p>
+        <h1 className="home-masthead__title" id="home-title">
+          Confrérie <em>du</em><br />
+          Petit Jaune<span aria-hidden="true">.</span>
+        </h1>
+        <div className="home-masthead__seal" aria-hidden="true">
+          <span>Se réunir</span>
+          <strong>✳</strong>
+          <span>sans chichis</span>
+        </div>
+      </section>
+
       {nextApero && (
-        <section className="sheet sheet--hero">
-          <p className="eyebrow">
-            {nextApero.isDecided ? "Prochain rendez-vous" : "Ça vote au comptoir"}
-          </p>
-          <h2 className="h2">{nextApero.event.ceremonialName}</h2>
+        <section className="home-next sheet sheet--hero" aria-labelledby="next-apero-title">
+          <div className="home-next__heading">
+            <span className="home-next__marker" aria-hidden="true">À LA UNE</span>
+            <p className="eyebrow">
+              {nextApero.isDecided ? "Prochain rendez-vous" : "Ça vote au comptoir"}
+            </p>
+          </div>
+          <h2 className="h2" id="next-apero-title">{nextApero.event.ceremonialName}</h2>
           <p className="factline">
             <span>{formatNextDate(nextApero.startMs)}</span>
             <span>
@@ -119,31 +122,58 @@ export function HomePage() {
             </span>
           </p>
           <AppLink className="button button--primary button--block" to={nextApero.path}>
-            Ouvrir l’apéro
+            Ouvrir l’apéro <span aria-hidden="true">↗</span>
           </AppLink>
         </section>
       )}
 
-      <section className="sheet">
+      <section className="home-manifesto sheet" aria-labelledby="home-manifesto-title">
         <p className="eyebrow">Institution officieuse du comptoir</p>
-        <hr className="accent" />
-        <h1 className="h1">La Confrérie du Petit Jaune</h1>
+        <h2 className="home-manifesto__title" id="home-manifesto-title">
+          Le moment est sacré.<br />
+          <em>Le protocole, un peu moins.</em>
+        </h2>
         <p className="lede">
-          Le zinc décide, pour toute la tablée. Tu proposes des créneaux, tu partages un lien,
-          la tablée tranche.
+          Une date à trouver, une tablée à réunir, et personne qui ne sait
+          où se retrouver. Ici, on propose, on partage, on vote.
         </p>
         <p className="hint">
-          Nous ne saurions présumer de ce que tu porteras à tes lèvres, ni sous quelle toiture, ou
-          pas, tu le porteras. Ces détails demeurent ta souveraine affaire. En revanche, nul ne
-          saurait se dérober à la question qui vient, ça, jamais.
+          Peu importe ce qu'il y a dans ton verre. Nous défendons une seule
+          cause : ne jamais laisser un bon rendez-vous mourir dans une
+          conversation de groupe.
         </p>
+
         <AppLink
-          className={`button ${nextApero ? "button--ghost" : "button--primary"} button--block`}
+          className={"button " + (nextApero ? "button--ghost" : "button--primary") + " button--block home-manifesto__cta"}
           to="/create"
         >
-          Organiser un apéro
+          Organiser un apéro <span aria-hidden="true">↗</span>
         </AppLink>
       </section>
+
+      <section className="home-how" aria-label="Comment fonctionne la Confrérie">
+        <p className="home-how__heading">Trois articles au règlement</p>
+        <ol className="home-how__steps">
+          <li><span>01</span> Tu proposes les créneaux.</li>
+          <li><span>02</span> La tablée donne son avis.</li>
+          <li><span>03</span> Le verdict tombe tout seul.</li>
+        </ol>
+      </section>
+
+      <nav className="home-shortcuts" aria-label="Accès aux autres espaces">
+        <AppLink to="/agenda">
+          <span>Le programme</span>
+          <strong>Les apéros à venir</strong>
+          <span aria-hidden="true">↗</span>
+        </AppLink>
+        <AppLink to="/tablees">
+          <span>La communauté</span>
+          <strong>Mes tablées</strong>
+          <span aria-hidden="true">↗</span>
+        </AppLink>
+      </nav>
+
+      <p className="home-colophon">L'amitié mérite un beau registre. Le reste est accessoire.</p>
     </MobilePage>
   );
 }
