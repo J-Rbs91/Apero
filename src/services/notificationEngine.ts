@@ -14,6 +14,15 @@ import type {
 } from "../types/notifications";
 import { normalizeMemberName } from "../utils/memberName";
 
+// Réglages d'un apéro tels que déjà vus. `null` sur childrenAllowed vaut
+// « pas précisé » (et survit au JSON, contrairement à undefined).
+export type AperoSettingsSnapshot = {
+  ceremonialName: string;
+  title: string;
+  childrenAllowed: boolean | null;
+  recurrence: string;
+};
+
 // Instantané de l'état « déjà vu » d'un apéro sur cet appareil.
 export type AperoSnapshot = {
   // Signature de contenu de chaque créneau, indexée par id.
@@ -22,8 +31,20 @@ export type AperoSnapshot = {
   participantVotes: Record<string, string>;
   // Créneau confirmé au moment du dernier sync.
   selectedOptionId?: string;
+  // Mots du mur du comptoir déjà vus. Optionnel : les instantanés d'avant la
+  // fonctionnalité n'ont pas le champ (aucun message n'existait alors).
+  messageIds?: string[];
+  // Réglages de l'apéro déjà vus (nom, prétexte, politique mioches, cadence),
+  // pour repérer une retouche de l'organisateur. Optionnel : les instantanés
+  // d'avant cette fonctionnalité n'ont pas le champ — leur première
+  // comparaison ne notifie rien, elle se contente d'enregistrer l'état.
+  settings?: AperoSettingsSnapshot;
   // Rappels « peut-être » déjà déclenchés ("48h", "24h", "2h").
   firedReminders: string[];
+  // Coup de coude « à qui le tour ? » déjà envoyé une fois l'apéro passé.
+  // Optionnel : les instantanés persistés avant cette fonctionnalité n'ont pas
+  // le champ, ce qui vaut « pas encore envoyé ».
+  firedNextRoundNudge?: boolean;
   // Faux tant qu'on n'a jamais synchronisé cet apéro : le tout premier passage
   // ne fait qu'enregistrer l'état, sans notifier l'historique déjà présent.
   initialized: boolean;
@@ -34,7 +55,10 @@ export function createEmptySnapshot(): AperoSnapshot {
     optionSignatures: {},
     participantVotes: {},
     selectedOptionId: undefined,
+    messageIds: [],
+    settings: undefined,
     firedReminders: [],
+    firedNextRoundNudge: false,
     initialized: false,
   };
 }
@@ -69,9 +93,42 @@ function optionSignature(option: AperitifOption): string {
   ].join("|");
 }
 
+function eventSettings(event: AperitifEvent): AperoSettingsSnapshot {
+  return {
+    ceremonialName: event.ceremonialName,
+    title: event.title ?? "",
+    childrenAllowed: event.childrenAllowed ?? null,
+    recurrence: event.recurrence ?? "",
+  };
+}
+
+function settingsSignature(settings: AperoSettingsSnapshot): string {
+  return JSON.stringify([
+    settings.ceremonialName,
+    settings.title,
+    settings.childrenAllowed,
+    settings.recurrence,
+  ]);
+}
+
 function participantVoteSignature(participant: ParticipantResponse): string {
   const entries = Object.entries(participant.votes ?? {}).sort(([a], [b]) => a.localeCompare(b));
   return JSON.stringify(entries);
+}
+
+// Tronque un extrait sans jamais couper un couple de substitution UTF-16 en
+// deux : un emoji à cheval sur la limite tomberait en « � » dans le corps de
+// la notification (et casserait toute API exigeant du texte bien formé).
+function truncateExcerpt(text: string, maxLength: number): string {
+  if (text.length <= maxLength) {
+    return text;
+  }
+  let cut = text.slice(0, maxLength - 1);
+  const lastCode = cut.charCodeAt(cut.length - 1);
+  if (lastCode >= 0xd800 && lastCode <= 0xdbff) {
+    cut = cut.slice(0, -1);
+  }
+  return `${cut}…`;
 }
 
 export function snapshotApero(event: AperitifEvent): AperoSnapshot {
@@ -90,9 +147,52 @@ export function snapshotApero(event: AperitifEvent): AperoSnapshot {
     optionSignatures,
     participantVotes,
     selectedOptionId: event.selectedOptionId,
+    messageIds: (event.messages ?? []).map((message) => message.id),
+    settings: eventSettings(event),
     firedReminders: [],
     initialized: true,
   };
+}
+
+/**
+ * Ce qu'on annonce à la tablée quand l'organisateur retouche ses réglages.
+ * La politique mioches passe devant : elle conditionne les renforts déjà
+ * annoncés (« je viens avec les deux petits »). Rendu null si rien de
+ * notifiable n'a bougé.
+ */
+function describeSettingsChange(
+  previous: AperoSettingsSnapshot,
+  next: AperoSettingsSnapshot,
+): string | null {
+  const name = next.ceremonialName;
+
+  if (previous.childrenAllowed !== next.childrenAllowed) {
+    if (next.childrenAllowed === true) {
+      return `« ${name} » : les mioches sont finalement conviés. Compte-les dans tes renforts.`;
+    }
+    if (next.childrenAllowed === false) {
+      return `« ${name} » : ce sera finalement sans les mioches. Prévois la garde, et revois tes renforts.`;
+    }
+    return `« ${name} » : la politique mioches n’est plus tranchée. Demande à l’organisateur.`;
+  }
+
+  if (previous.ceremonialName !== next.ceremonialName) {
+    return `« ${previous.ceremonialName} » s’appelle désormais « ${name} ». Même tablée, nouvelle enseigne.`;
+  }
+
+  if (previous.title !== next.title) {
+    return next.title
+      ? `Le prétexte de « ${name} » a changé : ${next.title}.`
+      : `« ${name} » n’a plus de prétexte affiché. On trinque, c’est déjà un motif.`;
+  }
+
+  if (previous.recurrence !== next.recurrence) {
+    return next.recurrence
+      ? `« ${name} » devient une assemblée récurrente. Le rituel prend la cadence.`
+      : `« ${name} » ne se répète plus : ce sera une assemblée d’un soir.`;
+  }
+
+  return null;
 }
 
 // Un invité « oui » ou encore indécis (« none ») est tenu au courant des
@@ -133,13 +233,13 @@ function buildNotifications(
         drafts.push({
           type: "guest-responded",
           title: "Nouvelle réponse au registre",
-          body: `${participant.participantName} vient d'émarger à « ${event.ceremonialName} ».`,
+          body: `${participant.participantName} vient d’émarger à « ${event.ceremonialName} ».`,
           dedupeKey: `${event.id}:responded:${key}`,
         });
       } else if (previousSignature !== signature) {
         drafts.push({
           type: "guest-changed-response",
-          title: "Un convive a changé d'avis",
+          title: "Un convive a changé d’avis",
           body: `${participant.participantName} a modifié sa réponse à « ${event.ceremonialName} ».`,
           // La signature entre dans la clé : chaque modification distincte
           // produit sa propre notification.
@@ -182,15 +282,36 @@ function buildNotifications(
       if (!isCreator && guestFollowsUpdates(viewer.vote)) {
         drafts.push({
           type: "option-modified",
-          title: "Un créneau a été modifié",
-          body: `Un créneau de « ${event.ceremonialName} » a changé.`,
+          title: "Un créneau a bougé",
+          body: `Un créneau de « ${event.ceremonialName} » a bougé. Va voir lequel.`,
           dedupeKey: `${event.id}:option-modified:${option.id}:${signature}`,
         });
       }
     }
   }
 
-  // 3) Confirmation finale : le créneau retenu vient d'être fixé ou changé.
+  // 3) Mots laissés sur le mur du comptoir : créateur et invités engagés sont
+  // prévenus, jamais l'auteur du mot lui-même.
+  const knownMessageIds = new Set(previous.messageIds ?? []);
+  for (const message of event.messages ?? []) {
+    if (knownMessageIds.has(message.id)) {
+      continue;
+    }
+    if (normalizeMemberName(message.authorName) === viewer.normalizedName) {
+      continue;
+    }
+    if (isCreator || guestFollowsUpdates(viewer.vote)) {
+      const excerpt = truncateExcerpt(message.body, 90);
+      drafts.push({
+        type: "new-message",
+        title: "Un mot au comptoir",
+        body: `${message.authorName}, à propos de « ${event.ceremonialName} » : ${excerpt}`,
+        dedupeKey: `${event.id}:message:${message.id}`,
+      });
+    }
+  }
+
+  // 4) Confirmation finale : le créneau retenu vient d'être fixé ou changé.
   if (
     event.selectedOptionId &&
     event.selectedOptionId !== previous.selectedOptionId &&
@@ -201,12 +322,33 @@ function buildNotifications(
     const wasAlreadySet = Boolean(previous.selectedOptionId);
     drafts.push({
       type: wasAlreadySet ? "important-change" : "final-confirmation",
-      title: wasAlreadySet ? "Changement important" : "C'est confirmé !",
+      title: wasAlreadySet ? "Changement important" : "C’est confirmé !",
       body: selected
         ? `« ${event.ceremonialName} » est calé : ${selected.date} à ${selected.time}, ${selected.location}.`
         : `Le créneau retenu de « ${event.ceremonialName} » a changé.`,
-      dedupeKey: `${event.id}:confirmed:${event.selectedOptionId}`,
+      // La provenance entre dans la clé : revenir à un créneau déjà confirmé
+      // par le passé (A → B → A) reste un changement important à annoncer.
+      dedupeKey: `${event.id}:confirmed:${event.selectedOptionId}:from:${previous.selectedOptionId ?? "none"}`,
     });
+  }
+
+  // 5) Réglages retouchés par l'organisateur : la tablée engagée doit le
+  // savoir, la politique mioches en tête. Instantané d'avant cette
+  // fonctionnalité (settings absent) : rien à comparer, on ne notifie pas.
+  if (previous.settings && !isCreator && guestFollowsUpdates(viewer.vote)) {
+    const nextSettings = eventSettings(event);
+    const change = describeSettingsChange(previous.settings, nextSettings);
+
+    if (change) {
+      drafts.push({
+        type: "important-change",
+        title: "L’apéro a été retouché",
+        body: change,
+        // Provenance et destination dans la clé, comme pour la confirmation
+        // de créneau : revenir à un réglage déjà connu reste une nouvelle.
+        dedupeKey: `${event.id}:settings:${settingsSignature(nextSettings)}:from:${settingsSignature(previous.settings)}`,
+      });
+    }
   }
 
   return drafts;
@@ -288,11 +430,80 @@ export function computeReminders(
   const draft: DraftNotification = {
     type: mostUrgent.type,
     title: "Tu te tâtes encore ?",
-    body: `« ${event.ceremonialName} » approche (${mostUrgent.id}). Confirme ta présence, la tablée compte sur toi.`,
+    body: `« ${event.ceremonialName} » approche : plus que ${mostUrgent.id} pour trancher. Le registre attend.`,
     dedupeKey: `${event.id}:reminder:${mostUrgent.id}`,
   };
 
   return { drafts: [draft], firedReminders: Array.from(fired) };
+}
+
+// ---- Coup de coude post-apéro (« à qui le tour ? ») --------------------------
+
+// On laisse l'apéro se finir tranquillement (12 h après l'heure du créneau),
+// puis on souffle l'idée de la tournée suivante. Au-delà de 7 jours, on ne
+// déterre plus rien : la fenêtre d'envie est passée.
+const NEXT_ROUND_NUDGE_DELAY_MS = 12 * HOUR_MS;
+const NEXT_ROUND_NUDGE_CUTOFF_MS = 7 * 24 * HOUR_MS;
+
+// Date de référence d'un apéro passé : le créneau confirmé, sinon le dernier
+// créneau daté (même logique que la purge).
+function resolveAperoEndMs(event: AperitifEvent): number {
+  if (event.selectedOptionId) {
+    const selected = event.options.find((option) => option.id === event.selectedOptionId);
+    const selectedMs = selected ? optionStartMs(selected) : Number.NaN;
+    if (!Number.isNaN(selectedMs)) {
+      return selectedMs;
+    }
+  }
+  const dated = event.options.map(optionStartMs).filter((ms) => !Number.isNaN(ms));
+  return dated.length ? Math.max(...dated) : Number.NaN;
+}
+
+// Le coup de coude s'adresse à ceux qui ont fait vivre l'apéro : le créateur
+// (tournée récurrente à relancer) et les invités qui étaient partants (à eux
+// de convoquer la prochaine). Les « peut-être » et « non » sont laissés en paix.
+export function computeNextRoundNudge(
+  event: AperitifEvent,
+  viewer: NotificationViewer,
+  previous: AperoSnapshot,
+  nowMs: number,
+): { drafts: DraftNotification[]; firedNextRoundNudge: boolean } {
+  const alreadyFired = Boolean(previous.firedNextRoundNudge);
+
+  if (alreadyFired) {
+    return { drafts: [], firedNextRoundNudge: true };
+  }
+
+  const eligible = viewer.role === "creator" || viewer.vote === "yes";
+  const endMs = resolveAperoEndMs(event);
+
+  if (
+    !eligible ||
+    Number.isNaN(endMs) ||
+    nowMs < endMs + NEXT_ROUND_NUDGE_DELAY_MS ||
+    nowMs > endMs + NEXT_ROUND_NUDGE_CUTOFF_MS
+  ) {
+    // Fenêtre dépassée sans envoi : on grave le drapeau pour ne jamais
+    // notifier un apéro préhistorique lors d'une future synchronisation.
+    const expired = !Number.isNaN(endMs) && nowMs > endMs + NEXT_ROUND_NUDGE_CUTOFF_MS;
+    return { drafts: [], firedNextRoundNudge: expired };
+  }
+
+  const draft: DraftNotification = event.recurrence
+    ? {
+        type: "next-round-nudge",
+        title: "La tournée suivante attend",
+        body: `« ${event.ceremonialName} » est passé, et cette assemblée se répète. Convoque la prochaine tournée, le zinc garde la cadence.`,
+        dedupeKey: `${event.id}:next-round`,
+      }
+    : {
+        type: "next-round-nudge",
+        title: "L’assemblée est levée",
+        body: `« ${event.ceremonialName} » est derrière nous. À qui le tour de convoquer ? Un lien, deux créneaux, et ça repart.`,
+        dedupeKey: `${event.id}:next-round`,
+      };
+
+  return { drafts: [draft], firedNextRoundNudge: true };
 }
 
 // ---- Entrée principale du moteur --------------------------------------------
@@ -326,11 +537,18 @@ export function diffAperoNotifications(
     previous,
     nowMs,
   );
+  const { drafts: nudgeDrafts, firedNextRoundNudge } = computeNextRoundNudge(
+    event,
+    viewer,
+    previous,
+    nowMs,
+  );
 
   const nextSnapshot = snapshotApero(event);
   nextSnapshot.firedReminders = firedReminders;
+  nextSnapshot.firedNextRoundNudge = firedNextRoundNudge;
 
-  const notifications: AppNotification[] = [...eventDrafts, ...reminderDrafts].map((draft) => ({
+  const notifications: AppNotification[] = [...eventDrafts, ...reminderDrafts, ...nudgeDrafts].map((draft) => ({
     id: makeId(draft.dedupeKey),
     aperoId: event.id,
     aperoName: event.ceremonialName,

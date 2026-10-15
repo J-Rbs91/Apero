@@ -6,10 +6,10 @@ export type BadgeId =
   | "SUPER_ORGANIZER"
   | "FAITHFUL_MEMBER"
   | "SERIAL_VOTER"
-  | "BANQUET_PROVIDER"
   | "LAST_MINUTE_MINISTER"
   | "ZINC_DIPLOMAT"
-  | "FIRST_SHOT_CONSENSUS";
+  | "FIRST_SHOT_CONSENSUS"
+  | "AFFRANCHI";
 
 export type BadgeRarity = "common" | "rare" | "legendary" | "shame";
 
@@ -21,9 +21,9 @@ export type BadgeIconName =
   | "crown"
   | "member"
   | "ballot"
-  | "banquet"
   | "minister"
-  | "diplomat";
+  | "diplomat"
+  | "torch";
 
 export type BadgeDefinition = {
   id: BadgeId;
@@ -88,13 +88,6 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     iconName: "ballot",
   },
   {
-    id: "BANQUET_PROVIDER",
-    name: "Providence du Banquet",
-    description: "A régulièrement indiqué une contribution au banquet. Chips, saucisson ou gloire éternelle.",
-    rarity: "common",
-    iconName: "banquet",
-  },
-  {
     id: "LAST_MINUTE_MINISTER",
     name: "Ministre du Peut-être",
     description:
@@ -116,5 +109,13 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     description: "A participé à plusieurs apéros sans jamais foutre le bazar dans les réponses.",
     rarity: "rare",
     iconName: "diplomat",
+  },
+  {
+    id: "AFFRANCHI",
+    name: "L’Affranchi",
+    description:
+      "A d’abord été convié comme simple convive, puis a retourné la situation en convoquant sa propre assemblée. Le zinc appelle ça une élévation, et il n’en voit pas si souvent.",
+    rarity: "rare",
+    iconName: "torch",
   },
 ];

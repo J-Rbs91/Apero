@@ -163,6 +163,18 @@ function createEmptyMemberStats(displayName: string, memberKey: string, lastSeen
   };
 }
 
+// Copie l'index des membres dans un objet SANS prototype : les noms de comptoir
+// sont des données utilisateur libres, donc un membre nommé « constructor » ou
+// « __proto__ » ne doit pas entrer en collision avec Object.prototype (lecture
+// d'un membre héritée fantôme → stats NaN, ou écriture qui réécrit le prototype).
+function cloneMembers(source: Record<string, MemberRewardStats>): Record<string, MemberRewardStats> {
+  const members: Record<string, MemberRewardStats> = Object.create(null);
+  for (const [key, value] of Object.entries(source ?? {})) {
+    members[key] = value;
+  }
+  return members;
+}
+
 function getOrCreateMemberStats(
   members: Record<string, MemberRewardStats>,
   displayName: string,
@@ -191,7 +203,7 @@ export function updateRewardsLedger(
     return ledger;
   }
 
-  const members = { ...ledger.members };
+  const members = cloneMembers(ledger.members);
   const organizerStats = getOrCreateMemberStats(
     members,
     purgedRecord.organizerName,

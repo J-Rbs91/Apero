@@ -1,28 +1,25 @@
 import type { ReactNode } from "react";
-import { TabBar } from "./TabBar";
 
 type MobilePageProps = {
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
-  /** Rangée du haut de la façade : barre de marque ou bouton retour. */
+  /** Rangée du haut de la façade : bouton retour + navigation, ou barre de marque. */
   header?: ReactNode;
-  /** Enseigne peinte sur la façade (titre, chapô, verdict). */
+  /** Enseigne peinte sur la façade : titre, chapô, verdict. */
   hero?: ReactNode;
-  /** Écran de premier niveau : affiche la navigation persistante. */
-  nav?: boolean;
 };
 
 // Coque d'une page : l'auvent à festons, la façade sombre qui porte l'enseigne,
-// puis le comptoir de papier (le contenu). Voir design-system.md §3 et §4.
-export function MobilePage({ children, className = "", header, hero, nav = false }: MobilePageProps) {
+// puis le comptoir de papier (le contenu). Voir docs/uxer/design-system.md §3-4.
+//
+// `<main>` n'est rendu que lorsqu'il y a un contenu : pendant un chargement,
+// l'enseigne seule occupe l'écran, et l'arrivée du contenu ne pousse rien.
+export function MobilePage({ children, className = "", header, hero }: MobilePageProps) {
   return (
-    <div className={`screen ${nav ? "screen--nav" : ""} ${className}`.trim()}>
+    <div className={`screen ${className}`.trim()}>
       <header className="facade">
         <div className="canopy" aria-hidden="true" />
-        <div className="facade__inner">
-          {header}
-          {nav && <TabBar />}
-        </div>
+        <div className="facade__inner">{header}</div>
         {hero && <div className="facade__hero">{hero}</div>}
       </header>
       {children != null && (

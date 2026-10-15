@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { BrandBar } from "../components/BrandBar";
+import { AppLink } from "../components/AppLink";
+import { useAppNavigation } from "../routes/useAppNavigation";
+import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { getAperoStorageMode } from "../config/aperoApiConfig";
 import { useNotifications } from "../hooks/useNotifications";
@@ -20,7 +21,7 @@ function formatWhen(iso: string): string {
   }
   const diffMinutes = Math.round((Date.now() - then) / 60000);
   if (diffMinutes < 1) {
-    return "à l'instant";
+    return "à l’instant";
   }
   if (diffMinutes < 60) {
     return `il y a ${diffMinutes} min`;
@@ -33,7 +34,7 @@ function formatWhen(iso: string): string {
 }
 
 export function NotificationsPage() {
-  const navigate = useNavigate();
+  const { aller } = useAppNavigation();
   const { notifications, unreadCount, markAllRead, clearNotifications } = useNotifications();
   const { permission, isSupported, request } = useNotificationPermission();
 
@@ -60,24 +61,26 @@ export function NotificationsPage() {
   const sorted = useMemo(() => notifications, [notifications]);
 
   function handleOpen(notification: AppNotification) {
-    navigate(aperoPath(notification.aperoId));
+    aller(aperoPath(notification.aperoId));
   }
 
   return (
     <MobilePage
       className="agenda-mobile"
-      nav
-      header={<BrandBar />}
+      header={<MobileHeader eyebrow="Le carnet du comptoir" />}
       hero={
         <div className="page-hero">
-          <p className="eyebrow">Le carnet du comptoir</p>
-          <h1 className="h1 h1--sm">Tes notifications</h1>
+          <h1 className="h1 h1--sm">Ce que le zinc a noté</h1>
           <p className="lede">
             Réponses, propositions, confirmations et rappels : tout ce que le zinc a noté pour toi
             depuis ton dernier passage.
           </p>
           {hasNotifications && (
-            <button type="button" className="ghost-link" onClick={() => clearNotifications()}>
+            <button
+              type="button"
+              className="ghost-link"
+              onClick={() => clearNotifications()}
+            >
               Vider le carnet
             </button>
           )}
@@ -88,7 +91,7 @@ export function NotificationsPage() {
         <section className="sheet">
           <h2 className="h2">Notifications du téléphone</h2>
           <p className="lede">
-            Pour être prévenu même quand l'app est fermée, autorise les notifications système. Sinon,
+            Pour être prévenu même quand l’app est fermée, autorise les notifications système. Sinon,
             pas de panique : le badge rouge reste là dès que tu ouvres la Confrérie.
           </p>
           <button
@@ -106,12 +109,12 @@ export function NotificationsPage() {
       {!hasNotifications ? (
         <section className="sheet">
           <p className="lede">
-            Le carnet est vide, silencieux, presque zen. Dès qu'un convive bouge une olive, tu le
+            Le carnet est vide, silencieux, presque zen. Dès qu’un convive bouge une olive, tu le
             sauras ici.
           </p>
-          <Link className="button button--ghost button--block" to="/agenda">
-            Voir l'agenda du comptoir
-          </Link>
+          <AppLink className="button button--ghost button--block" to="/agenda">
+            Voir l’ardoise du comptoir
+          </AppLink>
         </section>
       ) : (
         <div className="notif-list">

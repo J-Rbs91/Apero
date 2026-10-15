@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Dialog } from "../Dialog";
+import { useModalDialog } from "../../hooks/useModalDialog";
 import { MobilePage } from "../MobilePage";
 import { WineGlassMark } from "../WineGlassMark";
+import { Field } from "../ui";
 import { validateComptoirName } from "../../utils/memberName";
 
 type ComptoirNameOnboardingProps = {
@@ -16,6 +17,7 @@ export function ComptoirNameOnboarding({
   const [draftName, setDraftName] = useState(initialName);
   const [confirmedName, setConfirmedName] = useState("");
   const [error, setError] = useState("");
+  const confirmDialogRef = useModalDialog(Boolean(confirmedName), () => setConfirmedName(""));
 
   useEffect(() => {
     setDraftName(initialName);
@@ -44,15 +46,12 @@ export function ComptoirNameOnboarding({
     <MobilePage
       className="onboarding-screen"
       header={
-        <div className="brandbar">
-          <span className="brandbar__mark">
-            <WineGlassMark size={30} />
-            <span>La Confrérie</span>
-          </span>
+        <div className="brandpill">
+          <WineGlassMark size={26} /> La Confrérie
         </div>
       }
       hero={
-        <div className="sign__text" aria-labelledby="comptoir-title">
+        <div className="page-hero" role="group" aria-labelledby="comptoir-title">
           <p className="eyebrow">{"Entrée dans la Confrérie"}</p>
           <h1 className="h1 h1--sm" id="comptoir-title">
             Il te faut un nom de comptoir
@@ -66,48 +65,61 @@ export function ComptoirNameOnboarding({
       }
     >
       <form className="vote-form" onSubmit={handleSubmit}>
-        <label className="field">
-          <span>Nom de comptoir</span>
-          <input
-            autoFocus
-            maxLength={48}
-            value={draftName}
-            onChange={(eventChange) => setDraftName(eventChange.target.value)}
-            placeholder="Jean-Michel Pastaga, Gisèle Perrier…"
-          />
-        </label>
+        <Field
+          label="Nom de comptoir"
+          requirement="required"
+          hint="Un prénom, un surnom, ce que tu veux : c’est ce que la tablée verra."
+          error={error || undefined}
+        >
+          {(control) => (
+            <input
+              {...control}
+              autoFocus
+              maxLength={48}
+              value={draftName}
+              onChange={(eventChange) => setDraftName(eventChange.target.value)}
+              placeholder="Jean-Michel Pastaga, Gisèle Perrier…"
+            />
+          )}
+        </Field>
         <button className="button button--primary button--block" type="submit">
           Valider mon blaze
         </button>
-        {error && (
-          <p className="feedback" role="alert">
-            {error}
-          </p>
-        )}
       </form>
 
       {confirmedName && (
-        <Dialog labelledBy="comptoir-confirm-title" onClose={() => setConfirmedName("")}>
-          <p className="eyebrow">On confirme ?</p>
-          <h2 className="h1 h1--sm" id="comptoir-confirm-title">
-            {"Sérieux, c’est ça ton blaze ?"}
-          </h2>
-          <span className="blaze">
-            {"« "}
-            {confirmedName}
-            {" »"}
-          </span>
-          <button className="button button--primary button--block" type="button" onClick={handleConfirm}>
-            {"Oui, grave ça dans le zinc"}
-          </button>
-          <button
-            className="button button--ghost button--block"
-            type="button"
-            onClick={() => setConfirmedName("")}
+        <div className="modal-backdrop" role="presentation">
+          <section
+            ref={confirmDialogRef}
+            tabIndex={-1}
+            aria-labelledby="comptoir-confirm-title"
+            aria-modal="true"
+            className="sheet modal-sheet"
+            role="dialog"
           >
-            Non, je change de blaze
-          </button>
-        </Dialog>
+            <p className="eyebrow">On confirme ?</p>
+            <h2 className="h1 h1--sm" id="comptoir-confirm-title">
+              {"Sérieux, c’est ça ton blaze ?"}
+            </h2>
+            <span className="blaze">
+              {"« "}
+              {confirmedName}
+              {" »"}
+            </span>
+            <div className="button-row">
+              <button className="button button--primary" type="button" onClick={handleConfirm}>
+                {"Oui, grave ça dans le zinc"}
+              </button>
+              <button
+                className="button button--ghost"
+                type="button"
+                onClick={() => setConfirmedName("")}
+              >
+                Non, je change de blaze
+              </button>
+            </div>
+          </section>
+        </div>
       )}
     </MobilePage>
   );

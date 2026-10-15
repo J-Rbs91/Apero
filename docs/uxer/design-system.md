@@ -6,6 +6,31 @@ Fichier d'implémentation unique : `src/styles/global.css` (ordre : tokens → b
 
 ---
 
+> ## Addendum d'intégration — PR #48 (15/10/2026)
+> Le système a été porté sur le code de `main` (kit `src/components/ui/`, navigation par couche d'historique, tablées, coffre, rétrospective, recherche de lieu…). Correspondance **réelle** avec le code, qui remplace les lignes « Navigation de premier niveau », « Puce blaze » et « Modale » du §5 :
+>
+> | Rôle | Composant de `main` conservé | Habillage Fairground |
+> |---|---|---|
+> | Navigation | `BrandMenu` (accueil), `HeaderNav` + `MobileHeader` (pages intérieures), `ConfrerieMenuPanel`, `NotificationBell` | panneau de **papier** posé sur le scrim ; bouton retour `.bk` 44 px ; cloche carrée à badge rouge |
+> | Champ | `Field`, `TextField`, `TextAreaField` | libellé 800, mention `Obligatoire` (rouge foncé) / `Facultatif` en pilule, erreur à pastille « ! » sous le champ, champ en faute rosé |
+> | Choix | `ChoiceGroup` (+ option facultative `icon`) | **talons** à glyphe pour les trois réponses d'un créneau ; cartes à pastille pour les listes |
+> | Réglage | `SwitchRow` | bascule 52×30, verte quand « Oui » |
+> | Bloc numéroté | `FormSection` | pastille d'étape (cochée en vert), titre en affiche |
+> | Volet | `Disclosure` (`<details>`) | filets pointillés, titre 800, compte en pilule |
+> | Action | `ActionBar` | bande de **papier** sous un filet encre épais ; bouton rouge ; le statut dit la prochaine chose à faire |
+> | Saisie secondaire | `FormSheet` | feuille de papier bordée d'encre, titre en affiche |
+> | Modale | `ConfirmDialog` + `useModalDialog` | papier, bordure 3 px, ampoules statiques en tête |
+> | Créneau | `EventOptionMobileCard`, `SlotHead`, `SlotLeaf` | **ticket** : calendrier-feuille, heure en affiche, perforation, talons ; états incomplet (pointillé) / refusé (rosé + double trait) / répondu |
+> | Verdict | `MobileResultsPanel` | bande de façade (ampoules, date, compteurs à arche) ; tamponné « Servi » quand l'apéro est passé |
+> | Jauge | `TraquenardGauge`, `TraquenardSlider` | dix ampoules, trois zones ; curseur natif conservé ; état « pas encore touché » en creux |
+> | Recherche de lieu | `LocationField` (overlay `.locsearch`) | panneau de papier en haut d'écran sous le scrim |
+> | Ouverture | `SplashScreen` | façade plein écran sous l'auvent |
+>
+> Supprimés par l'intégration : `TabBar`, `BrandBar`, `Dialog`, `useDialogFocus`, `VoteSegmentedControl` (supprimé aussi par `main`). Ajoutés : `Icon`, `Bulbs`, `SlotLeaf`, `SlotHead`.
+> **Contextes de jetons** : `.facade`, `.verdict` et `.splash` relisent les jetons pour le texte clair sur vert ; `.slot`, `.modal-sheet`, `.formsheet__panel`, `.actionbar`, `.brand-menu__panel`, `.locsearch__panel`, `.maplinks__panel` et `.notif-item--unread` les relisent pour le texte encre sur papier — y compris en thème sombre. Un composant n'a pas à savoir où il est posé.
+> **Piège de cascade à éviter** : ne jamais déclarer une valeur *par défaut* d'un jeton sur l'élément qui le consomme (ex. `.cnt { --cnt-num: … }`) : elle écraserait la valeur du thème héritée de `:root`. Les défauts vivent sur `:root`.
+
+
 ## 1. Couleurs
 
 ### 1.1 Primitives
@@ -81,8 +106,8 @@ Règle de **couleur isolée** (grammaire secondaire) : par écran, **une** coule
 ### 2.1 Familles
 | Rôle | Famille | Source | Poids | Repli |
 |---|---|---|---|---|
-| Affiche (display) | **Abril Fatface** (didone gras, affiches lithographiques) | Google Fonts `display=swap` | 400 seul | `"Bodoni 72","Didot","Bodoni MT",Georgia,serif` |
-| Interface / texte | **Manrope** (existante) | Google Fonts | 500, 700, 800 | `system-ui,"Segoe UI",Arial,sans-serif` |
+| Affiche (display) | **Abril Fatface** (didone gras, affiches lithographiques) | **Auto-hébergée** `src/assets/fonts/abril-fatface-{latin,latin-ext}.woff2`, `font-display: swap` | 400 seul | `"Bodoni 72","Didot","Bodoni MT",Georgia,serif` |
+| Interface / texte | **Manrope** (existante) | **Auto-hébergée** `src/assets/fonts/manrope-*.woff2` | 500, 700, 800 | `system-ui,"Segoe UI",Arial,sans-serif` |
 `font-synthesis: none` (jamais de faux gras). Pas de troisième famille.
 
 ### 2.2 Rôles de la famille d'affiche — et seulement ceux-là

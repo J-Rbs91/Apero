@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { BadgeMedal } from "../components/BadgeMedal";
 import { LoadingScreen } from "../components/LoadingScreen";
-import { BrandBar } from "../components/BrandBar";
+import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { useComptoirName } from "../hooks/useComptoirName";
+import { getAperoStorageMode } from "../config/aperoApiConfig";
 import { eventStorage } from "../services";
+import { getMyAperos } from "../services/encryptedAperoRepository";
 import type { AperitifEvent } from "../types/apero";
 import type { BadgeDefinition } from "../types/badges";
 import { BADGE_DEFINITIONS } from "../types/badges";
@@ -75,7 +77,17 @@ export function PalmaresPage() {
         const loadedLedger = await eventStorage.readRewardsLedger();
         let loadedEvents: AperitifEvent[] = [];
         try {
-          loadedEvents = await eventStorage.listActiveEvents();
+          if (getAperoStorageMode() === "api-vps") {
+            // Flux chiffré : le palmarès se juge sur les apéros connus de cet
+            // appareil (créés ou rejoints), passés compris — c'est la seule
+            // source de vérité déchiffrable ici.
+            const mine = await getMyAperos();
+            loadedEvents = mine
+              .map((item) => item.event)
+              .filter((event): event is AperitifEvent => Boolean(event));
+          } else {
+            loadedEvents = await eventStorage.listActiveEvents();
+          }
         } catch {
           // Les apéros en cours sont un bonus : le palmarès tient déjà
           // debout avec le seul grand livre des récompenses.
@@ -150,7 +162,6 @@ export function PalmaresPage() {
 
   const hero = (
     <div className="page-hero">
-      <p className="eyebrow">Tableau d’honneur</p>
       <h1 className="h1 h1--sm">Le Palmarès de la Confrérie</h1>
       <p className="lede">Qui a décroché quoi, à la force du coude et parfois du foie.</p>
     </div>
@@ -158,14 +169,22 @@ export function PalmaresPage() {
 
   if (isLoading) {
     return (
-      <MobilePage className="palmares-mobile" nav header={<BrandBar />} hero={hero}>
+      <MobilePage
+        className="palmares-mobile"
+        header={<MobileHeader eyebrow="Tableau d’honneur" />}
+        hero={hero}
+      >
         <LoadingScreen title="On compte les breloques" subtitle="La Confrérie ouvre le grand livre…" />
       </MobilePage>
     );
   }
 
   return (
-    <MobilePage className="palmares-mobile" nav header={<BrandBar />} hero={hero}>
+    <MobilePage
+      className="palmares-mobile"
+      header={<MobileHeader eyebrow="Tableau d’honneur" />}
+      hero={hero}
+    >
       {error ? (
         <section className="sheet">
           <p className="feedback">{error}</p>
@@ -174,7 +193,7 @@ export function PalmaresPage() {
         <section className="sheet">
           <p className="lede">
             Le tableau est encore vierge, d’une blancheur presque suspecte. Organise, réponds,
-            ramène le saucisson : les breloques, elles, suivront — elles suivent toujours.
+            ramène surtout ta bobine : les breloques, elles, suivront. Elles suivent toujours.
           </p>
         </section>
       ) : (

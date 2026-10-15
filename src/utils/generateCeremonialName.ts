@@ -27,20 +27,31 @@ function isActiveEvent(event: AperitifEvent): boolean {
   return event.status === "active";
 }
 
+// Même clé de comparaison pour la disponibilité et l'unicité : sans elle, un
+// apéro nommé « le concile du saucisson » ne retirerait pas « Le Concile du
+// Saucisson » du tirage, et l'app générerait un nom qu'elle juge déjà pris.
+function normalizeCeremonialName(name: string): string {
+  return name.trim().toLowerCase();
+}
+
 export function getAvailableCeremonialNames(activeEvents: AperitifEvent[]): string[] {
   const usedNames = new Set(
-    activeEvents.filter(isActiveEvent).map((event) => event.ceremonialName),
+    activeEvents
+      .filter(isActiveEvent)
+      .map((event) => normalizeCeremonialName(event.ceremonialName)),
   );
 
-  return APERO_CEREMONIAL_NAMES.filter((name) => !usedNames.has(name));
+  return APERO_CEREMONIAL_NAMES.filter(
+    (name) => !usedNames.has(normalizeCeremonialName(name)),
+  );
 }
 
 export function isCeremonialNameTaken(name: string, activeEvents: AperitifEvent[]): boolean {
-  const normalizedName = name.trim().toLowerCase();
+  const normalizedName = normalizeCeremonialName(name);
 
   return activeEvents
     .filter(isActiveEvent)
-    .some((event) => event.ceremonialName.trim().toLowerCase() === normalizedName);
+    .some((event) => normalizeCeremonialName(event.ceremonialName) === normalizedName);
 }
 
 // Variante pour le flux chiffré (mode api-vps) : impossible de lister les

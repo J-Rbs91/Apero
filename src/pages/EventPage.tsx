@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router";
+import { AppLink } from "../components/AppLink";
+import { useAppNavigation } from "../routes/useAppNavigation";
 import { AlternativeOptionForm } from "../components/AlternativeOptionForm";
-import { Dialog } from "../components/Dialog";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
@@ -9,6 +10,7 @@ import { MobileResultsPanel } from "../components/MobileResultsPanel";
 import { MobileShareBox } from "../components/MobileShareBox";
 import { ParticipantList } from "../components/ParticipantList";
 import { VoteForm } from "../components/VoteForm";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { useComptoirName } from "../hooks/useComptoirName";
 import { eventStorage } from "../services";
 import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
@@ -20,7 +22,7 @@ const MIN_LOADING_MS = 700;
 
 export function EventPage() {
   const { eventId } = useParams<{ eventId: string }>();
-  const navigate = useNavigate();
+  const { aller } = useAppNavigation();
   const location = useLocation();
   const { comptoirName } = useComptoirName();
   const seededEvent = (location.state as { createdEvent?: AperitifEvent } | null)?.createdEvent;
@@ -29,6 +31,7 @@ export function EventPage() {
   const [isPurged, setIsPurged] = useState(false);
   const [isLoading, setIsLoading] = useState(!initialEvent);
   const [isSaving, setIsSaving] = useState(false);
+  const [isProposingSlot, setIsProposingSlot] = useState(false);
   const [isAddingOption, setIsAddingOption] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -149,7 +152,9 @@ export function EventPage() {
       setIsDeleting(true);
       setError("");
       await eventStorage.deleteEvent(eventId);
-      navigate("/agenda", { replace: true });
+      /* Même raison que sur la page d'invitation : l'apéro supprimé quitte la
+         pile avec son entrée. */
+      aller("/agenda");
     } catch (deleteError) {
       setError(
         deleteError instanceof Error
@@ -162,8 +167,8 @@ export function EventPage() {
 
   if (isLoading) {
     return (
-      <MobilePage className="event-mobile" header={<MobileHeader eyebrow="Apéro" />} hero={<LoadingScreen heading="h1" />}>
-        {null}
+      <MobilePage className="event-mobile" header={<MobileHeader eyebrow="Ton apéro" />}>
+        <LoadingScreen heading="h1" />
       </MobilePage>
     );
   }
@@ -178,12 +183,12 @@ export function EventPage() {
         <section className="sheet">
           <p className="lede">
             La soirée est passée, cette page a été nettoyée, mais rassure-toi : les hauts faits
-            de la tablée, eux, restent gravés dans la Confrérie pour l’éternité — ou en tout cas
+            de la tablée, eux, restent gravés dans la Confrérie pour l’éternité, ou en tout cas
             jusqu’à la prochaine purge.
           </p>
-          <Link className="button button--primary button--block" to="/">
+          <AppLink className="button button--primary button--block" to="/">
             Retourner à l’accueil
-          </Link>
+          </AppLink>
         </section>
       </MobilePage>
     );
@@ -199,18 +204,18 @@ export function EventPage() {
         <section className="sheet">
           <p className="lede">
             Soit le lien est complètement moisi, soit le troquet a purement et simplement fermé
-            boutique — et dans les deux cas, on ne peut plus rien pour toi ici.
+            boutique, et dans les deux cas, on ne peut plus rien pour toi ici.
           </p>
           {error && <p className="feedback">{error}</p>}
-          <Link className="button button--primary button--block" to="/">
+          <AppLink className="button button--primary button--block" to="/">
             Retour à la Confrérie
-          </Link>
+          </AppLink>
         </section>
       </MobilePage>
     );
   }
 
-  const metaText = `par ${event.organizerName} · ${event.options.length} créneaux · ${event.participants.length} réponses`;
+  const metaText = `par ${event.organizerName} · ${event.options.length} créneau${event.options.length > 1 ? "x" : ""} · ${event.participants.length} réponse${event.participants.length > 1 ? "s" : ""}`;
   const isOrganizer =
     Boolean(comptoirName) &&
     normalizeMemberName(comptoirName) === normalizeMemberName(event.organizerName);
@@ -220,13 +225,10 @@ export function EventPage() {
       className="event-mobile invite-page"
       header={<MobileHeader eyebrow="Ton apéro" />}
       hero={
-        <div className="invite-hero">
-          <div className="invite-hero__intro">
-            <h1 className="h1 h1--sm">{event.ceremonialName}</h1>
-            <p className="meta">{metaText}</p>
-            {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
-          </div>
-          {result && <MobileResultsPanel event={event} result={result} />}
+        <div className="page-hero">
+          <h1 className="h1 h1--sm">{event.ceremonialName}</h1>
+          <p className="meta">{metaText}</p>
+          {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
         </div>
       }
     >
@@ -243,13 +245,20 @@ export function EventPage() {
 
       <div className="invite-grid">
         <div className="invite-main">
+          {result && <MobileResultsPanel event={event} result={result} />}
           <VoteForm
             event={event}
             isSaving={isSaving}
             onSubmit={handleVoteSubmit}
             leadingOptionId={result?.type === "winner" ? result.optionId : undefined}
+            onProposeSlot={() => setIsProposingSlot(true)}
           />
-          <AlternativeOptionForm isSaving={isAddingOption} onSubmit={handleOptionSubmit} />
+          <AlternativeOptionForm
+            isSaving={isAddingOption}
+            isOpen={isProposingSlot}
+            onClose={() => setIsProposingSlot(false)}
+            onSubmit={handleOptionSubmit}
+          />
         </div>
 
         <div className="invite-aside">
@@ -273,35 +282,19 @@ export function EventPage() {
         </div>
       </div>
 
-      {showDeleteConfirm && (
-        <Dialog labelledBy="delete-title" onClose={() => !isDeleting && setShowDeleteConfirm(false)}>
-          <p className="eyebrow">Suppression</p>
-          <h2 className="h1 h1--sm" id="delete-title">
-            Supprimer cet apéro ?
-          </h2>
-          <p className="lede">
-            Ça efface tout, pour de bon : créneaux, réponses, propositions, tout y passe. Pas de
-            retour en arrière possible.
-          </p>
-          <button
-            type="button"
-            className="button button--danger button--block"
-            onClick={handleDelete}
-            disabled={isDeleting}
-          >
-            {isDeleting ? "Suppression…" : "Oui, supprimer"}
-          </button>
-          <button
-            type="button"
-            className="button button--ghost button--block"
-            onClick={() => setShowDeleteConfirm(false)}
-            disabled={isDeleting}
-          >
-            Non, je la garde
-          </button>
-          {error && <p className="feedback">{error}</p>}
-        </Dialog>
-      )}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        eyebrow="Suppression"
+        title="Supprimer cet apéro ?"
+        body="Ça efface tout, pour de bon : créneaux, réponses, propositions, tout y passe. Pas de retour en arrière possible."
+        cancelLabel="Non, je le garde"
+        confirmLabel="Oui, supprimer"
+        busyLabel="Suppression…"
+        isBusy={isDeleting}
+        error={error || undefined}
+        onCancel={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDelete}
+      />
     </MobilePage>
   );
 }

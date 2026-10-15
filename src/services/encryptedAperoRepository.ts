@@ -5,14 +5,23 @@
 // Aucun appel GitHub authentifie ne part d'ici.
 
 import { githubConfig } from "../config/githubConfig";
-import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
+import type { AperitifEvent, AperitifOption, AperoMessage, ParticipantResponse } from "../types/apero";
 import type { LocalAperoEntry, StoredEncryptedAperoFile } from "../types/encryptedApero";
-import { appendEventOption, normalizeEvent, upsertParticipant } from "../utils/eventNormalization";
+import {
+  appendEventMessage,
+  appendEventOption,
+  applyAperoSettings,
+  normalizeEvent,
+  toggleOptionCheer,
+  upsertParticipant,
+} from "../utils/eventNormalization";
+import type { AperoSettings } from "../utils/eventNormalization";
 import { sanitizeAperoEvent } from "../utils/aperoValidation";
 import {
   AperoApiError,
   createOrUpdateEncryptedApero,
   deleteEncryptedApero as deleteEncryptedAperoApi,
+  fetchEncryptedAperoFromApi,
 } from "./aperoApiClient";
 import { generateAperoId, generateBase64UrlRandomKey, isValidAperoId, sha256Hex } from "./aperoCryptoKeys";
 import { decryptAperoData, encryptAperoData, ENCRYPTION_KEY_BYTE_LENGTH } from "./aperoEncryption";
@@ -48,31 +57,152 @@ function decodeBase64Content(value: string): string {
 }
 
 /**
- * Lecture publique du fichier chiffre via GitHub Contents API, SANS token :
- * le repo est public et ce flux ne doit jamais transporter d'Authorization.
- * Retourne aussi le sha GitHub, indispensable comme baseSha anti-conflit.
+ * Sha git d'un blob : sha1("blob <taille>\0<contenu>"). C'est exactement le
+ * sha que renvoie la Contents API pour un fichier — le recalculer permet de
+ * garder un baseSha anti-conflit valide même quand on lit le fichier via
+ * raw.githubusercontent.com, qui ne fournit aucun sha.
+ */
+async function computeGitBlobSha(bytes: Uint8Array): Promise<string> {
+  const header = new TextEncoder().encode(`blob ${bytes.byteLength}\0`);
+  const blob = new Uint8Array(header.byteLength + bytes.byteLength);
+  blob.set(header, 0);
+  blob.set(bytes, header.byteLength);
+  const digest = await crypto.subtle.digest("SHA-1", blob);
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+/**
+ * Lecture de secours via raw.githubusercontent.com : servi par CDN, sans la
+ * limite de 60 requetes/heure de l'API anonyme. Contrepartie : cache CDN de
+ * quelques minutes (donnee potentiellement un peu perimee — un baseSha
+ * perime se solde par un 409 cote serveur, jamais par un ecrasement) et pas
+ * de sha fourni, d'ou le recalcul du blob sha ci-dessus.
+ */
+async function readPublicAperoFileViaRaw(
+  aperoId: string,
+  options: { bustCdnCache?: boolean } = {},
+): Promise<{ file: StoredEncryptedAperoFile; sha: string } | null> {
+  // Le cache Fastly de raw.githubusercontent.com garde une version quelques
+  // minutes : lors d'un retry anti-conflit (409), on force une clé de cache
+  // neuve via la query string, sinon on relit la même version périmée et le
+  // conflit ne se résout jamais.
+  const url =
+    `https://raw.githubusercontent.com/${githubConfig.owner}/${githubConfig.repo}` +
+    `/${githubConfig.branch}/${APEROS_DATA_PATH}/${aperoId}.json` +
+    (options.bustCdnCache ? `?cb=${Date.now()}` : "");
+
+  // no-cache (et non no-store) : le navigateur revalide avec son ETag, un 304
+  // est gratuit et instantané.
+  const response = await fetch(url, { cache: "no-cache" });
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new EncryptedAperoError(
+      "UNREADABLE_FILE",
+      `Lecture publique impossible (HTTP ${response.status}).`,
+    );
+  }
+
+  const bytes = new Uint8Array(await response.arrayBuffer());
+
+  try {
+    const file = JSON.parse(new TextDecoder().decode(bytes)) as StoredEncryptedAperoFile;
+    return { file, sha: await computeGitBlobSha(bytes) };
+  } catch {
+    throw new EncryptedAperoError("UNREADABLE_FILE", "Fichier apéro illisible.");
+  }
+}
+
+/**
+ * Lecture du fichier chiffre. Source primaire : l'API VPS (GET), qui sert le
+ * blob depuis son stockage (SQLite ou GitHub selon le backend serveur) avec
+ * son sha anti-conflit. Replis :
+ * - API deployee sans route GET (version anterieure) ou non configuree →
+ *   lecture publique GitHub historique, le temps de la transition ;
+ * - panne reseau / 5xx de l'API → l'erreur remonte (l'appelant retombe sur
+ *   son cache local). JAMAIS de repli GitHub dans ce cas : en stockage VPS,
+ *   GitHub ne recoit plus les nouveaux aperos — son 404 ferait passer un
+ *   apero vivant pour supprime et le purgerait des appareils.
  */
 export async function readPublicAperoFile(
   aperoId: string,
+  options: { bustCdnCache?: boolean } = {},
 ): Promise<{ file: StoredEncryptedAperoFile; sha: string } | null> {
   if (!isValidAperoId(aperoId)) {
     return null;
   }
 
+  let apiResult: Awaited<ReturnType<typeof fetchEncryptedAperoFromApi>>;
+  try {
+    apiResult = await fetchEncryptedAperoFromApi(aperoId);
+  } catch {
+    throw new EncryptedAperoError(
+      "UNREADABLE_FILE",
+      "Lecture impossible via l’API apéro pour le moment.",
+    );
+  }
+
+  if (apiResult.status === "ok") {
+    return { file: apiResult.file as StoredEncryptedAperoFile, sha: apiResult.sha };
+  }
+
+  if (apiResult.status === "not-found") {
+    return null;
+  }
+
+  return readPublicAperoFileViaGitHub(aperoId, options);
+}
+
+/**
+ * Lecture publique historique via GitHub Contents API, SANS token : le repo
+ * est public et ce flux ne doit jamais transporter d'Authorization.
+ * Retourne aussi le sha GitHub, indispensable comme baseSha anti-conflit.
+ * L'API anonyme est plafonnee a 60 requetes/heure par IP : quota epuise
+ * (403/429), on bascule sur raw.githubusercontent.com qui n'a pas ce plafond.
+ */
+async function readPublicAperoFileViaGitHub(
+  aperoId: string,
+  options: { bustCdnCache?: boolean } = {},
+): Promise<{ file: StoredEncryptedAperoFile; sha: string } | null> {
+  // `cache: no-cache` ne suffit pas toujours avec le cache partagé de la
+  // Contents API. Les lectures explicitement fraîches ajoutent donc une clé
+  // de requête unique, comme le fallback raw le fait déjà.
   const url =
     `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}` +
-    `/contents/${APEROS_DATA_PATH}/${aperoId}.json?ref=${githubConfig.branch}`;
+    `/contents/${APEROS_DATA_PATH}/${aperoId}.json?ref=${githubConfig.branch}` +
+    (options.bustCdnCache ? `&cb=${Date.now()}` : "");
 
-  const response = await fetch(url, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
-    cache: "no-store",
-  });
+  // no-cache : requête conditionnelle (ETag). Un 304 ne compte PAS dans le
+  // quota anonyme de 60 req/h — no-store brûlait le quota même sans changement.
+  let response: Response;
+
+  try {
+    response = await fetch(url, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      cache: "no-cache",
+    });
+  } catch {
+    // Appel qui claque avant toute réponse (réseau mobile capricieux, DNS,
+    // filtrage) : le CDN raw sert le même fichier par un autre chemin, il
+    // mérite sa chance avant de déclarer l'apéro illisible.
+    return readPublicAperoFileViaRaw(aperoId, options);
+  }
 
   if (response.status === 404) {
     return null;
+  }
+
+  // Quota anonyme épuisé (403/429) ou API GitHub en vrac (5xx) : même repli.
+  if (response.status === 403 || response.status === 429 || response.status >= 500) {
+    return readPublicAperoFileViaRaw(aperoId, options);
   }
 
   if (!response.ok) {
@@ -87,7 +217,7 @@ export async function readPublicAperoFile(
     const file = JSON.parse(decodeBase64Content(body.content)) as StoredEncryptedAperoFile;
     return { file, sha: body.sha };
   } catch {
-    throw new EncryptedAperoError("UNREADABLE_FILE", "Fichier apero illisible.");
+    throw new EncryptedAperoError("UNREADABLE_FILE", "Fichier apéro illisible.");
   }
 }
 
@@ -142,6 +272,7 @@ export function purgeDeletedApero(aperoId: string): boolean {
   const aperoName = entry.lastKnownEvent?.ceremonialName ?? "";
 
   removeLocalApero(aperoId);
+  invalidateMyAperosCache();
   removeNotificationsForApero(aperoId);
   removeSnapshot(aperoId);
 
@@ -154,8 +285,8 @@ export function purgeDeletedApero(aperoId: string): boolean {
       type: "apero-deleted",
       title: "Apéro annulé",
       body: aperoName
-        ? `« ${aperoName} » a été annulé par la personne qui l'organisait. Il a été retiré de ton agenda.`
-        : "Un apéro auquel tu participais a été annulé par la personne qui l'organisait. Il a été retiré de ton agenda.",
+        ? `L’organisateur a rangé le zinc : « ${aperoName} » est annulé. Ton ardoise est nettoyée.`
+        : "L’organisateur a rangé le zinc : un apéro auquel tu participais est annulé. Ton ardoise est nettoyée.",
       createdAt: now,
       read: false,
       dedupeKey: `${aperoId}:deleted`,
@@ -169,7 +300,9 @@ export function purgeDeletedApero(aperoId: string): boolean {
   return true;
 }
 
-function isAdminKeyHashUnsupported(error: unknown): error is AperoApiError {
+// Compatibilité avec une API VPS antérieure à adminKeyHash : elle rejette le
+// champ comme « unrecognized key ». Partagé avec le repository des tablées.
+export function isAdminKeyHashUnsupported(error: unknown): error is AperoApiError {
   return Boolean(
     error instanceof AperoApiError &&
       error.code === "INVALID_REQUEST" &&
@@ -244,6 +377,7 @@ export async function createEncryptedApero(
     displayName: event.organizerName,
     role: "creator",
   });
+  invalidateMyAperosCache();
 
   return { aperoId, encryptionKey, writeKey, event, sha: result.sha };
 }
@@ -255,8 +389,9 @@ export async function createEncryptedApero(
 export async function getEncryptedAperoById(
   aperoId: string,
   encryptionKey: string,
+  options: { bustCdnCache?: boolean } = {},
 ): Promise<{ event: AperitifEvent; sha: string } | null> {
-  const stored = await readPublicAperoFile(aperoId);
+  const stored = await readPublicAperoFile(aperoId, options);
 
   if (!stored) {
     return null;
@@ -285,10 +420,14 @@ export async function updateEncryptedApero(
   const maxAttempts = 2;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    const current = await getEncryptedAperoById(aperoId, encryptionKey);
+    // Au retry (409), on contourne le cache CDN : relire la même version
+    // périmée reproduirait exactement le même conflit.
+    const current = await getEncryptedAperoById(aperoId, encryptionKey, {
+      bustCdnCache: attempt > 1,
+    });
 
     if (!current) {
-      throw new EncryptedAperoError("NOT_FOUND", "Cet apero n'existe pas ou plus.");
+      throw new EncryptedAperoError("NOT_FOUND", "Cet apéro n’existe pas ou plus.");
     }
 
     const updatedEvent = sanitizeAperoEvent(
@@ -312,6 +451,7 @@ export async function updateEncryptedApero(
       // Le fichier vient d'être lu publiquement puis réécrit : son existence
       // publique est confirmée, un futur 404 signifiera une vraie suppression.
       cacheLocalAperoEvent(aperoId, updatedEvent, written.sha);
+      invalidateMyAperosCache();
       return updatedEvent;
     } catch (error) {
       const isRetryableConflict =
@@ -323,7 +463,7 @@ export async function updateEncryptedApero(
     }
   }
 
-  throw new AperoApiError("CONFLICT", "Conflit d'ecriture persistant.");
+  throw new AperoApiError("CONFLICT", "Conflit d’écriture persistant.");
 }
 
 /**
@@ -346,6 +486,47 @@ export async function joinApero(
 
   return updateEncryptedApero(aperoId, writeKey, encryptionKey, (event) =>
     upsertParticipant(event, participant),
+  );
+}
+
+/** Laisse un mot sur le mur du comptoir de l'apéro. */
+export async function addEncryptedAperoMessage(
+  aperoId: string,
+  writeKey: string,
+  encryptionKey: string,
+  message: AperoMessage,
+): Promise<AperitifEvent> {
+  return updateEncryptedApero(aperoId, writeKey, encryptionKey, (event) =>
+    appendEventMessage(event, message),
+  );
+}
+
+/** Lève ou repose le verre d'un convive sur un créneau (« trinquer »). */
+export async function toggleEncryptedAperoCheer(
+  aperoId: string,
+  writeKey: string,
+  encryptionKey: string,
+  optionId: string,
+  participantName: string,
+): Promise<AperitifEvent> {
+  return updateEncryptedApero(aperoId, writeKey, encryptionKey, (event) =>
+    toggleOptionCheer(event, optionId, participantName),
+  );
+}
+
+/**
+ * Retouche les reglages de l'apero (nom, pretexte, politique mioches,
+ * cadence). Reservee a l'organisateur cote interface : cryptographiquement,
+ * c'est la write key qui autorise l'ecriture, comme pour toute mutation.
+ */
+export async function updateEncryptedAperoSettings(
+  aperoId: string,
+  writeKey: string,
+  encryptionKey: string,
+  settings: AperoSettings,
+): Promise<AperitifEvent> {
+  return updateEncryptedApero(aperoId, writeKey, encryptionKey, (event) =>
+    applyAperoSettings(event, settings),
   );
 }
 
@@ -385,6 +566,7 @@ export async function deleteEncryptedApero(
     legacyWriteKey: credentials.legacyWriteKey,
   });
   removeLocalApero(aperoId);
+  invalidateMyAperosCache();
 }
 
 export type MyAperoItem = {
@@ -392,8 +574,33 @@ export type MyAperoItem = {
   event: AperitifEvent | null;
 };
 
+// Mutualisation des rafales : démarrage, agenda, palmarès et sync de
+// notifications appellent tous getMyAperos à quelques secondes d'écart.
+// On partage la promesse en vol et on garde le résultat quelques secondes —
+// chaque écriture (vote, création, suppression) invalide immédiatement.
+const MY_APEROS_CACHE_TTL_MS = 15_000;
+let myAperosInflight: { at: number; promise: Promise<MyAperoItem[]> } | null = null;
+
+export function invalidateMyAperosCache(): void {
+  myAperosInflight = null;
+}
+
 /** "Mes aperos" : uniquement les aperos du registre local. */
-export async function getMyAperos(): Promise<MyAperoItem[]> {
+export function getMyAperos(): Promise<MyAperoItem[]> {
+  if (myAperosInflight && Date.now() - myAperosInflight.at < MY_APEROS_CACHE_TTL_MS) {
+    return myAperosInflight.promise;
+  }
+
+  const promise = loadMyAperos().catch((error) => {
+    // Un échec ne doit pas rester collé dans le cache.
+    invalidateMyAperosCache();
+    throw error;
+  });
+  myAperosInflight = { at: Date.now(), promise };
+  return promise;
+}
+
+async function loadMyAperos(): Promise<MyAperoItem[]> {
   const entries = getLocalAperos();
 
   return Promise.all(
@@ -428,4 +635,14 @@ export async function getMyAperos(): Promise<MyAperoItem[]> {
 
 export function findLocalAperoEntry(aperoId: string): LocalAperoEntry | null {
   return findLocalApero(aperoId);
+}
+
+/**
+ * Derniere version de l'apero connue sur cet appareil (registre local).
+ * Sert de repli d'affichage quand la lecture publique GitHub echoue
+ * (quota anonyme epuise, reseau), comme le fait deja l'agenda.
+ */
+export function getCachedAperoEvent(aperoId: string): AperitifEvent | null {
+  const entry = findLocalApero(aperoId);
+  return entry ? getCachedEvent(entry) : null;
 }

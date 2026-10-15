@@ -1,6 +1,13 @@
 import { useEffect, useRef } from "react";
 import "leaflet/dist/leaflet.css";
-import { loadLeaflet, MARKER_STYLE, OSM_ATTRIBUTION, OSM_TILE_URL } from "../utils/leaflet";
+import {
+  loadLeaflet,
+  MARKER_STYLE,
+  MAX_TILE_ZOOM,
+  OSM_TILE_URL,
+  TILE_LAYER_OPTIONS,
+  watchMapSize,
+} from "../utils/leaflet";
 
 // Vue par défaut sur la France quand aucun point n'est encore posé.
 const FRANCE_CENTER: [number, number] = [46.6, 2.5];
@@ -22,32 +29,38 @@ export function LocationPickerMap({ lat, lng, onPick }: LocationPickerMapProps) 
 
   useEffect(() => {
     let isMounted = true;
+    let unwatchSize: (() => void) | undefined;
 
     async function mountMap() {
       const L = await loadLeaflet();
+      const container = containerRef.current;
 
-      if (!isMounted || !containerRef.current) {
+      if (!isMounted || !container) {
         return;
       }
 
-      const map = L.map(containerRef.current).setView(
+      const map = L.map(container, { maxZoom: MAX_TILE_ZOOM }).setView(
         lat != null && lng != null ? [lat, lng] : FRANCE_CENTER,
         lat != null && lng != null ? PICKED_ZOOM : FRANCE_ZOOM,
       );
 
-      L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION }).addTo(map);
+      L.tileLayer(OSM_TILE_URL, TILE_LAYER_OPTIONS).addTo(map);
       map.on("click", (mapEvent) => {
         onPickRef.current(mapEvent.latlng.lat, mapEvent.latlng.lng);
       });
 
       mapRef.current = map;
-      window.setTimeout(() => map.invalidateSize(), 60);
+      // La carte apparaît au dépliage du bloc « pointe-le toi-même » : sa
+      // taille se stabilise après le montage. Tant que Leaflet ne le sait pas,
+      // le clic tombe à côté du pixel visé — l'inverse de ce qu'on promet.
+      unwatchSize = watchMapSize(map, container);
     }
 
     mountMap();
 
     return () => {
       isMounted = false;
+      unwatchSize?.();
       mapRef.current?.remove();
       mapRef.current = null;
       markerRef.current = null;

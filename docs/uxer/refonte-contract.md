@@ -7,6 +7,25 @@ Documents liés : [`design-system.md`](design-system.md) (spécification implém
 
 > Règle : aucun fichier de `src/`, `index.html` ou `public/` n'est modifié avant le commit de ces deux documents.
 
+
+> ## Addendum d'intégration — PR #48, base `main` `0fc1fbe` (15/10/2026)
+>
+> La branche a été intégrée à `main` après 256 commits de divergence (React Router v8, `AppLink`/`useAppNavigation`, kit de saisie `ui/`, tablées, coffre, rétrospective, recherche de lieu, barre d'action, volets…). Ce contrat a été écrit sur l'ancienne base ; **les décisions ci-dessous remplacent les passages correspondants** (le reste du texte est conservé comme historique de la décision artistique, qui, elle, est inchangée : *Fairground Baroque*).
+>
+> | Passage d'origine | Décision après intégration | Pourquoi |
+> |---|---|---|
+> | §4 point 1 : barre de navigation persistante à la place du menu | **Abandonnée.** Le menu de la Confrérie reste une *couche d'historique* (`BrandMenu`, `HeaderNav`, `ConfrerieMenuPanel`), restylé en panneau de papier ; cloche et menu sont dans l'en-tête de toutes les pages intérieures | Sur `main`, le menu et la cloche suivent déjà l'utilisateur partout (le constat F5 n'existe plus) et `docs/NAVIGATION.md` + `npm run test:nav` en font un contrat (couche dans la pile, `.brand-menu__panel`, `aria-label="Menu de la Confrérie"`). Remplacer le menu aurait exigé de modifier ces tests |
+> | §10 : bouton « Je réponds » | **Retiré.** La barre d'action épinglée de `main` (`ActionBar`, « Envoyer ma réponse ») répond déjà au constat F6 | Une action de plus aurait doublé un geste existant |
+> | §10 : composant `Dialog` | **Retiré.** `ConfirmDialog` et `useModalDialog` de `main` assurent focus, piège à Tab, Échap et retour du focus | Doublon |
+> | §6.2, §7 : polices chargées depuis Google Fonts | **Auto-hébergées** : `src/assets/fonts/abril-fatface-*.woff2` à côté de Manrope, licences dans `CREDITS.md` | RGPD : `main` interdit tout CDN de police (`CREDITS.md`, `index.html`) |
+> | §6.1 : verdict dans l'enseigne, formulaire ensuite | **Ordre piloté par le rôle conservé** (`voteFirst`, `shareFirst`, apéro passé) : le verdict est une bande de façade **posée où l'ordre de `main` la met** ; l'enseigne ne porte que l'identité de l'assemblée | L'ordre des blocs est un comportement fonctionnel de `main`, pas un choix de composition |
+> | Accueil verrouillé en une vue (`.is-locked`) | Retiré : la composition n'a plus besoin de verrouiller le défilement | Une page qui tient dans l'écran ne défile pas ; une page qui déborde peut défiler |
+> | Écran d'ouverture (`SplashScreen`) | Conservé tel quel (une boucle du verre, tap pour passer) ; habillé en façade sous l'auvent. **Correction** : en mouvement réduit le verre ne boucle plus, donc l'écran se retire après 700 ms au lieu d'attendre le filet de 4 s | Régression de fusion détectée à la lecture de `WineGlassMark` |
+>
+> **Documents de `main` qui parlent de l'identité précédente** (« registre de zinc ») : `docs/refonte-visuelle/PO-VISION.md` et `IDENTITE.md` portent désormais un bandeau « historique ». Leurs invariants **fonctionnels** (parcours P1-P7, ordre des blocs, kit `ui/`, textes, tests, classes de repère, cibles ≥ 44 px, plancher 12 px, focus visible, mouvement réduit, aucun CDN) restent tenus ; leurs choix **esthétiques** (accent pastis unique, décor photo plein cadre sous voile, Manrope seule, thème sombre unique) sont remplacés par la décision du propriétaire d'adopter cette direction.
+>
+> Les preuves du §11 ont été **rejouées sur l'arbre intégré** : voir le §12.
+
 ---
 
 ## 1. Exploration du produit
@@ -255,3 +274,19 @@ Direction artistique : **non rouverte**. Elle a tenu sur les écrans testés ; a
 
 ### Verdict `ui-review-qa`
 **PASS sous réserves** — preuves d'exécution et captures effectivement inspectées pour Chromium (Linux), 320/390/1280, thème clair, thème sombre (mobile) et mouvement réduit ; parcours fonctionnels verts. **Non couvert, à ne pas lire comme validé** : appareils tactiles réels, lecteurs d'écran, autres moteurs de rendu, thème sombre sur grand écran (non capturé), cartes avec fonds de plan réels, rendu des champs date/heure natifs sur téléphone. La CI verte est une preuve technique ; le jugement artistique ci-dessus est celui de l'agent signataire.
+
+
+---
+
+## 12. Preuves sur l'arbre intégré (PR #48 après fusion de `main`)
+Base de comparaison : `origin/main` `0fc1fbe` exécuté tel quel dans un worktree séparé. Captures : `…/scratchpad/shots/{main-base,new-a,new-b,new-dark}/`.
+
+| Contrôle | `main` seul | Branche intégrée |
+|---|---|---|
+| `npm test` | 236/236 | **236/236** (dont `navigationTree.test.ts` : navigation par un seul point, arbre complet) |
+| `npm run build` | ✓ | ✓ |
+| `npm run test:functional` | 71/71 | **71/71** |
+| `npm run test:nav` | 23/23 | **23/23** |
+| `npm run test:functional:sqlite` | **échoue** (étape 2 : le voile de recherche de lieu intercepte le clic « Créer l'apéro » ; puis `no such table: aperos`) | **échoue au même endroit**. Une copie temporaire corrigée de l'étape 1 donne le même résultat sur les deux arbres : la création d'un apéro en stockage sqlite aboutit (✅) puis le banc bute sur le schéma. Le banc est périmé sur `main` ; il n'a **pas** été modifié |
+| Contraste calculé (texte vs fond effectif), 11 écrans + 10 états (menu, dialogues, feuille, vote vierge/refusé/choisi, création refusée, recherche de lieu), clair et sombre | — | **0 écart** (un défaut trouvé et corrigé : compteurs jaunes sur ivoire dans la rétrospective) |
+| Débordement horizontal 320 / 390 / 1280 | — | aucun |

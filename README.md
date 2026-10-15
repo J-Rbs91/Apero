@@ -4,20 +4,25 @@
 
 La Confrérie du Petit Jaune est un mini Doodle de comptoir : une personne convoque une assemblée, propose plusieurs combinaisons date + heure + lieu, puis partage un lien unique. La tablée invitée vote uniquement sur cette assemblée.
 
-Le contraste est volontaire : un nom pompeux, presque chevaleresque, pour une mission absolument essentielle et moyennement distinguée : se mettre d’accord pour boire un coup. Chaque convive vient avec son carburant — pastaga, pinard, soft, Perrier ou cacahuètes — mais tout le monde passe par le registre.
+Le contraste est volontaire : un nom pompeux, presque chevaleresque, pour une mission absolument essentielle et moyennement distinguée : se mettre d’accord pour se retrouver quelque part. On ne présume rien, ni de l’endroit — terrasse, zinc ou trottoir — ni du contenu du verre : chacun s’abreuve selon sa conscience et sa constitution, mais tout le monde passe par le registre.
 
-Ligne éditoriale : *une app d’apéro de comptoir, absurde, alcool-compatible et pleine de gouaille, ouverte à toute la tablée — pas seulement aux gentlemen du pastaga.*
+Ligne éditoriale : *une app de comptoir, absurde et pleine de gouaille, ouverte à toute la tablée — car derrière le pastaga du nom, ce qu’on porte à ses lèvres demeure la souveraine affaire de chacun.*
 
 ## Principe multi-aperos
 
 Chaque apero reste independant :
 
-- un apero = un fichier chiffre dans `data/aperos/<aperoId>.json` ;
+- un apero = un blob chiffre, identifie par son `aperoId` ;
 - un lien = une assemblee precise, avec les cles dans le fragment d'URL ;
 - les participants d'une assemblee ne polluent jamais une autre ;
-- les votes sont fusionnes via l'API VPS, jamais via un token GitHub dans le navigateur.
+- lectures et ecritures passent par l'API VPS (`server/`), jamais par un token dans le navigateur.
 
-Le frontend lit les fichiers chiffres publiquement, mais il ne sait pas ecrire dans GitHub. Les ecritures passent par `server/`, ou le token GitHub reste cote serveur.
+L'API stocke les blobs chiffres selon son `STORAGE_BACKEND` :
+
+- `sqlite` (recommande) : base SQLite locale au VPS (`node:sqlite`, zero dependance) — voir `docs/RACCORDEMENT-VPS.md`, partie C ;
+- `github` (historique, defaut) : chaque apero est un fichier `data/aperos/<aperoId>.json` commite dans ce repo via l'API GitHub, le token restant cote serveur. Le frontend sait encore lire ces fichiers publiquement en repli, le temps de la transition.
+
+Dans les deux cas le serveur ne voit que du chiffre : la cle de dechiffrement ne quitte jamais le fragment d'URL des invites.
 
 ## Noms ceremoniels
 
@@ -94,7 +99,8 @@ npm run dev
 ## Tests
 
 ```bash
-npm test
+npm test          # unitaires + garde-fous de structure
+npm run test:nav  # contrat du geste retour, dans un vrai navigateur
 ```
 
 ## Build
@@ -126,6 +132,59 @@ Cette URL n’est pas un secret (elle est publique dans le bundle), une variable
 
 La procédure complète (mise en service de l’API sur le VPS + raccordement GitHub) est décrite dans [`docs/RACCORDEMENT-VPS.md`](docs/RACCORDEMENT-VPS.md).
 
+## Navigation : ce que fait le geste retour
+
+Le bouton retour d'Android, celui du navigateur et le glissement latéral d'iOS
+rejouent la **pile d'historique** — la chronologie des écrans visités, à
+l'envers. On se représente pourtant une application comme un **arbre**, où
+« retour » veut dire remonter d'un niveau. Les deux divergent au premier pas de
+côté, et c'est le défaut de navigation le plus courant des applications web
+installables : il ne se voit pas sur un ordinateur, où personne n'appuie sur
+retour.
+
+Un seul invariant le tient : la pile d'historique est toujours le chemin de la
+racine à l'écran courant. Descendre empile, un frère remplace, remonter dépile —
+et l'intention se déduit de la position des deux écrans dans l'arbre, jamais
+d'une déclaration à la main. Rien n'est intercepté : c'est le navigateur qui
+dépile.
+
+- [`src/routes/navigationTree.ts`](src/routes/navigationTree.ts) — le seul
+  endroit où la structure est déclarée. Ajouter un écran, c'est y ajouter une
+  ligne ; `npm test` échoue s'il manque.
+- [`src/routes/useAppNavigation.ts`](src/routes/useAppNavigation.ts) — le point
+  de passage unique, qui compare les profondeurs et choisit le geste.
+- [`docs/NAVIGATION.md`](docs/NAVIGATION.md) — le contrat, les arbitrages, et
+  les six vérifications à faire sur un téléphone. Elles ne s'automatisent pas
+  ici : un geste retour ne se lit pas dans du code.
+
+## Interface : le kit de la Confrérie
+
+L’interface a été refondue autour de quatre règles, décrites en détail dans
+[`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md) :
+
+1. **un champ dit ce qu’on attend de lui** : libellé au-dessus, mention
+   `Obligatoire` ou `Facultatif`, phrase d’aide, erreur sous le champ concerné ;
+2. **ce qui se sélectionne ressemble à quelque chose qui se sélectionne** :
+   cartes cochables (`ChoiceGroup`) au lieu de menus déroulants qui imitaient
+   des zones de texte ;
+3. **le bouton qui enregistre reste sous le pouce** : barre d’action épinglée
+   (`ActionBar`) qui annonce la prochaine chose à faire, et feuille plein écran
+   (`FormSheet`) pour les saisies secondaires ;
+4. **un seul bouton plein par écran** : réservé à l’action qui enregistre (rouge sur
+   le papier, jaune pastis sur la façade).
+
+Les composants partagés vivent dans [`src/components/ui/`](src/components/ui/)
+(`Field`, `ChoiceGroup`, `SwitchRow`, `FormSection`, `Disclosure`, `ActionBar`,
+`FormSheet`). Les jetons de style (accent unique, échelle d’arrondis, échelle
+typographique) sont en tête de `src/styles/global.css`.
+
+Les guides de conception qui ont servi de référence sont embarqués dans le repo,
+sous [`.claude/skills/`](.claude/skills/) — notamment
+`higgsfield-websites/references/design-recipe.md` (typographie, couleur, états
+de formulaire), `app-layouts.md` (divulgation progressive, action épinglée) et
+`review-rubric.md` (revue mécanique avant livraison). Ils sont lus par les
+agents qui travaillent sur ce repo, et restent lisibles à la main.
+
 ## Fonctionnalités
 
 - Accueil au nom officiel `La Confrérie du Petit Jaune`.
@@ -134,7 +193,6 @@ La procédure complète (mise en service de l’API sur le VPS + raccordement Gi
 - Page publique par lien unique basé sur l’`id` technique.
 - Vote par pseudo : j’y serai, j’me tâte, sans moi.
 - Modification du vote si le même pseudo revient.
-- Contributions au banquet et déclarations au comptoir.
 - Registre du comptoir groupé : les présences en tête, les désertions et les culs entre deux chaises dans un menu dépliant.
 - Lieu avec autocomplétion OpenStreetMap (API publique Photon, sans clé) : nom de l’établissement → adresse + coordonnées, saisie libre conservée pour « chez Dédé ».
 - Mini-carte Leaflet sous le verdict quand le créneau en tête a des coordonnées, avec lien vers OpenStreetMap.
@@ -142,6 +200,65 @@ La procédure complète (mise en service de l’API sur le VPS + raccordement Gi
 - Gestion simple des conflits GitHub : relecture, fusion, deuxième tentative.
 - Page d’apéro complète via le lien chiffré (`/invite/:aperoId`), identique pour l’organisateur et les invités : verdict, votes créneau par créneau, contre-propositions, registre. L’organisateur y garde en plus la suppression définitive de l’apéro.
 - Notifications selon le rôle et la réponse (voir section dédiée).
+- Engagement, rituel et communauté (voir section dédiée) : trinquer aux créneaux, mur du comptoir, relance manuelle, export calendrier et image du verdict, « Remettre ça » et assemblées récurrentes, Tablées, Comptes du Comptoir, Coffre.
+
+## Engagement, rituel et communauté
+
+Toutes ces fonctionnalités respectent le modèle zero-knowledge existant : les
+données vivent dans le payload chiffré des apéros, le `localStorage` de
+l’appareil, ou des fichiers chiffrés du même format — jamais en clair côté
+serveur.
+
+### Autour d’un apéro
+
+- **Trinquer à un créneau** : micro-approbation d’ambiance, distincte du vote.
+  Les blazes qui lèvent leur verre sont gravés sur le créneau (`cheers`),
+  dédupliqués par nom normalisé.
+- **Le mur du comptoir** : fil de mots courts signés au blaze, dans le payload
+  chiffré (plafond 200, les plus vieux tombent). Créateur et invités engagés
+  sont notifiés des nouveaux mots — jamais l’auteur, jamais les déserteurs.
+- **Sonner le rappel** : l’organisateur partage un message de relance qui
+  récapitule l’état du registre (présences, hésitations, désertions, créneau
+  en tête). Pas de push serveur : l’organisateur est le canal.
+- **Graver au registre** : une fois le verdict tombé, export `.ics` (heure
+  locale flottante, lien d’invitation en description) et **Tableau de Chasse**,
+  l’image du verdict dessinée au canvas dans la DA de l’app (sans clé ni lien).
+
+### La boucle invité → organisateur
+
+- **CTA post-vote** : sitôt sa réponse envoyée, le convive se voit proposer de
+  convoquer sa propre assemblée.
+- **« Remettre ça »** : un apéro passé propose à toute la tablée de convoquer
+  le suivant, formulaire pré-rempli (nom, lieu, heure, politique mioches),
+  date décalée vers la prochaine occurrence.
+- **Assemblées récurrentes** : cadence optionnelle (chaque semaine / deux
+  semaines / mois) gravée sur l’apéro ; l’apéro passé propose la tournée
+  suivante sur cette cadence.
+- **Notification post-apéro** : douze heures après le dernier créneau, le
+  moteur souffle « à qui le tour ? » au créateur et aux présents (jamais deux
+  fois, jamais au-delà de sept jours).
+- **Badge « L’Affranchi »** : récompense un membre qui organise après avoir
+  été convié chez quelqu’un d’autre.
+
+### La communauté
+
+- **Les Tablées** (`/tablees`, `/tablee/:tableeId?k=…&w=…`) : les bandes
+  persistantes de la Confrérie. Une tablée est stockée exactement comme un
+  apéro (fichier chiffré AES-GCM sous `data/aperos/`, écrit via la même API
+  VPS — zéro changement serveur) et son payload référence ses apéros **avec
+  leurs clés** : le lien de la tablée ouvre l’histoire complète de la bande,
+  contrat assumé. Fondation de zéro ou depuis un apéro (troupe attablée
+  d’office), « Convoquer la tablée » (apéro auto-rattaché aux annales),
+  palmarès maison (Pilier de la Tablée, Grand Convocateur, Ministre du
+  Peut-être, Plume du Comptoir).
+- **Les Comptes du Comptoir** (`/comptes`) : bilan annuel du membre, calculé
+  sur l’appareil (convocations, émargements, votes, blazes croisés, quartier
+  général, plus grande tablée, Traquenard-O-mètre personnel), exportable en
+  image dans la DA de l’app.
+- **Le Coffre** (`/coffre`) : sauvegarde et transfert du registre local
+  (blaze, apéros et tablées avec leurs clés) dans un fichier chiffré par
+  phrase de passe (PBKDF2 310 000 itérations + AES-GCM). L’import fusionne
+  sans jamais écraser un rôle de créateur ni un blaze déjà installé.
 
 ## Notifications
 
@@ -155,6 +272,8 @@ Le système notifie chaque personne selon son **rôle** (créateur ou invité) e
 | Invité « oui » (ou encore indécis) | nouvelle proposition, modification d’un créneau, confirmation finale, changement important |
 | Invité « peut-être » | rappels automatiques 48 h / 24 h / 2 h avant l’apéro |
 | Invité « non » | rien — sauf s’il change lui-même sa réponse, ce qui réactive le canal |
+| Créateur et invités engagés | nouveaux mots sur le mur du comptoir (jamais l’auteur du mot) |
+| Créateur et invités « oui » | coup de coude post-apéro « à qui le tour ? » (12 h après le dernier créneau, une seule fois, fenêtre de 7 jours) |
 
 Le moteur ne s’auto-notifie jamais des actions de l’utilisateur lui-même (le créateur qui ajoute un créneau, l’invité qui vote…).
 
@@ -182,14 +301,47 @@ Conséquence pour les notifications système : on fait du **best-effort** via l�
 - Clôturer ou archiver une assemblée depuis l’interface.
 - Libérer explicitement les noms cérémoniels des assemblées terminées.
 - QR code de convocation.
-- Export image du verdict du zinc.
+- Liste d’intendance « qui ramène quoi » (le champ `brings` existe déjà dans le modèle).
 - PWA installable.
 
 ## Direction artistique
 
-La refonte UX/UI (« La Baraque du Petit Jaune », style *Fairground Baroque* / arts forains) est décrite et opposable :
+L’identité visuelle est « La Baraque du Petit Jaune » (style *Fairground Baroque*, arts forains).
+Elle est décrite et opposable :
 
-- [`docs/uxer/refonte-contract.md`](docs/uxer/refonte-contract.md) — exploration du produit, choix du style, contrat fonctionnel, journal de convergence, preuves et limites ;
-- [`docs/uxer/design-system.md`](docs/uxer/design-system.md) — tokens, typographie, mise en page, composants, grammaire d'animation.
+- [`docs/uxer/refonte-contract.md`](docs/uxer/refonte-contract.md) : exploration du produit, choix du style, contrat fonctionnel, journal de convergence, preuves et limites ;
+- [`docs/uxer/design-system.md`](docs/uxer/design-system.md) : jetons, typographie, mise en page, composants, grammaire d’animation.
 
-L'interface n'utilise aucun emoji. Les pictogrammes sont des SVG monochromes en ligne (`currentColor`) définis dans `src/components/Icon.tsx`. Les polices (Abril Fatface, Manrope) sont chargées depuis Google Fonts, avec repli système.
+Les règles de **saisie et de navigation** (`docs/DESIGN-SYSTEM.md`, `docs/NAVIGATION.md`) restent en vigueur : seule l’identité visuelle a changé. Les documents `docs/refonte-visuelle/` décrivent l’identité précédente (« registre de zinc ») et sont conservés à titre historique.
+
+## Direction iconographique
+
+L’interface n’utilise aucun emoji. Les pictogrammes sont des SVG monochromes en ligne (`currentColor`), définis dans `src/components/Icon.tsx`.
+
+> ⚠️ **Ne pas committer d'icônes IconScout ici.** Ce dépôt est public, or la [licence IconScout](https://iconscout.com/licenses) interdit la redistribution de ses éléments « with source files », même modifiés et même gratuits : les verser dans un dépôt public serait une violation. Pour des SVG supplémentaires, prendre un jeu sous licence permissive — [Lucide](https://lucide.dev/) (ISC), [Phosphor](https://phosphoricons.com/) (MIT) ou [Tabler Icons](https://tabler.io/icons) (MIT) — et l'ajouter à `CREDITS.md`.
+
+Les badges utilisent `iconName` plutôt qu’un champ `icon` en emoji.
+
+## Licence et crédits
+
+Le code source est publié sous **licence MIT** (voir [`LICENSE`](LICENSE)).
+
+Certains actifs embarqués dans ce dépôt ne sont **pas** couverts par cette licence et
+restent soumis à la leur — polices Manrope et Abril Fatface (SIL OFL 1.1), animation Lottie issue de
+Noto Animated Emoji (CC BY 4.0, modifiée), images d'ambiance générées par IA, données
+cartographiques OpenStreetMap (ODbL). Le détail, fichier par fichier, est dans
+[`CREDITS.md`](CREDITS.md).
+
+Deux règles à respecter pour toute contribution :
+
+- **Aucun actif dont la licence interdit la redistribution avec les fichiers sources**
+  (le dépôt est public — cela exclut notamment IconScout).
+- **Aucune ressource chargée depuis un CDN tiers** dans le parcours utilisateur. Les
+  polices sont auto-hébergées : servir Manrope depuis `fonts.googleapis.com`
+  transmettrait l'adresse IP de chaque visiteur à Google sans base légale, ce qu'un
+  tribunal allemand a jugé contraire au RGPD (LG München I, 20 janvier 2022).
+
+Les mentions légales et l'information RGPD destinées aux utilisateurs vivent dans
+l'app, sur la route `#/registre-legal` (`src/pages/RegistreLegalPage.tsx`) : toute
+évolution qui changerait la nature des données traitées doit y être répercutée avant
+d'être déployée.

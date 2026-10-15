@@ -1,0 +1,100 @@
+import { useState } from "react";
+import { AppLink } from "./AppLink";
+import { requestComptoirNameEdit } from "../hooks/useComptoirName";
+
+// Panneau partagé du menu de la Confrérie (accueil + pages intérieures).
+//
+// Les entrées ne referment pas le menu elles-mêmes : le menu est une couche
+// posée sur l'écran, son ouverture vit dans l'historique, et une entrée de menu
+// est au même niveau que l'écran visé — la navigation REMPLACE donc l'entrée de
+// la couche, ce qui referme le menu et laisse la pile inchangée. `onClose` ne
+// sert plus qu'aux fermetures sans navigation : Échap, clic hors du panneau, et
+// le changement de blaze qui ouvre une invite par-dessus.
+// Les entrées du quotidien (Au programme, Tablées) et les bilans (Palmarès,
+// Rétrospective) restent à plat ; la sauvegarde et le changement de blaze,
+// plus rares, sont repliés dans un sous-menu « Réglages ». Le carnet des
+// notifications n'a pas d'entrée ici : la cloche y mène déjà.
+export function ConfrerieMenuPanel({
+  withComptoirLink = false,
+  className = "brand-menu__panel",
+  onClose,
+}: {
+  withComptoirLink?: boolean;
+  className?: string;
+  onClose: () => void;
+}) {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  return (
+    <div className={className} role="menu">
+      {withComptoirLink && (
+        <AppLink className="brand-menu__item" role="menuitem" to="/">
+          Le Comptoir
+        </AppLink>
+      )}
+      <AppLink className="brand-menu__item" role="menuitem" to="/agenda">
+        Au programme
+      </AppLink>
+      <AppLink className="brand-menu__item" role="menuitem" to="/tablees">
+        Tablées
+      </AppLink>
+      <AppLink className="brand-menu__item" role="menuitem" to="/palmares">
+        Palmarès
+      </AppLink>
+      <AppLink className="brand-menu__item" role="menuitem" to="/comptes">
+        Rétrospective
+      </AppLink>
+
+      <div className="brand-menu__group">
+        <button
+          type="button"
+          className="brand-menu__item brand-menu__group-toggle"
+          role="menuitem"
+          aria-expanded={isSettingsOpen}
+          onClick={() => setIsSettingsOpen((open) => !open)}
+        >
+          <span>Réglages</span>
+          <svg
+            className="brand-menu__group-chevron"
+            viewBox="0 0 24 24"
+            width="14"
+            height="14"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        {isSettingsOpen && (
+          <div className="brand-menu__sub" role="menu">
+            <AppLink
+              className="brand-menu__item brand-menu__item--sub"
+              role="menuitem"
+              to="/coffre"
+            >
+              Sauvegarde
+            </AppLink>
+            <button
+              type="button"
+              className="brand-menu__item brand-menu__item--sub"
+              role="menuitem"
+              onClick={() => {
+                onClose();
+                requestComptoirNameEdit();
+              }}
+            >
+              Changer de blaze
+            </button>
+            <AppLink
+              className="brand-menu__item brand-menu__item--sub"
+              role="menuitem"
+              to="/registre-legal"
+            >
+              Le registre légal
+            </AppLink>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

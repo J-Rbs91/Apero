@@ -15,7 +15,7 @@ const REASONS = [
   "Recevoir les réponses des invités",
   "Être informé des nouvelles propositions",
   "Ne pas oublier de confirmer ta présence",
-  "Recevoir les rappels importants avant l'apéro",
+  "Recevoir les rappels importants avant l’apéro",
 ];
 
 export function NotificationPermissionOnboarding({
@@ -27,22 +27,19 @@ export function NotificationPermissionOnboarding({
     <MobilePage
       className="onboarding-screen"
       header={
-        <div className="brandbar">
-          <span className="brandbar__mark">
-            <WineGlassMark size={30} />
-            <span>La Confrérie</span>
-          </span>
+        <div className="brandpill">
+          <WineGlassMark size={26} /> La Confrérie
         </div>
       }
       hero={
-        <div className="sign__text" aria-labelledby="notif-onboarding-title">
+        <div className="page-hero" role="group" aria-labelledby="notif-onboarding-title">
           <p className="eyebrow">Rester dans la boucle du zinc</p>
           <h1 className="h1 h1--sm" id="notif-onboarding-title">
             On te prévient quand ça bouge au comptoir ?
           </h1>
           <p className="lede">
-            Autorise les notifications pour ne rien rater de tes apéros, même quand l'app est fermée.
-            Tu gardes la main : tu peux refuser, le badge rouge dans l'app fera le guet quand même.
+            Autorise les notifications pour ne rien rater de tes apéros, même quand l’app est fermée.
+            Tu gardes la main : tu peux refuser, le badge rouge dans l’app fera le guet quand même.
           </p>
         </div>
       }
@@ -71,7 +68,7 @@ export function NotificationPermissionOnboarding({
           onClick={onSkip}
           disabled={isRequesting}
         >
-          Plus tard — garder juste le badge
+          Plus tard, garder juste le badge
         </button>
       </div>
     </MobilePage>

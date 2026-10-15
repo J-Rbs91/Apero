@@ -35,6 +35,79 @@ export class AperoApiError extends Error {
   }
 }
 
+export type FetchEncryptedAperoResult =
+  /** L'API a servi le fichier chiffre : source de verite. */
+  | { status: "ok"; file: unknown; sha: string }
+  /** L'apero n'existe pas (ou plus) : un vrai 404 metier, definitif. */
+  | { status: "not-found" }
+  /**
+   * L'API deployee ne connait pas la route GET (version anterieure au
+   * stockage VPS), ou aucune API n'est configuree : au client de se replier
+   * sur la lecture publique GitHub, le temps de la transition.
+   */
+  | { status: "endpoint-missing" };
+
+/**
+ * Lecture du fichier chiffre via l'API VPS (GET, sans cle ni secret).
+ * Ne se replie JAMAIS silencieusement sur "not-found" : une panne reseau ou
+ * un 5xx leve une erreur, pour que l'appelant retombe sur son cache local —
+ * confondre une panne avec une disparition purgerait l'apero des appareils.
+ */
+export async function fetchEncryptedAperoFromApi(
+  aperoId: string,
+): Promise<FetchEncryptedAperoResult> {
+  const baseUrl = getAperoApiBaseUrl();
+
+  if (!baseUrl) {
+    return { status: "endpoint-missing" };
+  }
+
+  const url = joinApiUrl(baseUrl, `api/aperos/${encodeURIComponent(aperoId)}`);
+
+  let response: Response;
+  try {
+    // no-cache : revalidation ETag (Express en genere un), un 304 est gratuit.
+    response = await fetch(url, { cache: "no-cache" });
+  } catch {
+    throw new AperoApiError(
+      "NETWORK_ERROR",
+      "L’API apéro est injoignable (réseau, CORS ou serveur arrêté).",
+    );
+  }
+
+  if (response.status === 404) {
+    const { serverCode } = await readErrorBody(response);
+    // APERO_NOT_FOUND : l'apero a disparu. Tout autre 404 (NOT_FOUND « Route
+    // not found ») vient d'une API anterieure a la route GET.
+    return serverCode === "APERO_NOT_FOUND"
+      ? { status: "not-found" }
+      : { status: "endpoint-missing" };
+  }
+
+  if (!response.ok) {
+    const { serverCode, message } = await readErrorBody(response);
+    throw new AperoApiError(
+      mapStatusToErrorCode(response.status),
+      message ?? `L'API apero a refuse la lecture (HTTP ${response.status}).`,
+      response.status,
+      serverCode,
+    );
+  }
+
+  let body: { ok?: boolean; file?: unknown; sha?: string };
+  try {
+    body = (await response.json()) as { ok?: boolean; file?: unknown; sha?: string };
+  } catch {
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse illisible de l’API apéro.");
+  }
+
+  if (body?.ok !== true || typeof body.sha !== "string" || body.file == null) {
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse inattendue de l’API apéro.");
+  }
+
+  return { status: "ok", file: body.file, sha: body.sha };
+}
+
 export type CreateOrUpdateEncryptedAperoParams = {
   aperoId: string;
   writeKey: string;
@@ -105,7 +178,7 @@ export async function createOrUpdateEncryptedApero(
   if (!baseUrl) {
     throw new AperoApiError(
       "API_NOT_CONFIGURED",
-      "VITE_APERO_API_BASE_URL est absente : impossible de joindre l'API apero.",
+      "VITE_APERO_API_BASE_URL est absente : impossible de joindre l’API apéro.",
     );
   }
 
@@ -128,7 +201,7 @@ export async function createOrUpdateEncryptedApero(
   } catch {
     throw new AperoApiError(
       "NETWORK_ERROR",
-      "L'API apero est injoignable (reseau, CORS ou serveur arrete).",
+      "L’API apéro est injoignable (réseau, CORS ou serveur arrêté).",
     );
   }
 
@@ -147,11 +220,11 @@ export async function createOrUpdateEncryptedApero(
   try {
     result = (await response.json()) as CreateOrUpdateEncryptedAperoResult;
   } catch {
-    throw new AperoApiError("UNEXPECTED_RESPONSE", "Reponse illisible de l'API apero.");
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse illisible de l’API apéro.");
   }
 
   if (result?.ok !== true || typeof result.sha !== "string") {
-    throw new AperoApiError("UNEXPECTED_RESPONSE", "Reponse inattendue de l'API apero.");
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse inattendue de l’API apéro.");
   }
 
   return result;
@@ -178,7 +251,7 @@ export async function deleteEncryptedApero(
   if (!baseUrl) {
     throw new AperoApiError(
       "API_NOT_CONFIGURED",
-      "VITE_APERO_API_BASE_URL est absente : impossible de joindre l'API apero.",
+      "VITE_APERO_API_BASE_URL est absente : impossible de joindre l’API apéro.",
     );
   }
 
@@ -199,7 +272,7 @@ export async function deleteEncryptedApero(
   } catch {
     throw new AperoApiError(
       "NETWORK_ERROR",
-      "L'API apero est injoignable (reseau, CORS ou serveur arrete).",
+      "L’API apéro est injoignable (réseau, CORS ou serveur arrêté).",
     );
   }
 
@@ -213,7 +286,7 @@ export async function deleteEncryptedApero(
   if (response.status === 404) {
     throw new AperoApiError(
       "NOT_FOUND",
-      "L'endpoint de suppression est absent de l'API deployee.",
+      "L’endpoint de suppression est absent de l’API déployée.",
       404,
       "DELETE_ENDPOINT_MISSING",
     );
@@ -234,11 +307,11 @@ export async function deleteEncryptedApero(
   try {
     result = (await response.json()) as DeleteEncryptedAperoResult;
   } catch {
-    throw new AperoApiError("UNEXPECTED_RESPONSE", "Reponse illisible de l'API apero.");
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse illisible de l’API apéro.");
   }
 
   if (result?.ok !== true) {
-    throw new AperoApiError("UNEXPECTED_RESPONSE", "Reponse inattendue de l'API apero.");
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse inattendue de l’API apéro.");
   }
 
   return result;

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ComptoirNameOnboarding } from "./components/onboarding/ComptoirNameOnboarding";
 import { NotificationPermissionOnboarding } from "./components/onboarding/NotificationPermissionOnboarding";
+import { SplashScreen } from "./components/SplashScreen";
 import {
   COMPTOIR_NAME_EDIT_EVENT,
   useComptoirName,
@@ -14,6 +15,16 @@ import { AppRouter } from "./routes/AppRouter";
 
 export function App() {
   const { comptoirName, setComptoirName } = useComptoirName();
+  // Le rideau ne se lève que sur l'entrée principale : quelqu'un qui arrive
+  // par un lien profond (invitation, tablée) vient voir un contenu précis —
+  // on ne lui met pas un spectacle devant.
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window === "undefined") {
+      return true;
+    }
+    const hash = window.location.hash;
+    return !hash.includes("/invite/") && !hash.includes("/tablee");
+  });
   const [isEditingComptoirName, setIsEditingComptoirName] = useState(false);
   const { isSupported, seenOnboarding, request, dismissOnboarding } = useNotificationPermission();
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);
@@ -53,10 +64,15 @@ export function App() {
 
     // Re-synchronise au retour sur l'app : capte les évolutions distantes et
     // fait mûrir les rappels « peut-être » (48h / 24h / 2h) sans rechargement.
+    // focus et visibilitychange tirent souvent ensemble au retour d'onglet :
+    // le garde-fou temporel évite de doubler la rafale de lectures publiques.
+    let lastSyncAt = Date.now();
     function handleVisible() {
-      if (document.visibilityState === "visible") {
-        void syncAllMyAperos();
+      if (document.visibilityState !== "visible" || Date.now() - lastSyncAt < 5_000) {
+        return;
       }
+      lastSyncAt = Date.now();
+      void syncAllMyAperos();
     }
 
     window.addEventListener("focus", handleVisible);
@@ -80,6 +96,7 @@ export function App() {
   return (
     <div className="app-shell">
       <div className="app-shell__content">
+        {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
         {shouldShowNameOnboarding ? (
           <ComptoirNameOnboarding
             initialName={comptoirName}

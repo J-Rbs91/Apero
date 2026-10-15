@@ -4,7 +4,20 @@ import { z } from "zod";
 dotenv.config();
 
 const envSchema = z.object({
-  GITHUB_TOKEN: z.string().min(1).optional(),
+  // Backend de stockage des fichiers chiffres :
+  // - "github" (historique) : chaque apero est un fichier data/aperos/*.json
+  //   commite dans le repo via l'API GitHub (token requis).
+  // - "sqlite" : les blobs chiffres vivent dans une base SQLite locale au VPS
+  //   (node:sqlite, zero dependance) — plus de token, plus de rate limit
+  //   GitHub, plus de commits parasites.
+  STORAGE_BACKEND: z.enum(["github", "sqlite"]).default("github"),
+  SQLITE_DB_PATH: z.string().min(1).default("data/apero-storage.db"),
+  // Chaine vide = absent : un `GITHUB_TOKEN=` laisse dans le .env apres la
+  // bascule sqlite ne doit pas empecher le service de demarrer.
+  GITHUB_TOKEN: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.string().min(1).optional(),
+  ),
   GITHUB_OWNER: z.string().min(1).default("J-Rbs91"),
   GITHUB_REPO: z.string().min(1).default("Apero"),
   GITHUB_BRANCH: z.string().min(1).default("main"),
@@ -41,6 +54,8 @@ if (!parsed.success) {
 }
 
 export const config = {
+  storageBackend: parsed.data.STORAGE_BACKEND,
+  sqliteDbPath: parsed.data.SQLITE_DB_PATH,
   githubToken: parsed.data.GITHUB_TOKEN ?? "",
   githubOwner: parsed.data.GITHUB_OWNER,
   githubRepo: parsed.data.GITHUB_REPO,

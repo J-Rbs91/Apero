@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { AppLink } from "../components/AppLink";
+import { useAppNavigation } from "../routes/useAppNavigation";
 import { LoadingScreen } from "../components/LoadingScreen";
-import { BrandBar } from "../components/BrandBar";
+import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
-import { SlotLeaf, slotDateLabel } from "../components/SlotLeaf";
+import { SlotHead } from "../components/SlotHead";
 import { TraquenardGauge } from "../components/TraquenardGauge";
 import { getAperoStorageMode } from "../config/aperoApiConfig";
 import { eventStorage } from "../services";
@@ -13,6 +14,7 @@ import {
   calculateAverageTraquenardLevel,
   calculateBestOptions,
 } from "../utils/calculateResults";
+import { buildNextRoundPrefill } from "../utils/nextRound";
 
 function getSlotTime(option: AperitifOption): number {
   if (!option.date || !option.time) {
@@ -42,6 +44,7 @@ async function loadMyLocalAperos(): Promise<AperitifEvent[]> {
 }
 
 export function AgendaPage() {
+  const { aller } = useAppNavigation();
   const [events, setEvents] = useState<AperitifEvent[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -104,9 +107,28 @@ export function AgendaPage() {
       .sort((first, second) => first.earliest - second.earliest);
   }, [events]);
 
+  // Les tournées passées restent sur l'ardoise : c'est là que vit « Remettre
+  // ça » — sans quoi un apéro terminé devient un cul-de-sac dès le lendemain.
+  const pastItems = useMemo(() => {
+    if (!events) {
+      return [];
+    }
+    const now = Date.now();
+
+    return events
+      .map((event) => {
+        const slotTimes = event.options
+          .map(getSlotTime)
+          .filter((time) => !Number.isNaN(time));
+        const latest = slotTimes.length ? Math.max(...slotTimes) : Number.NaN;
+        return { event, latest };
+      })
+      .filter((item) => !Number.isNaN(item.latest) && item.latest < now)
+      .sort((first, second) => second.latest - first.latest);
+  }, [events]);
+
   const hero = (
     <div className="page-hero">
-      <p className="eyebrow">L’agenda du comptoir</p>
       <h1 className="h1 h1--sm">Les apéros à venir</h1>
       <p className="lede">
         Les apéros encore debout, ceux qui tiennent bon, triés par date la plus proche.
@@ -116,14 +138,22 @@ export function AgendaPage() {
 
   if (isLoading) {
     return (
-      <MobilePage className="agenda-mobile" nav header={<BrandBar />} hero={hero}>
+      <MobilePage
+        className="agenda-mobile"
+        header={<MobileHeader eyebrow="L’ardoise du comptoir" />}
+        hero={hero}
+      >
         <LoadingScreen title="On feuillette l’ardoise" subtitle="La Confrérie sort les apéros à venir…" />
       </MobilePage>
     );
   }
 
   return (
-    <MobilePage className="agenda-mobile" nav header={<BrandBar />} hero={hero}>
+    <MobilePage
+      className="agenda-mobile"
+      header={<MobileHeader eyebrow="L’ardoise du comptoir" />}
+      hero={hero}
+    >
       {error ? (
         <section className="sheet">
           <p className="feedback">{error}</p>
@@ -132,12 +162,12 @@ export function AgendaPage() {
         <section className="sheet">
           <p className="lede">
             L’ardoise est vide, désespérément vide, le comptoir tourne au ralenti dans un silence
-            presque inquiétant — à toi de relancer la machine avant que ça devienne
+            presque inquiétant. À toi de relancer la machine avant que ça devienne
             philosophique.
           </p>
-          <Link className="button button--primary button--block" to="/create">
+          <AppLink className="button button--primary button--block" to="/create">
             Organiser un apéro
-          </Link>
+          </AppLink>
         </section>
       ) : (
         <div className="event-stack event-stack--grid">
@@ -147,36 +177,28 @@ export function AgendaPage() {
                 {upcomingSlots.length} créneau{upcomingSlots.length > 1 ? "x" : ""} ·{" "}
                 {event.participants.length} réponse{event.participants.length > 1 ? "s" : ""}
               </p>
-              <h2 className="h2 h2--lg">{event.ceremonialName}</h2>
+              <h2 className="h2">{event.ceremonialName}</h2>
               {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
               <p className="meta">par {event.organizerName}</p>
 
               <div className="slot-stack">
                 {upcomingSlots.map((option) => (
                   <div className="slot slot--compact" key={option.id}>
-                    <div className="slot__top">
-                      <SlotLeaf option={option} />
-                      <div className="slot__body">
-                        <div className="slot__d">
-                          <span className="sr-only">{slotDateLabel(option)} · </span>
-                          {option.time || "?"}
-                        </div>
-                        <div className="slot__p">{option.location}</div>
-                      </div>
-                      {option.id === winnerId && <span className="agenda-lead">En tête</span>}
-                    </div>
+                    <SlotHead option={option} badge={option.id === winnerId ? <span className="agenda-lead">En tête</span> : undefined}>
+                      <div className="slot__p">{option.location}</div>
+                    </SlotHead>
                   </div>
                 ))}
               </div>
 
-              <Link
+              <AppLink
                 className="button button--ghost button--block"
                 to={
                   storageMode === "api-vps" ? `/invite/${event.id}` : `/event/${event.id}`
                 }
               >
-                Voir l’apéro
-              </Link>
+                Ouvrir l’apéro
+              </AppLink>
 
               <TraquenardGauge
                 level={calculateAverageTraquenardLevel(event)}
@@ -189,6 +211,52 @@ export function AgendaPage() {
             </section>
           ))}
         </div>
+      )}
+
+      {pastItems.length > 0 && (
+        <>
+          <section className="sheet">
+            <h2 className="h2">Les tournées passées</h2>
+            <p className="lede">
+              Les verres sont secs, mais rien n’empêche de remettre ça.
+            </p>
+          </section>
+          <div className="event-stack event-stack--grid">
+            {pastItems.map(({ event, latest }) => (
+              <section className="sheet sheet--past" key={event.id}>
+                <p className="eyebrow">
+                  {new Intl.DateTimeFormat("fr-FR", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  }).format(new Date(latest))}{" "}
+                  · {event.participants.length} réponse
+                  {event.participants.length > 1 ? "s" : ""}
+                </p>
+                <h2 className="h2">{event.ceremonialName}</h2>
+                <div className="button-row">
+                  <button
+                    type="button"
+                    className="button button--primary"
+                    onClick={() =>
+                      aller("/create", { state: { prefill: buildNextRoundPrefill(event) } })
+                    }
+                  >
+                    Remettre ça
+                  </button>
+                  <AppLink
+                    className="button button--ghost"
+                    to={
+                      storageMode === "api-vps" ? `/invite/${event.id}` : `/event/${event.id}`
+                    }
+                  >
+                    Ouvrir l’apéro
+                  </AppLink>
+                </div>
+              </section>
+            ))}
+          </div>
+        </>
       )}
     </MobilePage>
   );

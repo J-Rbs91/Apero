@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
-import type { AperitifEvent, AperitifOption } from "../types/apero";
-import { appendEventOption, normalizeEvent } from "./eventNormalization";
+import type { AperitifEvent, AperitifOption, ParticipantResponse } from "../types/apero";
+import {
+  appendEventMessage,
+  appendEventOption,
+  applyAperoSettings,
+  normalizeEvent,
+  readAperoSettings,
+  toggleOptionCheer,
+  upsertParticipant,
+} from "./eventNormalization";
+import { AperoValidationError, sanitizeAperoEvent } from "./aperoValidation";
 
 function createEvent(id: string, option: AperitifOption): AperitifEvent {
   return {
@@ -63,5 +72,191 @@ describe("event normalization", () => {
       "option_c",
     ]);
     expect(secondEvent.options.map((option) => option.id)).toEqual(["option_b"]);
+  });
+
+  it("merges a re-vote that differs only by accents or casing", () => {
+    const event = createEvent("apero_test_dedup", {
+      id: "option_a",
+      date: "2026-07-03",
+      time: "19:00",
+      location: "Bar A",
+    });
+
+    const base: Omit<ParticipantResponse, "participantName"> = {
+      id: "participant_1",
+      votes: { option_a: "yes" },
+      createdAt: "2026-06-30T19:00:00.000Z",
+      updatedAt: "2026-06-30T19:00:00.000Z",
+    };
+
+    const withJose = upsertParticipant(event, { ...base, participantName: "José" });
+    const withJoseAgain = upsertParticipant(withJose, {
+      ...base,
+      id: "participant_2",
+      participantName: "jose",
+      votes: { option_a: "no" },
+    });
+
+    expect(withJoseAgain.participants).toHaveLength(1);
+    // L'identité d'origine est conservée, mais le vote est bien mis à jour.
+    expect(withJoseAgain.participants[0].id).toBe("participant_1");
+    expect(withJoseAgain.participants[0].votes.option_a).toBe("no");
+  });
+
+  it("rejects hostile decrypted content with a validation error, not a TypeError", () => {
+    expect(() => normalizeEvent("not an object")).toThrow(AperoValidationError);
+    expect(() => normalizeEvent(42)).toThrow(AperoValidationError);
+    // options/participants qui ne sont pas des tableaux : ne doit pas lancer
+    // de TypeError brute sur .map, mais une AperoValidationError propre.
+    expect(() =>
+      normalizeEvent({ id: "apero_hostile", options: { foo: 1 }, participants: "nope" }),
+    ).toThrow(AperoValidationError);
+  });
+});
+
+describe("toggleOptionCheer", () => {
+  const cheerEvent = createEvent("apero_cheer", {
+    id: "option_a",
+    date: "2026-07-03",
+    time: "19:00",
+    location: "Bar A",
+  });
+
+  it("lève puis repose le verre d'un convive", () => {
+    const cheered = toggleOptionCheer(cheerEvent, "option_a", "Nadine");
+    expect(cheered.options[0].cheers).toEqual(["Nadine"]);
+
+    const uncheered = toggleOptionCheer(cheered, "option_a", "Nadine");
+    expect(uncheered.options[0].cheers).toBeUndefined();
+  });
+
+  it("déduplique par nom normalisé (accents, casse, espaces)", () => {
+    const cheered = toggleOptionCheer(cheerEvent, "option_a", "José");
+    const toggledBack = toggleOptionCheer(cheered, "option_a", "  jose ");
+    expect(toggledBack.options[0].cheers).toBeUndefined();
+  });
+
+  it("ne touche pas aux autres créneaux ni aux noms vides", () => {
+    const twoOptions = {
+      ...cheerEvent,
+      options: [
+        ...cheerEvent.options,
+        { id: "option_b", date: "2026-07-04", time: "20:00", location: "Bar B" },
+      ],
+    };
+    const cheered = toggleOptionCheer(twoOptions, "option_b", "Nadine");
+    expect(cheered.options[0].cheers).toBeUndefined();
+    expect(cheered.options[1].cheers).toEqual(["Nadine"]);
+
+    expect(toggleOptionCheer(twoOptions, "option_a", "   ")).toBe(twoOptions);
+  });
+});
+
+describe("appendEventMessage", () => {
+  const wallEvent = createEvent("apero_wall", {
+    id: "option_a",
+    date: "2026-07-03",
+    time: "19:00",
+    location: "Bar A",
+  });
+
+  it("ajoute le mot au bout du fil", () => {
+    const updated = appendEventMessage(wallEvent, {
+      id: "message_1",
+      authorName: "Nadine",
+      body: "J'amène les olives.",
+      createdAt: "2026-07-01T10:00:00.000Z",
+    });
+    expect(updated.messages).toHaveLength(1);
+    expect(updated.messages?.[0].body).toBe("J'amène les olives.");
+  });
+
+  it("fait tomber les plus vieux mots au-delà du plafond", () => {
+    const crowded = {
+      ...wallEvent,
+      messages: Array.from({ length: 200 }, (_, index) => ({
+        id: `message_${index}`,
+        authorName: "Nadine",
+        body: `Mot ${index}`,
+        createdAt: "2026-07-01T10:00:00.000Z",
+      })),
+    };
+    const updated = appendEventMessage(crowded, {
+      id: "message_new",
+      authorName: "Jojo",
+      body: "Le dernier mot.",
+      createdAt: "2026-07-01T11:00:00.000Z",
+    });
+    expect(updated.messages).toHaveLength(200);
+    expect(updated.messages?.[0].id).toBe("message_1");
+    expect(updated.messages?.at(-1)?.id).toBe("message_new");
+  });
+});
+
+describe("applyAperoSettings", () => {
+  const settingsEvent: AperitifEvent = {
+    ...createEvent("apero_settings", {
+      id: "option_a",
+      date: "2026-07-03",
+      time: "19:00",
+      location: "Bar A",
+    }),
+    title: "Fin de chantier",
+    childrenAllowed: true,
+    recurrence: "weekly",
+  };
+
+  it("corrige la politique mioches sans toucher au reste", () => {
+    const updated = applyAperoSettings(settingsEvent, {
+      ...readAperoSettings(settingsEvent),
+      childrenAllowed: false,
+    });
+
+    expect(updated.childrenAllowed).toBe(false);
+    expect(updated.ceremonialName).toBe(settingsEvent.ceremonialName);
+    expect(updated.title).toBe("Fin de chantier");
+    expect(updated.recurrence).toBe("weekly");
+    expect(updated.options).toEqual(settingsEvent.options);
+    expect(updated.participants).toEqual(settingsEvent.participants);
+  });
+
+  it("efface les champs optionnels vidés au lieu de les laisser à undefined", () => {
+    const updated = applyAperoSettings(settingsEvent, {
+      ceremonialName: "Le Nouveau Concile",
+    });
+
+    expect(updated.ceremonialName).toBe("Le Nouveau Concile");
+    expect("title" in updated).toBe(false);
+    expect("childrenAllowed" in updated).toBe(false);
+    expect("recurrence" in updated).toBe(false);
+  });
+
+  it("ignore un nom cérémonial vide : un apéro sans nom n'existe pas", () => {
+    const updated = applyAperoSettings(settingsEvent, {
+      ...readAperoSettings(settingsEvent),
+      ceremonialName: "   ",
+    });
+
+    expect(updated.ceremonialName).toBe(settingsEvent.ceremonialName);
+  });
+
+  it("rogne les espaces et rafraîchit la date de mise à jour", () => {
+    const updated = applyAperoSettings(settingsEvent, {
+      ceremonialName: "  La Grande Tablée  ",
+      title: "  Apéro de rentrée  ",
+    });
+
+    expect(updated.ceremonialName).toBe("La Grande Tablée");
+    expect(updated.title).toBe("Apéro de rentrée");
+    expect(updated.updatedAt).not.toBe(settingsEvent.updatedAt);
+  });
+
+  it("produit un apéro que le registre accepte tel quel", () => {
+    const updated = applyAperoSettings(settingsEvent, {
+      ceremonialName: "La Grande Tablée",
+      childrenAllowed: false,
+    });
+
+    expect(() => sanitizeAperoEvent(updated, updated.id)).not.toThrow();
   });
 });

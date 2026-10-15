@@ -144,13 +144,64 @@ function addActiveEventToStats(stats: MemberRewardStats, event: AperitifEvent, m
   ).length;
 }
 
+// Lecture sûre d'un index membre : les noms de comptoir sont des données libres,
+// donc « constructor » ou « __proto__ » ne doivent jamais renvoyer une propriété
+// héritée d'Object.prototype (sinon stats fantômes copiées en NaN).
+function readMemberStats(
+  members: Record<string, MemberRewardStats>,
+  memberKey: string,
+): MemberRewardStats | undefined {
+  return Object.prototype.hasOwnProperty.call(members, memberKey) ? members[memberKey] : undefined;
+}
+
+// « L'Affranchi » : a été convive chez quelqu'un d'autre AVANT d'organiser sa
+// première assemblée. C'est le badge de la boucle vertueuse : invité un jour,
+// organisateur le lendemain. Les dates viennent des apéros actifs (createdAt
+// précis) et du grand livre des purges (date de l'apéro en approximation).
+export function hasEarnedAffranchi({ activeEvents, ledger, memberName }: MemberBadgeContext): boolean {
+  const memberKey = normalizeMemberName(memberName);
+  let firstOrganizedAt = Number.POSITIVE_INFINITY;
+  let firstGuestAt = Number.POSITIVE_INFINITY;
+
+  function parseMs(value?: string): number {
+    const ms = value ? Date.parse(value) : Number.NaN;
+    return Number.isNaN(ms) ? Number.POSITIVE_INFINITY : ms;
+  }
+
+  for (const event of activeEvents) {
+    const isOrganizer = normalizeMemberName(event.organizerName) === memberKey;
+    if (isOrganizer) {
+      firstOrganizedAt = Math.min(firstOrganizedAt, parseMs(event.createdAt));
+      continue;
+    }
+    for (const participant of event.participants) {
+      if (normalizeMemberName(participant.participantName) === memberKey) {
+        firstGuestAt = Math.min(firstGuestAt, parseMs(participant.createdAt));
+      }
+    }
+  }
+
+  for (const record of ledger.purgedEvents) {
+    const recordMs = parseMs(record.eventDateTime ?? record.purgedAt);
+    if (record.organizerKey === memberKey) {
+      firstOrganizedAt = Math.min(firstOrganizedAt, recordMs);
+      continue;
+    }
+    if (record.participants.some((participant) => participant.participantKey === memberKey)) {
+      firstGuestAt = Math.min(firstGuestAt, recordMs);
+    }
+  }
+
+  return Number.isFinite(firstOrganizedAt) && firstGuestAt < firstOrganizedAt;
+}
+
 export function getMemberRewardStats({
   activeEvents,
   ledger,
   memberName,
 }: MemberBadgeContext): MemberRewardStats {
   const memberKey = normalizeMemberName(memberName);
-  const ledgerStats = ledger.members[memberKey];
+  const ledgerStats = readMemberStats(ledger.members, memberKey);
   const stats: MemberRewardStats = ledgerStats
     ? { ...ledgerStats }
     : createEmptyStats(memberName, memberKey);
@@ -195,16 +246,16 @@ export function getMemberBadgeIds(context: MemberBadgeContext): BadgeId[] {
     badgeIds.push("SERIAL_VOTER");
   }
 
-  if (stats.contributionCount >= 3) {
-    badgeIds.push("BANQUET_PROVIDER");
-  }
-
   if (stats.maybeVoteCount >= 3) {
     badgeIds.push("LAST_MINUTE_MINISTER");
   }
 
   if (stats.participatedEventCount >= 3 && stats.noVoteCount === 0) {
     badgeIds.push("ZINC_DIPLOMAT");
+  }
+
+  if (hasEarnedAffranchi(context)) {
+    badgeIds.push("AFFRANCHI");
   }
 
   return badgeIds;
