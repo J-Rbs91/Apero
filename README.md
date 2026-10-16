@@ -339,8 +339,8 @@ Les badges utilisent `iconName` plutôt qu’un champ `icon` en emoji.
 Le code source est publié sous **licence MIT** (voir [`LICENSE`](LICENSE)).
 
 Certains actifs embarqués dans ce dépôt ne sont **pas** couverts par cette licence et
-restent soumis à la leur — polices Manrope et Abril Fatface (SIL OFL 1.1), animation Lottie issue de
-Noto Animated Emoji (CC BY 4.0, modifiée), images d'ambiance générées par IA, données
+restent soumis à la leur — polices Archivo et Fragment Mono (SIL OFL 1.1), images
+d'ambiance générées par IA (conservées, non affichées), données
 cartographiques OpenStreetMap (ODbL). Le détail, fichier par fichier, est dans
 [`CREDITS.md`](CREDITS.md).
 

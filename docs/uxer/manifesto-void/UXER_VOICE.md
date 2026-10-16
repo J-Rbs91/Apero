@@ -141,8 +141,8 @@ Défauts trouvés et corrigés pendant l'intégration :
 
 Points laissés au propriétaire :
 
-- l'écran d'ouverture garde le verre animé, qui n'a plus de plaisanterie pour le
-  justifier : le retirer ou le garder comme seul objet figuratif ;
+- ~~l'écran d'ouverture garde le verre animé~~ : tranché, le verre est redessiné en
+  trame de points et se remplit du Petit Jaune (`GlassField`) ;
 - quelques répétitions assumées par le minimalisme : titre et champ « Nom » à
   l'onboarding, titre « Confirmer ? » et bouton « Confirmer » ;
 - les images exportées (image du résultat, bilan) suivent le lexique, pas encore une

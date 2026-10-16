@@ -234,15 +234,13 @@
 
 .splash__glass {
   display: block;
-  margin-bottom: var(--s-2);
+  margin-bottom: var(--s-4);
 }
 
-.splash__eyebrow {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: var(--t-micro);
-  color: var(--ash);
+.glassfield {
+  display: block;
 }
+
 
 .splash__name {
   max-width: 11ch;
@@ -255,21 +253,4 @@
   text-wrap: balance;
 }
 
-.splash__tagline {
-  max-width: 26rem;
-  margin: var(--s-2) 0 0;
-  font-size: var(--t-lede);
-  line-height: 1.4;
-  color: var(--ash);
-}
 
-.splash__aside {
-  max-width: 26rem;
-  margin: var(--s-2) 0 0;
-  padding-top: var(--s-3);
-  border-top: var(--hair) solid var(--rule);
-  font-family: var(--font-mono);
-  font-size: var(--t-micro);
-  line-height: 1.5;
-  color: var(--ash-2);
-}

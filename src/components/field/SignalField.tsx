@@ -7,9 +7,9 @@ const GOLDEN = 0.618;
 
 // Le champ d'émergence de l'écran d'ouverture (UXER_MOTION_SYSTEM.md §2,
 // « Signal Emergence ») : une trame régulière de points apparaît en onde depuis
-// l'intersection d'or, puis le Petit Jaune émerge à cet endroit. Aucune donnée
-// n'est représentée : c'est le seul motif de rituel du système, et il ne vit
-// que le temps de l'ouverture.
+// l'intersection d'or. Le Petit Jaune, lui, émerge dans le verre (GlassField).
+// Aucune donnée n'est représentée : c'est le seul motif de rituel du système,
+// et il ne vit que le temps de l'ouverture.
 export function SignalField() {
   const draw = useCallback<FieldDraw>((context, { width, height }, progress, palette) => {
     const originX = width * GOLDEN;
@@ -33,14 +33,6 @@ export function SignalField() {
       }
     }
     context.globalAlpha = 1;
-
-    const emergence = easeOutExpo(clamp((progress - 0.4) / 0.6, 0, 1));
-    if (emergence > 0) {
-      context.fillStyle = palette.signal;
-      context.beginPath();
-      context.arc(originX, originY, 7 * emergence, 0, Math.PI * 2);
-      context.fill();
-    }
   }, []);
 
   const canvasRef = useFieldCanvas(draw, { duration: DURATION, dataKey: "splash" });

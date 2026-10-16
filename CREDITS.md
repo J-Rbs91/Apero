@@ -37,19 +37,11 @@ Ne pas rétablir le chargement CDN.
 
 ## Animation
 
-### Verre de vin (écran d'ouverture)
-
-- **Fichier** : `src/assets/wine-glass.json`
-- **Source** : Noto Animated Emoji — emoji « wine glass » (U+1F377), projet Google Fonts
-  <https://googlefonts.github.io/noto-emoji-animation/>
-- **Licence** : Creative Commons Attribution 4.0 International (CC BY 4.0)
-  <https://creativecommons.org/licenses/by/4.0/>
-- **Modifications** : **oui**. Deux calques de l'animation originale ont été retirés
-  (`wine droplet` et `wine surfce 3`) pour alléger le mouvement à l'ouverture.
-  Le reste de l'animation est inchangé.
-
-La licence CC BY 4.0 impose de créditer l'auteur **et** de signaler les modifications :
-les deux mentions ci-dessus sont la condition de conformité. Ne pas les supprimer.
+Aucun actif tiers. Le verre de l'écran d'ouverture est dessiné par le code de
+l'application (`src/components/field/GlassField.tsx`, licence MIT du dépôt) depuis le
+16/10/2026. L'ancienne animation Lottie issue de Noto Animated Emoji (CC BY 4.0,
+modifiée) a été retirée du dépôt à cette date ; elle reste dans l'historique Git avec
+son crédit.
 
 ---
 
