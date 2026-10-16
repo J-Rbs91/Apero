@@ -8,6 +8,7 @@ import { ComptoirWall } from "../components/ComptoirWall";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
+import { SlotHead } from "../components/SlotHead";
 import { MobilePage } from "../components/MobilePage";
 import { MobileResultsPanel } from "../components/MobileResultsPanel";
 import { MobileShareBox } from "../components/MobileShareBox";
@@ -38,7 +39,6 @@ import { createId } from "../utils/createId";
 import { hapticError, hapticSuccess, hapticTap } from "../utils/haptics";
 import { isEventExpired } from "../services/eventPurge";
 import { calculateBestOptions } from "../utils/calculateResults";
-import { formatOption } from "../utils/formatOption";
 import { readAperoSettings, toggleOptionCheer } from "../utils/eventNormalization";
 import type { AperoSettings } from "../utils/eventNormalization";
 import { normalizeMemberName } from "../utils/memberName";
@@ -295,9 +295,8 @@ export function InvitePage() {
 
   if (state.status === "loading") {
     return (
-      <MobilePage className="event-mobile" overlay="deep">
-        <MobileHeader eyebrow="Invitation" />
-        <LoadingScreen title="On ouvre l’invitation" subtitle="On déchiffre les détails de l’apéro…" />
+      <MobilePage className="event-mobile" header={<MobileHeader eyebrow="Invitation" />}>
+        <LoadingScreen heading="h1" title="On ouvre l’invitation" subtitle="On déchiffre les détails de l’apéro…" />
       </MobilePage>
     );
   }
@@ -317,12 +316,16 @@ export function InvitePage() {
                 : state.message;
 
     return (
-      <MobilePage className="event-mobile" overlay="deep">
-        <MobileHeader eyebrow="Invitation" />
-        <section className="sheet">
+      <MobilePage
+        className="event-mobile"
+        header={<MobileHeader eyebrow="Invitation" />}
+        hero={
           <h1 className="h1 h1--sm">
             {state.status === "deleted" ? "Apéro annulé" : "Aïe, ce lien coince"}
           </h1>
+        }
+      >
+        <section className="sheet">
           <p className="lede">{message}</p>
           <AppLink className="button button--ghost button--block" to="/">
             Retour au comptoir
@@ -442,26 +445,26 @@ export function InvitePage() {
     </>
   ) : (
     <section className="sheet">
-      <p className="lbl">{event.options.length > 1 ? "Toutes les dates proposées" : "Le créneau proposé"}</p>
+      <h2 className="h2">{event.options.length > 1 ? "Toutes les dates proposées" : "Le créneau proposé"}</h2>
       <div className="slot-stack">
         {event.options.map((option) => (
-          <div className="slot" key={option.id}>
-            <div className="slot__top">
-              <div>
-                <div className="slot__d">{formatOption(option)}</div>
-                {(option.locationAddress ||
-                  (option.locationLat != null && option.locationLng != null)) && (
-                  <OpenInMapsButton
-                    className="slot__maplink"
-                    label={option.location}
-                    address={option.locationAddress}
-                    lat={option.locationLat}
-                    lng={option.locationLng}
-                  />
-                )}
-              </div>
-              {option.id === winnerId && <span className="agenda-lead">En tête</span>}
-            </div>
+          <div className="slot slot--compact" key={option.id}>
+            <SlotHead
+              option={option}
+              badge={option.id === winnerId ? <span className="agenda-lead">En tête</span> : undefined}
+            >
+              <div className="slot__p">{option.location}</div>
+              {(option.locationAddress ||
+                (option.locationLat != null && option.locationLng != null)) && (
+                <OpenInMapsButton
+                  className="slot__maplink"
+                  label={option.location}
+                  address={option.locationAddress}
+                  lat={option.locationLat}
+                  lng={option.locationLng}
+                />
+              )}
+            </SlotHead>
             {(option.cheers?.length ?? 0) > 0 && (
               <span className="cheer-count">
                 {option.cheers?.length} verre{(option.cheers?.length ?? 0) > 1 ? "s" : ""} levé
@@ -525,37 +528,42 @@ export function InvitePage() {
       </Disclosure>
     ) : null;
 
+  // Tête de page, peinte sur la façade : le nom de l'assemblée et son état.
+  const heroBlock = (
+    <div className="page-hero">
+      <p className="eyebrow">
+        {isOrganizer ? "Ton assemblée" : `Une invitation de ${event.organizerName}`}
+      </p>
+      <h1 className="h1 h1--sm">{event.ceremonialName}</h1>
+      {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
+      <p className="factline">
+        <span>
+          <b>{event.options.length}</b> créneau{event.options.length > 1 ? "x" : ""} proposé
+          {event.options.length > 1 ? "s" : ""}
+        </span>
+        <span>
+          <b>{event.participants.length}</b> réponse{event.participants.length > 1 ? "s" : ""} au
+          registre
+        </span>
+      </p>
+      <div className="tagrow">
+        {event.childrenAllowed != null && (
+          <span className={`tag ${event.childrenAllowed ? "tag--yes" : "tag--no"}`}>
+            {event.childrenAllowed ? "Marmaille admise" : "Sans les mioches"}
+          </span>
+        )}
+        {event.recurrence && <span className="tag">{describeRecurrence(event.recurrence)}</span>}
+        {hasLocalEntry && !isPastEvent && <span className="tag">Sur ton ardoise</span>}
+      </div>
+    </div>
+  );
+
   return (
-    <MobilePage className="event-mobile" overlay="deep">
-      <MobileHeader eyebrow={isOrganizer ? "Ta convocation" : "Invitation"} />
-
-      <section className="sheet sheet--hero">
-        <p className="eyebrow">
-          {isOrganizer ? "Ton assemblée" : `Une invitation de ${event.organizerName}`}
-        </p>
-        <h1 className="h1 h1--sm">{event.ceremonialName}</h1>
-        {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
-        <p className="factline">
-          <span>
-            <b>{event.options.length}</b> créneau{event.options.length > 1 ? "x" : ""} proposé
-            {event.options.length > 1 ? "s" : ""}
-          </span>
-          <span>
-            <b>{event.participants.length}</b> réponse{event.participants.length > 1 ? "s" : ""} au
-            registre
-          </span>
-        </p>
-        <div className="tagrow">
-          {event.childrenAllowed != null && (
-            <span className={`tag ${event.childrenAllowed ? "tag--yes" : "tag--no"}`}>
-              {event.childrenAllowed ? "Marmaille admise" : "Sans les mioches"}
-            </span>
-          )}
-          {event.recurrence && <span className="tag">{describeRecurrence(event.recurrence)}</span>}
-          {hasLocalEntry && !isPastEvent && <span className="tag">Sur ton ardoise</span>}
-        </div>
-      </section>
-
+    <MobilePage
+      className="event-mobile invite-page"
+      header={<MobileHeader eyebrow={isOrganizer ? "Ta convocation" : "Invitation"} />}
+      hero={heroBlock}
+    >
       {(error || loadWarning) && (
         <p className="page-message page-message--error" role="alert">
           {error || loadWarning}
@@ -575,100 +583,114 @@ export function InvitePage() {
         />
       )}
 
-      {isPastEvent ? (
-        // ---- Apéro passé : le verdict est servi, la suite est la tournée
-        // suivante. Vote, calendrier et partage n'ont plus cours.
-        <>
-          {verdictPanel}
-
-          <section className="sheet">
-            <p className="eyebrow">{event.recurrence ? "La tournée suivante" : "Remettre ça"}</p>
-            <h2 className="h2">
-              {event.recurrence
-                ? "Cette assemblée se répète, le rituel n’attend pas."
-                : "Cet apéro est derrière nous."}
-            </h2>
-            <p className="lede">
-              {event.recurrence
-                ? `La cadence est gravée : ${describeRecurrence(event.recurrence)}. Le rituel n’attend que ta convocation.`
-                : "Les verres sont secs, le zinc est rangé. La suite logique : la même chose un peu plus tard, et n’importe quel membre de la tablée peut convoquer la prochaine."}
-            </p>
-            <button
-              type="button"
-              className="button button--primary button--block"
-              onClick={() =>
-                aller("/create", { state: { prefill: buildNextRoundPrefill(event) } })
-              }
-            >
-              {event.recurrence ? "Convoquer la prochaine tournée" : "Remettre ça"}
-            </button>
-          </section>
-
-          <ParticipantList participants={event.participants} />
-
-          <ComptoirWall
-            messages={event.messages ?? []}
-            authorName={comptoirName}
-            onPost={keys.writeKey ? handlePostMessage : undefined}
-            isSaving={isPostingMessage}
-          />
-
-          {tableeSection}
-        </>
-      ) : (
-        // ---- Apéro à venir : l'ordre suit le lecteur. Organisateur seul →
-        // partager ; invité pas voté → voter ; a voté → verdict d'abord.
-        <>
-          {shareFirst && shareBox}
-
-          {voteFirst && keys.writeKey ? (
-            <>
-              {voteBlock}
+      {/* Deux flux qui gardent l'ordre de lecture d'origine : la prochaine
+          action et le verdict (flux principal), puis le registre, le mur et
+          les outils (flux secondaire). Empilés sur mobile, côte à côte sur
+          grand écran. */}
+      <div className="invite-grid">
+        {isPastEvent ? (
+          // ---- Apéro passé : le verdict est servi, la suite est la tournée
+          // suivante. Vote, calendrier et partage n'ont plus cours.
+          <>
+            <div className="invite-main">
               {verdictPanel}
-            </>
-          ) : (
-            <>
-              {verdictPanel}
-              {voteBlock}
-            </>
-          )}
 
-          {hasGuestResponses && canExportToCalendar && winnerOption && (
-            <VerdictExportSection
-              event={event}
-              winnerOption={winnerOption}
-              result={result}
-              inviteUrl={canShare ? inviteUrl : undefined}
-            />
-          )}
+              <section className="sheet">
+                <p className="eyebrow">{event.recurrence ? "La tournée suivante" : "Remettre ça"}</p>
+                <h2 className="h2">
+                  {event.recurrence
+                    ? "Cette assemblée se répète, le rituel n’attend pas."
+                    : "Cet apéro est derrière nous."}
+                </h2>
+                <p className="lede">
+                  {event.recurrence
+                    ? `La cadence est gravée : ${describeRecurrence(event.recurrence)}. Le rituel n’attend que ta convocation.`
+                    : "Les verres sont secs, le zinc est rangé. La suite logique : la même chose un peu plus tard, et n’importe quel membre de la tablée peut convoquer la prochaine."}
+                </p>
+                <button
+                  type="button"
+                  className="button button--primary button--block"
+                  onClick={() =>
+                    aller("/create", { state: { prefill: buildNextRoundPrefill(event) } })
+                  }
+                >
+                  {event.recurrence ? "Convoquer la prochaine tournée" : "Remettre ça"}
+                </button>
+              </section>
+            </div>
 
-          {!shareFirst && shareBox}
+            <div className="invite-aside">
+              <ParticipantList participants={event.participants} />
 
-          <ParticipantList participants={event.participants} />
+              <ComptoirWall
+                messages={event.messages ?? []}
+                authorName={comptoirName}
+                onPost={keys.writeKey ? handlePostMessage : undefined}
+                isSaving={isPostingMessage}
+              />
 
-          <ComptoirWall
-            messages={event.messages ?? []}
-            authorName={comptoirName}
-            onPost={keys.writeKey ? handlePostMessage : undefined}
-            isSaving={isPostingMessage}
-          />
+              {tableeSection}
+            </div>
+          </>
+        ) : (
+          // ---- Apéro à venir : l'ordre suit le lecteur. Organisateur seul →
+          // partager ; invité pas voté → voter ; a voté → verdict d'abord.
+          <>
+            <div className="invite-main">
+              {shareFirst && shareBox}
 
-          {tableeSection}
+              {voteFirst && keys.writeKey ? (
+                <>
+                  {voteBlock}
+                  {verdictPanel}
+                </>
+              ) : (
+                <>
+                  {verdictPanel}
+                  {voteBlock}
+                </>
+              )}
 
-          {hasJustVoted && !isOrganizer && (
-            <section className="sheet">
-              <p className="eyebrow">À ton tour</p>
-              <p className="lede">
-                Une assemblée, deux créneaux, un lien : tu sais tout. La Confrérie
-                n’attend plus que ta convocation.
-              </p>
-              <AppLink className="button button--ghost button--block" to="/create">
-                Organiser mon propre apéro
-              </AppLink>
-            </section>
-          )}
-        </>
-      )}
+              {hasGuestResponses && canExportToCalendar && winnerOption && (
+                <VerdictExportSection
+                  event={event}
+                  winnerOption={winnerOption}
+                  result={result}
+                  inviteUrl={canShare ? inviteUrl : undefined}
+                />
+              )}
+
+              {!shareFirst && shareBox}
+            </div>
+
+            <div className="invite-aside">
+              <ParticipantList participants={event.participants} />
+
+              <ComptoirWall
+                messages={event.messages ?? []}
+                authorName={comptoirName}
+                onPost={keys.writeKey ? handlePostMessage : undefined}
+                isSaving={isPostingMessage}
+              />
+
+              {tableeSection}
+
+              {hasJustVoted && !isOrganizer && (
+                <section className="sheet">
+                  <p className="eyebrow">À ton tour</p>
+                  <p className="lede">
+                    Une assemblée, deux créneaux, un lien : tu sais tout. La Confrérie
+                    n’attend plus que ta convocation.
+                  </p>
+                  <AppLink className="button button--ghost button--block" to="/create">
+                    Organiser mon propre apéro
+                  </AppLink>
+                </section>
+              )}
+            </div>
+          </>
+        )}
+      </div>
 
       {organizerTools}
 

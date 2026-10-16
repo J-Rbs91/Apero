@@ -4,6 +4,7 @@ import { useAppNavigation } from "../routes/useAppNavigation";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
+import { SlotHead } from "../components/SlotHead";
 import { TraquenardGauge } from "../components/TraquenardGauge";
 import { getAperoStorageMode } from "../config/aperoApiConfig";
 import { eventStorage } from "../services";
@@ -21,18 +22,6 @@ function getSlotTime(option: AperitifOption): number {
   }
   const time = new Date(`${option.date}T${option.time}:00`).getTime();
   return Number.isNaN(time) ? Number.NaN : time;
-}
-
-function formatSlot(option: AperitifOption): string {
-  const dateLabel = option.date
-    ? new Intl.DateTimeFormat("fr-FR", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-      }).format(new Date(`${option.date}T00:00:00`))
-    : "Date mystère";
-
-  return `${dateLabel} · ${option.time || "heure mystère"}`;
 }
 
 type AgendaItem = {
@@ -138,26 +127,33 @@ export function AgendaPage() {
       .sort((first, second) => second.latest - first.latest);
   }, [events]);
 
+  const hero = (
+    <div className="page-hero">
+      <h1 className="h1 h1--sm">Les apéros à venir</h1>
+      <p className="lede">
+        Les apéros encore debout, ceux qui tiennent bon, triés par date la plus proche.
+      </p>
+    </div>
+  );
+
   if (isLoading) {
     return (
-      <MobilePage className="agenda-mobile" overlay="deep">
-        <MobileHeader eyebrow="L’ardoise du comptoir" />
+      <MobilePage
+        className="agenda-mobile"
+        header={<MobileHeader eyebrow="L’ardoise du comptoir" />}
+        hero={hero}
+      >
         <LoadingScreen title="On feuillette l’ardoise" subtitle="La Confrérie sort les apéros à venir…" />
       </MobilePage>
     );
   }
 
   return (
-    <MobilePage className="agenda-mobile" overlay="deep">
-      <MobileHeader eyebrow="L’ardoise du comptoir" />
-
-      <section className="sheet">
-        <h1 className="h1 h1--sm">Les apéros à venir</h1>
-        <p className="lede">
-          Les apéros encore debout, ceux qui tiennent bon, triés par date la plus proche.
-        </p>
-      </section>
-
+    <MobilePage
+      className="agenda-mobile"
+      header={<MobileHeader eyebrow="L’ardoise du comptoir" />}
+      hero={hero}
+    >
       {error ? (
         <section className="sheet">
           <p className="feedback">{error}</p>
@@ -174,7 +170,7 @@ export function AgendaPage() {
           </AppLink>
         </section>
       ) : (
-        <div className="event-stack">
+        <div className="event-stack event-stack--grid">
           {items.map(({ event, upcomingSlots, winnerId }) => (
             <section className="sheet" key={event.id}>
               <p className="eyebrow">
@@ -187,14 +183,10 @@ export function AgendaPage() {
 
               <div className="slot-stack">
                 {upcomingSlots.map((option) => (
-                  <div className="slot" key={option.id}>
-                    <div className="slot__top">
-                      <div>
-                        <div className="slot__d">{formatSlot(option)}</div>
-                        <div className="slot__p">{option.location}</div>
-                      </div>
-                      {option.id === winnerId && <span className="agenda-lead">En tête</span>}
-                    </div>
+                  <div className="slot slot--compact" key={option.id}>
+                    <SlotHead option={option} badge={option.id === winnerId ? <span className="agenda-lead">En tête</span> : undefined}>
+                      <div className="slot__p">{option.location}</div>
+                    </SlotHead>
                   </div>
                 ))}
               </div>
@@ -229,7 +221,7 @@ export function AgendaPage() {
               Les verres sont secs, mais rien n’empêche de remettre ça.
             </p>
           </section>
-          <div className="event-stack">
+          <div className="event-stack event-stack--grid">
             {pastItems.map(({ event, latest }) => (
               <section className="sheet sheet--past" key={event.id}>
                 <p className="eyebrow">

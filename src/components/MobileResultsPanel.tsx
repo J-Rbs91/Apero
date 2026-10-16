@@ -1,5 +1,6 @@
 import type { AperitifEvent, AperitifOption, ResultState } from "../types/apero";
 import { calculateAverageTraquenardLevel } from "../utils/calculateResults";
+import { Bulbs } from "./Bulbs";
 import { MiniMap } from "./MiniMap";
 import { TraquenardGauge } from "./TraquenardGauge";
 
@@ -15,8 +16,8 @@ type MobileResultsPanelProps = {
   isPast?: boolean;
 };
 
-function formatWinner(option: AperitifOption): string {
-  const dateLabel = option.date
+function splitWinner(option: AperitifOption): { date: string; time: string } {
+  const date = option.date
     ? new Intl.DateTimeFormat("fr-FR", {
         weekday: "short",
         day: "numeric",
@@ -24,7 +25,7 @@ function formatWinner(option: AperitifOption): string {
       }).format(new Date(`${option.date}T00:00:00`))
     : "Date mystère";
 
-  return `${dateLabel} · ${option.time || "heure mystère"}, ${option.location}`;
+  return { date, time: option.time || "heure mystère" };
 }
 
 function describeEyebrow(result: ResultState): string {
@@ -78,47 +79,67 @@ export function MobileResultsPanel({
         ? optionsWithCoords[0]
         : undefined;
 
+  const winner = !awaitingGuests && highlightedOption ? splitWinner(highlightedOption) : null;
+
+  // Le panneau de verdict : le seul endroit où le produit « crie » — ampoules,
+  // date en chiffres d'affiche, compteurs à arche (docs/uxer/design-system.md §5).
   return (
     <div className={`verdict${isPast ? " verdict--past" : ""}`}>
+      <Bulbs chase={!isPast && !awaitingGuests && result.type === "winner"} off={isPast || !winner} />
       {isPast && (
         <span className="verdict__stamp" aria-label="Apéro passé">
           Servi
         </span>
       )}
-      <p className="eyebrow">{awaitingGuests ? "Le comptoir délibère" : describeEyebrow(result)}</p>
-      <div className="verdict__title">
-        {awaitingGuests
-          ? "La tablée n’a pas encore émargé : le zinc réserve son verdict."
-          : highlightedOption
-            ? formatWinner(highlightedOption)
-            : result.message}
+      <div className="verdict__main">
+        <p className="eyebrow verdict__label">
+          {awaitingGuests ? "Le comptoir délibère" : describeEyebrow(result)}
+        </p>
+        {winner && highlightedOption ? (
+          <>
+            <div className="verdict__title">
+              <span className="verdict__date">{winner.date}</span>
+              <span className="sr-only"> · </span>
+              <span className="verdict__time">{winner.time}</span>
+            </div>
+            <p className="verdict__place">{highlightedOption.location}</p>
+            <p className="meta">{result.message}</p>
+          </>
+        ) : (
+          <div className="verdict__title verdict__title--text">
+            {awaitingGuests
+              ? "La tablée n’a pas encore émargé : le zinc réserve son verdict."
+              : result.message}
+          </div>
+        )}
       </div>
-      {!awaitingGuests && highlightedOption && <p className="meta">{result.message}</p>}
-      {!awaitingGuests && highlightedResult && (
-        <div className="counts">
-          <div className="cnt">
-            <b>{highlightedResult.yesCount}</b>
-            <span>Présences</span>
+      <div className="verdict__side">
+        {!awaitingGuests && highlightedResult && (
+          <div className="counts">
+            <div className="cnt">
+              <b>{highlightedResult.yesCount}</b>
+              <span>Présences</span>
+            </div>
+            <div className="cnt">
+              <b>{highlightedResult.maybeCount}</b>
+              <span>Hésitations</span>
+            </div>
+            <div className="cnt">
+              <b>{highlightedResult.noCount}</b>
+              <span>Désertions</span>
+            </div>
           </div>
-          <div className="cnt">
-            <b>{highlightedResult.maybeCount}</b>
-            <span>Hésitations</span>
-          </div>
-          <div className="cnt">
-            <b>{highlightedResult.noCount}</b>
-            <span>Désertions</span>
-          </div>
-        </div>
-      )}
-      {mapOption && mapOption.locationLat != null && mapOption.locationLng != null && (
-        <MiniMap
-          lat={mapOption.locationLat}
-          lng={mapOption.locationLng}
-          label={mapOption.location}
-          address={mapOption.locationAddress}
-        />
-      )}
-      <TraquenardGauge level={averageTraquenardLevel} voteCount={traquenardVoteCount} />
+        )}
+        {mapOption && mapOption.locationLat != null && mapOption.locationLng != null && (
+          <MiniMap
+            lat={mapOption.locationLat}
+            lng={mapOption.locationLng}
+            label={mapOption.location}
+            address={mapOption.locationAddress}
+          />
+        )}
+        <TraquenardGauge level={averageTraquenardLevel} voteCount={traquenardVoteCount} />
+      </div>
     </div>
   );
 }

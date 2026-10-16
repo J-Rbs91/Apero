@@ -1,5 +1,6 @@
 import { useAppNavigation } from "../routes/useAppNavigation";
 import { HeaderNav } from "./HeaderNav";
+import { Icon } from "./Icon";
 
 type MobileHeaderProps = {
   eyebrow: string;
@@ -21,26 +22,18 @@ export function MobileHeader({ eyebrow, title, meta }: MobileHeaderProps) {
   const { remonter } = useAppNavigation();
 
   return (
-    <header className="screen-head">
+    <div className="screen-head">
       <div className="backrow">
         <button type="button" className="bk" onClick={remonter} aria-label="Retour">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
-            <path
-              d="M15 5l-7 7 7 7"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <Icon name="back" size={22} />
         </button>
-        <p className="eyebrow">{eyebrow}</p>
+        <p className="eyebrow backrow__label">{eyebrow}</p>
         {/* Cloche + menu : la Confrérie reste à portée de pouce sur toutes
             les pages, pas seulement à l'accueil. */}
         <HeaderNav />
       </div>
       {title && <h1 className="h1 h1--sm screen-head__title">{title}</h1>}
       {meta && <p className="meta">{meta}</p>}
-    </header>
+    </div>
   );
 }

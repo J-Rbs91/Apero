@@ -71,41 +71,46 @@ export function ComptesPage() {
 
   if (isLoading) {
     return (
-      <MobilePage className="agenda-mobile" overlay="deep">
-        <MobileHeader eyebrow="La Rétrospective du Comptoir" />
+      <MobilePage
+        className="agenda-mobile"
+        header={<MobileHeader eyebrow="La Rétrospective du Comptoir" />}
+        hero={<h1 className="h1 h1--sm">Ta rétrospective {year}</h1>}
+      >
         <LoadingScreen title="On épluche les registres" subtitle="La Confrérie compte les tournées de l’année…" />
       </MobilePage>
     );
   }
 
   return (
-    <MobilePage className="agenda-mobile" overlay="deep">
-      <MobileHeader eyebrow="La Rétrospective du Comptoir" />
-
-      <section className="sheet">
-        <h1 className="h1 h1--sm">Ta rétrospective {year}</h1>
-        <p className="lede">
-          Le bilan comptable de tes activités de comptoir, dressé sur cet appareil et
-          nulle part ailleurs. Le registre fait foi, le reste est légende.
-        </p>
-        <div className="button-row">
-          <button
-            type="button"
-            className={`button ${year === currentYear - 1 ? "button--primary" : "button--ghost"}`}
-            onClick={() => setYear(currentYear - 1)}
-          >
-            {currentYear - 1}
-          </button>
-          <button
-            type="button"
-            className={`button ${year === currentYear ? "button--primary" : "button--ghost"}`}
-            onClick={() => setYear(currentYear)}
-          >
-            {currentYear}
-          </button>
+    <MobilePage
+      className="agenda-mobile"
+      header={<MobileHeader eyebrow="La Rétrospective du Comptoir" />}
+      hero={
+        <div className="page-hero">
+          <h1 className="h1 h1--sm">Ta rétrospective {year}</h1>
+          <p className="lede">
+            Le bilan comptable de tes activités de comptoir, dressé sur cet appareil et
+            nulle part ailleurs. Le registre fait foi, le reste est légende.
+          </p>
+          <div className="button-row">
+            <button
+              type="button"
+              className={`button ${year === currentYear - 1 ? "button--primary" : "button--ghost"}`}
+              onClick={() => setYear(currentYear - 1)}
+            >
+              {currentYear - 1}
+            </button>
+            <button
+              type="button"
+              className={`button ${year === currentYear ? "button--primary" : "button--ghost"}`}
+              onClick={() => setYear(currentYear)}
+            >
+              {currentYear}
+            </button>
+          </div>
         </div>
-      </section>
-
+      }
+    >
       {!comptoirName.trim() ? (
         <section className="sheet">
           <p className="lede">

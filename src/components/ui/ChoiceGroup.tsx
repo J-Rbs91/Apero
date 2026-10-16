@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { Icon, type IconName } from "../Icon";
 import type { FieldRequirement } from "./Field";
 
 /** Teinte d'une option retenue : neutre par défaut, accent pour un oui. */
@@ -10,6 +11,9 @@ export type ChoiceOption<TValue extends string> = {
   /** Une ligne d'explication sous le libellé, quand le mot seul ne suffit pas. */
   description?: string;
   tone?: ChoiceTone;
+  /** Glyphe de l'option (✓ / ? / ✕…) : la pastille le montre à la place du
+   *  simple coche, pour que le choix ne tienne jamais à la seule couleur. */
+  icon?: IconName;
 };
 
 type ChoiceGroupProps<TValue extends string> = {
@@ -103,15 +107,19 @@ export function ChoiceGroup<TValue extends string>({
                 onChange={() => onChange(option.value)}
               />
               <span className="choice__mark" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
-                  <path
-                    d="M5 12.5l4.2 4.3L19 7.5"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                {option.icon ? (
+                  <Icon name={option.icon} size={18} />
+                ) : (
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
+                    <path
+                      d="M5 12.5l4.2 4.3L19 7.5"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
               </span>
               <span className="choice__body">
                 <span className="choice__label">{option.label}</span>

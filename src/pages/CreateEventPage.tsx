@@ -390,17 +390,20 @@ export function CreateEventPage() {
   }
 
   return (
-    <MobilePage className="create-mobile" overlay="deep">
-      <MobileHeader eyebrow="Nouvelle assemblée" />
-
-      <form className="sheet" onSubmit={handleSubmit}>
-        <div>
+    <MobilePage
+      className="create-mobile"
+      header={<MobileHeader eyebrow="Nouvelle assemblée" />}
+      hero={
+        <div className="page-hero">
           <h1 className="h1 h1--sm">Organiser un apéro</h1>
           <p className="lede">
             Une seule chose est obligatoire : au moins un créneau complet. Tout le reste
             se règle après, ou jamais.
           </p>
         </div>
+      }
+    >
+      <form className="sheet" onSubmit={handleSubmit}>
 
         {isDraftRestored && (
           // Accusé de réception à l'entrée, hors de la ligne de regard de la

@@ -11,9 +11,10 @@ import { MobilePage } from "../components/MobilePage";
 // serveur doit être répercutée ici avant d'être déployée.
 export function RegistreLegalPage() {
   return (
-    <MobilePage overlay="deep">
-      <MobileHeader eyebrow="La Confrérie" title="Le registre légal" />
-
+    <MobilePage
+      header={<MobileHeader eyebrow="La Confrérie" />}
+      hero={<h1 className="h1 h1--sm">Le registre légal</h1>}
+    >
       <section className="sheet">
         <h2 className="h2">Qui tient ce comptoir</h2>
         <p className="lede">

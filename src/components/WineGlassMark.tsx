@@ -17,6 +17,7 @@ export function WineGlassMark({ size = 28, className = "", onLoopComplete }: Win
   useEffect(() => {
     let animation: AnimationItem | undefined;
     let cancelled = false;
+    let settleTimer: number | undefined;
 
     // Chargement paresseux : le moteur Lottie (build léger SVG) et l'animation
     // partent dans un chunk séparé, hors du bundle initial.
@@ -28,21 +29,31 @@ export function WineGlassMark({ size = 28, className = "", onLoopComplete }: Win
         return;
       }
 
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       animation = lottieModule.default.loadAnimation({
         container: ref.current,
         renderer: "svg",
-        loop: true,
-        autoplay: true,
+        loop: !reducedMotion,
+        autoplay: !reducedMotion,
         animationData: animationModule.default,
       });
 
       animation.addEventListener("loopComplete", () => {
         onLoopRef.current?.();
       });
+
+      // Mouvement réduit : le verre reste sur sa première image et ne boucle
+      // jamais, donc « loopComplete » n'arrive jamais. L'écran d'ouverture
+      // compte sur ce signal pour se retirer : on le donne après un court
+      // instant plutôt que de le laisser attendre son filet de sécurité de 4 s.
+      if (reducedMotion) {
+        settleTimer = window.setTimeout(() => onLoopRef.current?.(), 700);
+      }
     });
 
     return () => {
       cancelled = true;
+      window.clearTimeout(settleTimer);
       animation?.destroy();
     };
   }, []);

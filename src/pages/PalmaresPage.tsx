@@ -160,24 +160,31 @@ export function PalmaresPage() {
     (member) => member.key !== myKey && member.badges.length === 0,
   ).length;
 
+  const hero = (
+    <div className="page-hero">
+      <h1 className="h1 h1--sm">Le Palmarès de la Confrérie</h1>
+      <p className="lede">Qui a décroché quoi, à la force du coude et parfois du foie.</p>
+    </div>
+  );
+
   if (isLoading) {
     return (
-      <MobilePage className="palmares-mobile" overlay="deep">
-        <MobileHeader eyebrow="Tableau d’honneur" />
+      <MobilePage
+        className="palmares-mobile"
+        header={<MobileHeader eyebrow="Tableau d’honneur" />}
+        hero={hero}
+      >
         <LoadingScreen title="On compte les breloques" subtitle="La Confrérie ouvre le grand livre…" />
       </MobilePage>
     );
   }
 
   return (
-    <MobilePage className="palmares-mobile" overlay="deep">
-      <MobileHeader eyebrow="Tableau d’honneur" />
-
-      <section className="sheet">
-        <h1 className="h1 h1--sm">Le Palmarès de la Confrérie</h1>
-        <p className="lede">Qui a décroché quoi, à la force du coude et parfois du foie.</p>
-      </section>
-
+    <MobilePage
+      className="palmares-mobile"
+      header={<MobileHeader eyebrow="Tableau d’honneur" />}
+      hero={hero}
+    >
       {error ? (
         <section className="sheet">
           <p className="feedback">{error}</p>
@@ -190,7 +197,7 @@ export function PalmaresPage() {
           </p>
         </section>
       ) : (
-        <div className="event-stack">
+        <div className="event-stack event-stack--grid">
           {shownMembers.map((member) => (
             <section className="sheet" key={member.key}>
               <div className="palmares-head">

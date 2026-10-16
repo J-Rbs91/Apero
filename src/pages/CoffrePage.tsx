@@ -142,18 +142,20 @@ export function CoffrePage() {
   }
 
   return (
-    <MobilePage className="agenda-mobile" overlay="deep">
-      <MobileHeader eyebrow="Le Coffre de la Confrérie" />
-
-      <section className="sheet">
-        <h1 className="h1 h1--sm">Ton registre, sous clé</h1>
-        <p className="lede">
-          Ton blaze, tes apéros et leurs clés vivent uniquement sur cet appareil. Le Coffre
-          les emballe dans un fichier chiffré par ta phrase de passe : change de téléphone,
-          ouvre le coffre, et la Confrérie te reconnaît comme si de rien n’était.
-        </p>
-      </section>
-
+    <MobilePage
+      className="agenda-mobile"
+      header={<MobileHeader eyebrow="Le Coffre de la Confrérie" />}
+      hero={
+        <div className="page-hero">
+          <h1 className="h1 h1--sm">Ton registre, sous clé</h1>
+          <p className="lede">
+            Ton blaze, tes apéros et leurs clés vivent uniquement sur cet appareil. Le Coffre
+            les emballe dans un fichier chiffré par ta phrase de passe : change de téléphone,
+            ouvre le coffre, et la Confrérie te reconnaît comme si de rien n’était.
+          </p>
+        </div>
+      }
+    >
       <section className="sheet">
         <p className="eyebrow">Sceller un coffre</p>
         <Field

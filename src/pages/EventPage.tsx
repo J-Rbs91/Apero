@@ -167,18 +167,20 @@ export function EventPage() {
 
   if (isLoading) {
     return (
-      <MobilePage className="event-mobile" overlay="scene">
-        <LoadingScreen />
+      <MobilePage className="event-mobile" header={<MobileHeader eyebrow="Ton apéro" />}>
+        <LoadingScreen heading="h1" />
       </MobilePage>
     );
   }
 
   if (!event && isPurged) {
     return (
-      <MobilePage className="event-mobile" overlay="deep">
-        <MobileHeader eyebrow="Apéro archivé" />
+      <MobilePage
+        className="event-mobile"
+        header={<MobileHeader eyebrow="Apéro archivé" />}
+        hero={<h1 className="h1 h1--sm">Cet apéro est terminé</h1>}
+      >
         <section className="sheet">
-          <h1 className="h1 h1--sm">Cet apéro est terminé</h1>
           <p className="lede">
             La soirée est passée, cette page a été nettoyée, mais rassure-toi : les hauts faits
             de la tablée, eux, restent gravés dans la Confrérie pour l’éternité, ou en tout cas
@@ -194,10 +196,12 @@ export function EventPage() {
 
   if (!event) {
     return (
-      <MobilePage className="event-mobile" overlay="deep">
-        <MobileHeader eyebrow="Apéro introuvable" />
+      <MobilePage
+        className="event-mobile"
+        header={<MobileHeader eyebrow="Apéro introuvable" />}
+        hero={<h1 className="h1 h1--sm">Cet apéro n’existe pas</h1>}
+      >
         <section className="sheet">
-          <h1 className="h1 h1--sm">Cet apéro n’existe pas</h1>
           <p className="lede">
             Soit le lien est complètement moisi, soit le troquet a purement et simplement fermé
             boutique, et dans les deux cas, on ne peut plus rien pour toi ici.
@@ -217,10 +221,17 @@ export function EventPage() {
     normalizeMemberName(comptoirName) === normalizeMemberName(event.organizerName);
 
   return (
-    <MobilePage className="event-mobile" overlay="scene">
-      <MobileHeader eyebrow="Ton apéro" title={event.ceremonialName} meta={metaText} />
-      {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
-
+    <MobilePage
+      className="event-mobile invite-page"
+      header={<MobileHeader eyebrow="Ton apéro" />}
+      hero={
+        <div className="page-hero">
+          <h1 className="h1 h1--sm">{event.ceremonialName}</h1>
+          <p className="meta">{metaText}</p>
+          {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
+        </div>
+      }
+    >
       {error && (
         <p className="page-message page-message--error" role="alert">
           {error}
@@ -232,39 +243,43 @@ export function EventPage() {
         </p>
       )}
 
-      <div className="event-stack">
-        {result && <MobileResultsPanel event={event} result={result} />}
-        <VoteForm
-          event={event}
-          isSaving={isSaving}
-          onSubmit={handleVoteSubmit}
-          leadingOptionId={result?.type === "winner" ? result.optionId : undefined}
-          onProposeSlot={() => setIsProposingSlot(true)}
-        />
-        <AlternativeOptionForm
-          isSaving={isAddingOption}
-          isOpen={isProposingSlot}
-          onClose={() => setIsProposingSlot(false)}
-          onSubmit={handleOptionSubmit}
-        />
+      <div className="invite-grid">
+        <div className="invite-main">
+          {result && <MobileResultsPanel event={event} result={result} />}
+          <VoteForm
+            event={event}
+            isSaving={isSaving}
+            onSubmit={handleVoteSubmit}
+            leadingOptionId={result?.type === "winner" ? result.optionId : undefined}
+            onProposeSlot={() => setIsProposingSlot(true)}
+          />
+          <AlternativeOptionForm
+            isSaving={isAddingOption}
+            isOpen={isProposingSlot}
+            onClose={() => setIsProposingSlot(false)}
+            onSubmit={handleOptionSubmit}
+          />
+        </div>
 
-        <ParticipantList participants={event.participants} />
+        <div className="invite-aside">
+          <ParticipantList participants={event.participants} />
 
-        <MobileShareBox
-          url={shareUrl}
-          title={buildShareTitle(event)}
-          text={buildShareText(event)}
-        />
+          <MobileShareBox
+            url={shareUrl}
+            title={buildShareTitle(event)}
+            text={buildShareText(event)}
+          />
 
-        {isOrganizer && (
-          <button
-            type="button"
-            className="ghost-link ghost-link--danger"
-            onClick={() => setShowDeleteConfirm(true)}
-          >
-            Supprimer cet apéro
-          </button>
-        )}
+          {isOrganizer && (
+            <button
+              type="button"
+              className="ghost-link ghost-link--danger"
+              onClick={() => setShowDeleteConfirm(true)}
+            >
+              Supprimer cet apéro
+            </button>
+          )}
+        </div>
       </div>
 
       <ConfirmDialog

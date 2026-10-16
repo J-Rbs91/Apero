@@ -170,8 +170,8 @@ L’interface a été refondue autour de quatre règles, décrites en détail da
 3. **le bouton qui enregistre reste sous le pouce** : barre d’action épinglée
    (`ActionBar`) qui annonce la prochaine chose à faire, et feuille plein écran
    (`FormSheet`) pour les saisies secondaires ;
-4. **un seul bouton plein par écran** : le jaune pastis est réservé à l’action
-   qui enregistre.
+4. **un seul bouton plein par écran** : réservé à l’action qui enregistre (rouge sur
+   le papier, jaune pastis sur la façade).
 
 Les composants partagés vivent dans [`src/components/ui/`](src/components/ui/)
 (`Field`, `ChoiceGroup`, `SwitchRow`, `FormSection`, `Disclosure`, `ActionBar`,
@@ -304,22 +304,30 @@ Conséquence pour les notifications système : on fait du **best-effort** via l�
 - Liste d’intendance « qui ramène quoi » (le champ `brings` existe déjà dans le modèle).
 - PWA installable.
 
+## Direction artistique
+
+L’identité visuelle est « La Baraque du Petit Jaune » (style *Fairground Baroque*, arts forains).
+Elle est décrite et opposable :
+
+- [`docs/uxer/refonte-contract.md`](docs/uxer/refonte-contract.md) : exploration du produit, choix du style, contrat fonctionnel, journal de convergence, preuves et limites ;
+- [`docs/uxer/design-system.md`](docs/uxer/design-system.md) : jetons, typographie, mise en page, composants, grammaire d’animation.
+
+Les règles de **saisie et de navigation** (`docs/DESIGN-SYSTEM.md`, `docs/NAVIGATION.md`) restent en vigueur : seule l’identité visuelle a changé. Les documents `docs/refonte-visuelle/` décrivent l’identité précédente (« registre de zinc ») et sont conservés à titre historique.
+
 ## Direction iconographique
 
-L’interface n’utilise aucun emoji. Les pictogrammes doivent être des SVG monochromes de style glyph afin de conserver une direction artistique cohérente.
+L’interface n’utilise aucun emoji. Les pictogrammes sont des SVG monochromes en ligne (`currentColor`), définis dans `src/components/Icon.tsx`.
 
-Les icônes locales vivent dans `src/assets/icons/`. Les fichiers actuels sont des placeholders SVG simples, monochromes et recolorables via `currentColor`.
+> ⚠️ **Ne pas committer d'icônes IconScout ici.** Ce dépôt est public, or la [licence IconScout](https://iconscout.com/licenses) interdit la redistribution de ses éléments « with source files », même modifiés et même gratuits : les verser dans un dépôt public serait une violation. Pour des SVG supplémentaires, prendre un jeu sous licence permissive — [Lucide](https://lucide.dev/) (ISC), [Phosphor](https://phosphoricons.com/) (MIT) ou [Tabler Icons](https://tabler.io/icons) (MIT) — et l'ajouter à `CREDITS.md`.
 
-> ⚠️ **Ne pas committer d'icônes IconScout ici.** Ce dépôt est public, or la [licence IconScout](https://iconscout.com/licenses) interdit la redistribution de ses éléments « with source files », même modifiés et même gratuits : les verser dans un dépôt public serait une violation. Pour les SVG définitifs en style glyph, prendre un jeu sous licence permissive — [Lucide](https://lucide.dev/) (ISC), [Phosphor](https://phosphoricons.com/) (MIT) ou [Tabler Icons](https://tabler.io/icons) (MIT) — et l'ajouter à `CREDITS.md`.
-
-Les badges utilisent `iconName` plutôt qu’un champ `icon` en emoji. Le composant `Icon` applique les SVG locaux sous forme de masque CSS, ce qui permet de contrôler la couleur depuis les styles.
+Les badges utilisent `iconName` plutôt qu’un champ `icon` en emoji.
 
 ## Licence et crédits
 
 Le code source est publié sous **licence MIT** (voir [`LICENSE`](LICENSE)).
 
 Certains actifs embarqués dans ce dépôt ne sont **pas** couverts par cette licence et
-restent soumis à la leur — police Manrope (SIL OFL 1.1), animation Lottie issue de
+restent soumis à la leur — polices Manrope et Abril Fatface (SIL OFL 1.1), animation Lottie issue de
 Noto Animated Emoji (CC BY 4.0, modifiée), images d'ambiance générées par IA, données
 cartographiques OpenStreetMap (ODbL). Le détail, fichier par fichier, est dans
 [`CREDITS.md`](CREDITS.md).

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useModalDialog } from "../../hooks/useModalDialog";
+import { MobilePage } from "../MobilePage";
 import { WineGlassMark } from "../WineGlassMark";
 import { Field } from "../ui";
 import { validateComptoirName } from "../../utils/memberName";
@@ -42,18 +43,16 @@ export function ComptoirNameOnboarding({
   }
 
   return (
-    <main className="onboarding-screen">
-      <div className="screen-overlay screen-overlay--scene" aria-hidden />
-      <div className="onboarding-screen__inner">
+    <MobilePage
+      className="onboarding-screen"
+      header={
         <div className="brandpill">
           <WineGlassMark size={26} /> La Confrérie
         </div>
-
-        <div className="grow" />
-
-        <section className="sheet" aria-labelledby="comptoir-title">
+      }
+      hero={
+        <div className="page-hero" role="group" aria-labelledby="comptoir-title">
           <p className="eyebrow">{"Entrée dans la Confrérie"}</p>
-          <hr className="accent" />
           <h1 className="h1 h1--sm" id="comptoir-title">
             Il te faut un nom de comptoir
           </h1>
@@ -62,31 +61,31 @@ export function ComptoirNameOnboarding({
               "C’est sous ce blaze que le zinc se souviendra de toi, pour le meilleur et surtout pour le pire. La tablée ne juge pas ce que tu bois, elle grave juste les noms, et ça, ça reste pour toujours."
             }
           </p>
-
-          <form className="vote-form" onSubmit={handleSubmit}>
-            <Field
-              label="Nom de comptoir"
-              requirement="required"
-              hint="Un prénom, un surnom, ce que tu veux : c’est ce que la tablée verra."
-              error={error || undefined}
-            >
-              {(control) => (
-                <input
-                  {...control}
-                  autoFocus
-                  maxLength={48}
-                  value={draftName}
-                  onChange={(eventChange) => setDraftName(eventChange.target.value)}
-                  placeholder="Jean-Michel Pastaga, Gisèle Perrier…"
-                />
-              )}
-            </Field>
-            <button className="button button--primary button--block" type="submit">
-              Valider mon blaze
-            </button>
-          </form>
-        </section>
-      </div>
+        </div>
+      }
+    >
+      <form className="vote-form" onSubmit={handleSubmit}>
+        <Field
+          label="Nom de comptoir"
+          requirement="required"
+          hint="Un prénom, un surnom, ce que tu veux : c’est ce que la tablée verra."
+          error={error || undefined}
+        >
+          {(control) => (
+            <input
+              {...control}
+              autoFocus
+              maxLength={48}
+              value={draftName}
+              onChange={(eventChange) => setDraftName(eventChange.target.value)}
+              placeholder="Jean-Michel Pastaga, Gisèle Perrier…"
+            />
+          )}
+        </Field>
+        <button className="button button--primary button--block" type="submit">
+          Valider mon blaze
+        </button>
+      </form>
 
       {confirmedName && (
         <div className="modal-backdrop" role="presentation">
@@ -122,6 +121,6 @@ export function ComptoirNameOnboarding({
           </section>
         </div>
       )}
-    </main>
+    </MobilePage>
   );
 }

@@ -143,8 +143,11 @@ export function TableesPage() {
 
   if (items === null) {
     return (
-      <MobilePage className="agenda-mobile" overlay="deep">
-        <MobileHeader eyebrow="Les Tablées" />
+      <MobilePage
+        className="agenda-mobile"
+        header={<MobileHeader eyebrow="Les Tablées" />}
+        hero={<h1 className="h1 h1--sm">Tes tablées</h1>}
+      >
         <LoadingScreen title="On pousse les tables" subtitle="La Confrérie recense tes tablées…" />
       </MobilePage>
     );
@@ -156,18 +159,20 @@ export function TableesPage() {
   const failedTablees = items.filter((item) => !item.tablee && item.failed);
 
   return (
-    <MobilePage className="agenda-mobile" overlay="deep">
-      <MobileHeader eyebrow="Les Tablées" />
-
-      <section className="sheet">
-        <h1 className="h1 h1--sm">Tes tablées</h1>
-        <p className="lede">
-          Un apéro est un événement ; une tablée est la bande qui recommence. Membres,
-          apéros passés et à venir, palmarès maison : tout au même endroit, chiffré comme
-          le reste.
-        </p>
-      </section>
-
+    <MobilePage
+      className="agenda-mobile"
+      header={<MobileHeader eyebrow="Les Tablées" />}
+      hero={
+        <div className="page-hero">
+          <h1 className="h1 h1--sm">Tes tablées</h1>
+          <p className="lede">
+            Un apéro est un événement ; une tablée est la bande qui recommence. Membres,
+            apéros passés et à venir, palmarès maison : tout au même endroit, chiffré comme
+            le reste.
+          </p>
+        </div>
+      }
+    >
       {failedTablees.length > 0 && (
         <p className="page-message page-message--error" role="alert">
           Impossible de récupérer {failedTablees.length > 1 ? `${failedTablees.length} de tes tablées` : "une de tes tablées"} pour

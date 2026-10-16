@@ -9,6 +9,7 @@ import {
   TILE_LAYER_OPTIONS,
   watchMapSize,
 } from "../utils/leaflet";
+import { Icon } from "./Icon";
 import { OpenInMapsButton } from "./OpenInMapsButton";
 
 type MiniMapProps = {
@@ -144,7 +145,7 @@ export function MiniMap({ lat, lng, label, address }: MiniMapProps) {
                 onClick={() => setIsExpanded(false)}
                 aria-label="Fermer la carte"
               >
-                ✕
+                <Icon name="close" size={20} />
               </button>
             </div>
             <div ref={expandedContainerRef} className="minimap__canvas minimap__canvas--expanded" />

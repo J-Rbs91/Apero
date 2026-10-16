@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { WineGlassMark } from "./WineGlassMark";
-
 type LoadingScreenProps = {
   title?: string;
   subtitle?: string;
+  /** « h1 » quand le chargement occupe seul la page (tablée, invitation), « h2 » sinon. */
+  heading?: "h1" | "h2";
 };
 
 // En dessous de ce seuil, on n'affiche rien : un chargement expédié en moins
@@ -41,6 +41,7 @@ export function loadingPhase(elapsedMs: number): LoadingPhase {
 export function LoadingScreen({
   title = "Un instant…",
   subtitle = "La Confrérie ouvre le comptoir…",
+  heading: Heading = "h2",
 }: LoadingScreenProps) {
   const [elapsedMs, setElapsedMs] = useState(0);
   const [quipIndex, setQuipIndex] = useState(0);
@@ -76,9 +77,14 @@ export function LoadingScreen({
   return (
     <div className="loading-screen" role="status" aria-live="polite">
       <section className="sheet loading-sheet">
-        <WineGlassMark size={40} />
-        <hr className="accent" />
-        <h1 className="h1 h1--sm">{title}</h1>
+        {/* Trois ampoules qui s'allument en séquence : le seul mouvement en
+            boucle du produit, et il s'arrête avec l'écran. */}
+        <div className="loading-bulbs" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+        </div>
+        <Heading className="h1 h1--sm">{title}</Heading>
         <p className="lede">{isQuips ? LONG_WAIT_QUIPS[quipIndex] : subtitle}</p>
       </section>
     </div>

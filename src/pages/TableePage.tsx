@@ -146,9 +146,8 @@ export function TableePage() {
 
   if (state.status === "loading") {
     return (
-      <MobilePage className="agenda-mobile" overlay="deep">
-        <MobileHeader eyebrow="La Tablée" />
-        <LoadingScreen title="On pousse les tables" subtitle="On déchiffre le registre de la tablée…" />
+      <MobilePage className="agenda-mobile" header={<MobileHeader eyebrow="La Tablée" />}>
+        <LoadingScreen heading="h1" title="On pousse les tables" subtitle="On déchiffre le registre de la tablée…" />
       </MobilePage>
     );
   }
@@ -168,10 +167,12 @@ export function TableePage() {
                 : "Impossible de récupérer cette tablée pour le moment. Réessaie dans un instant.";
 
     return (
-      <MobilePage className="agenda-mobile" overlay="deep">
-        <MobileHeader eyebrow="La Tablée" />
+      <MobilePage
+        className="agenda-mobile"
+        header={<MobileHeader eyebrow="La Tablée" />}
+        hero={<h1 className="h1 h1--sm">Aïe, ce lien coince</h1>}
+      >
         <section className="sheet">
-          <h1 className="h1 h1--sm">Aïe, ce lien coince</h1>
           <p className="lede">{message}</p>
           <AppLink className="button button--ghost button--block" to="/tablees">
             Voir mes tablées
@@ -206,34 +207,36 @@ export function TableePage() {
     : "";
 
   return (
-    <MobilePage className="agenda-mobile" overlay="deep">
-      <MobileHeader eyebrow="La Tablée" />
-
-      <section className="sheet">
-        <p className="eyebrow">
-          {tablee.members.length} attablé{tablee.members.length > 1 ? "s" : ""}, fondée par{" "}
-          {tablee.founderName}
-        </p>
-        <h1 className="h1 h1--sm">{tablee.name}</h1>
-        {tablee.motto && <p className="lede">{"« "}{tablee.motto}{" »"}</p>}
-        <p className="meta">
-          Attablés : {tablee.members.map((member) => member.name).join(", ")}
-        </p>
-        {!isMember && keys.writeKey && (
-          <button
-            type="button"
-            className="button button--primary button--block"
-            onClick={handleJoin}
-            disabled={isJoining || !comptoirName.trim()}
-          >
-            {isJoining ? "On te fait une place…" : "M’attabler"}
-          </button>
-        )}
-        {!isMember && keys.writeKey && !comptoirName.trim() && (
-          <p className="hint">Choisis d’abord ton blaze (menu de la Confrérie) pour t’attabler.</p>
-        )}
-      </section>
-
+    <MobilePage
+      className="agenda-mobile"
+      header={<MobileHeader eyebrow="La Tablée" />}
+      hero={
+        <div className="page-hero">
+          <p className="eyebrow">
+            {tablee.members.length} attablé{tablee.members.length > 1 ? "s" : ""}, fondée par{" "}
+            {tablee.founderName}
+          </p>
+          <h1 className="h1 h1--sm">{tablee.name}</h1>
+          {tablee.motto && <p className="lede">{"« "}{tablee.motto}{" »"}</p>}
+          <p className="meta">
+            Attablés : {tablee.members.map((member) => member.name).join(", ")}
+          </p>
+          {!isMember && keys.writeKey && (
+            <button
+              type="button"
+              className="button button--primary button--block"
+              onClick={handleJoin}
+              disabled={isJoining || !comptoirName.trim()}
+            >
+              {isJoining ? "On te fait une place…" : "M’attabler"}
+            </button>
+          )}
+          {!isMember && keys.writeKey && !comptoirName.trim() && (
+            <p className="hint">Choisis d’abord ton blaze (menu de la Confrérie) pour t’attabler.</p>
+          )}
+        </div>
+      }
+    >
       {error && (
         <p className="page-message page-message--error" role="alert">
           {error}

@@ -18,7 +18,16 @@ les obligations d'attribution correspondantes.
 - **Modifications** : aucune. Les fichiers sont les sous-ensembles `latin` et `latin-ext`
   distribués par Google Fonts, repris tels quels.
 
-La police est **auto-hébergée** et non chargée depuis le CDN Google. Ce choix est
+### Abril Fatface
+
+- **Fichiers** : `src/assets/fonts/abril-fatface-latin.woff2`, `src/assets/fonts/abril-fatface-latin-ext.woff2`
+- **Auteurs** : Copyright (c) 2011, TypeTogether — <https://www.type-together.com>
+- **Licence** : SIL Open Font License 1.1 — texte intégral dans `src/assets/fonts/OFL-AbrilFatface.txt`
+- **Modifications** : aucune. Sous-ensembles `latin` et `latin-ext` distribués par Google Fonts,
+  repris tels quels. Employée uniquement pour les titres et chiffres d'affiche (voir
+  `docs/uxer/design-system.md` §2).
+
+Les deux polices sont **auto-hébergées** et non chargées depuis le CDN Google. Ce choix est
 délibéré : servir une police depuis `fonts.googleapis.com` transmet l'adresse IP de
 chaque visiteur à Google aux États-Unis sans base légale ni consentement, ce qu'un
 tribunal allemand a jugé contraire au RGPD (LG München I, 20 janvier 2022, 3 O 17493/20).

@@ -1,5 +1,7 @@
 import type { AperitifOption, VoteStatus } from "../types/apero";
 import { OpenInMapsButton } from "./OpenInMapsButton";
+import { SlotHead } from "./SlotHead";
+import { slotDateLabel } from "./SlotLeaf";
 import { ChoiceGroup, type ChoiceOption } from "./ui";
 
 type EventOptionMobileCardProps = {
@@ -22,26 +24,16 @@ type EventOptionMobileCardProps = {
   isCheerSaving?: boolean;
 };
 
+// Chaque talon a son glyphe (✓ / ? / ✕) : le choix n'est jamais porté par la
+// couleur seule.
 const voteChoices: ChoiceOption<VoteStatus>[] = [
-  { value: "yes", label: "J’y serai", tone: "accent" },
-  { value: "maybe", label: "J’me tâte", tone: "warn" },
-  { value: "no", label: "Sans moi", tone: "danger" },
+  { value: "yes", label: "J’y serai", tone: "accent", icon: "check" },
+  { value: "maybe", label: "J’me tâte", tone: "warn", icon: "maybe" },
+  { value: "no", label: "Sans moi", tone: "danger", icon: "close" },
 ];
 
 function formatCheerCount(count: number): string {
   return `${count} verre${count > 1 ? "s" : ""} levé${count > 1 ? "s" : ""}`;
-}
-
-function formatDateTime(option: AperitifOption): string {
-  const dateLabel = option.date
-    ? new Intl.DateTimeFormat("fr-FR", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-      }).format(new Date(`${option.date}T00:00:00`))
-    : "Date mystère";
-
-  return `${dateLabel} · ${option.time || "heure mystère"}`;
 }
 
 /**
@@ -62,7 +54,7 @@ export function EventOptionMobileCard({
   isCheerSaving,
 }: EventOptionMobileCardProps) {
   const cheerCount = option.cheers?.length ?? 0;
-  const slotLabel = `${formatDateTime(option)}, ${option.location || "lieu mystère"}`;
+  const slotLabel = `${slotDateLabel(option)} · ${option.time || "heure mystère"}, ${option.location || "lieu mystère"}`;
   const subtitle =
     option.createdByRole === "participant" && option.createdByName
       ? `${option.location} · proposé par ${option.createdByName}`
@@ -79,29 +71,30 @@ export function EventOptionMobileCard({
         .filter(Boolean)
         .join(" ")}
     >
-      <div className="slot__top">
-        <div>
-          <div className="slot__d">{formatDateTime(option)}</div>
-          <div className="slot__p">{subtitle}</div>
-          {(option.locationAddress || (option.locationLat != null && option.locationLng != null)) && (
-            <OpenInMapsButton
-              className="slot__maplink"
-              label={option.location}
-              address={option.locationAddress}
-              lat={option.locationLat}
-              lng={option.locationLng}
-            />
-          )}
-          {option.note && <div className="slot__p">{option.note}</div>}
-        </div>
-        {isLeading ? (
-          <span className="agenda-lead">En tête</span>
-        ) : (
-          <span className={`slot__state slot__state--${value ? "done" : "todo"}`}>
-            {value ? "Répondu" : "À voter"}
-          </span>
+      <SlotHead
+        option={option}
+        badge={
+          isLeading ? (
+            <span className="agenda-lead">En tête</span>
+          ) : (
+            <span className={`slot__state slot__state--${value ? "done" : "todo"}`}>
+              {value ? "Répondu" : "À voter"}
+            </span>
+          )
+        }
+      >
+        <div className="slot__p">{subtitle}</div>
+        {(option.locationAddress || (option.locationLat != null && option.locationLng != null)) && (
+          <OpenInMapsButton
+            className="slot__maplink"
+            label={option.location}
+            address={option.locationAddress}
+            lat={option.locationLat}
+            lng={option.locationLng}
+          />
         )}
-      </div>
+        {option.note && <div className="slot__p">{option.note}</div>}
+      </SlotHead>
 
       <ChoiceGroup
         name={`vote-${option.id}`}

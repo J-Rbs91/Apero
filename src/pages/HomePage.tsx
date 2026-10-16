@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import zincIllustration from "../assets/art/Le-zinc.jpg";
 import { AppLink } from "../components/AppLink";
 import { BrandMenu } from "../components/BrandMenu";
 import { MobilePage } from "../components/MobilePage";
@@ -80,70 +81,61 @@ export function HomePage() {
     });
   }, []);
 
-  // L’accueil vierge est un écran d’atterrissage tenu sur une seule vue : on
-  // verrouille le défilement le temps qu’on y reste. Dès qu’une carte d’apéro
-  // s’ajoute, le contenu peut déborder : on laisse défiler.
-  useEffect(() => {
-    if (nextApero) {
-      return;
-    }
-    const root = document.documentElement;
-    const { body } = document;
-    root.classList.add("is-locked");
-    body.classList.add("is-locked");
-    return () => {
-      root.classList.remove("is-locked");
-      body.classList.remove("is-locked");
-    };
-  }, [nextApero]);
-
   return (
-    <MobilePage className="home-mobile" overlay="scene">
-      <BrandMenu />
+    <MobilePage
+      className="home-mobile"
+      header={<BrandMenu />}
+      hero={
+        <div className="sign">
+          {/* Un apéro en cours passe devant : c'est la seule chose qui attend une
+              action de la part de l'habitué qui rouvre l'app. */}
+          {nextApero && (
+            <section className="sheet sheet--hero nextapero">
+              <p className="eyebrow">
+                {nextApero.isDecided ? "Prochain rendez-vous" : "Ça vote au comptoir"}
+              </p>
+              <h2 className="h2">{nextApero.event.ceremonialName}</h2>
+              <p className="factline">
+                <span>{formatNextDate(nextApero.startMs)}</span>
+                <span>
+                  <b>{nextApero.event.participants.length}</b> réponse
+                  {nextApero.event.participants.length > 1 ? "s" : ""} au registre
+                </span>
+              </p>
+              <AppLink className="button button--primary button--block" to={nextApero.path}>
+                Ouvrir l’apéro
+              </AppLink>
+            </section>
+          )}
 
-      <div className="grow" />
+          <div className="sign__text">
+            <p className="eyebrow">Institution officieuse du comptoir</p>
+            <h1 className="h1">
+              La Confrérie du <span className="h1__pop">Petit Jaune</span>
+            </h1>
+            <p className="lede">
+              Le zinc décide, pour toute la tablée. Tu proposes des créneaux, tu partages un lien,
+              la tablée tranche.
+            </p>
+            <AppLink
+              className={`button ${nextApero ? "button--ghost" : "button--primary"} button--block`}
+              to="/create"
+            >
+              Organiser un apéro
+            </AppLink>
+          </div>
 
-      {/* Un apéro en cours passe devant : c'est la seule chose qui attend une
-          action de la part de l'habitué qui rouvre l'app. */}
-      {nextApero && (
-        <section className="sheet sheet--hero">
-          <p className="eyebrow">
-            {nextApero.isDecided ? "Prochain rendez-vous" : "Ça vote au comptoir"}
-          </p>
-          <h2 className="h2">{nextApero.event.ceremonialName}</h2>
-          <p className="factline">
-            <span>{formatNextDate(nextApero.startMs)}</span>
-            <span>
-              <b>{nextApero.event.participants.length}</b> réponse
-              {nextApero.event.participants.length > 1 ? "s" : ""} au registre
-            </span>
-          </p>
-          <AppLink className="button button--primary button--block" to={nextApero.path}>
-            Ouvrir l’apéro
-          </AppLink>
-        </section>
-      )}
-
-      <section className="sheet">
-        <p className="eyebrow">Institution officieuse du comptoir</p>
-        <hr className="accent" />
-        <h1 className="h1">La Confrérie du Petit Jaune</h1>
-        <p className="lede">
-          Le zinc décide, pour toute la tablée. Tu proposes des créneaux, tu partages un lien,
-          la tablée tranche.
-        </p>
-        <p className="hint">
-          Nous ne saurions présumer de ce que tu porteras à tes lèvres, ni sous quelle toiture, ou
-          pas, tu le porteras. Ces détails demeurent ta souveraine affaire. En revanche, nul ne
-          saurait se dérober à la question qui vient, ça, jamais.
-        </p>
-        <AppLink
-          className={`button ${nextApero ? "button--ghost" : "button--primary"} button--block`}
-          to="/create"
-        >
-          Organiser un apéro
-        </AppLink>
-      </section>
+          <div className="window" aria-hidden="true">
+            <img src={zincIllustration} alt="" width="1376" height="782" />
+          </div>
+        </div>
+      }
+    >
+      <p className="hint">
+        Nous ne saurions présumer de ce que tu porteras à tes lèvres, ni sous quelle toiture, ou
+        pas, tu le porteras. Ces détails demeurent ta souveraine affaire. En revanche, nul ne
+        saurait se dérober à la question qui vient, ça, jamais.
+      </p>
     </MobilePage>
   );
 }

@@ -8,6 +8,7 @@ import { reverseGeocode, searchPlaces } from "../utils/photonGeocoding";
 import type { NearbyPlace } from "../utils/nearbyPlaces";
 import { fetchNearbyPlaces, formatDistance } from "../utils/nearbyPlaces";
 import { Field, type FieldRequirement } from "./ui";
+import { Icon } from "./Icon";
 
 const SEARCH_DEBOUNCE_MS = 300;
 // 2 lettres plutôt que 3 : le lieu est le champ le plus coûteux du parcours
@@ -391,7 +392,7 @@ export function LocationField({
                       overlayInputRef.current?.focus();
                     }}
                   >
-                    ✕
+                    <Icon name="close" size={18} />
                   </button>
                 )}
               </div>

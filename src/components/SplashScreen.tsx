@@ -62,7 +62,7 @@ export function SplashScreen({ onDone }: SplashScreenProps) {
       role="presentation"
       onClick={dismiss}
     >
-      <div className="screen-overlay screen-overlay--deep" aria-hidden />
+      <div className="canopy" aria-hidden="true" />
       <div className="splash__inner">
         <span className="splash__glass">
           <WineGlassMark size={size} onLoopComplete={handleLoopComplete} />

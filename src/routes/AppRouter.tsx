@@ -46,7 +46,7 @@ const TableesPage = lazy(() =>
 
 function RouteFallback() {
   return (
-    <MobilePage overlay="deep">
+    <MobilePage>
       <LoadingScreen title="On pousse la porte" subtitle="Le comptoir arrive…" />
     </MobilePage>
   );
@@ -56,10 +56,11 @@ function RouteFallback() {
 // laisser un écran blanc — surtout pas pour un lien d'invitation mal collé.
 function NotFoundRoute() {
   return (
-    <MobilePage overlay="deep">
-      <MobileHeader eyebrow="La Confrérie" />
+    <MobilePage
+      header={<MobileHeader eyebrow="La Confrérie" />}
+      hero={<h1 className="h1 h1--sm">Aïe, ce lien coince</h1>}
+    >
       <section className="sheet">
-        <h1 className="h1 h1--sm">Aïe, ce lien coince</h1>
         <p className="lede">
           Cette porte ne mène nulle part : lien tronqué ou adresse inconnue. Si on
           t’a invité·e, demande le lien complet à la personne qui organise.

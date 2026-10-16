@@ -1,5 +1,8 @@
 # IDENTITE : le registre de zinc
 
+> **Document historique (15/10/2026).** Ce document décrit l'identité visuelle « registre de zinc », remplacée par la direction *Fairground Baroque* sur décision du propriétaire (PR #48 ; voir `docs/uxer/refonte-contract.md` et `docs/uxer/design-system.md`). Ses invariants **fonctionnels** (parcours, ordre des blocs, kit `ui/`, textes, tests et classes de repère, cibles ≥ 44 px, plancher de 12 px, focus visible, mouvement réduit, aucun CDN) restent en vigueur ; ses choix **esthétiques** (accent pastis unique, décor photo plein cadre sous voile, Manrope seule, thème sombre unique) ne le sont plus.
+
+
 > Noyau d'identité de la refonte visuelle. **Jetable avec la refonte**, comme
 > `PO-VISION.md`, qui reste le garde-fou opposable : en cas de conflit, c'est lui
 > qui gagne. Ce fichier dit **pourquoi** les surfaces sont ainsi ; les valeurs

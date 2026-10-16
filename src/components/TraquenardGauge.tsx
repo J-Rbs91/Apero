@@ -1,18 +1,23 @@
 import { type CSSProperties } from "react";
 import { TRAQUENARD_LEVEL_MAX } from "../utils/calculateResults";
-import {
-  describeTraquenardLevel,
-  traquenardColor,
-  traquenardRatioFromLevel,
-} from "../utils/traquenardScale";
+import { describeTraquenardLevel } from "../utils/traquenardScale";
 
-// Variables CSS pilotant le remplissage et la couleur de la jauge : la même
-// valeur donne le même rendu, qu'elle soit récapitulative ou interactive.
-function gaugeStyle(ratio: number): CSSProperties {
-  return {
-    "--traq-ratio": ratio,
-    "--traq-color": traquenardColor(ratio),
-  } as CSSProperties;
+// Dix ampoules, trois zones (froid / tiède / chaud) comme un testeur de force
+// de foire (docs/uxer/design-system.md §5). Le niveau est toujours dit en
+// toutes lettres : ni la couleur ni le nombre d'ampoules allumées ne portent
+// le sens seuls. Les ampoules s'allument en cascade (montée uniquement).
+function GaugeBulbs({ lit }: { lit: number }) {
+  return (
+    <div className="traq__bulbs" aria-hidden="true">
+      {Array.from({ length: TRAQUENARD_LEVEL_MAX }, (_, index) => (
+        <i
+          key={index}
+          className={index < lit ? "traq__bulb is-lit" : "traq__bulb"}
+          style={{ "--i": index } as CSSProperties}
+        />
+      ))}
+    </div>
+  );
 }
 
 type TraquenardGaugeProps = {
@@ -24,10 +29,10 @@ type TraquenardGaugeProps = {
 // traquenard autour de l'évènement. Horizontale, en pied de carte.
 export function TraquenardGauge({ level, voteCount }: TraquenardGaugeProps) {
   const hasLevel = level != null;
-  const ratio = hasLevel ? traquenardRatioFromLevel(level) : 0;
+  const lit = hasLevel ? Math.round(level) : 0;
 
   return (
-    <div className="traq traq--summary" style={gaugeStyle(ratio)}>
+    <div className="traq traq--summary">
       <div className="traq__head">
         {/* « Pronostic de la tablée » : la synthèse se distingue du curseur
             interactif (« Ton pronostic ») d'un coup d'œil. */}
@@ -49,10 +54,7 @@ export function TraquenardGauge({ level, voteCount }: TraquenardGaugeProps) {
             : "Pronostic de la tablée : rien de déposé pour l’instant"
         }
       >
-        <div className="traq__track">
-          <div className="traq__fill" />
-        </div>
-        {hasLevel && <div className="traq__thumb" />}
+        <GaugeBulbs lit={lit} />
       </div>
     </div>
   );
@@ -69,13 +71,9 @@ type TraquenardSliderProps = {
 // déplace le curseur pour indiquer son pronostic. La couleur suit la valeur.
 export function TraquenardSlider({ value, onChange }: TraquenardSliderProps) {
   const displayValue = value ?? 5;
-  const ratio = traquenardRatioFromLevel(displayValue);
 
   return (
-    <div
-      className={`traq traq--interactive${value == null ? " traq--untouched" : ""}`}
-      style={gaugeStyle(ratio)}
-    >
+    <div className={`traq traq--interactive${value == null ? " traq--untouched" : ""}`}>
       <div className="traq__head">
         <p className="traq__title">Ton pronostic</p>
         <p className={`traq__value${value == null ? " traq__value--empty" : ""}`}>
@@ -85,10 +83,7 @@ export function TraquenardSlider({ value, onChange }: TraquenardSliderProps) {
         </p>
       </div>
       <div className="traq__gauge">
-        <div className="traq__track" aria-hidden="true">
-          <div className="traq__fill" />
-        </div>
-        <div className="traq__thumb" aria-hidden="true" />
+        <GaugeBulbs lit={displayValue} />
         <input
           className="traq__input"
           type="range"
