@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "run_id": "manifesto-void",
+  "status": "in_progress",
+  "execution_profile": "standard",
+  "current_phase": "implementation",
+  "current_unit": "foundations",
+  "completed_phases": [
+    "audit",
+    "concept",
+    "contract",
+    "design-system"
+  ],
+  "completed_units": [],
+  "last_safe_checkpoint": "2026-10-16T20:54:30+00:00",
+  "session_name": "uxer-manifesto-void",
+  "branch": "feat/uxer-manifesto-void",
+  "commit_sha": "84e26aa",
+  "files_changed": [
+    "docs/uxer/manifesto-void/UXER_BASELINE_AUDIT.md",
+    "docs/uxer/manifesto-void/UXER_CONCEPT_EXPLORATION.md",
+    "docs/uxer/manifesto-void/UXER_REDESIGN_CONTRACT.md",
+    "docs/uxer/manifesto-void/UXER_DESIGN_SYSTEM.md",
+    "docs/uxer/manifesto-void/UXER_MOTION_SYSTEM.md"
+  ],
+  "validations_passed": [
+    "baseline: unit 240/240, functional 71/71, nav 23/23, ton N=25, build ok"
+  ],
+  "validations_failed": [],
+  "next_action": "Fondations : polices, jetons, coque",
+  "blocking_issue": null,
+  "pause_reason": null,
+  "resume_required": false
+}
