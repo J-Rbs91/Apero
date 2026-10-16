@@ -14,11 +14,6 @@ const FADE_MS = 560;
 // s'efface quand même, vite — le contenu prime sur le spectacle.
 const SAFETY_MS = 4000;
 
-// La punchline de l'écran d'ouverture. Modifiable d'un mot.
-const TAGLINE = "Nul n’est tenu d’avoir soif pour venir perdre son temps avec panache.";
-// Le clin d'œil excédé : oui, le verre est rouge et le nom parle de jaune.
-const ASIDE = "Le rouge, le jaune… oui, la cohérence de la charte graphique a le cul entre deux chaises.";
-
 // Taille du verre : ~1/9 de la longueur de l'écran (le grand côté), bornée.
 // Le verre est l'unique objet figuratif de l'univers « Point Jaune » : il se
 // pose dans le vide, à l'échelle d'un objet, pas d'une affiche.
@@ -69,10 +64,7 @@ export function SplashScreen({ onDone }: SplashScreenProps) {
         <span className="splash__glass">
           <WineGlassMark size={size} onLoopComplete={handleLoopComplete} />
         </span>
-        <p className="splash__eyebrow">Institution officieuse du comptoir</p>
         <h1 className="splash__name">La Confrérie du Petit Jaune</h1>
-        <p className="splash__tagline">{TAGLINE}</p>
-        <p className="splash__aside">{ASIDE}</p>
       </div>
     </div>
   );

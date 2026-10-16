@@ -5,10 +5,10 @@ type BadgeMedalProps = {
 };
 
 const RARITY_LABEL: Record<BadgeDefinition["rarity"], string> = {
-  common: "Commune",
+  common: "Commun",
   rare: "Rare",
   legendary: "Légendaire",
-  shame: "Honteuse",
+  shame: "Malus",
 };
 
 // Glyphe de breloque : un carré dont le remplissage croît avec la rareté

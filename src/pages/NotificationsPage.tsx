@@ -21,14 +21,14 @@ function formatWhen(iso: string): string {
   }
   const diffMinutes = Math.round((Date.now() - then) / 60000);
   if (diffMinutes < 1) {
-    return "à l’instant";
+    return "À l’instant";
   }
   if (diffMinutes < 60) {
-    return `il y a ${diffMinutes} min`;
+    return `Il y a ${diffMinutes} min`;
   }
   const diffHours = Math.round(diffMinutes / 60);
   if (diffHours < 24) {
-    return `il y a ${diffHours} h`;
+    return `Il y a ${diffHours} h`;
   }
   return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" }).format(new Date(iso));
 }
@@ -67,21 +67,17 @@ export function NotificationsPage() {
   return (
     <MobilePage
       className="agenda-mobile"
-      header={<MobileHeader eyebrow="Le carnet du comptoir" />}
+      header={<MobileHeader eyebrow="Notifications" />}
       hero={
         <div className="page-hero">
-          <h1 className="h1 h1--sm">Ce que le zinc a noté</h1>
-          <p className="lede">
-            Réponses, propositions, confirmations et rappels : tout ce que le zinc a noté pour toi
-            depuis ton dernier passage.
-          </p>
+          <h1 className="h1 h1--sm">Notifications</h1>
           {hasNotifications && (
             <button
               type="button"
               className="ghost-link"
               onClick={() => clearNotifications()}
             >
-              Vider le carnet
+              Tout effacer
             </button>
           )}
         </div>
@@ -89,11 +85,6 @@ export function NotificationsPage() {
     >
       {canOfferSystem && (
         <section className="sheet">
-          <h2 className="h2">Notifications du téléphone</h2>
-          <p className="lede">
-            Pour être prévenu même quand l’app est fermée, autorise les notifications système. Sinon,
-            pas de panique : le badge rouge reste là dès que tu ouvres la Confrérie.
-          </p>
           <button
             type="button"
             className="button button--primary button--block"
@@ -101,19 +92,16 @@ export function NotificationsPage() {
               void request();
             }}
           >
-            Autoriser les notifications système
+            Activer les notifications
           </button>
         </section>
       )}
 
       {!hasNotifications ? (
         <section className="sheet">
-          <p className="lede">
-            Le carnet est vide, silencieux, presque zen. Dès qu’un convive bouge une olive, tu le
-            sauras ici.
-          </p>
+          <p className="lede">Aucune notification.</p>
           <AppLink className="button button--ghost button--block" to="/agenda">
-            Voir l’ardoise du comptoir
+            À venir
           </AppLink>
         </section>
       ) : (
@@ -145,7 +133,7 @@ export function NotificationsPage() {
       {unreadCount > 0 && (
         <section className="sheet">
           <button type="button" className="ghost-link" onClick={() => markAllRead()}>
-            Tout marquer comme lu
+            Tout marquer lu
           </button>
         </section>
       )}

@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Contrôle du cliquet anti-dérive de la routine « Refonte de la saisie ».
+"""HISTORIQUE — corpus retiré le 16/10/2026 par décision du propriétaire ; contrôle
+remplacé par docs/uxer/manifesto-void/verifier-voix.py (voix minimaliste).
+
+Contrôle du cliquet anti-dérive de la routine « Refonte de la saisie ».
 
 Recherche dans `src/` chacune des tournures gelées de TON.md et refuse de
 sortir en 0 s'il en manque une. À lancer en Phase 0 (avant de modifier) et en

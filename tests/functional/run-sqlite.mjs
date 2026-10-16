@@ -143,12 +143,12 @@ console.log("\n▶ 2. Création d'un apéro (organisateur)");
 const organizerContext = await newPersona("Jojo l'Organisateur");
 const organizerPage = await organizerContext.newPage();
 await organizerPage.goto(`${APP_URL}/Apero/#/create`);
-await organizerPage.getByPlaceholder("La Grande Tablée des Olives").fill("Le Conseil du Zinc Local");
+await organizerPage.getByRole("textbox", { name: /^Nom/ }).fill("Le Conseil du Zinc Local");
 const slot = organizerPage.locator("form .slot").first();
 await slot.locator('input[type="date"]').fill(futureDate(4));
 await slot.locator('input[type="time"]').fill("19:00");
 await slot.locator(".field--wide input").fill("Chez Dédé");
-await organizerPage.getByRole("button", { name: "Créer l’apéro" }).click();
+await organizerPage.getByRole("button", { name: "Créer", exact: true }).click();
 await organizerPage.waitForURL(/#\/invite\/apero_/, { timeout: 20_000 });
 const inviteUrl = organizerPage.url();
 const aperoId = inviteUrl.match(/#\/invite\/(apero_[\w-]+)/)?.[1];
@@ -178,15 +178,15 @@ console.log("\n▶ 4. Vote d'un invité, persistance et relecture");
 const guestContext = await newPersona("Bob Ricard");
 const guestPage = await guestContext.newPage();
 await guestPage.goto(inviteUrl);
-const nameInput = guestPage.getByPlaceholder("Jojo, Nadine, Éminence Chips…");
+const nameInput = guestPage.locator(".vote-form").getByRole("textbox", { name: /^Nom/ });
 await nameInput.waitFor({ state: "visible", timeout: 20_000 });
-await guestPage.locator(".vote-form .slot").first().getByText("J’y serai", { exact: true }).click();
+await guestPage.locator(".vote-form .slot").first().getByText("Oui", { exact: true }).click();
 await guestPage.getByRole("button", { name: "Répondre à l’invitation" }).click();
-await guestPage.getByText("C’est émargé. Le registre te remercie.").waitFor({ timeout: 15_000 });
+await guestPage.getByText("Réponse enregistrée.").waitFor({ timeout: 15_000 });
 check("L'invité vote et le registre confirme", true);
 
 await guestPage.reload();
-await guestPage.getByRole("button", { name: "Modifier ma réponse" }).waitFor({ timeout: 20_000 });
+await guestPage.getByRole("button", { name: "Modifier", exact: true }).waitFor({ timeout: 20_000 });
 check("Après rechargement, la réponse relue vient bien du stockage VPS", true);
 
 const updatedRow = dbRead.prepare("SELECT sha FROM aperos WHERE apero_id = ?").get(aperoId);
@@ -206,8 +206,8 @@ check("Une écriture avec mauvaise clé est refusée (403)", conflictResponse.st
 
 console.log("\n▶ 6. Suppression par l'organisateur");
 await organizerPage.reload();
-await organizerPage.getByRole("button", { name: "Annuler l’apéro" }).click();
-await organizerPage.getByRole("button", { name: "Oui, tout rayer" }).click();
+await organizerPage.getByRole("button", { name: "Supprimer l’apéro" }).click();
+await organizerPage.getByRole("button", { name: "Supprimer", exact: true }).click();
 await organizerPage.waitForURL(/#\/agenda/, { timeout: 20_000 });
 const afterDelete = await fetch(`${API_URL}/api/aperos/${aperoId}`);
 const afterDeleteBody = await afterDelete.json();
@@ -217,7 +217,7 @@ check("La ligne a disparu de la base SQLite", !deletedRow);
 
 await guestPage.reload();
 await guestPage
-  .getByText(/annulé|introuvable|coince/i)
+  .getByText(/supprimé|introuvable|invalide/i)
   .first()
   .waitFor({ timeout: 20_000 });
 check("Le lien de l'invité aboutit sur l'écran d'annulation", true);

@@ -1,0 +1,754 @@
+ancien	nouveau	fichier
+On pousse la porte	Chargement	src/routes/AppRouter.tsx
+Le comptoir arrive…	(supprimé)	src/routes/AppRouter.tsx
+Aïe, ce lien coince	Lien invalide.	src/routes/AppRouter.tsx
+Cette porte ne mène nulle part : lien tronqué ou adresse inconnue. Si on t’a invité·e, demande le lien complet à la personne qui organise.	(supprimé)	src/routes/AppRouter.tsx
+Retour au comptoir	Accueil	src/routes/AppRouter.tsx
+Prochain rendez-vous	Prochain	src/pages/HomePage.tsx
+Ça vote au comptoir	En cours	src/pages/HomePage.tsx
+N réponse(s) au registre	N réponse(s)	src/pages/HomePage.tsx
+Ouvrir l’apéro	Ouvrir	src/pages/HomePage.tsx
+Institution officieuse du comptoir	(supprimé)	src/pages/HomePage.tsx
+Le zinc décide, pour toute la tablée. Tu proposes des créneaux, tu partages un lien, la tablée tranche.	(supprimé)	src/pages/HomePage.tsx
+Organiser un apéro	Nouvel apéro	src/pages/HomePage.tsx
+Nous ne saurions présumer de ce que tu porteras à tes lèvres, ni sous quelle toiture, ou pas, tu le porteras. Ces détails demeurent ta souveraine affaire. En revanche, nul ne saurait se dérober à la question qui vient, ça, jamais.	(supprimé)	src/pages/HomePage.tsx
+aria-label: Menu de la Confrérie	aria-label: Menu	src/components/HeaderNav.tsx
+aria-label: Menu de la Confrérie	aria-label: Menu	src/components/BrandMenu.tsx
+Menu de la Confrérie	La Confrérie	src/components/BrandMenu.tsx
+Le Comptoir	Accueil	src/components/ConfrerieMenuPanel.tsx
+Au programme	À venir	src/components/ConfrerieMenuPanel.tsx
+Tablées	Groupes	src/components/ConfrerieMenuPanel.tsx
+Rétrospective	Bilan	src/components/ConfrerieMenuPanel.tsx
+Changer de blaze	Changer de nom	src/components/ConfrerieMenuPanel.tsx
+Le registre légal	Mentions légales	src/components/ConfrerieMenuPanel.tsx
+aria-label: Notifications (N non lue(s))	aria-label: Notifications, N non lue(s)	src/components/NotificationBell.tsx
+Institution officieuse du comptoir	(supprimé)	src/components/SplashScreen.tsx
+Nul n’est tenu d’avoir soif pour venir perdre son temps avec panache.	(supprimé)	src/components/SplashScreen.tsx
+Le rouge, le jaune… oui, la cohérence de la charte graphique a le cul entre deux chaises.	(supprimé)	src/components/SplashScreen.tsx
+Un instant… (titre par défaut)	Chargement	src/components/LoadingScreen.tsx
+La Confrérie ouvre le comptoir… (sous-titre par défaut)	(supprimé)	src/components/LoadingScreen.tsx
+Le tenancier revient, il est parti changer l’eau des olives.	(supprimé)	src/components/LoadingScreen.tsx
+On change le fût, on arrive.	(supprimé)	src/components/LoadingScreen.tsx
+Nous aussi on est pas là pour être ici.	(supprimé)	src/components/LoadingScreen.tsx
+Doucement sur la pression, faudrait pas décapsuler.	(supprimé)	src/components/LoadingScreen.tsx
+Deux minutes, on essuie le zinc et on est à toi.	(supprimé)	src/components/LoadingScreen.tsx
+Le patron cherche ses lunettes pour déchiffrer l’ardoise.	(supprimé)	src/components/LoadingScreen.tsx
+Entrée dans la Confrérie	(supprimé)	src/components/onboarding/ComptoirNameOnboarding.tsx
+Il te faut un nom de comptoir	Nom	src/components/onboarding/ComptoirNameOnboarding.tsx
+C’est sous ce blaze que le zinc se souviendra de toi, pour le meilleur et surtout pour le pire. La tablée ne juge pas ce que tu bois, elle grave juste les noms, et ça, ça reste pour toujours.	(supprimé)	src/components/onboarding/ComptoirNameOnboarding.tsx
+Nom de comptoir	Nom	src/components/onboarding/ComptoirNameOnboarding.tsx
+Un prénom, un surnom, ce que tu veux : c’est ce que la tablée verra.	(supprimé)	src/components/onboarding/ComptoirNameOnboarding.tsx
+placeholder: Jean-Michel Pastaga, Gisèle Perrier…	(supprimé)	src/components/onboarding/ComptoirNameOnboarding.tsx
+Valider mon blaze	Valider	src/components/onboarding/ComptoirNameOnboarding.tsx
+On confirme ?	(supprimé)	src/components/onboarding/ComptoirNameOnboarding.tsx
+Sérieux, c’est ça ton blaze ? (titre et nom du dialog)	Confirmer ?	src/components/onboarding/ComptoirNameOnboarding.tsx
+« NOM » (guillemets autour du nom)	NOM	src/components/onboarding/ComptoirNameOnboarding.tsx
+Oui, grave ça dans le zinc	Confirmer	src/components/onboarding/ComptoirNameOnboarding.tsx
+Non, je change de blaze	Modifier	src/components/onboarding/ComptoirNameOnboarding.tsx
+Même le pilier du fond a un nom. Inscris quelque chose.	Nom requis.	src/utils/memberName.ts
+C’est un peu court pour entrer dans les grandes archives du zinc, qui ont leur dignité.	2 caractères min.	src/utils/memberName.ts
+C’est un peu long pour un blaze. Fais plus court, ça passera mieux au comptoir.	40 caractères max.	src/utils/memberName.ts
+Rester dans la boucle du zinc	(supprimé)	src/components/onboarding/NotificationPermissionOnboarding.tsx
+On te prévient quand ça bouge au comptoir ?	Notifications	src/components/onboarding/NotificationPermissionOnboarding.tsx
+Autorise les notifications pour ne rien rater de tes apéros, même quand l’app est fermée. Tu gardes la main : tu peux refuser, le badge rouge dans l’app fera le guet quand même.	(supprimé)	src/components/onboarding/NotificationPermissionOnboarding.tsx
+Recevoir les réponses des invités	Réponses	src/components/onboarding/NotificationPermissionOnboarding.tsx
+Être informé des nouvelles propositions	Nouveaux créneaux	src/components/onboarding/NotificationPermissionOnboarding.tsx
+Ne pas oublier de confirmer ta présence	Créneau retenu	src/components/onboarding/NotificationPermissionOnboarding.tsx
+Recevoir les rappels importants avant l’apéro	Rappels	src/components/onboarding/NotificationPermissionOnboarding.tsx
+Activer les notifications	Activer	src/components/onboarding/NotificationPermissionOnboarding.tsx
+On demande au téléphone…	Activation…	src/components/onboarding/NotificationPermissionOnboarding.tsx
+Plus tard, garder juste le badge	Plus tard	src/components/onboarding/NotificationPermissionOnboarding.tsx
+L’ardoise est restée coincée à la cave, on ne sait pas pourquoi, mais réessaie dans un instant, elle finit toujours par remonter.	Chargement impossible. Réessayer.	src/pages/AgendaPage.tsx
+Les apéros à venir	À venir	src/pages/AgendaPage.tsx
+Les apéros encore debout, ceux qui tiennent bon, triés par date la plus proche.	(supprimé)	src/pages/AgendaPage.tsx
+L’ardoise du comptoir (eyebrow en-tête)	À venir	src/pages/AgendaPage.tsx
+On feuillette l’ardoise	Chargement	src/pages/AgendaPage.tsx
+La Confrérie sort les apéros à venir…	(supprimé)	src/pages/AgendaPage.tsx
+L’ardoise est vide, désespérément vide, le comptoir tourne au ralenti dans un silence presque inquiétant. À toi de relancer la machine avant que ça devienne philosophique.	Aucun apéro.	src/pages/AgendaPage.tsx
+Organiser un apéro	Nouvel apéro	src/pages/AgendaPage.tsx
+« TITRE » (guillemets autour du prétexte)	TITRE	src/pages/AgendaPage.tsx
+par NOM	Hôte : NOM	src/pages/AgendaPage.tsx
+Ouvrir l’apéro	Ouvrir	src/pages/AgendaPage.tsx
+Les tournées passées	Passés	src/pages/AgendaPage.tsx
+Les verres sont secs, mais rien n’empêche de remettre ça.	(supprimé)	src/pages/AgendaPage.tsx
+Remettre ça	Refaire	src/pages/AgendaPage.tsx
+Le carnet du comptoir (eyebrow en-tête)	Notifications	src/pages/NotificationsPage.tsx
+Ce que le zinc a noté	Notifications	src/pages/NotificationsPage.tsx
+Réponses, propositions, confirmations et rappels : tout ce que le zinc a noté pour toi depuis ton dernier passage.	(supprimé)	src/pages/NotificationsPage.tsx
+Vider le carnet	Tout effacer	src/pages/NotificationsPage.tsx
+Notifications du téléphone	(supprimé)	src/pages/NotificationsPage.tsx
+Pour être prévenu même quand l’app est fermée, autorise les notifications système. Sinon, pas de panique : le badge rouge reste là dès que tu ouvres la Confrérie.	(supprimé)	src/pages/NotificationsPage.tsx
+Autoriser les notifications système	Activer les notifications	src/pages/NotificationsPage.tsx
+Le carnet est vide, silencieux, presque zen. Dès qu’un convive bouge une olive, tu le sauras ici.	Aucune notification.	src/pages/NotificationsPage.tsx
+Voir l’ardoise du comptoir	À venir	src/pages/NotificationsPage.tsx
+Tout marquer comme lu	Tout marquer lu	src/pages/NotificationsPage.tsx
+à l’instant	À l’instant	src/pages/NotificationsPage.tsx
+il y a N min	Il y a N min	src/pages/NotificationsPage.tsx
+il y a N h	Il y a N h	src/pages/NotificationsPage.tsx
+Nouvelle réponse au registre	Nouvelle réponse	src/services/notificationEngine.ts
+NOM vient d’émarger à « APÉRO ».	NOM · APÉRO	src/services/notificationEngine.ts
+Un convive a changé d’avis	Réponse modifiée	src/services/notificationEngine.ts
+NOM a modifié sa réponse à « APÉRO ».	NOM · APÉRO	src/services/notificationEngine.ts
+Nouvelle proposition de créneau	Nouveau créneau	src/services/notificationEngine.ts
+NOM propose un créneau pour « APÉRO ». (repli : Un convive)	NOM · APÉRO (repli : Convive)	src/services/notificationEngine.ts
+Un nouveau créneau a été proposé pour « APÉRO ».	APÉRO	src/services/notificationEngine.ts
+Un créneau a bougé	Créneau modifié	src/services/notificationEngine.ts
+Un créneau de « APÉRO » a bougé. Va voir lequel.	APÉRO	src/services/notificationEngine.ts
+Un mot au comptoir	Nouveau message	src/services/notificationEngine.ts
+AUTEUR, à propos de « APÉRO » : EXTRAIT	AUTEUR · APÉRO : EXTRAIT	src/services/notificationEngine.ts
+C’est confirmé !	Créneau retenu	src/services/notificationEngine.ts
+Changement important	Créneau retenu modifié	src/services/notificationEngine.ts
+« APÉRO » est calé : DATE à HEURE, LIEU.	APÉRO · DATE HEURE · LIEU	src/services/notificationEngine.ts
+Le créneau retenu de « APÉRO » a changé.	APÉRO	src/services/notificationEngine.ts
+L’apéro a été retouché	Apéro modifié	src/services/notificationEngine.ts
+« APÉRO » : les mioches sont finalement conviés. Compte-les dans tes renforts.	APÉRO · Enfants acceptés.	src/services/notificationEngine.ts
+« APÉRO » : ce sera finalement sans les mioches. Prévois la garde, et revois tes renforts.	APÉRO · Enfants non acceptés.	src/services/notificationEngine.ts
+« APÉRO » : la politique mioches n’est plus tranchée. Demande à l’organisateur.	APÉRO · Enfants : non précisé.	src/services/notificationEngine.ts
+« ANCIEN » s’appelle désormais « NOUVEAU ». Même tablée, nouvelle enseigne.	ANCIEN · Nouveau nom : NOUVEAU	src/services/notificationEngine.ts
+Le prétexte de « APÉRO » a changé : TITRE.	APÉRO · Prétexte : TITRE	src/services/notificationEngine.ts
+« APÉRO » n’a plus de prétexte affiché. On trinque, c’est déjà un motif.	APÉRO · Prétexte supprimé.	src/services/notificationEngine.ts
+« APÉRO » devient une assemblée récurrente. Le rituel prend la cadence.	APÉRO · Récurrence ajoutée.	src/services/notificationEngine.ts
+« APÉRO » ne se répète plus : ce sera une assemblée d’un soir.	APÉRO · Récurrence supprimée.	src/services/notificationEngine.ts
+Tu te tâtes encore ?	Réponse à confirmer	src/services/notificationEngine.ts
+« APÉRO » approche : plus que 48h pour trancher. Le registre attend. (48h/24h/2h)	APÉRO · Dans 48 h (48/24/2)	src/services/notificationEngine.ts
+La tournée suivante attend	Prochain apéro	src/services/notificationEngine.ts
+« APÉRO » est passé, et cette assemblée se répète. Convoque la prochaine tournée, le zinc garde la cadence.	APÉRO · Récurrent. Créer le suivant.	src/services/notificationEngine.ts
+L’assemblée est levée	Apéro passé	src/services/notificationEngine.ts
+« APÉRO » est derrière nous. À qui le tour de convoquer ? Un lien, deux créneaux, et ça repart.	APÉRO · Refaire ?	src/services/notificationEngine.ts
+chaque semaine	hebdomadaire	src/utils/nextRound.ts
+toutes les deux semaines	bimensuel	src/utils/nextRound.ts
+chaque mois	mensuel	src/utils/nextRound.ts
+Cette annulation n’est disponible que depuis l’appareil qui a créé l’apéro.	Suppression réservée à l’appareil créateur.	src/pages/InvitePage.tsx
+On ouvre l’invitation	Chargement	src/pages/InvitePage.tsx
+On déchiffre les détails de l’apéro…	(supprimé)	src/pages/InvitePage.tsx
+Ce lien d’invitation est mal formé : on ne reconnaît pas cet identifiant.	Lien invalide (h1, plus de paragraphe)	src/pages/InvitePage.tsx
+Ce lien d’invitation est incomplet : il lui manque sa clé de lecture. Demande le lien complet à la personne qui t’a invité·e.	Lien incomplet (h1, plus de paragraphe)	src/pages/InvitePage.tsx
+Cet apéro reste introuvable : soit ce lien ne mène nulle part, soit l’apéro a déjà eu lieu.	Apéro introuvable (h1, plus de paragraphe)	src/pages/InvitePage.tsx
+Cet apéro a été annulé par la personne qui l’organisait : créneaux, votes et registre, tout a été effacé. Il a aussi été retiré de ton ardoise sur cet appareil.	Retiré de cet appareil.	src/pages/InvitePage.tsx
+Cette clé n’ouvre pas cet apéro : lien tronqué ou périmé. Demande une invitation fraîche.	Lien invalide (h1, plus de paragraphe)	src/pages/InvitePage.tsx
+Apéro annulé (h1, statut deleted)	Apéro supprimé	src/pages/InvitePage.tsx
+Aïe, ce lien coince (h1 des autres échecs)	Lien invalide | Lien incomplet | Apéro introuvable | Erreur (selon le statut)	src/pages/InvitePage.tsx
+Retour au comptoir	Accueil	src/pages/InvitePage.tsx
+Personne n’a encore répondu. Envoie le lien, c’est la seule porte d’entrée.	(supprimé)	src/pages/InvitePage.tsx
+Sonner le rappel	Relancer	src/pages/InvitePage.tsx
+Toutes les dates proposées	Créneaux	src/pages/InvitePage.tsx
+Le créneau proposé	Créneau	src/pages/InvitePage.tsx
+${n} verre(s) levé(s)	${n} soutien(s)	src/pages/InvitePage.tsx
+Ce lien permet de consulter l’apéro, mais pas d’y répondre : il manque la clé d’écriture. Demande le lien complet à la personne qui t’a invité·e.	Lecture seule. Demander le lien complet.	src/pages/InvitePage.tsx
+Coulisses de l’organisation	Gestion	src/pages/InvitePage.tsx
+Retoucher les réglages, ou tout annuler.	(supprimé)	src/pages/InvitePage.tsx
+Retoucher l’apéro	Réglages	src/pages/InvitePage.tsx
+Annuler efface créneaux, réponses et contre-propositions pour toute la tablée. C’est sans retour.	(supprimé)	src/pages/InvitePage.tsx
+Annuler l’apéro (bouton)	Supprimer l’apéro	src/pages/InvitePage.tsx
+Ton assemblée	Hôte : ${organizerName}	src/pages/InvitePage.tsx
+Une invitation de ${organizerName}	Hôte : ${organizerName}	src/pages/InvitePage.tsx
+« ${title} »	${title}	src/pages/InvitePage.tsx
+${n} créneau(x) proposé(s)	${n} créneau(x)	src/pages/InvitePage.tsx
+${n} réponse(s) au registre	${n} réponse(s)	src/pages/InvitePage.tsx
+Marmaille admise	Enfants bienvenus	src/pages/InvitePage.tsx
+Sans les mioches	Sans enfants	src/pages/InvitePage.tsx
+Sur ton ardoise	Sur cet appareil	src/pages/InvitePage.tsx
+Ta convocation (en-tête, hôte)	Apéro	src/pages/InvitePage.tsx
+La tournée suivante	(supprimé)	src/pages/InvitePage.tsx
+Remettre ça (surtitre)	(supprimé)	src/pages/InvitePage.tsx
+Cette assemblée se répète, le rituel n’attend pas.	(supprimé)	src/pages/InvitePage.tsx
+Cet apéro est derrière nous.	(supprimé)	src/pages/InvitePage.tsx
+La cadence est gravée : ${recurrence}. Le rituel n’attend que ta convocation.	(supprimé)	src/pages/InvitePage.tsx
+Les verres sont secs, le zinc est rangé. La suite logique : la même chose un peu plus tard, et n’importe quel membre de la tablée peut convoquer la prochaine.	(supprimé)	src/pages/InvitePage.tsx
+Convoquer la prochaine tournée	Refaire	src/pages/InvitePage.tsx
+Remettre ça (bouton)	Refaire	src/pages/InvitePage.tsx
+À ton tour	(supprimé)	src/pages/InvitePage.tsx
+Une assemblée, deux créneaux, un lien : tu sais tout. La Confrérie n’attend plus que ta convocation.	(supprimé)	src/pages/InvitePage.tsx
+Organiser mon propre apéro	Nouvel apéro	src/pages/InvitePage.tsx
+Annuler l’apéro (surtitre du dialogue)	(supprimé)	src/pages/InvitePage.tsx
+On raye tout, vraiment ?	Supprimer ?	src/pages/InvitePage.tsx
+Créneaux, réponses, votes et contre-propositions : tout part au vide-cave, et le vide-cave ne rend rien.	Irréversible.	src/pages/InvitePage.tsx
+Non, je le garde	Annuler	src/pages/InvitePage.tsx
+Oui, tout rayer	Supprimer	src/pages/InvitePage.tsx
+On raye…	Suppression…	src/pages/InvitePage.tsx
+Impossible de récupérer cet apéro pour le moment. Réessaie dans un instant.	Réseau indisponible. Réessayer.	src/pages/EventPage.tsx
+Réponse bien reçue, merci !	Réponse enregistrée.	src/pages/EventPage.tsx
+Le comptoir est débordé. Réessaie dans deux secondes, ça devrait passer.	Réseau indisponible. Réessayer.	src/pages/EventPage.tsx
+Nouvelle date proposée, elle apparaît maintenant dans la liste.	Créneau ajouté.	src/pages/EventPage.tsx
+Impossible d’ajouter cette proposition pour le moment. Réessaie dans un instant.	Réseau indisponible. Réessayer.	src/pages/EventPage.tsx
+Impossible de supprimer cet apéro pour le moment. Réessaie dans un instant.	Réseau indisponible. Réessayer.	src/pages/EventPage.tsx
+Ton apéro	Apéro	src/pages/EventPage.tsx
+Apéro archivé	Apéro	src/pages/EventPage.tsx
+Cet apéro est terminé	Apéro passé	src/pages/EventPage.tsx
+La soirée est passée, cette page a été nettoyée, mais rassure-toi : les hauts faits de la tablée, eux, restent gravés dans la Confrérie pour l’éternité, ou en tout cas jusqu’à la prochaine purge.	(supprimé)	src/pages/EventPage.tsx
+Retourner à l’accueil	Accueil	src/pages/EventPage.tsx
+Apéro introuvable (en-tête)	Apéro	src/pages/EventPage.tsx
+Cet apéro n’existe pas	Apéro introuvable	src/pages/EventPage.tsx
+Soit le lien est complètement moisi, soit le troquet a purement et simplement fermé boutique, et dans les deux cas, on ne peut plus rien pour toi ici.	(supprimé)	src/pages/EventPage.tsx
+Retour à la Confrérie	Accueil	src/pages/EventPage.tsx
+par ${organizerName} · ${n} créneau(x) · ${n} réponse(s)	Hôte : ${organizerName} · ${n} créneau(x) · ${n} réponse(s)	src/pages/EventPage.tsx
+« ${title} »	${title}	src/pages/EventPage.tsx
+Supprimer cet apéro	Supprimer l’apéro	src/pages/EventPage.tsx
+Suppression (surtitre du dialogue)	(supprimé)	src/pages/EventPage.tsx
+Supprimer cet apéro ?	Supprimer ?	src/pages/EventPage.tsx
+Ça efface tout, pour de bon : créneaux, réponses, propositions, tout y passe. Pas de retour en arrière possible.	Irréversible.	src/pages/EventPage.tsx
+Non, je le garde	Annuler	src/pages/EventPage.tsx
+Oui, supprimer	Supprimer	src/pages/EventPage.tsx
+J’y serai	Oui	src/components/VoteForm.tsx
+J’me tâte	Peut-être	src/components/VoteForm.tsx
+Sans moi	Non	src/components/VoteForm.tsx
+Date mystère	Sans date	src/components/VoteForm.tsx
+heure mystère	Sans heure	src/components/VoteForm.tsx
+Le registre se souvient de toi. Retouche, si le cœur t’en dit.	Réponse retrouvée.	src/components/VoteForm.tsx
+L’envoi a échoué. L’explication est juste au-dessus.	Envoi échoué.	src/components/VoteForm.tsx
+Il manque ton blaze en haut du formulaire.	Nom requis.	src/components/VoteForm.tsx
+Encore ${n} créneau(x) à trancher.	${n} créneau(x) sans réponse.	src/components/VoteForm.tsx
+Tout est rempli. Plus qu’à corriger le registre.	Réponse complète.	src/components/VoteForm.tsx
+Tout est rempli. Plus qu’à émarger.	Réponse complète.	src/components/VoteForm.tsx
+Le registre est corrigé. On ne dira rien.	Réponse modifiée.	src/components/VoteForm.tsx
+C’est émargé. Le registre te remercie.	Réponse enregistrée.	src/components/VoteForm.tsx
+L’envoi a raté. Ta réponse reste sous le coude, réessaie.	Envoi échoué. Réessayer.	src/components/VoteForm.tsx
+Ta réponse est au registre	Réponse	src/components/VoteForm.tsx
+ · ${n} renfort(s)	 · ${n} accompagnant(s)	src/components/VoteForm.tsx
+Pas de réponse	Sans réponse	src/components/VoteForm.tsx
+Modifier ma réponse	Modifier	src/components/VoteForm.tsx
++ Proposer un autre créneau	+ Créneau (nom accessible : Proposer un créneau)	src/components/VoteForm.tsx
+Qui répond ?	Convive	src/components/VoteForm.tsx
+Le blaze qui apparaîtra au registre de la tablée.	(supprimé)	src/components/VoteForm.tsx
+Ton prénom (ou blaze)	Nom	src/components/VoteForm.tsx
+Jojo, Nadine, Éminence Chips… (placeholder)	(supprimé)	src/components/VoteForm.tsx
+Indique un blaze pour émarger.	Nom requis.	src/components/VoteForm.tsx
+Tranche chaque créneau	Créneaux	src/components/VoteForm.tsx
+Tranche le créneau	Créneau	src/components/VoteForm.tsx
+Une réponse par créneau proposé, même un « Sans moi ».	(supprimé)	src/components/VoteForm.tsx
+Ce créneau attend encore ta réponse.	Réponse requise.	src/components/VoteForm.tsx
++ Aucun ne va : proposer un autre créneau	+ Créneau (nom accessible : Proposer un créneau)	src/components/VoteForm.tsx
+Ajouter des détails	Détails	src/components/VoteForm.tsx
+Renforts, pronostic, petit mot. Rien d’obligatoire.	Facultatif	src/components/VoteForm.tsx
+Un petit mot pour la troupe	Commentaire	src/components/VoteForm.tsx
+Je viendrai si le monde ne s’est pas arrêté de tourner d’ici là. (placeholder)	(supprimé)	src/components/VoteForm.tsx
+Laisser ma réponse telle quelle	Annuler	src/components/VoteForm.tsx
+On émarge…	Envoi…	src/components/VoteForm.tsx
+Enregistrer ma réponse	Enregistrer	src/components/VoteForm.tsx
+Envoyer ma réponse	Envoyer	src/components/VoteForm.tsx
+J’y serai (radio)	Oui	src/components/EventOptionMobileCard.tsx
+J’me tâte (radio)	Peut-être	src/components/EventOptionMobileCard.tsx
+Sans moi (radio)	Non	src/components/EventOptionMobileCard.tsx
+${n} verre(s) levé(s)	${n} soutien(s)	src/components/EventOptionMobileCard.tsx
+heure mystère (légende lecteur d’écran)	Sans heure	src/components/EventOptionMobileCard.tsx
+lieu mystère (légende lecteur d’écran)	Sans lieu	src/components/EventOptionMobileCard.tsx
+${location} · proposé par ${name}	${location} · par ${name}	src/components/EventOptionMobileCard.tsx
+À voter	Sans réponse	src/components/EventOptionMobileCard.tsx
+Ta réponse (légende du groupe radio)	Réponse	src/components/EventOptionMobileCard.tsx
+Trinquer à ce créneau	+1 (nom accessible : Soutenir ce créneau, aria-pressed=false)	src/components/EventOptionMobileCard.tsx
+Verre levé	+1 (nom accessible : Soutenir ce créneau, aria-pressed=true)	src/components/EventOptionMobileCard.tsx
+Date mystère	Sans date	src/components/MobileResultsPanel.tsx
+heure mystère	Sans heure	src/components/MobileResultsPanel.tsx
+Le rendez-vous retenu	Retenu	src/components/MobileResultsPanel.tsx
+Plusieurs options en lice	En tête	src/components/MobileResultsPanel.tsx
+En attente de réponses	Résultat	src/components/MobileResultsPanel.tsx
+Servi	Passé	src/components/MobileResultsPanel.tsx
+Le comptoir délibère	Résultat	src/components/MobileResultsPanel.tsx
+La tablée n’a pas encore émargé : le zinc réserve son verdict.	En attente des convives.	src/components/MobileResultsPanel.tsx
+Présences	Oui	src/components/MobileResultsPanel.tsx
+Hésitations	Peut-être	src/components/MobileResultsPanel.tsx
+Désertions	Non	src/components/MobileResultsPanel.tsx
++${n} pièces rapportées	+${n}	src/components/ParticipantList.tsx
++1 pièce rapportée	+1	src/components/ParticipantList.tsx
+Personne n’a encore émargé.	Aucune réponse.	src/components/ParticipantList.tsx
+${n} confirmé(s) · ${n} qui hésite(nt) · ${n} sans nous	${n} oui · ${n} peut-être · ${n} non	src/components/ParticipantList.tsx
+Qui vient ?	Réponses	src/components/ParticipantList.tsx
+Personne n’a encore répondu. Sois le premier, ou la première.	(supprimé)	src/components/ParticipantList.tsx
+Ils y seront	Oui	src/components/ParticipantList.tsx
+Le cul entre deux chaises	Peut-être	src/components/ParticipantList.tsx
+Les déserteurs	Non	src/components/ParticipantList.tsx
+Le mot n’est pas arrivé jusqu’au mur. Réessaie dans un instant.	Envoi échoué. Réessayer.	src/components/ComptoirWall.tsx
+Le mur du comptoir	Messages	src/components/ComptoirWall.tsx
+Personne n’a encore rien lâché.	Aucun message.	src/components/ComptoirWall.tsx
+Dernier mot ${quand}.	Dernier message ${quand}.	src/components/ComptoirWall.tsx
+Le premier mot donne toujours le ton de la soirée. À toi de voir lequel.	(supprimé)	src/components/ComptoirWall.tsx
+Lâcher un mot (signé ${nom})	Message	src/components/ComptoirWall.tsx
+Lâcher un mot	Message	src/components/ComptoirWall.tsx
+Choisis d’abord ton blaze (menu de la Confrérie) pour signer tes mots.	Nom requis, via le menu.	src/components/ComptoirWall.tsx
+J’amène les olives, quelqu’un gère la glace ? (placeholder)	(supprimé)	src/components/ComptoirWall.tsx
+On grave le mot…	Envoi…	src/components/ComptoirWall.tsx
+Poser ça sur le mur	Publier	src/components/ComptoirWall.tsx
+Copie impossible ici. Garde le lien sous le coude.	Copie impossible.	src/components/MobileShareBox.tsx
+Invitation copiée, mot pour mot. Colle-la dans ta conversation, le reste suivra tout seul.	Invitation copiée.	src/components/MobileShareBox.tsx
+Rappel copié, mot pour mot. Colle-le dans la conversation, les retardataires comprendront.	Relance copiée.	src/components/MobileShareBox.tsx
+Rameuter le comptoir	Invitation	src/components/MobileShareBox.tsx
+Partager l’invitation	Partager	src/components/MobileShareBox.tsx
+Graver au registre	Exporter	src/components/VerdictExportSection.tsx
+Le verdict est tombé : grave-le avant qu’il ne s’évapore entre deux tournées.	(supprimé)	src/components/VerdictExportSection.tsx
+Graver dans mon calendrier	Calendrier	src/components/VerdictExportSection.tsx
+Partager le tableau de chasse	Image	src/components/VerdictExportSection.tsx
+tableau-de-chasse.png (nom de fichier)	apero.png	src/components/VerdictExportSection.tsx
+L’image n’a pas voulu sortir du cadre. Réessaie dans un instant.	Image indisponible. Réessayer.	src/components/VerdictExportSection.tsx
+Tableau de chasse téléchargé : il n’attend plus que la conversation.	Image téléchargée.	src/components/VerdictExportSection.tsx
+C’est gravé : cet apéro rejoint les annales de « ${nom} ».	Apéro ajouté.	src/components/TableeAttachSection.tsx
+Le rattachement a capoté. Réessaie dans un instant.	Ajout échoué. Réessayer.	src/components/TableeAttachSection.tsx
+Rattacher à une tablée	Groupes	src/components/TableeAttachSection.tsx
+${n} tablée(s) sur cet appareil.	${n} groupe(s)	src/components/TableeAttachSection.tsx
+Fonder une bande avec les convives de ce registre.	Aucun groupe.	src/components/TableeAttachSection.tsx
+Rattache cet apéro aux annales d’une de tes tablées : la bande le retrouvera avec le reste de son histoire.	(supprimé)	src/components/TableeAttachSection.tsx
+À quelle tablée ?	Groupe	src/components/TableeAttachSection.tsx
+On grave aux annales…	Ajout…	src/components/TableeAttachSection.tsx
+Rattacher à cette tablée	Ajouter	src/components/TableeAttachSection.tsx
+Cette bande mérite mieux qu’un apéro sans lendemain : fonde une tablée, la troupe du registre sera attablée d’office.	(supprimé)	src/components/TableeAttachSection.tsx
+Fonder une tablée avec cette bande	Créer un groupe	src/components/TableeAttachSection.tsx
+Quitte à imposer cette contradiction, il s’agirait au moins d’avoir l’élégance d’être précis : un jour, une heure et un lieu, histoire que cette proposition ait meilleure mine que la tienne.	Jour, heure et lieu requis.	src/components/AlternativeOptionForm.tsx
+Indique ton blaze, qu’on sache au moins l’intitulé du fauteur de troubles.	Nom requis.	src/components/AlternativeOptionForm.tsx
+La contre-proposition n’est pas arrivée au registre. Ta saisie reste là, réessaie.	Envoi échoué. Réessayer.	src/components/AlternativeOptionForm.tsx
+Proposer un autre créneau (titre et nom du dialogue)	Nouveau créneau	src/components/AlternativeOptionForm.tsx
+Jour, heure et troquet, puis ton blaze. Le créneau rejoindra la liste, et toute la tablée pourra voter dessus.	(supprimé)	src/components/AlternativeOptionForm.tsx
+L’envoi a été refusé. L’explication est juste au-dessus.	Envoi refusé.	src/components/AlternativeOptionForm.tsx
+Prêt à rejoindre la liste des créneaux.	Créneau complet.	src/components/AlternativeOptionForm.tsx
+Jour, heure et troquet sont obligatoires.	Jour, heure et lieu requis.	src/components/AlternativeOptionForm.tsx
+Laisser tomber	Annuler	src/components/AlternativeOptionForm.tsx
+Proposer ce créneau	Proposer	src/components/AlternativeOptionForm.tsx
+Choisis un jour.	Jour requis.	src/components/AlternativeOptionForm.tsx
+Choisis une heure.	Heure requise.	src/components/AlternativeOptionForm.tsx
+Le troquet	Lieu	src/components/AlternativeOptionForm.tsx
+Le Bar du Coin (placeholder)	(supprimé)	src/components/AlternativeOptionForm.tsx
+Tape deux lettres, la liste te propose les rades du coin.	(supprimé)	src/components/AlternativeOptionForm.tsx
+Indique où on se retrouve.	Lieu requis.	src/components/AlternativeOptionForm.tsx
+Proposé par	Nom	src/components/AlternativeOptionForm.tsx
+Pour que la tablée sache qui a bousculé le programme.	(supprimé)	src/components/AlternativeOptionForm.tsx
+Nadine Diabolo, Jean-Mi Pastaga… (placeholder)	(supprimé)	src/components/AlternativeOptionForm.tsx
+Indique ton blaze.	Nom requis.	src/components/AlternativeOptionForm.tsx
+Une seule fois	Une fois	src/components/AperoSettingsForm.tsx
+On verra bien après.	(supprimé)	src/components/AperoSettingsForm.tsx
+Chaque semaine	Hebdomadaire	src/components/AperoSettingsForm.tsx
+Le rituel hebdomadaire.	(supprimé)	src/components/AperoSettingsForm.tsx
+Une semaine sur deux	Bimensuel	src/components/AperoSettingsForm.tsx
+Chaque mois	Mensuel	src/components/AperoSettingsForm.tsx
+Un apéro sans nom, ça ne se convoque pas. Garde l’ancien ou trouve mieux.	Nom requis.	src/components/AperoSettingsForm.tsx
+La retouche n’est pas arrivée au registre. Ta saisie reste là, réessaie.	Envoi échoué. Réessayer.	src/components/AperoSettingsForm.tsx
+Retoucher l’apéro (titre et nom du dialogue)	Réglages	src/components/AperoSettingsForm.tsx
+Le nom, le prétexte et les règles. Les créneaux, eux, ne bougent plus.	(supprimé)	src/components/AperoSettingsForm.tsx
+La tablée sera prévenue du changement.	Convives prévenus après enregistrement.	src/components/AperoSettingsForm.tsx
+Le nom de l’apéro ne peut pas rester vide.	Nom requis.	src/components/AperoSettingsForm.tsx
+Annuler les retouches	Annuler	src/components/AperoSettingsForm.tsx
+Enregistrer les retouches	Enregistrer	src/components/AperoSettingsForm.tsx
+Nom de l’apéro	Nom	src/components/AperoSettingsForm.tsx
+La Grande Tablée des Olives (placeholder)	(supprimé)	src/components/AperoSettingsForm.tsx
+Donne-lui un nom.	Nom requis.	src/components/AperoSettingsForm.tsx
+Le prétexte	Objet	src/components/AperoSettingsForm.tsx
+Apéro fin de chantier (placeholder)	(supprimé)	src/components/AperoSettingsForm.tsx
+Les mioches sont-ils conviés ?	Enfants	src/components/AperoSettingsForm.tsx
+Marmaille admise	(supprimé)	src/components/AperoSettingsForm.tsx
+Ce soir c’est sans les mômes	(supprimé)	src/components/AperoSettingsForm.tsx
+Rien n’avait été précisé jusqu’ici : enregistrer tranchera la question pour toute la tablée.	Non défini jusqu’ici.	src/components/AperoSettingsForm.tsx
+Ça se reproduit ?	Récurrence	src/components/AperoSettingsForm.tsx
+Les créneaux ne se retouchent pas ici : les votes y sont accrochés. Pour changer l’heure ou le troquet, propose un autre créneau.	Créneaux non modifiables.	src/components/AperoSettingsForm.tsx
+Tu débarques accompagné·e ?	Accompagnants	src/components/CompanionsField.tsx
+En escadron	(supprimé)	src/components/CompanionsField.tsx
+Peinard, en solo	(supprimé)	src/components/CompanionsField.tsx
+Nombre de renforts (aria-label)	Nombre d’accompagnants	src/components/CompanionsField.tsx
+Un renfort de moins (aria-label)	Retirer un accompagnant	src/components/CompanionsField.tsx
+Un renfort de plus (aria-label)	Ajouter un accompagnant	src/components/CompanionsField.tsx
+renforts	accompagnants	src/components/CompanionsField.tsx
+renfort	accompagnant	src/components/CompanionsField.tsx
+Le nombre de bouches en plus, qu’on prévoie assez de cacahuètes.	(supprimé)	src/components/CompanionsField.tsx
+Les mioches comptent dans le lot.	Enfants inclus.	src/components/CompanionsField.tsx
+C’est sans les mioches ce coup-ci : on parle de renforts en âge de trinquer.	Sans enfants.	src/components/CompanionsField.tsx
+Pronostic de la tablée	Intensité moyenne	src/components/TraquenardGauge.tsx
+Aucun pronostic déposé	Aucun avis.	src/components/TraquenardGauge.tsx
+En attente de pronostics	En attente.	src/components/TraquenardGauge.tsx
+Pronostic de la tablée : ${x} sur 10, ${niveau} (aria-label)	Intensité moyenne : ${x} sur 10, ${niveau}	src/components/TraquenardGauge.tsx
+Pronostic de la tablée : rien de déposé pour l’instant (aria-label)	Intensité moyenne : aucun avis	src/components/TraquenardGauge.tsx
+Ton pronostic	Intensité	src/components/TraquenardGauge.tsx
+Glisse pour te mouiller (optionnel)	Facultatif	src/components/TraquenardGauge.tsx
+Traquenard-O-mètre : ton pronostic (aria-label du curseur)	Intensité	src/components/TraquenardGauge.tsx
+aucun pronostic déposé (aria-valuetext)	aucun avis	src/components/TraquenardGauge.tsx
+Copié.	Adresse copiée.	src/components/OpenInMapsButton.tsx
+Copie impossible ici.	Copie impossible.	src/components/OpenInMapsButton.tsx
+Direction le troquet	Itinéraire	src/components/OpenInMapsButton.tsx
+Copier l’adresse	Copier	src/components/OpenInMapsButton.tsx
+ce troquet (libellé de repli)	Lieu	src/components/MiniMap.tsx
+Agrandir la carte	Agrandir (nom accessible : Agrandir la carte)	src/components/MiniMap.tsx
+Le repère	Lieu	src/components/MiniMap.tsx
+Fermer la carte (aria-label)	Fermer	src/components/MiniMap.tsx
+Date mystère (slotDateLabel)	Sans date	src/components/SlotLeaf.tsx
+Date (feuillet sans date)	(supprimé)	src/components/SlotLeaf.tsx
+mystère (feuillet sans date)	(supprimé)	src/components/SlotLeaf.tsx
+heure mystère	Sans heure	src/components/SlotHead.tsx
+eyebrow (prop obligatoire)	eyebrow facultatif, non rendu s’il est absent	src/components/ConfirmDialog.tsx
+Personne n’a encore répondu. Sois le premier, ou la première, à donner le ton !	Aucune réponse.	src/utils/calculateResults.ts
+Personne n’est chaud pour l’instant. Une nouvelle date fera peut-être pencher la balance.	Aucune disponibilité.	src/utils/calculateResults.ts
+Ça hésite encore entre plusieurs options, les avis ne sont pas tranchés.	Égalité.	src/utils/calculateResults.ts
+C’est calé : il ne reste plus qu’à sortir les glaçons !	Confirmé.	src/utils/calculateResults.ts
+Ça penche pour cette option, sans certitude absolue.	Incertain.	src/utils/calculateResults.ts
+Traquenard total	extrême	src/utils/traquenardScale.ts
+Ça sent le traquenard	forte	src/utils/traquenardScale.ts
+Ambiance correcte	modérée	src/utils/traquenardScale.ts
+Petite soirée sage	calme	src/utils/traquenardScale.ts
+${organizerName} t’invite à « ${ceremonialName} » !	Apéro : ${ceremonialName} + ligne Hôte : ${organizerName}	src/utils/shareMessage.ts
+Au programme : ${title}	${title}	src/utils/shareMessage.ts
+Créneaux proposés :	Créneaux :	src/utils/shareMessage.ts
+Créneau proposé :	Créneau :	src/utils/shareMessage.ts
+Les chiards sont de la partie : ramène la portée, y’a du sirop pour tout le monde.	Enfants bienvenus	src/utils/shareMessage.ts
+Pas de mioches ce coup-ci : on trinque entre adultes vaccinés.	Sans enfants	src/utils/shareMessage.ts
+Nous ne présumons rien, ni l’endroit, ni le contenu du verre. (paragraphe complet)	(supprimé)	src/utils/shareMessage.ts
+Réponds ici :	Répondre :	src/utils/shareMessage.ts
+${organizerName} sonne le rappel pour « ${ceremonialName} » !	Relance : ${ceremonialName}	src/utils/shareMessage.ts
+Au registre pour l’instant : ${n} présence(s), ${n} hésitation(s), ${n} désertion(s).	${n} oui, ${n} peut-être, ${n} non.	src/utils/shareMessage.ts
+Créneau en tête : ${créneau}	En tête : ${créneau}	src/utils/shareMessage.ts
+Celles et ceux qui n’ont pas encore émargé se reconnaîtront. Le zinc ne juge pas, il note. Réponds ici :	Répondre :	src/utils/shareMessage.ts
+Convocation de ${organizerName} pour « ${ceremonialName} ».	Hôte : ${organizerName}	src/utils/calendarExport.ts
+Au programme : ${title}	${title}	src/utils/calendarExport.ts
+Date mystère	Sans date	src/utils/formatOption.ts
+heure mystère	Sans heure	src/utils/formatOption.ts
+Date mystère	Sans date	src/utils/verdictImage.ts
+Tableau de chasse : le registre fait foi	Résultat	src/utils/verdictImage.ts
+LE VERDICT	RETENU	src/utils/verdictImage.ts
+Heure mystère	Sans heure	src/utils/verdictImage.ts
+Présences	Oui	src/utils/verdictImage.ts
+Hésitations	Peut-être	src/utils/verdictImage.ts
+Désertions	Non	src/utils/verdictImage.ts
+TRAQUENARD-O-MÈTRE	INTENSITÉ	src/utils/verdictImage.ts
+Pronostic de la tablée : ${x} / 10	${x} / 10	src/utils/verdictImage.ts
+Pronostic de la tablée : aucun avis, méfiance.	Aucun avis.	src/utils/verdictImage.ts
+Assemblée convoquée par ${organizerName}	Hôte : ${organizerName}	src/utils/verdictImage.ts
+Chacun s’abreuve selon sa conscience et sa constitution.	(supprimé)	src/utils/verdictImage.ts
+Impossible de rafraîchir cet apéro pour le moment : voici sa dernière version connue sur cet appareil.	Réseau indisponible. Version locale affichée.	src/hooks/useAperoInvite.ts
+Impossible de récupérer cet apéro pour le moment. Réessaie dans un instant.	Réseau indisponible. Réessayer.	src/hooks/useAperoInvite.ts
+Nouvelle assemblée	Apéro	src/pages/CreateEventPage.tsx (MobileHeader eyebrow)
+Organiser un apéro	Nouvel apéro	src/pages/CreateEventPage.tsx (h1)
+Une seule chose est obligatoire : au moins un créneau complet. Tout le reste se règle après, ou jamais.	(supprimé)	src/pages/CreateEventPage.tsx (lede)
+Ta saisie précédente a été retrouvée sur cet appareil. Reprends où tu en étais.	Brouillon restauré.	src/pages/CreateEventPage.tsx (role=status)
+Repartir de zéro	Recommencer	src/pages/CreateEventPage.tsx (button)
+Les créneaux	Créneaux	src/pages/CreateEventPage.tsx (h2 FormSection)
+Propose plusieurs créneaux, la tablée tranchera.	(supprimé)	src/pages/CreateEventPage.tsx (FormSection lead)
+Créneau {n}	Créneau {n}	src/pages/CreateEventPage.tsx (inchangé)
+À compléter	Incomplet	src/pages/CreateEventPage.tsx (slot state)
+Complet	Complet	src/pages/CreateEventPage.tsx (slot state, inchangé)
+Retirer	Retirer	src/pages/CreateEventPage.tsx (texte visible inchangé ; aria-label ajouté « Retirer le créneau {n} »)
+Jour	Date	src/pages/CreateEventPage.tsx (label input[type=date])
+Heure	Heure	src/pages/CreateEventPage.tsx (label, inchangé)
+Choisis un jour.	Date requise.	src/pages/CreateEventPage.tsx (field error)
+Choisis une heure.	Heure requise.	src/pages/CreateEventPage.tsx (field error)
+Le troquet	Lieu	src/pages/CreateEventPage.tsx (label LocationField)
+Tape deux lettres, la liste te propose les rades du coin.	(supprimé)	src/pages/CreateEventPage.tsx (hint LocationField)
+Indique où on se retrouve.	Lieu requis.	src/pages/CreateEventPage.tsx (field error)
++ Ajouter un créneau	+ Créneau	src/pages/CreateEventPage.tsx (button)
+La carte de visite	Détails	src/pages/CreateEventPage.tsx (h2 FormSection)
+Rien d’obligatoire ici : sans nom, la Confrérie en tire un au sort.	(supprimé)	src/pages/CreateEventPage.tsx (FormSection lead)
+Nom de l’apéro	Nom	src/pages/CreateEventPage.tsx (label)
+La Grande Tablée des Olives	(supprimé)	src/pages/CreateEventPage.tsx (placeholder du champ Nom ; E2E : utiliser getByLabel('Nom'))
+Le prétexte	Objet	src/pages/CreateEventPage.tsx (label)
+La raison officielle du rassemblement, si tant est qu’il en faille une.	(supprimé)	src/pages/CreateEventPage.tsx (hint)
+Apéro fin de chantier	(supprimé)	src/pages/CreateEventPage.tsx (placeholder du champ Objet ; E2E : utiliser getByLabel('Objet'))
+Réglages de l’assemblée	Réglages	src/pages/CreateEventPage.tsx (Disclosure summary title)
+Politique mioches et cadence. Modifiables plus tard.	Enfants, récurrence	src/pages/CreateEventPage.tsx (Disclosure summary)
+Les mioches sont-ils conviés ?	Enfants	src/pages/CreateEventPage.tsx (SwitchRow title, role=switch)
+Oui / Non	Oui / Non	src/pages/CreateEventPage.tsx (SwitchRow state, inchangé)
+Marmaille admise	(supprimé)	src/pages/CreateEventPage.tsx (SwitchRow aside)
+Ce soir c’est sans les mômes	(supprimé)	src/pages/CreateEventPage.tsx (SwitchRow aside)
+Ça se reproduit ?	Récurrence	src/pages/CreateEventPage.tsx (ChoiceGroup legend)
+Une seule fois	Une fois	src/pages/CreateEventPage.tsx (radio)
+On verra bien après.	(supprimé)	src/pages/CreateEventPage.tsx (radio description)
+Chaque semaine	Hebdomadaire	src/pages/CreateEventPage.tsx (radio)
+Le rituel hebdomadaire.	(supprimé)	src/pages/CreateEventPage.tsx (radio description)
+Une semaine sur deux	Bimensuel	src/pages/CreateEventPage.tsx (radio)
+Chaque mois	Mensuel	src/pages/CreateEventPage.tsx (radio)
+Une assemblée qui se répète devient un rituel : une fois celle-ci passée, la Confrérie proposera de convoquer la suivante dans la foulée, mêmes lieu et heure, date décalée d’autant.	(supprimé)	src/pages/CreateEventPage.tsx (hint récurrence)
+L’envoi a été refusé. L’explication est juste au-dessus.	Envoi refusé.	src/pages/CreateEventPage.tsx (ActionBar status)
+{n} créneaux prêts. La tablée tranchera.	{n} créneaux prêts.	src/pages/CreateEventPage.tsx (ActionBar status)
+Le créneau est prêt. La tablée n’a plus qu’à répondre.	Prêt.	src/pages/CreateEventPage.tsx (ActionBar status)
+Remplis jour, heure et troquet du créneau 1.	Créneau {n} incomplet.	src/pages/CreateEventPage.tsx (ActionBar status ; n = index du créneau incomplet quand il y en a 1)
+Encore {n} créneau(x) à compléter (ou à retirer).	{n} créneaux incomplets. | Créneau {n} incomplet.	src/pages/CreateEventPage.tsx (ActionBar status ; >1 incomplets → « {n} créneaux incomplets. », 1 seul → « Créneau {index} incomplet. »)
+Tous tes créneaux sont déjà passés. Joli exploit temporel, zéro convive. La machine à remonter le temps est en réparation : vise l’avenir.	Date passée.	src/pages/CreateEventPage.tsx (feedback role=alert)
+Ce nom d’apéro est déjà pris par un événement en cours. Trouve-en un autre, ou laisse le champ vide pour un tirage au sort.	Nom déjà pris.	src/pages/CreateEventPage.tsx (feedback)
+Le comptoir numérique n’est pas encore raccordé (API non configurée) : impossible de créer l’apéro dans ce mode. Repasse en mode classique ou configure VITE_APERO_API_BASE_URL.	Service non configuré.	src/pages/CreateEventPage.tsx (feedback)
+Impossible de joindre le comptoir numérique. Vérifie la connexion (ou que l’API tourne bien) et réessaie.	Réseau indisponible. Réessayer.	src/pages/CreateEventPage.tsx (feedback)
+La Confrérie est complète, archi-complète même : trop d’apéros tournent déjà en coulisses dans une magouille généralisée que plus personne ne maîtrise vraiment. Clôture un apéro avant d’en lancer un nouveau, sinon c’est le chaos total.	Aucun nom libre. Saisir un nom.	src/pages/CreateEventPage.tsx (feedback)
+Le registre refuse cette saisie ({message}). Corrige le champ concerné et réessaie.	Saisie invalide. Vérifier les champs.	src/pages/CreateEventPage.tsx (feedback)
+Le service a fait une bêtise. On ne veut pas savoir laquelle. Deux secondes, ça se répare tout seul.	Création impossible. Réessayer.	src/pages/CreateEventPage.tsx (feedback)
+Création de l’apéro…	Création	src/pages/CreateEventPage.tsx (submit en cours)
+Créer l’apéro	Créer	src/pages/CreateEventPage.tsx (submit button)
+Bar des Sports	(supprimé)	src/components/LocationField.tsx (placeholder par défaut, champ et overlay)
+(aucun nom accessible)	Lieu	src/components/LocationField.tsx (aria-label ajouté sur l’input de l’overlay, = label du champ, remplace le placeholder supprimé)
+Recherche du lieu	Rechercher un lieu	src/components/LocationField.tsx (dialog aria-label .locsearch)
+Fermer la recherche	Fermer	src/components/LocationField.tsx (aria-label .locsearch__scrim)
+Retour	Retour	src/components/LocationField.tsx (aria-label .locsearch__back, inchangé)
+Effacer	Effacer	src/components/LocationField.tsx (aria-label .locsearch__clear, inchangé)
+Tape le nom du rade (au moins 2 lettres) : les suggestions s’affichent ici au fil de ta saisie.	2 lettres minimum.	src/components/LocationField.tsx (.locsearch__hint)
+Aucun lieu trouvé. Ferme la recherche pour le pointer toi-même sur la carte.	Aucun résultat. Placer sur la carte.	src/components/LocationField.tsx (.locsearch__hint)
+Pour lister les comptoirs autour de toi, la Confrérie a besoin de ta position. Elle reste sur ton téléphone : elle sert juste à interroger la carte OpenStreetMap, et ne part sur aucun serveur.	Position transmise uniquement à OpenStreetMap, jamais aux serveurs de l’app.	src/components/LocationField.tsx (priming géolocalisation)
+Chercher autour de moi	Localiser	src/components/LocationField.tsx (button)
+Laisse tomber	Annuler	src/components/LocationField.tsx (button)
+Les rades autour de moi	À proximité	src/components/LocationField.tsx (button .locfield__nearby-toggle)
+On te situe…	Localisation	src/components/LocationField.tsx (button state)
+On scanne le quartier…	Recherche	src/components/LocationField.tsx (button state)
+Ce navigateur ne sait pas te situer. La recherche et la carte restent là.	Géolocalisation indisponible.	src/components/LocationField.tsx (role=alert)
+Le quartier ne répond pas (OpenStreetMap est peut-être en pause). Réessaie dans un instant.	OpenStreetMap indisponible. Réessayer.	src/components/LocationField.tsx (role=alert)
+Position refusée : pas de tournée du quartier sans ton feu vert. La recherche et la carte restent là.	Position refusée.	src/components/LocationField.tsx (role=alert)
+Impossible de te situer pour le moment. Réessaie, ou pointe le rade sur la carte.	Position introuvable. Réessayer.	src/components/LocationField.tsx (role=alert)
+Aucun comptoir recensé à moins de 800 m. Soit le désert, soit une carte OpenStreetMap à compléter. La recherche reste là.	Aucun lieu à moins de 800 m.	src/components/LocationField.tsx (role=status)
+Cacher la carte	Masquer la carte	src/components/LocationField.tsx (button .locfield__pin-toggle)
+Corriger le point sur la carte	Déplacer le point	src/components/LocationField.tsx (button .locfield__pin-toggle)
+Introuvable ? Pointe-le toi-même sur la carte	Placer sur la carte	src/components/LocationField.tsx (button .locfield__pin-toggle)
+Clique sur la carte à l’endroit exact du rade, au pixel près si possible.	(supprimé)	src/components/LocationField.tsx (.locpicker .hint)
+Retirer le point	Retirer le point	src/components/LocationField.tsx (button, inchangé)
+Point posé sur la carte	Point sur la carte	src/components/LocationField.tsx (nom de lieu par défaut d’un point posé sans nom)
+Carte pour pointer un lieu à la main	Carte du lieu	src/components/LocationPickerMap.tsx (role=img aria-label)
+Lieux et adresses © les contributeurs OpenStreetMap	© contributeurs OpenStreetMap	src/components/OsmAttribution.tsx (lien openstreetmap.org/copyright conservé ; texte du lien « contributeurs OpenStreetMap »)
+Obligatoire	Requis	src/components/ui/Field.tsx
+Obligatoire	Requis	src/components/ui/ChoiceGroup.tsx
+Facultatif	Facultatif	src/components/ui/Field.tsx, ChoiceGroup.tsx (inchangé)
+Fermer	Fermer	src/components/ui/FormSheet.tsx (aria-label, inchangé)
+Position choisie	Point sur la carte	src/utils/photonGeocoding.ts (nom de repli d’un résultat Photon sans nom)
+ce fichier n’est pas une tablée	ce fichier n’est pas un groupe	src/utils/tableeValidation.ts (message technique, non affiché tel quel)
+La Grande Tablée des Olives	Assemblée	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+Le Concile du Saucisson	Réunion	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+Le Sommet des Glaçons	Tournée	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+La Bande à Zinc	Séance	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+La Sainte Tournée	Cercle	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+Le Banquet des Gobelets	Conseil	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+Le Cercle du Petit Jaune	Comité	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+La Réunion des Verres Qui Collent	Rencontre	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+La Fine Équipe de la Chips	Soirée	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+Le Club des Tire-Bouchons	Table	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+La Tablée du Comptoir	Session	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+Le Grand Ordre du Sauciflard	Rendez-vous	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+La Sortie Improvisée du Bar-Tabac	(supprimé)	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+La Table Ronde des Coudes Posés	(supprimé)	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+L’Académie du Dernier Pour la Route	(supprimé)	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+La Bande des Glaçons Fondus	(supprimé)	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+La Loge des Cacahuètes Salées	(supprimé)	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+La Fête des Chaises en Plastique	(supprimé)	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+La Brigade d’Honneur du Saucisson	(supprimé)	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+Le Symposium des Olives Molles	(supprimé)	src/utils/generateCeremonialName.ts (APERO_CEREMONIAL_NAMES ; liste remplacée en bloc par les 12 noms de la charte §4)
+Éminence Fondatrice	Premier hôte	src/types/badges.ts
+A organisé le tout premier apéro ayant réussi à attirer au moins un convive de la Confrérie, ce qui n’avait rien d’évident au départ.	Apéro créé, 1 convive minimum.	src/types/badges.ts
+Vigie du Zinc	Éclaireur	src/types/badges.ts
+A proposé ce lieu sacré avant tout le monde, dans un rayon d’environ 1 km, ce qui tient à la fois de l’exploit et de la drôle de coïncidence.	Premier à proposer ce lieu.	src/types/badges.ts
+Table de Dix	Grande table	src/types/badges.ts
+A organisé un apéro avec plus de 10 convives. La nappe a souffert.	Apéro à plus de 10 convives.	src/types/badges.ts
+Grand-Croix de la Loose	Table vide	src/types/badges.ts
+A organisé un apéro auquel absolument personne, pas même le chien du quartier, n’est venu. Respect dans l’échec.	Apéro passé sans aucun convive.	src/types/badges.ts
+Excellence de Cérémonie	Grand hôte	src/types/badges.ts
+A organisé plus de 10 apéros avec au moins un convive. Le zinc s’incline, et le zinc ne s’incline jamais.	Plus de 10 apéros avec convives.	src/types/badges.ts
+Pilier Certifié	Fidèle	src/types/badges.ts
+A participé à au moins 5 apéros différents. Présence suspectement régulière.	Réponse à 5 apéros minimum.	src/types/badges.ts
+Fine Gâchette du Registre	Répondant	src/types/badges.ts
+A déposé un nombre de réponses qui frise l’acharnement dans les apéros de la Confrérie.	10 réponses minimum.	src/types/badges.ts
+Ministre du Peut-être	Hésitant	src/types/badges.ts
+A beaucoup trop souvent répondu « J’me tâte », avec la constance d’un vrai ministre du doute.	Peut-être, 3 fois minimum.	src/types/badges.ts
+Consensus du premier coup	Consensus	src/types/badges.ts
+A organisé un apéro si limpide que tout le monde a validé la proposition initiale sans réclamer de nouvelle date, de nouvel horaire ou de nouveau lieu.	Créneau initial accepté par tous.	src/types/badges.ts
+Diplomate du Zinc	Diplomate	src/types/badges.ts
+A participé à plusieurs apéros sans jamais foutre le bazar dans les réponses.	3 apéros minimum, aucun Non.	src/types/badges.ts
+L’Affranchi	Promu	src/types/badges.ts
+A d’abord été convié comme simple convive, puis a retourné la situation en convoquant sa propre assemblée. Le zinc appelle ça une élévation, et il n’en voit pas si souvent.	Convive d’abord, hôte ensuite.	src/types/badges.ts
+Commune	Commun	src/components/BadgeMedal.tsx
+Honteuse	Malus	src/components/BadgeMedal.tsx
+Le grand livre du palmarès est resté coincé sous le comptoir, entre deux ronds de bière. Réessaie dans un instant.	Chargement impossible. Réessayer.	src/pages/PalmaresPage.tsx
+Le Palmarès de la Confrérie	Palmarès	src/pages/PalmaresPage.tsx
+Qui a décroché quoi, à la force du coude et parfois du foie.	(supprimé)	src/pages/PalmaresPage.tsx
+Tableau d’honneur (eyebrow MobileHeader)	La Confrérie	src/pages/PalmaresPage.tsx
+On compte les breloques (LoadingScreen title)	Chargement (défaut du composant)	src/pages/PalmaresPage.tsx
+La Confrérie ouvre le grand livre… (LoadingScreen subtitle)	(supprimé)	src/pages/PalmaresPage.tsx
+Le tableau est encore vierge, d’une blancheur presque suspecte. Organise, réponds, ramène surtout ta bobine : les breloques, elles, suivront. Elles suivent toujours.	Aucun badge.	src/pages/PalmaresPage.tsx
+Toi	Moi	src/pages/PalmaresPage.tsx
+Pas encore de breloque	Aucun badge	src/pages/PalmaresPage.tsx
+{n} breloque(s)	{n} badge(s)	src/pages/PalmaresPage.tsx
+Ton tableau est vide. Le zinc attend tes exploits avec une patience qui commence, il faut le dire, à s’éroder.	(supprimé)	src/pages/PalmaresPage.tsx
+Rien encore au tableau.	(supprimé)	src/pages/PalmaresPage.tsx
+{n} autre(s) convive(s) sans breloque pour l’instant.	{n} autre(s) convive(s) sans badge.	src/pages/PalmaresPage.tsx
+La Rétrospective du Comptoir (eyebrow MobileHeader)	La Confrérie	src/pages/ComptesPage.tsx
+Ta rétrospective {year}	Bilan {year}	src/pages/ComptesPage.tsx
+On épluche les registres (LoadingScreen title)	Chargement (défaut du composant)	src/pages/ComptesPage.tsx
+La Confrérie compte les tournées de l’année… (LoadingScreen subtitle)	(supprimé)	src/pages/ComptesPage.tsx
+Le bilan comptable de tes activités de comptoir, dressé sur cet appareil et nulle part ailleurs. Le registre fait foi, le reste est légende.	(supprimé)	src/pages/ComptesPage.tsx
+Sans blaze, pas de comptes : choisis d’abord ton nom de comptoir depuis le menu de la Confrérie.	Nom requis, depuis le menu.	src/pages/ComptesPage.tsx
+Aucune trace de toi dans les registres de {year} sur cet appareil. Soit une année sobre, soit une année ailleurs : dans les deux cas, ça se rattrape.	Aucun apéro en {year}.	src/pages/ComptesPage.tsx
+Lancer l’année {currentYear}	Nouvel apéro	src/pages/ComptesPage.tsx
+Convoquées	Créés	src/pages/ComptesPage.tsx
+Émargées	Rejoints	src/pages/ComptesPage.tsx
+Blazes croisés	Convives	src/pages/ComptesPage.tsx
+Présences	Oui	src/pages/ComptesPage.tsx
+Hésitations	Peut-être	src/pages/ComptesPage.tsx
+Désertions	Non	src/pages/ComptesPage.tsx
+Quartier général	Lieu	src/pages/ComptesPage.tsx
+La plus grande tablée	Plus grand apéro	src/pages/ComptesPage.tsx
+{nom} : {n} convives au registre.	{nom}, {n} convive(s)	src/pages/ComptesPage.tsx
+Traquenard-O-mètre personnel	Intensité moyenne	src/pages/ComptesPage.tsx
+{x} / 10 de pronostic moyen. On sait à quoi s’en tenir.	{x} / 10	src/pages/ComptesPage.tsx
+Aucun pronostic déposé cette année. Prudence de sioux, ou négligence coupable.	Aucune	src/pages/ComptesPage.tsx
+Faire circuler (eyebrow)	(supprimé)	src/pages/ComptesPage.tsx
+La rétrospective se partage en image : les chiffres, ton blaze, rien d’autre. Ni lien, ni clé : ta comptabilité reste la tienne.	Image : chiffres et nom, sans lien.	src/pages/ComptesPage.tsx
+retrospective-du-comptoir-{year}.png (nom du fichier téléchargé)	bilan-{year}.png	src/pages/ComptesPage.tsx
+L’image n’a pas voulu sortir du cadre. Réessaie dans un instant.	Image indisponible. Réessayer.	src/pages/ComptesPage.tsx
+Bilan téléchargé : il n’attend plus que la conversation.	Image téléchargée.	src/pages/ComptesPage.tsx
+Partager mes Comptes {year}	Partager	src/pages/ComptesPage.tsx
+Au registre (image)	Réponses	src/utils/recapImage.ts
+{n} présence(s), {n} hésitation(s), {n} désertion(s) (image)	{n} oui, {n} peut-être, {n} non	src/utils/recapImage.ts
+Quartier général (image)	Lieu	src/utils/recapImage.ts
+La plus grande tablée (image)	Plus grand apéro	src/utils/recapImage.ts
+{nom} ({n} convive(s)) (image)	{nom}, {n} convive(s)	src/utils/recapImage.ts
+Traquenard-O-mètre personnel (image)	Intensité moyenne	src/utils/recapImage.ts
+{x} / 10 de pronostic moyen (image)	{x} / 10	src/utils/recapImage.ts
+Aucun pronostic déposé, prudence de sioux (image)	Aucune	src/utils/recapImage.ts
+Les Comptes du Comptoir, exercice {year} (image)	Bilan {year}	src/utils/recapImage.ts
+Convoquées (image)	Créés	src/utils/recapImage.ts
+Émargées (image)	Rejoints	src/utils/recapImage.ts
+Blazes croisés (image)	Convives	src/utils/recapImage.ts
+Le registre fait foi. Le reste est légende. (image, pied de page)	(supprimé)	src/utils/recapImage.ts
+Il faut une phrase de passe d’au moins {8} caractères : c’est elle qui garde le coffre.	Mot de passe : {8} caractères minimum.	src/pages/CoffrePage.tsx
+Le coffre serait vide : rien à emporter sur cet appareil pour l’instant.	Rien à exporter.	src/pages/CoffrePage.tsx
+coffre-confrerie.json (nom du fichier téléchargé)	sauvegarde-confrerie.json	src/pages/CoffrePage.tsx
+Coffre scellé et téléchargé : {n} apéro(s) et ton blaze. Garde la phrase de passe précieusement, personne ne pourra la retrouver.	Sauvegarde exportée.	src/pages/CoffrePage.tsx
+Le coffre a refusé de se sceller. Réessaie dans un instant.	Export impossible. Réessayer.	src/pages/CoffrePage.tsx
+Choisis d’abord le fichier de coffre à ouvrir.	Fichier requis.	src/pages/CoffrePage.tsx
+Il faut la phrase de passe qui a scellé ce coffre.	Mot de passe requis.	src/pages/CoffrePage.tsx
+Ce fichier est bien trop lourd pour être un coffre de la Confrérie.	Fichier trop lourd, 5 Mo maximum.	src/pages/CoffrePage.tsx
+Ce fichier n’est pas un coffre de la Confrérie. (JSON invalide)	Fichier invalide.	src/pages/CoffrePage.tsx
+Coffre ouvert : {n} apéro(s) rapatrié(s) sur cet appareil, blaze « {nom} » adopté. Tu retrouveras tout dans l’ardoise.	{n} apéro(s) importé(s). [+ Nom importé.]	src/pages/CoffrePage.tsx
+Le coffre n’a pas voulu s’ouvrir. Réessaie dans un instant.	Import impossible. Réessayer.	src/pages/CoffrePage.tsx
+Le Coffre de la Confrérie (eyebrow MobileHeader)	La Confrérie	src/pages/CoffrePage.tsx
+Ton registre, sous clé	Sauvegarde	src/pages/CoffrePage.tsx
+Ton blaze, tes apéros et leurs clés vivent uniquement sur cet appareil. Le Coffre les emballe dans un fichier chiffré par ta phrase de passe : change de téléphone, ouvre le coffre, et la Confrérie te reconnaît comme si de rien n’était.	(supprimé)	src/pages/CoffrePage.tsx
+Sceller un coffre	Exporter	src/pages/CoffrePage.tsx
+Phrase de passe (champ export)	Mot de passe	src/pages/CoffrePage.tsx
+Garde-la précieusement : sans elle, le coffre ne se rouvre pas.	Irrécupérable si oublié.	src/pages/CoffrePage.tsx
+Une phrase que toi seul connais (placeholder)	(supprimé)	src/pages/CoffrePage.tsx
+On scelle le coffre…	Export en cours	src/pages/CoffrePage.tsx
+Sceller et télécharger le coffre	Exporter	src/pages/CoffrePage.tsx
+Ouvrir un coffre	Importer	src/pages/CoffrePage.tsx
+Sur le nouvel appareil : choisis le fichier, saisis la phrase de passe, et tout fusionne avec l’existant. Un apéro déjà connu ici garde son rôle d’organisateur.	Fusion avec les données existantes.	src/pages/CoffrePage.tsx
+Fichier de coffre	Fichier	src/pages/CoffrePage.tsx
+Phrase de passe (champ import)	Mot de passe	src/pages/CoffrePage.tsx
+Celle qui a scellé le coffre (placeholder)	(supprimé)	src/pages/CoffrePage.tsx
+On force la serrure… non, on déchiffre.	Import en cours	src/pages/CoffrePage.tsx
+Ouvrir le coffre sur cet appareil	Importer	src/pages/CoffrePage.tsx
+Web Crypto API indisponible.	Chiffrement indisponible.	src/services/registryVault.ts
+Ce fichier n’est pas un coffre de la Confrérie.	Fichier invalide.	src/services/registryVault.ts
+Coffre illisible.	Fichier illisible.	src/services/registryVault.ts
+Cette phrase de passe n’ouvre pas ce coffre.	Mot de passe incorrect.	src/services/registryVault.ts
+Contenu de coffre illisible.	Contenu illisible.	src/services/registryVault.ts
+La Tablée {du/de la/des/de l’} {nom d’apéro} (nom suggéré)	Groupe {du/de la/des/de l’} {nom d’apéro}	src/pages/TableesPage.tsx
+Une tablée sans nom, c’est juste des gens debout. Trouve-lui un blaze.	Nom requis.	src/pages/TableesPage.tsx
+Ce nom déborde de la table (80 caractères maximum). Fais plus court, ça claque mieux.	80 caractères maximum.	src/pages/TableesPage.tsx
+Choisis d’abord ton blaze (menu de la Confrérie) : une tablée a besoin d’un fondateur.	Nom de membre requis, voir menu.	src/pages/TableesPage.tsx
+Impossible de joindre le comptoir numérique. Vérifie la connexion et réessaie.	Réseau indisponible. Réessayer.	src/pages/TableesPage.tsx
+La fondation a capoté, on ne sait pas trop pourquoi. Réessaie dans un instant.	Création impossible. Réessayer.	src/pages/TableesPage.tsx
+Les Tablées (eyebrow MobileHeader)	La Confrérie	src/pages/TableesPage.tsx
+Tes tablées	Groupes	src/pages/TableesPage.tsx
+On pousse les tables (LoadingScreen title)	Chargement (défaut du composant)	src/pages/TableesPage.tsx
+La Confrérie recense tes tablées… (LoadingScreen subtitle)	(supprimé)	src/pages/TableesPage.tsx
+Un apéro est un événement ; une tablée est la bande qui recommence. Membres, apéros passés et à venir, palmarès maison : tout au même endroit, chiffré comme le reste.	(supprimé)	src/pages/TableesPage.tsx
+Impossible de récupérer {n de tes tablées | une de tes tablées} pour le moment. Vérifie la connexion et réessaie : rien n’est perdu.	{n} groupes indisponibles. | 1 groupe indisponible. + Réessayer.	src/pages/TableesPage.tsx
+Tes tablées sont injoignables pour le moment, mais elles sont toujours gravées sur cet appareil.	Aucun groupe chargé.	src/pages/TableesPage.tsx
+Aucune tablée sur cet appareil pour l’instant. Fonde la première : il suffit d’un nom, le reste suivra à la prochaine tournée.	Aucun groupe.	src/pages/TableesPage.tsx
+{n} attablé(s) · {n} apéro(s)	{n} membre(s) · {n} apéro(s)	src/pages/TableesPage.tsx
+« {devise} » (guillemets décoratifs)	{devise}	src/pages/TableesPage.tsx
+fondée par {nom}	Créé par {nom}	src/pages/TableesPage.tsx
+Voir la tablée	Ouvrir	src/pages/TableesPage.tsx
+Fonder une tablée	Nouveau groupe	src/pages/TableesPage.tsx
+Acte de fondation (eyebrow formulaire)	(supprimé)	src/pages/TableesPage.tsx
+La troupe de « {apéro} » ({n} blaze(s)) sera attablée d’office, et l’apéro rejoindra les annales de la tablée.	{apéro} : apéro et {n} membre(s) inclus.	src/pages/TableesPage.tsx
+Nom de la tablée	Nom	src/pages/TableesPage.tsx
+Les Piliers du Jeudi (placeholder)	(supprimé)	src/pages/TableesPage.tsx
+On ne présume rien, on trinque. (placeholder)	(supprimé)	src/pages/TableesPage.tsx
+Fondation en cours…	Création en cours	src/pages/TableesPage.tsx
+Fonder la tablée	Créer	src/pages/TableesPage.tsx
+Impossible de t’attabler pour le moment. Réessaie dans un instant.	Ajout impossible. Réessayer.	src/pages/TableePage.tsx
+La Tablée (eyebrow MobileHeader)	Groupe	src/pages/TableePage.tsx
+On pousse les tables (LoadingScreen title)	Chargement (défaut du composant)	src/pages/TableePage.tsx
+On déchiffre le registre de la tablée… (LoadingScreen subtitle)	(supprimé)	src/pages/TableePage.tsx
+Ce lien de tablée est mal formé : on ne reconnaît pas cet identifiant.	Lien invalide.	src/pages/TableePage.tsx
+Ce lien de tablée est incomplet : il lui manque sa clé de lecture. Demande le lien complet à la bande.	Lien incomplet. Demander le lien complet.	src/pages/TableePage.tsx
+Cette tablée reste introuvable : soit le lien ne mène nulle part, soit la tablée a été dissoute.	Groupe introuvable.	src/pages/TableePage.tsx
+Cette clé n’ouvre pas cette tablée : lien tronqué ou périmé.	Clé invalide.	src/pages/TableePage.tsx
+Ce lien mène à autre chose qu’une tablée. Vérifie qu’il ne s’agit pas d’un lien d’apéro.	Lien d’apéro, pas de groupe.	src/pages/TableePage.tsx
+Impossible de récupérer cette tablée pour le moment. Réessaie dans un instant.	Chargement impossible. Réessayer.	src/pages/TableePage.tsx
+Aïe, ce lien coince	Groupe indisponible	src/pages/TableePage.tsx
+Voir mes tablées	Groupes	src/pages/TableePage.tsx
+{n} attablé(s), fondée par {nom} (eyebrow)	Créé par {nom}	src/pages/TableePage.tsx
+« {devise} » (guillemets décoratifs)	{devise}	src/pages/TableePage.tsx
+Attablés : {noms}	Membres : {noms}	src/pages/TableePage.tsx
+On te fait une place…	Ajout en cours	src/pages/TableePage.tsx
+M’attabler	Rejoindre	src/pages/TableePage.tsx
+Choisis d’abord ton blaze (menu de la Confrérie) pour t’attabler.	Nom de membre requis, voir menu.	src/pages/TableePage.tsx
+La prochaine tournée (eyebrow)	(supprimé)	src/pages/TableePage.tsx
+On relit les annales de la tablée…	(supprimé)	src/pages/TableePage.tsx
+Une assemblée est déjà en route, mais rien n’interdit d’en convoquer une autre.	(supprimé)	src/pages/TableePage.tsx
+Rien d’attablé à l’horizon. La tablée n’attend qu’une convocation.	(supprimé)	src/pages/TableePage.tsx
+Convoquer la tablée	Nouvel apéro	src/pages/TableePage.tsx
+Les annales de la tablée	Historique	src/pages/TableePage.tsx
+Impossible de récupérer cet apéro pour le moment	Chargement impossible	src/pages/TableePage.tsx
+Disparu du registre (annulé ou purgé)	Apéro supprimé	src/pages/TableePage.tsx
+Ouvrir l’apéro	Ouvrir	src/pages/TableePage.tsx
+Le palmarès de la tablée	Palmarès	src/pages/TableePage.tsx
+Pilier de la Tablée	Assidu	src/utils/tableePalmares.ts
+Présence la plus assidue au registre. Le tabouret porte son nom.	Le plus de présences.	src/utils/tableePalmares.ts
+Grand Convocateur	Hôte	src/utils/tableePalmares.ts
+A convoqué le plus d’assemblées. La bande lui doit ses meilleures excuses du lendemain.	Le plus d’apéros créés.	src/utils/tableePalmares.ts
+Ministre du Peut-être	Hésitant	src/utils/tableePalmares.ts
+Champion du « J’me tâte ». Un jour il tranchera, mais pas aujourd’hui.	Le plus de Peut-être.	src/utils/tableePalmares.ts
+Plume du Comptoir	Auteur	src/utils/tableePalmares.ts
+Le mur du comptoir lui doit ses plus belles lignes.	Le plus de messages.	src/utils/tableePalmares.ts
+{fondateur} t’invite à t’attabler : « {nom} », la tablée officielle de la bande.	{nom} / Groupe créé par {fondateur}.	src/utils/tableeLink.ts
+Une tablée, c’est la Confrérie en format rapproché : les apéros du groupe, le registre des présences, le palmarès maison. Rien d’obligatoire, tout d’essentiel.	(supprimé)	src/utils/tableeLink.ts
+Attable-toi ici :	Rejoindre :	src/utils/tableeLink.ts
+Cette tablée n’existe pas ou plus.	Groupe introuvable.	src/services/tableeRepository.ts
+Conflit d’écriture persistant.	Conflit. Recharger.	src/services/tableeRepository.ts
+Le registre légal	Mentions légales	src/pages/RegistreLegalPage.tsx
+Qui tient ce comptoir	Éditeur	src/pages/RegistreLegalPage.tsx
+La Confrérie du Petit Jaune est un projet personnel et non commercial : aucune vente, aucune publicité, aucune régie, aucun traçage.	Nature : non commerciale. Aucune vente, aucune publicité, aucune régie, aucun traçage.	src/pages/RegistreLegalPage.tsx
+Éditeur : J-Rbs91, projet personnel édité à titre non professionnel.	Éditeur : J-Rbs91, projet personnel, édité à titre non professionnel.	src/pages/RegistreLegalPage.tsx
+Contact : par une issue sur le dépôt public du projet.	Contact : issue sur le dépôt public du projet.	src/pages/RegistreLegalPage.tsx
+Hébergement de l’API : serveur privé (VPS) opéré pour le compte de l’éditeur, au sein de l’Union européenne.	Hébergement de l’API : serveur privé (VPS) opéré pour le compte de l’éditeur, Union européenne.	src/pages/RegistreLegalPage.tsx
+Ce que la Confrérie sait de toi	Données	src/pages/RegistreLegalPage.tsx
+Très peu, et c’est un choix d’architecture, pas une promesse en l’air.	(supprimé)	src/pages/RegistreLegalPage.tsx
+Ce qui ne quitte jamais ton appareil	Sur l’appareil uniquement	src/pages/RegistreLegalPage.tsx
+Ton blaze, tes apéros en cache, tes notifications et tes accusés de lecture vivent dans le stockage local de ton navigateur. Vider les données du site les efface définitivement.	Nom, apéros en cache, notifications, accusés de lecture : stockage local du navigateur. Effacement définitif en vidant les données du site.	src/pages/RegistreLegalPage.tsx
+La clé de déchiffrement d’un apéro voyage dans le fragment du lien d’invitation (la partie après le #). Par construction, un navigateur n’envoie jamais le fragment au serveur : la clé ne peut donc pas arriver jusqu’à nous.	Clé de déchiffrement d’un apéro : dans le fragment du lien d’invitation (après le #). Fragment jamais envoyé au serveur par le navigateur, donc clé jamais reçue par le serveur.	src/pages/RegistreLegalPage.tsx
+Ta position géographique, si tu utilises « les rades autour de moi », est lue par le navigateur et envoyée directement au service de carte. Elle ne transite par aucun serveur de la Confrérie.	Position géographique (recherche de lieux à proximité) : lue par le navigateur, envoyée directement au service de carte, sans passage par un serveur de la Confrérie.	src/pages/RegistreLegalPage.tsx
+Ce que le serveur stocke	Sur le serveur	src/pages/RegistreLegalPage.tsx
+Le contenu d’un apéro (noms, dates, lieux, votes, mots du comptoir) est chiffré sur ton appareil avant d’être envoyé (AES-GCM). Le serveur ne conserve qu’un bloc illisible pour lui : il ne peut savoir ni qui participe, ni où, ni quand.	Contenu d’un apéro (noms, dates, lieux, réponses, messages) : chiffré sur l’appareil avant envoi (AES-GCM). Bloc illisible pour le serveur : ni participants, ni lieu, ni date.	src/pages/RegistreLegalPage.tsx
+Des empreintes de clés d’écriture, qui servent uniquement à vérifier qu’une modification vient bien de quelqu’un d’autorisé.	Empreintes des clés d’écriture : vérification des modifications autorisées, sans autre usage.	src/pages/RegistreLegalPage.tsx
+Ton adresse IP, temporairement, dans les journaux techniques et le mécanisme anti-abus. C’est le minimum nécessaire pour empêcher qu’on noie le comptoir sous les requêtes.	Adresse IP : conservation temporaire, journaux techniques et protection anti-abus.	src/pages/RegistreLegalPage.tsx
+Les services extérieurs	Services tiers	src/pages/RegistreLegalPage.tsx
+Trois services de cartographie sont appelés directement par ton navigateur, et reçoivent donc ton adresse IP au moment de l’appel :	Appels directs depuis le navigateur, avec transmission de l’adresse IP à chaque appel :	src/pages/RegistreLegalPage.tsx
+Tuiles OpenStreetMap : affichage des fonds de carte.	Tuiles OpenStreetMap : fonds de carte.	src/pages/RegistreLegalPage.tsx
+Overpass : liste des bars et cafés autour de toi.	Overpass : bars et cafés à proximité.	src/pages/RegistreLegalPage.tsx
+Les polices de caractères sont hébergées sur ce site, jamais chargées depuis un CDN tiers : aucun appel réseau n’est fait à ton insu pour un simple détail typographique.	Polices hébergées sur ce site. Aucun chargement depuis un CDN tiers.	src/pages/RegistreLegalPage.tsx
+Données cartographiques © les contributeurs OpenStreetMap, sous licence ODbL.	Données cartographiques © les contributeurs OpenStreetMap, licence ODbL.	src/pages/RegistreLegalPage.tsx
+Tes droits	Droits	src/pages/RegistreLegalPage.tsx
+Le RGPD te donne un droit d’accès, de rectification, d’effacement, d’opposition et de portabilité sur tes données.	RGPD : droits d’accès, de rectification, d’effacement, d’opposition et de portabilité.	src/pages/RegistreLegalPage.tsx
+Effacer tout, tout de suite : vide les données du site dans ton navigateur. Ce qui est local disparaît immédiatement.	Effacement local : vider les données du site dans le navigateur. Suppression immédiate.	src/pages/RegistreLegalPage.tsx
+Supprimer un apéro du serveur : la personne qui a organisé l’assemblée peut le faire depuis son lien d’administration.	Suppression d’un apéro sur le serveur : par l’hôte, depuis son lien d’administration.	src/pages/RegistreLegalPage.tsx
+Comme le serveur ne détient que du chiffré, il ne peut pas identifier une personne, ni retrouver ses données à partir de son nom : c’est la contrepartie logique du zero-knowledge.	Identification impossible côté serveur : données chiffrées, aucune recherche possible par nom.	src/pages/RegistreLegalPage.tsx
+En cas de désaccord, tu peux saisir la CNIL.	Réclamation : CNIL.	src/pages/RegistreLegalPage.tsx
+Aucun cookie de mesure d’audience, aucun traceur publicitaire, aucun partage à des tiers à des fins commerciales : il n’y a rien à monétiser dans un bloc chiffré.	Aucun cookie de mesure d’audience. Aucun traceur publicitaire. Aucun partage avec des tiers à des fins commerciales.	src/pages/RegistreLegalPage.tsx
+Polices Archivo (…) et Fragment Mono (…), SIL Open Font License 1.1.	Polices Archivo (…) et Fragment Mono (…) : SIL Open Font License 1.1.	src/pages/RegistreLegalPage.tsx
+Animation du verre : Noto Animated Emoji (Google), sous licence CC BY 4.0, modifiée (deux calques retirés).	Animation du verre : Noto Animated Emoji (Google), licence CC BY 4.0, modifiée (2 calques retirés).	src/pages/RegistreLegalPage.tsx
+Code source sous licence MIT, ouvert sur GitHub.	Code source : licence MIT, GitHub.	src/pages/RegistreLegalPage.tsx
+Ici comme ailleurs, ce qu’on porte à ses lèvres reste la souveraine affaire de chacun : la Confrérie organise des retrouvailles, pas des beuveries.	(supprimé)	src/pages/RegistreLegalPage.tsx
+La Confrérie du Petit Jaune organise avec gravité les apéros moyennement distingués de toute la tablée.	Apéros entre amis : créneaux, réponses, lieu.	index.html
+La démocratie du zinc, pour toute la tablée : enfin dans ta poche.	Apéros entre amis : créneaux, réponses, lieu.	public/manifest.webmanifest
+Cet apéro n’existe plus au registre : il a été annulé entre-temps.	Apéro supprimé.	src/utils/apiErrorMessages.ts
+Impossible de relire cet apéro pour le moment (comptoir injoignable) : rien n’a été modifié. Réessaie dans un instant.	Réseau indisponible. Réessayer.	src/utils/apiErrorMessages.ts
+Le comptoir numérique n’est pas encore raccordé (API non configurée). Ta réponse est notée sur cet appareil, elle partira dès que le service sera rétabli.	Service non configuré.	src/utils/apiErrorMessages.ts
+Impossible de joindre le comptoir numérique. Vérifie la connexion et réessaie. Ta réponse reste notée sur cet appareil.	Réseau indisponible. Réessayer.	src/utils/apiErrorMessages.ts
+Quelqu’un a répondu en même temps que toi. Recharge la page et réessaie, ça passe presque toujours du deuxième coup.	Conflit. Recharger.	src/utils/apiErrorMessages.ts
+Cette ancienne convocation n’a pas encore de clé d’annulation sécurisée. Active temporairement ALLOW_LEGACY_WRITE_KEY_DELETE côté API pour la supprimer, puis remets la variable à false.	Ancien apéro. Suppression désactivée.	src/utils/apiErrorMessages.ts
+Ce lien ne permet pas de répondre ici. Vérifie qu’il est complet.	Lien incomplet.	src/utils/apiErrorMessages.ts
+La suppression n’est pas encore disponible côté serveur : l’API du VPS doit être mise à jour. Rien n’a été supprimé.	Suppression indisponible. Serveur obsolète.	src/utils/apiErrorMessages.ts
+Le comptoir sature, doucement sur la cadence. Réessaie dans une minute.	Trop de requêtes. Réessayer dans 1 min.	src/utils/apiErrorMessages.ts
+Le registre refuse cette saisie (${error.message}). Corrige le champ concerné et réessaie.	Saisie invalide (${error.message}).	src/utils/apiErrorMessages.ts
+Un souci technique est survenu, réessaie dans un instant.	Erreur serveur. Réessayer.	src/utils/apiErrorMessages.ts (AperoApiError NOT_FOUND + default)
+Un souci technique est survenu, réessaie dans un instant.	Erreur inattendue. Réessayer.	src/utils/apiErrorMessages.ts (final fallback, non-API error)
+Réponse illisible de l’API apéro.	Réponse serveur illisible. Réessayer.	src/services/aperoApiClient.ts
+Réponse inattendue de l’API apéro.	Réponse serveur invalide. Réessayer.	src/services/aperoApiClient.ts
+L'API apero a refuse l'ecriture (HTTP ${response.status}).	Écriture refusée (HTTP ${response.status}).	src/services/aperoApiClient.ts
+Web Crypto API indisponible dans cet environnement.	Navigateur incompatible.	src/services/aperoCryptoKeys.ts
+Web Crypto API indisponible dans cet environnement.	Navigateur incompatible.	src/services/aperoEncryption.ts
+Web Crypto API indisponible : impossible de générer un identifiant sûr.	Navigateur incompatible.	src/utils/createId.ts
+Le stockage GitHub direct depuis le navigateur est desactive : utilise le lien d'invitation du nouveau flux API VPS.	Ancien format désactivé.	src/services/index.ts
+Apéro annulé	Apéro supprimé	src/services/encryptedAperoRepository.ts (notification title)
+L’organisateur a rangé le zinc : « ${aperoName} » est annulé. Ton ardoise est nettoyée.	${aperoName} supprimé par l’hôte.	src/services/encryptedAperoRepository.ts (notification body)
+L’organisateur a rangé le zinc : un apéro auquel tu participais est annulé. Ton ardoise est nettoyée.	Apéro supprimé par l’hôte.	src/services/encryptedAperoRepository.ts (notification body, no name)
+Quelqu’un du comptoir	Hôte	src/utils/eventNormalization.ts (written as \u escapes)
+Établissement à confirmer	Lieu à confirmer	src/utils/eventNormalization.ts (written as \u escapes)
+Apéro sans nom	Sans nom	src/utils/eventNormalization.ts (written as \u escapes)
+Convive anonyme	Anonyme	src/utils/eventNormalization.ts
+Le comptoir numérique n’est pas encore raccordé	Service non configuré.	README.md (line 125 quote only)

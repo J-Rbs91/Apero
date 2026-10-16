@@ -1,5 +1,11 @@
 # TON.md — corpus gelé du registre « Confrérie »
 
+> **Document historique (16/10/2026).** Le corpus de ton gelé a été **retiré par décision
+> du propriétaire** : tout le texte de l'application est réécrit dans une voix
+> minimaliste extrême (`docs/uxer/manifesto-void/UXER_VOICE.md`). Le contrôle
+> `verifier-ton.py` ne s'applique plus ; il est remplacé par
+> `docs/uxer/manifesto-void/verifier-voix.py`.
+
 Ce fichier est **gelé sur le contenu, vivant sur le placement**, conformément à la
 règle absolue de la routine « Refonte de la saisie de formulaire » (section 2 et 3
 du prompt de routine). Aucune itération n'a le droit de modifier le texte d'une

@@ -6,7 +6,7 @@ La Confrérie du Petit Jaune est un mini Doodle de comptoir : une personne convo
 
 Le contraste est volontaire : un nom pompeux, presque chevaleresque, pour une mission absolument essentielle et moyennement distinguée : se mettre d’accord pour se retrouver quelque part. On ne présume rien, ni de l’endroit — terrasse, zinc ou trottoir — ni du contenu du verre : chacun s’abreuve selon sa conscience et sa constitution, mais tout le monde passe par le registre.
 
-Ligne éditoriale : *une app de comptoir, absurde et pleine de gouaille, ouverte à toute la tablée — car derrière le pastaga du nom, ce qu’on porte à ses lèvres demeure la souveraine affaire de chacun.*
+Ligne éditoriale (depuis le 16/10/2026) : **minimalisme extrême**. Le contraste porte désormais sur le nom seul : l’interface ne dit que l’information et l’action, en un mot quand un mot suffit. Charte et lexique : [`docs/uxer/manifesto-void/UXER_VOICE.md`](docs/uxer/manifesto-void/UXER_VOICE.md) ; contrôle : `python3 docs/uxer/manifesto-void/verifier-voix.py`.
 
 ## Principe multi-aperos
 
@@ -26,11 +26,11 @@ Dans les deux cas le serveur ne voit que du chiffre : la cle de dechiffrement ne
 
 ## Noms ceremoniels
 
-À la création, la personne qui organise peut saisir elle-même le `ceremonialName` de l’assemblée. Si elle laisse le champ vide, un nom lisible est tiré au sort parmi 30 noms prédéfinis, par exemple :
+À la création, la personne qui organise peut saisir elle-même le `ceremonialName` de l’assemblée. Si elle laisse le champ vide, un nom d’un seul mot est tiré au sort parmi douze noms prédéfinis, par exemple :
 
-- `La Grande Tablée des Olives`
-- `Le Concile du Saucisson`
-- `Le Sommet des Glaçons`
+- `Assemblée`
+- `Tournée`
+- `Séance`
 
 Ce nom ne remplace pas l’identifiant technique :
 
@@ -122,7 +122,7 @@ L’app est déployée automatiquement sur GitHub Pages à chaque push sur `main
 
 ### Raccorder le comptoir numérique (API VPS)
 
-Le workflow injecte `VITE_APERO_API_BASE_URL` au build depuis une **variable de dépôt GitHub**. Sans elle, le build **échoue volontairement** (plutôt que de déployer un site qui afficherait « Le comptoir numérique n’est pas encore raccordé » et refuserait de sceller les convocations).
+Le workflow injecte `VITE_APERO_API_BASE_URL` au build depuis une **variable de dépôt GitHub**. Sans elle, le build **échoue volontairement** (plutôt que de déployer un site qui afficherait « Service non configuré. » et refuserait de sceller les convocations).
 
 1. Sur GitHub : `Settings` → `Secrets and variables` → `Actions` → onglet `Variables` → `New repository variable`.
 2. Nom : `VITE_APERO_API_BASE_URL`, valeur : l’URL publique de la mini API (ex. `https://api-apero.example.com`, l’URL exposée par Caddy devant `server/`).
@@ -192,18 +192,24 @@ agents qui travaillent sur ce repo, et restent lisibles à la main.
 - Création d’une assemblée avec nom cérémoniel unique.
 - Propositions complètes : jour, heure, établissement de réception, note.
 - Page publique par lien unique basé sur l’`id` technique.
-- Vote par pseudo : j’y serai, j’me tâte, sans moi.
+- Vote par nom : oui, peut-être, non.
 - Modification du vote si le même pseudo revient.
 - Registre du comptoir groupé : les présences en tête, les désertions et les culs entre deux chaises dans un menu dépliant.
 - Lieu avec autocomplétion OpenStreetMap (API publique Photon, sans clé) : nom de l’établissement → adresse + coordonnées, saisie libre conservée pour « chez Dédé ».
 - Mini-carte Leaflet sous le verdict quand le créneau en tête a des coordonnées, avec lien vers OpenStreetMap.
-- Calcul du verdict : priorité aux « j’y serai », départage aux « j’me tâte », égalités conservées.
+- Calcul du résultat : priorité aux « oui », départage aux « peut-être », égalités conservées.
 - Gestion simple des conflits GitHub : relecture, fusion, deuxième tentative.
 - Page d’apéro complète via le lien chiffré (`/invite/:aperoId`), identique pour l’organisateur et les invités : verdict, votes créneau par créneau, contre-propositions, registre. L’organisateur y garde en plus la suppression définitive de l’apéro.
 - Notifications selon le rôle et la réponse (voir section dédiée).
 - Engagement, rituel et communauté (voir section dédiée) : trinquer aux créneaux, mur du comptoir, relance manuelle, export calendrier et image du verdict, « Remettre ça » et assemblées récurrentes, Tablées, Comptes du Comptoir, Coffre.
 
 ## Engagement, rituel et communauté
+
+> Les noms ci-dessous sont ceux des fonctions dans le code. Les **libellés affichés**
+> suivent le lexique de `UXER_VOICE.md` : trinquer → **+1**, mur du comptoir →
+> **Messages**, sonner le rappel → **Relancer**, Tableau de Chasse → **Image**,
+> Remettre ça → **Refaire**, Tablées → **Groupes**, Comptes du Comptoir → **Bilan**,
+> Coffre → **Sauvegarde**, Traquenard-O-mètre → **Intensité**, blaze → **nom**.
 
 Toutes ces fonctionnalités respectent le modèle zero-knowledge existant : les
 données vivent dans le payload chiffré des apéros, le `localStorage` de

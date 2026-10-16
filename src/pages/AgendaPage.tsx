@@ -66,9 +66,7 @@ export function AgendaPage() {
         }
       } catch {
         if (isMounted) {
-          setError(
-            "L’ardoise est restée coincée à la cave, on ne sait pas pourquoi, mais réessaie dans un instant, elle finit toujours par remonter.",
-          );
+          setError("Chargement impossible. Réessayer.");
         }
       } finally {
         if (isMounted) {
@@ -130,10 +128,7 @@ export function AgendaPage() {
 
   const hero = (
     <div className="page-hero">
-      <h1 className="h1 h1--sm">Les apéros à venir</h1>
-      <p className="lede">
-        Les apéros encore debout, ceux qui tiennent bon, triés par date la plus proche.
-      </p>
+      <h1 className="h1 h1--sm">À venir</h1>
     </div>
   );
 
@@ -141,10 +136,10 @@ export function AgendaPage() {
     return (
       <MobilePage
         className="agenda-mobile"
-        header={<MobileHeader eyebrow="L’ardoise du comptoir" />}
+        header={<MobileHeader eyebrow="À venir" />}
         hero={hero}
       >
-        <LoadingScreen title="On feuillette l’ardoise" subtitle="La Confrérie sort les apéros à venir…" />
+        <LoadingScreen title="Chargement" />
       </MobilePage>
     );
   }
@@ -152,7 +147,7 @@ export function AgendaPage() {
   return (
     <MobilePage
       className="agenda-mobile"
-      header={<MobileHeader eyebrow="L’ardoise du comptoir" />}
+      header={<MobileHeader eyebrow="À venir" />}
       hero={hero}
     >
       {error ? (
@@ -161,13 +156,9 @@ export function AgendaPage() {
         </section>
       ) : items.length === 0 ? (
         <section className="sheet">
-          <p className="lede">
-            L’ardoise est vide, désespérément vide, le comptoir tourne au ralenti dans un silence
-            presque inquiétant. À toi de relancer la machine avant que ça devienne
-            philosophique.
-          </p>
+          <p className="lede">Aucun apéro.</p>
           <AppLink className="button button--primary button--block" to="/create">
-            Organiser un apéro
+            Nouvel apéro
           </AppLink>
         </section>
       ) : (
@@ -180,8 +171,8 @@ export function AgendaPage() {
               </p>
               <h2 className="h2">{event.ceremonialName}</h2>
               <Signature seed={event.id} />
-              {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
-              <p className="meta">par {event.organizerName}</p>
+              {event.title && <p className="lede">{event.title}</p>}
+              <p className="meta">Hôte : {event.organizerName}</p>
 
               <div className="slot-stack">
                 {upcomingSlots.map((option) => (
@@ -199,7 +190,7 @@ export function AgendaPage() {
                   storageMode === "api-vps" ? `/invite/${event.id}` : `/event/${event.id}`
                 }
               >
-                Ouvrir l’apéro
+                Ouvrir
               </AppLink>
 
               <TraquenardGauge
@@ -218,10 +209,7 @@ export function AgendaPage() {
       {pastItems.length > 0 && (
         <>
           <section className="sheet">
-            <h2 className="h2">Les tournées passées</h2>
-            <p className="lede">
-              Les verres sont secs, mais rien n’empêche de remettre ça.
-            </p>
+            <h2 className="h2">Passés</h2>
           </section>
           <div className="event-stack event-stack--grid">
             {pastItems.map(({ event, latest }) => (
@@ -244,7 +232,7 @@ export function AgendaPage() {
                       aller("/create", { state: { prefill: buildNextRoundPrefill(event) } })
                     }
                   >
-                    Remettre ça
+                    Refaire
                   </button>
                   <AppLink
                     className="button button--ghost"
@@ -252,7 +240,7 @@ export function AgendaPage() {
                       storageMode === "api-vps" ? `/invite/${event.id}` : `/event/${event.id}`
                     }
                   >
-                    Ouvrir l’apéro
+                    Ouvrir
                   </AppLink>
                 </div>
               </section>

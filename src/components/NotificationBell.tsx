@@ -13,7 +13,7 @@ export function NotificationBell({ className }: { className?: string }) {
       className={`notif-bell${className ? ` ${className}` : ""}`}
       aria-label={
         unreadCount > 0
-          ? `Notifications (${unreadCount} non lue${unreadCount > 1 ? "s" : ""})`
+          ? `Notifications, ${unreadCount} non lue${unreadCount > 1 ? "s" : ""}`
           : "Notifications"
       }
     >

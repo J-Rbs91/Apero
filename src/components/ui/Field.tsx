@@ -32,7 +32,7 @@ type FieldProps = {
 };
 
 const requirementLabel: Record<FieldRequirement, string> = {
-  required: "Obligatoire",
+  required: "Requis",
   optional: "Facultatif",
 };
 

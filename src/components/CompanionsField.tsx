@@ -32,31 +32,30 @@ export function CompanionsField({
     onChange(next);
   }
 
-  const miocheNote = childrenAllowed
-    ? " Les mioches comptent dans le lot."
+  const childrenNote = childrenAllowed
+    ? "Enfants inclus."
     : childrenAllowed === false
-      ? " C’est sans les mioches ce coup-ci : on parle de renforts en âge de trinquer."
+      ? "Sans enfants."
       : "";
 
   return (
     <div className="setting">
       <SwitchRow
-        title="Tu débarques accompagné·e ?"
+        title="Accompagnants"
         state={accompanied ? "Oui" : "Non"}
-        aside={accompanied ? "En escadron" : "Peinard, en solo"}
         checked={accompanied}
         onChange={setAccompanied}
       />
 
       {accompanied && (
         <div className="companions">
-          <div className="stepper" role="group" aria-label="Nombre de renforts">
+          <div className="stepper" role="group" aria-label="Nombre d’accompagnants">
             <button
               type="button"
               className="stepper__btn"
               onClick={() => step(-1)}
               disabled={count <= 1}
-              aria-label="Un renfort de moins"
+              aria-label="Retirer un accompagnant"
             >
               −
             </button>
@@ -68,17 +67,15 @@ export function CompanionsField({
               className="stepper__btn"
               onClick={() => step(1)}
               disabled={count >= MAX_COMPANIONS}
-              aria-label="Un renfort de plus"
+              aria-label="Ajouter un accompagnant"
             >
               +
             </button>
             <span className="stepper__unit">
-              {count > 1 ? "renforts" : "renfort"}
+              {count > 1 ? "accompagnants" : "accompagnant"}
             </span>
           </div>
-          <p className="field__hint">
-            Le nombre de bouches en plus, qu’on prévoie assez de cacahuètes.{miocheNote}
-          </p>
+          {childrenNote && <p className="field__hint">{childrenNote}</p>}
         </div>
       )}
     </div>

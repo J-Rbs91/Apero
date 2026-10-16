@@ -75,7 +75,7 @@ function parseFeature(feature: PhotonFeature, fallbackIndex: number): PlaceSugge
     return undefined;
   }
   const address = properties ? buildAddress(properties) : "";
-  const name = properties?.name || properties?.street || address || "Position choisie";
+  const name = properties?.name || properties?.street || address || "Point sur la carte";
   const osmType = properties?.osm_type ? PHOTON_OSM_TYPES[properties.osm_type] : undefined;
   const placeId =
     osmType && typeof properties?.osm_id === "number" && Number.isFinite(properties.osm_id)

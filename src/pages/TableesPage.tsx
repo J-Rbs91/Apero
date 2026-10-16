@@ -39,7 +39,7 @@ function suggestTableeName(ceremonialName: string): string {
           : `de ${name}`;
 
   // Le nom d'une tablée est plafonné à 80 caractères (sanitizeTablee).
-  return `La Tablée ${contracted}`.slice(0, 80);
+  return `Groupe ${contracted}`.slice(0, 80);
 }
 
 export function TableesPage() {
@@ -90,15 +90,15 @@ export function TableesPage() {
     const founderName = comptoirName.trim();
 
     if (!trimmedName) {
-      setFeedback("Une tablée sans nom, c’est juste des gens debout. Trouve-lui un blaze.");
+      setFeedback("Nom requis.");
       return;
     }
     if (trimmedName.length > 80) {
-      setFeedback("Ce nom déborde de la table (80 caractères maximum). Fais plus court, ça claque mieux.");
+      setFeedback("80 caractères maximum.");
       return;
     }
     if (!founderName) {
-      setFeedback("Choisis d’abord ton blaze (menu de la Confrérie) : une tablée a besoin d’un fondateur.");
+      setFeedback("Nom de membre requis, voir menu.");
       return;
     }
 
@@ -133,8 +133,8 @@ export function TableesPage() {
     } catch (createError) {
       setFeedback(
         createError instanceof AperoApiError && createError.code === "NETWORK_ERROR"
-          ? "Impossible de joindre le comptoir numérique. Vérifie la connexion et réessaie."
-          : "La fondation a capoté, on ne sait pas trop pourquoi. Réessaie dans un instant.",
+          ? "Réseau indisponible. Réessayer."
+          : "Création impossible. Réessayer.",
       );
     } finally {
       createLockRef.current = false;
@@ -146,10 +146,10 @@ export function TableesPage() {
     return (
       <MobilePage
         className="agenda-mobile"
-        header={<MobileHeader eyebrow="Les Tablées" />}
-        hero={<h1 className="h1 h1--sm">Tes tablées</h1>}
+        header={<MobileHeader eyebrow="La Confrérie" />}
+        hero={<h1 className="h1 h1--sm">Groupes</h1>}
       >
-        <LoadingScreen title="On pousse les tables" subtitle="La Confrérie recense tes tablées…" />
+        <LoadingScreen />
       </MobilePage>
     );
   }
@@ -162,31 +162,26 @@ export function TableesPage() {
   return (
     <MobilePage
       className="agenda-mobile"
-      header={<MobileHeader eyebrow="Les Tablées" />}
+      header={<MobileHeader eyebrow="La Confrérie" />}
       hero={
         <div className="page-hero">
-          <h1 className="h1 h1--sm">Tes tablées</h1>
-          <p className="lede">
-            Un apéro est un événement ; une tablée est la bande qui recommence. Membres,
-            apéros passés et à venir, palmarès maison : tout au même endroit, chiffré comme
-            le reste.
-          </p>
+          <h1 className="h1 h1--sm">Groupes</h1>
         </div>
       }
     >
       {failedTablees.length > 0 && (
         <p className="page-message page-message--error" role="alert">
-          Impossible de récupérer {failedTablees.length > 1 ? `${failedTablees.length} de tes tablées` : "une de tes tablées"} pour
-          le moment. Vérifie la connexion et réessaie : rien n’est perdu.
+          {failedTablees.length > 1
+            ? `${failedTablees.length} groupes indisponibles.`
+            : "1 groupe indisponible."}{" "}
+          Réessayer.
         </p>
       )}
 
       {knownTablees.length === 0 ? (
         <section className="sheet">
           <p className="lede">
-            {failedTablees.length > 0
-              ? "Tes tablées sont injoignables pour le moment, mais elles sont toujours gravées sur cet appareil."
-              : "Aucune tablée sur cet appareil pour l’instant. Fonde la première : il suffit d’un nom, le reste suivra à la prochaine tournée."}
+            {failedTablees.length > 0 ? "Aucun groupe chargé." : "Aucun groupe."}
           </p>
         </section>
       ) : (
@@ -194,13 +189,13 @@ export function TableesPage() {
           {knownTablees.map(({ entry, tablee }) => (
             <section className="sheet" key={entry.tableeId}>
               <p className="eyebrow">
-                {tablee!.members.length} attablé{tablee!.members.length > 1 ? "s" : ""} ·{" "}
+                {tablee!.members.length} membre{tablee!.members.length > 1 ? "s" : ""} ·{" "}
                 {tablee!.aperoRefs.length} apéro{tablee!.aperoRefs.length > 1 ? "s" : ""}
               </p>
               <h2 className="h2">{tablee!.name}</h2>
               <Signature seed={entry.tableeId} />
-              {tablee!.motto && <p className="lede">{"« "}{tablee!.motto}{" »"}</p>}
-              <p className="meta">fondée par {tablee!.founderName}</p>
+              {tablee!.motto && <p className="lede">{tablee!.motto}</p>}
+              <p className="meta">Créé par {tablee!.founderName}</p>
               <AppLink
                 className="button button--ghost button--block"
                 to={buildTableePath(entry.tableeId, {
@@ -208,7 +203,7 @@ export function TableesPage() {
                   writeKey: entry.writeKey,
                 })}
               >
-                Voir la tablée
+                Ouvrir
               </AppLink>
             </section>
           ))}
@@ -222,35 +217,31 @@ export function TableesPage() {
             className="button button--primary button--block"
             onClick={() => setShowForm(true)}
           >
-            Fonder une tablée
+            Nouveau groupe
           </button>
         </section>
       ) : (
         <form className="sheet" onSubmit={handleCreate}>
-          <p className="eyebrow">Acte de fondation</p>
           {seed && (
             <p className="hint">
-              La troupe de « {seed.ceremonialName} » ({seed.memberNames.length} blaze
-              {seed.memberNames.length > 1 ? "s" : ""}) sera attablée d’office, et l’apéro
-              rejoindra les annales de la tablée.
+              {seed.ceremonialName} : apéro et {seed.memberNames.length} membre
+              {seed.memberNames.length > 1 ? "s" : ""} inclus.
             </p>
           )}
           <TextField
-            label="Nom de la tablée"
+            label="Nom"
             requirement="required"
             value={name}
-            placeholder="Les Piliers du Jeudi"
             onChange={setName}
           />
           <TextField
             label="Devise"
             requirement="optional"
             value={motto}
-            placeholder="On ne présume rien, on trinque."
             onChange={setMotto}
           />
           <button className="button button--primary button--block" disabled={isCreating}>
-            {isCreating ? "Fondation en cours…" : "Fonder la tablée"}
+            {isCreating ? "Création en cours" : "Créer"}
           </button>
           {feedback && (
             <p className="feedback" role="alert">

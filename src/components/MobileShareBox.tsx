@@ -45,7 +45,7 @@ export function MobileShareBox({
       setFeedback(successFeedback);
     } catch {
       hapticError();
-      setFeedback("Copie impossible ici. Garde le lien sous le coude.");
+      setFeedback("Copie impossible.");
     }
   }
 
@@ -69,11 +69,7 @@ export function MobileShareBox({
   }
 
   async function handleShare() {
-    await shareMessage(
-      title,
-      text,
-      "Invitation copiée, mot pour mot. Colle-la dans ta conversation, le reste suivra tout seul.",
-    );
+    await shareMessage(title, text, "Invitation copiée.");
   }
 
   async function handleCopyLink() {
@@ -84,14 +80,14 @@ export function MobileShareBox({
       setFeedback("Lien copié.");
     } catch {
       hapticError();
-      setFeedback("Copie impossible ici. Garde le lien sous le coude.");
+      setFeedback("Copie impossible.");
     }
   }
 
   return (
     <section className={`sheet${isPrimary ? " sheet--hero" : ""}`}>
       <div>
-        <p className="eyebrow">Rameuter le comptoir</p>
+        <p className="eyebrow">Invitation</p>
         {lead && <p className="lede">{lead}</p>}
       </div>
 
@@ -100,20 +96,14 @@ export function MobileShareBox({
         type="button"
         onClick={handleShare}
       >
-        Partager l’invitation
+        Partager
       </button>
 
       {reminder && (
         <button
           className="button button--quiet button--block"
           type="button"
-          onClick={() =>
-            shareMessage(
-              reminder.title,
-              reminder.text,
-              "Rappel copié, mot pour mot. Colle-le dans la conversation, les retardataires comprendront.",
-            )
-          }
+          onClick={() => shareMessage(reminder.title, reminder.text, "Relance copiée.")}
         >
           {reminder.label}
         </button>

@@ -372,7 +372,7 @@ describe("encryptedAperoRepository (round-trip fetch stubbé)", () => {
     expect(remaining).toHaveLength(1);
     expect(remaining[0].type).toBe("apero-deleted");
     expect(remaining[0].body).toContain(cachedEvent.ceremonialName);
-    expect(remaining[0].body).toContain("est annulé");
+    expect(remaining[0].body).toContain("supprimé par l’hôte");
   });
 
   it("readPublicAperoFile bascule sur raw.githubusercontent quand l'API anonyme est rate-limitee (403)", async () => {

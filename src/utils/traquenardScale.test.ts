@@ -35,9 +35,9 @@ describe("traquenardScale", () => {
   });
 
   it("décrit le niveau par paliers", () => {
-    expect(describeTraquenardLevel(0)).toBe("Petite soirée sage");
-    expect(describeTraquenardLevel(3)).toBe("Ambiance correcte");
-    expect(describeTraquenardLevel(6)).toBe("Ça sent le traquenard");
-    expect(describeTraquenardLevel(9)).toBe("Traquenard total");
+    expect(describeTraquenardLevel(0)).toBe("calme");
+    expect(describeTraquenardLevel(3)).toBe("modérée");
+    expect(describeTraquenardLevel(6)).toBe("forte");
+    expect(describeTraquenardLevel(9)).toBe("extrême");
   });
 });

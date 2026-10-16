@@ -36,7 +36,7 @@ export function calculateEventResults(event: AperitifEvent): EventResults[] {
 
 export const TRAQUENARD_LEVEL_MAX = 10;
 
-// Moyenne du Traquenard-O-mètre parmi les convives qui ont voté.
+// Moyenne de l'intensité parmi les convives qui ont voté.
 // `null` tant que personne n'a encore donné son avis.
 export function calculateAverageTraquenardLevel(event: AperitifEvent): number | null {
   const levels = event.participants
@@ -56,7 +56,7 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
   if (event.participants.length === 0) {
     return {
       type: "empty",
-      message: "Personne n’a encore répondu. Sois le premier, ou la première, à donner le ton !",
+      message: "Aucune réponse.",
       results,
     };
   }
@@ -78,7 +78,7 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
   if (!bestResult || (bestResult.yesCount === 0 && bestResult.maybeCount === 0)) {
     return {
       type: "no-availability",
-      message: "Personne n’est chaud pour l’instant. Une nouvelle date fera peut-être pencher la balance.",
+      message: "Aucune disponibilité.",
       results,
     };
   }
@@ -93,7 +93,7 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
   if (tiedResults.length > 1) {
     return {
       type: "tie",
-      message: "Ça hésite encore entre plusieurs options, les avis ne sont pas tranchés.",
+      message: "Égalité.",
       optionIds: tiedResults.map((result) => result.optionId),
       results,
     };
@@ -102,9 +102,7 @@ export function calculateBestOptions(event: AperitifEvent): ResultState {
   return {
     type: "winner",
     message:
-      bestResult.yesCount > 0
-        ? "C’est calé : il ne reste plus qu’à sortir les glaçons !"
-        : "Ça penche pour cette option, sans certitude absolue.",
+      bestResult.yesCount > 0 ? "Confirmé." : "Incertain.",
     optionId: bestResult.optionId,
     results,
   };

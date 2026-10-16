@@ -120,8 +120,8 @@ describe("buildNextRoundPrefill", () => {
 
 describe("describeRecurrence", () => {
   it("décrit chaque cadence en français de comptoir", () => {
-    expect(describeRecurrence("weekly")).toBe("chaque semaine");
-    expect(describeRecurrence("biweekly")).toBe("toutes les deux semaines");
-    expect(describeRecurrence("monthly")).toBe("chaque mois");
+    expect(describeRecurrence("weekly")).toBe("hebdomadaire");
+    expect(describeRecurrence("biweekly")).toBe("bimensuel");
+    expect(describeRecurrence("monthly")).toBe("mensuel");
   });
 });

@@ -43,12 +43,7 @@ export function buildTableeUrl(options: {
   return `${base}/#${path}`;
 }
 
-/** Message d'invitation à rejoindre la tablée. */
+/** Message d'invitation à rejoindre le groupe. */
 export function buildTableeShareText(tableeName: string, founderName: string): string {
-  return [
-    `${founderName} t’invite à t’attabler : « ${tableeName} », la tablée officielle de la bande.`,
-    "",
-    "Une tablée, c’est la Confrérie en format rapproché : les apéros du groupe, le registre des présences, le palmarès maison. Rien d’obligatoire, tout d’essentiel.",
-    "Attable-toi ici :",
-  ].join("\n");
+  return [tableeName, `Groupe créé par ${founderName}.`, "Rejoindre :"].join("\n");
 }

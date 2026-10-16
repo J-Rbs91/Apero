@@ -17,22 +17,15 @@ export function validateComptoirName(name: string): ComptoirNameValidation {
   const normalizedName = normalizeDisplayName(name);
 
   if (!normalizedName) {
-    return { ok: false, message: "M\u00eame le pilier du fond a un nom. Inscris quelque chose." };
+    return { ok: false, message: "Nom requis." };
   }
 
   if (normalizedName.length < 2) {
-    return {
-      ok: false,
-      message:
-        "C\u2019est un peu court pour entrer dans les grandes archives du zinc, qui ont leur dignit\u00e9.",
-    };
+    return { ok: false, message: "2 caract\u00e8res min." };
   }
 
   if (normalizedName.length > 40) {
-    return {
-      ok: false,
-      message: "C\u2019est un peu long pour un blaze. Fais plus court, \u00e7a passera mieux au comptoir.",
-    };
+    return { ok: false, message: "40 caract\u00e8res max." };
   }
 
   return { ok: true, name: normalizedName };

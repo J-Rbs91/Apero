@@ -7,10 +7,10 @@ import { ActionBar, ChoiceGroup, FormSheet, SwitchRow, TextField, type ChoiceOpt
 type RecurrenceChoice = AperoRecurrence | "once";
 
 const recurrenceChoices: ChoiceOption<RecurrenceChoice>[] = [
-  { value: "once", label: "Une seule fois", description: "On verra bien après." },
-  { value: "weekly", label: "Chaque semaine", description: "Le rituel hebdomadaire." },
-  { value: "biweekly", label: "Une semaine sur deux" },
-  { value: "monthly", label: "Chaque mois" },
+  { value: "once", label: "Une fois" },
+  { value: "weekly", label: "Hebdomadaire" },
+  { value: "biweekly", label: "Bimensuel" },
+  { value: "monthly", label: "Mensuel" },
 ];
 
 type AperoSettingsFormProps = {
@@ -55,7 +55,7 @@ export function AperoSettingsForm({
 
     if (!trimmedCeremonialName) {
       hapticError();
-      setFeedback("Un apéro sans nom, ça ne se convoque pas. Garde l’ancien ou trouve mieux.");
+      setFeedback("Nom requis.");
       return;
     }
 
@@ -73,7 +73,7 @@ export function AperoSettingsForm({
       setFeedback(
         submitError instanceof Error && submitError.message
           ? submitError.message
-          : "La retouche n’est pas arrivée au registre. Ta saisie reste là, réessaie.",
+          : "Envoi échoué. Réessayer.",
       );
       return;
     }
@@ -87,75 +87,64 @@ export function AperoSettingsForm({
   return (
     <FormSheet
       isOpen={isOpen}
-      title="Retoucher l’apéro"
-      lead="Le nom, le prétexte et les règles. Les créneaux, eux, ne bougent plus."
+      title="Réglages"
       onClose={onClose}
       onSubmit={handleSubmit}
       footer={
         <ActionBar
           status={
             isReady
-              ? "La tablée sera prévenue du changement."
-              : "Le nom de l’apéro ne peut pas rester vide."
+              ? "Convives prévenus après enregistrement."
+              : "Nom requis."
           }
           tone={isReady ? "ready" : hasTriedSubmit ? "blocked" : "neutral"}
           secondary={
             <button type="button" className="ghost-link" onClick={onClose}>
-              Annuler les retouches
+              Annuler
             </button>
           }
         >
           <button className="button button--primary" disabled={isSaving} type="submit">
-            {isSaving ? "Enregistrement…" : "Enregistrer les retouches"}
+            {isSaving ? "Enregistrement…" : "Enregistrer"}
           </button>
         </ActionBar>
       }
     >
       <TextField
-        label="Nom de l’apéro"
+        label="Nom"
         requirement="required"
         value={ceremonialName}
         maxLength={160}
-        placeholder="La Grande Tablée des Olives"
-        error={hasTriedSubmit && !isReady ? "Donne-lui un nom." : undefined}
+        error={hasTriedSubmit && !isReady ? "Nom requis." : undefined}
         onChange={setCeremonialName}
       />
 
       <TextField
-        label="Le prétexte"
+        label="Objet"
         requirement="optional"
         value={title}
         maxLength={160}
-        placeholder="Apéro fin de chantier"
         onChange={setTitle}
       />
 
       <SwitchRow
-        title="Les mioches sont-ils conviés ?"
+        title="Enfants"
         state={childrenAllowed ? "Oui" : "Non"}
-        aside={childrenAllowed ? "Marmaille admise" : "Ce soir c’est sans les mômes"}
         checked={childrenAllowed}
         onChange={setChildrenAllowed}
-        hint={
-          settings.childrenAllowed == null
-            ? "Rien n’avait été précisé jusqu’ici : enregistrer tranchera la question pour toute la tablée."
-            : undefined
-        }
+        hint={settings.childrenAllowed == null ? "Non défini jusqu’ici." : undefined}
       />
 
       <ChoiceGroup
         name="edit-recurrence"
-        legend="Ça se reproduit ?"
+        legend="Récurrence"
         requirement="optional"
         options={recurrenceChoices}
         value={recurrence}
         onChange={setRecurrence}
       />
 
-      <p className="field__hint">
-        Les créneaux ne se retouchent pas ici : les votes y sont accrochés. Pour changer
-        l’heure ou le troquet, propose un autre créneau.
-      </p>
+      <p className="field__hint">Créneaux non modifiables.</p>
 
       {feedback && (
         <p className="feedback" role="alert">

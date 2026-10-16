@@ -46,7 +46,7 @@ export function HeaderNav() {
         className="bk header-nav__menu"
         aria-haspopup="menu"
         aria-expanded={isOpen}
-        aria-label="Menu de la Confrérie"
+        aria-label="Menu"
         onClick={() => setIsOpen(!isOpen)}
       >
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">

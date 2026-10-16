@@ -24,9 +24,9 @@ function splitWinner(option: AperitifOption): { date: string; time: string } {
         day: "numeric",
         month: "short",
       }).format(new Date(`${option.date}T00:00:00`))
-    : "Date mystère";
+    : "Sans date";
 
-  return { date, time: option.time || "heure mystère" };
+  return { date, time: option.time || "Sans heure" };
 }
 
 // Repère court d'une rangée du champ des votes (« lun. 19 »).
@@ -42,11 +42,11 @@ function rowLabel(option: AperitifOption): string {
 function describeEyebrow(result: ResultState): string {
   switch (result.type) {
     case "winner":
-      return "Le rendez-vous retenu";
+      return "Retenu";
     case "tie":
-      return "Plusieurs options en lice";
+      return "En tête";
     default:
-      return "En attente de réponses";
+      return "Résultat";
   }
 }
 
@@ -111,12 +111,12 @@ export function MobileResultsPanel({
       <Bulbs chase={!isPast && !awaitingGuests && result.type === "winner"} off={isPast || !winner} />
       {isPast && (
         <span className="verdict__stamp" aria-label="Apéro passé">
-          Servi
+          Passé
         </span>
       )}
       <div className="verdict__main">
         <p className="eyebrow verdict__label">
-          {awaitingGuests ? "Le comptoir délibère" : describeEyebrow(result)}
+          {awaitingGuests ? "Résultat" : describeEyebrow(result)}
         </p>
         {winner && highlightedOption ? (
           <>
@@ -131,7 +131,7 @@ export function MobileResultsPanel({
         ) : (
           <div className="verdict__title verdict__title--text">
             {awaitingGuests
-              ? "La tablée n’a pas encore émargé : le zinc réserve son verdict."
+              ? "En attente des convives."
               : result.message}
           </div>
         )}
@@ -144,15 +144,15 @@ export function MobileResultsPanel({
           <div className="counts">
             <div className="cnt">
               <b>{highlightedResult.yesCount}</b>
-              <span>Présences</span>
+              <span>Oui</span>
             </div>
             <div className="cnt">
               <b>{highlightedResult.maybeCount}</b>
-              <span>Hésitations</span>
+              <span>Peut-être</span>
             </div>
             <div className="cnt">
               <b>{highlightedResult.noCount}</b>
-              <span>Désertions</span>
+              <span>Non</span>
             </div>
           </div>
         )}

@@ -6,7 +6,7 @@ import { OsmAttribution } from "./OsmAttribution";
 import type { PlaceSuggestion } from "../utils/photonGeocoding";
 import { reverseGeocode, searchPlaces } from "../utils/photonGeocoding";
 import type { NearbyPlace } from "../utils/nearbyPlaces";
-import { fetchNearbyPlaces, formatDistance } from "../utils/nearbyPlaces";
+import { fetchNearbyPlaces, formatDistance, NEARBY_RADIUS_M } from "../utils/nearbyPlaces";
 import { Field, type FieldRequirement } from "./ui";
 import { Icon } from "./Icon";
 
@@ -56,7 +56,7 @@ type LocationFieldProps = {
 
 export function LocationField({
   label = "Lieu",
-  placeholder = "Bar des Sports",
+  placeholder,
   value,
   onChange,
   requirement,
@@ -192,7 +192,7 @@ export function LocationField({
     setIsPickerOpen(true);
   }
 
-  // Premier temps : le clic sur « Les rades autour de moi » n'appelle PAS
+  // Premier temps : le clic sur « À proximité » n'appelle PAS
   // encore la géoloc — il ouvre l'explication. La permission du navigateur
   // n'est demandée qu'au clic suivant (handleNearbyScan), après contexte.
   function handleNearbyPrime() {
@@ -202,7 +202,7 @@ export function LocationField({
     if (!("geolocation" in navigator)) {
       setNearby({
         status: "error",
-        message: "Ce navigateur ne sait pas te situer. La recherche et la carte restent là.",
+        message: "Géolocalisation indisponible.",
       });
       return;
     }
@@ -216,7 +216,7 @@ export function LocationField({
     if (!("geolocation" in navigator)) {
       setNearby({
         status: "error",
-        message: "Ce navigateur ne sait pas te situer. La recherche et la carte restent là.",
+        message: "Géolocalisation indisponible.",
       });
       return;
     }
@@ -236,7 +236,7 @@ export function LocationField({
         } catch {
           setNearby({
             status: "error",
-            message: "Le quartier ne répond pas (OpenStreetMap est peut-être en pause). Réessaie dans un instant.",
+            message: "OpenStreetMap indisponible. Réessayer.",
           });
         }
       },
@@ -245,8 +245,8 @@ export function LocationField({
           status: "error",
           message:
             geolocationError.code === geolocationError.PERMISSION_DENIED
-              ? "Position refusée : pas de tournée du quartier sans ton feu vert. La recherche et la carte restent là."
-              : "Impossible de te situer pour le moment. Réessaie, ou pointe le rade sur la carte.",
+              ? "Position refusée."
+              : "Position introuvable. Réessayer.",
         });
       },
       { enableHighAccuracy: false, timeout: GEOLOCATION_TIMEOUT_MS, maximumAge: 60_000 },
@@ -257,7 +257,7 @@ export function LocationField({
     const currentName = value.location.trim();
     skipNextSearchRef.current = true;
     onChange({
-      location: currentName || "Point posé sur la carte",
+      location: currentName || "Point sur la carte",
       locationAddress: undefined,
       locationLat: lat,
       locationLng: lng,
@@ -351,7 +351,7 @@ export function LocationField({
             className="locsearch"
             role="dialog"
             aria-modal="true"
-            aria-label="Recherche du lieu"
+            aria-label="Rechercher un lieu"
           >
             <button
               type="button"
@@ -376,6 +376,7 @@ export function LocationField({
                   onChange={(eventChange) => handleInput(eventChange.target.value)}
                   onKeyDown={handleOverlayKeyDown}
                   placeholder={placeholder}
+                  aria-label={label}
                   autoComplete="off"
                   autoFocus
                   role="combobox"
@@ -399,10 +400,7 @@ export function LocationField({
 
               <div className="locsearch__results">
                 {value.location.trim().length < MIN_QUERY_LENGTH ? (
-                  <p className="locsearch__hint">
-                    Tape le nom du rade (au moins {MIN_QUERY_LENGTH} lettres) : les
-                    suggestions s’affichent ici au fil de ta saisie.
-                  </p>
+                  <p className="locsearch__hint">{MIN_QUERY_LENGTH} lettres minimum.</p>
                 ) : isSearching ? (
                   <ul className="locsearch__list locsearch__list--skeleton" aria-hidden="true">
                     {[0, 1, 2, 3].map((row) => (
@@ -432,10 +430,7 @@ export function LocationField({
                     ))}
                   </ul>
                 ) : (
-                  <p className="locsearch__hint">
-                    Aucun lieu trouvé. Ferme la recherche pour le pointer toi-même
-                    sur la carte.
-                  </p>
+                  <p className="locsearch__hint">Aucun résultat. Placer sur la carte.</p>
                 )}
                 {suggestions.length > 0 && <OsmAttribution />}
               </div>
@@ -447,9 +442,7 @@ export function LocationField({
       {nearby.status === "priming" ? (
         <div className="locfield__nearby-prime">
           <p className="locfield__nearby-prime-text">
-            Pour lister les comptoirs autour de toi, la Confrérie a besoin de ta
-            position. Elle reste sur ton téléphone : elle sert juste à
-            interroger la carte OpenStreetMap, et ne part sur aucun serveur.
+            Position transmise uniquement à OpenStreetMap, jamais aux serveurs de l’app.
           </p>
           <div className="button-row">
             <button
@@ -457,14 +450,14 @@ export function LocationField({
               className="button button--ghost"
               onClick={handleNearbyScan}
             >
-              Chercher autour de moi
+              Localiser
             </button>
             <button
               type="button"
               className="ghost-link"
               onClick={() => setNearby({ status: "idle" })}
             >
-              Laisse tomber
+              Annuler
             </button>
           </div>
         </div>
@@ -476,10 +469,10 @@ export function LocationField({
           disabled={isScanning}
         >
           {nearby.status === "locating"
-            ? "On te situe…"
+            ? "Localisation"
             : nearby.status === "searching"
-              ? "On scanne le quartier…"
-              : "Les rades autour de moi"}
+              ? "Recherche"
+              : "À proximité"}
         </button>
       )}
 
@@ -492,8 +485,7 @@ export function LocationField({
       {nearby.status === "ready" &&
         (nearby.places.length === 0 ? (
           <p className="locfield__nearby-note" role="status">
-            Aucun comptoir recensé à moins de 800 m. Soit le désert, soit une
-            carte OpenStreetMap à compléter. La recherche reste là.
+            Aucun lieu à moins de {NEARBY_RADIUS_M} m.
           </p>
         ) : (
           <ul className="locfield__nearby-list">
@@ -524,17 +516,14 @@ export function LocationField({
         onClick={() => setIsPickerOpen((isShown) => !isShown)}
       >
         {isPickerOpen
-          ? "Cacher la carte"
+          ? "Masquer la carte"
           : value.locationLat != null
-            ? "Corriger le point sur la carte"
-            : "Introuvable ? Pointe-le toi-même sur la carte"}
+            ? "Déplacer le point"
+            : "Placer sur la carte"}
       </button>
 
       {isPickerOpen && (
         <div className="locpicker">
-          <p className="hint">
-            Clique sur la carte à l’endroit exact du rade, au pixel près si possible.
-          </p>
           <LocationPickerMap
             lat={value.locationLat}
             lng={value.locationLng}

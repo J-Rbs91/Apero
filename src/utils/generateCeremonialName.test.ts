@@ -31,7 +31,7 @@ describe("ceremonial name generation", () => {
 
     expect(availableNames).not.toContain(usedName);
     expect(availableNames).toContain(APERO_CEREMONIAL_NAMES[1]);
-    expect(availableNames).toHaveLength(19);
+    expect(availableNames).toHaveLength(11);
   });
 
   it("generates a name that is not already used", () => {

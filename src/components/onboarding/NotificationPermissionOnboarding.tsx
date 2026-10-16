@@ -11,12 +11,7 @@ type NotificationPermissionOnboardingProps = {
   isRequesting?: boolean;
 };
 
-const REASONS = [
-  "Recevoir les réponses des invités",
-  "Être informé des nouvelles propositions",
-  "Ne pas oublier de confirmer ta présence",
-  "Recevoir les rappels importants avant l’apéro",
-];
+const REASONS = ["Réponses", "Nouveaux créneaux", "Créneau retenu", "Rappels"];
 
 export function NotificationPermissionOnboarding({
   onAllow,
@@ -33,14 +28,9 @@ export function NotificationPermissionOnboarding({
       }
       hero={
         <div className="page-hero" role="group" aria-labelledby="notif-onboarding-title">
-          <p className="eyebrow">Rester dans la boucle du zinc</p>
           <h1 className="h1 h1--sm" id="notif-onboarding-title">
-            On te prévient quand ça bouge au comptoir ?
+            Notifications
           </h1>
-          <p className="lede">
-            Autorise les notifications pour ne rien rater de tes apéros, même quand l’app est fermée.
-            Tu gardes la main : tu peux refuser, le badge rouge dans l’app fera le guet quand même.
-          </p>
         </div>
       }
     >
@@ -60,7 +50,7 @@ export function NotificationPermissionOnboarding({
           onClick={onAllow}
           disabled={isRequesting}
         >
-          {isRequesting ? "On demande au téléphone…" : "Activer les notifications"}
+          {isRequesting ? "Activation…" : "Activer"}
         </button>
         <button
           type="button"
@@ -68,7 +58,7 @@ export function NotificationPermissionOnboarding({
           onClick={onSkip}
           disabled={isRequesting}
         >
-          Plus tard, garder juste le badge
+          Plus tard
         </button>
       </div>
     </MobilePage>

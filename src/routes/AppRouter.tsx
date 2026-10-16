@@ -47,7 +47,7 @@ const TableesPage = lazy(() =>
 function RouteFallback() {
   return (
     <MobilePage>
-      <LoadingScreen title="On pousse la porte" subtitle="Le comptoir arrive…" />
+      <LoadingScreen title="Chargement" />
     </MobilePage>
   );
 }
@@ -58,15 +58,12 @@ function NotFoundRoute() {
   return (
     <MobilePage
       header={<MobileHeader eyebrow="La Confrérie" />}
-      hero={<h1 className="h1 h1--sm">Aïe, ce lien coince</h1>}
+      hero={<h1 className="h1 h1--sm">Lien invalide</h1>}
     >
       <section className="sheet">
-        <p className="lede">
-          Cette porte ne mène nulle part : lien tronqué ou adresse inconnue. Si on
-          t’a invité·e, demande le lien complet à la personne qui organise.
-        </p>
+        <p className="lede">Demander le lien complet à l’hôte.</p>
         <AppLink className="button button--ghost button--block" to="/">
-          Retour au comptoir
+          Accueil
         </AppLink>
       </section>
     </MobilePage>

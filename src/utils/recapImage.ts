@@ -1,6 +1,6 @@
-// Les Comptes du Comptoir en image : le bilan annuel d'un membre, rendu dans
-// la même direction artistique que le Tableau de Chasse, prêt à être posé
-// dans la conversation. Aucune clé, aucun lien — que des chiffres et du blaze.
+// Le bilan annuel d'un membre en image, rendu dans la même direction
+// artistique que l'export image d'un apéro, prêt à être posé dans la
+// conversation. Aucune clé, aucun lien : seulement des chiffres et le nom.
 
 import type { YearRecap } from "./yearRecap";
 import { shareOrDownloadPng, type ImageShareOutcome } from "./imageShare";
@@ -74,28 +74,22 @@ export async function renderRecapImage({ recap, memberName }: RecapImageInput): 
   const plural = (count: number) => (count > 1 ? "s" : "");
   const lineBlocks: Array<{ label: string; value: string }> = [
     {
-      label: "Au registre",
-      value:
-        `${recap.yesCount} présence${plural(recap.yesCount)}, ` +
-        `${recap.maybeCount} hésitation${plural(recap.maybeCount)}, ` +
-        `${recap.noCount} désertion${plural(recap.noCount)}`,
+      label: "Réponses",
+      value: `${recap.yesCount} oui, ${recap.maybeCount} peut-être, ${recap.noCount} non`,
     },
   ];
   if (recap.favoriteLocation) {
-    lineBlocks.push({ label: "Quartier général", value: recap.favoriteLocation });
+    lineBlocks.push({ label: "Lieu", value: recap.favoriteLocation });
   }
   if (recap.biggestTableName) {
     lineBlocks.push({
-      label: "La plus grande tablée",
-      value: `${recap.biggestTableName} (${recap.biggestTableSize} convive${plural(recap.biggestTableSize)})`,
+      label: "Plus grand apéro",
+      value: `${recap.biggestTableName}, ${recap.biggestTableSize} convive${plural(recap.biggestTableSize)}`,
     });
   }
   lineBlocks.push({
-    label: "Traquenard-O-mètre personnel",
-    value:
-      recap.averageTraquenard != null
-        ? `${recap.averageTraquenard.toFixed(1)} / 10 de pronostic moyen`
-        : "Aucun pronostic déposé, prudence de sioux",
+    label: "Intensité moyenne",
+    value: recap.averageTraquenard != null ? `${recap.averageTraquenard.toFixed(1)} / 10` : "Aucune",
   });
 
   context.font = `700 40px ${CANVAS_FONT}`;
@@ -111,7 +105,7 @@ export async function renderRecapImage({ recap, memberName }: RecapImageInput): 
     10 + 6 + 90 + // trait pastis
     panelHeight + 92 + // panneau des trois grands chiffres
     blockHeights.reduce((total, blockHeight) => total + blockHeight, 0) +
-    92; // pied de page
+    92; // marge basse
   const height = Math.max(1350, fluxHeight);
 
   // Changer la hauteur réinitialise l'état du contexte : à faire avant tout.
@@ -135,7 +129,7 @@ export async function renderRecapImage({ recap, memberName }: RecapImageInput): 
   y += 46;
   context.fillStyle = CANVAS_COLORS.muted;
   context.font = `600 28px ${CANVAS_FONT}`;
-  context.fillText(`Les Comptes du Comptoir, exercice ${recap.year}`, margin, y);
+  context.fillText(`Bilan ${recap.year}`, margin, y);
   y += 100;
 
   context.fillStyle = CANVAS_COLORS.cream;
@@ -161,19 +155,14 @@ export async function renderRecapImage({ recap, memberName }: RecapImageInput): 
 
   const columnWidth = (WIDTH - margin * 2) / 3;
   const statsY = y + 112;
-  drawStat(context, margin + columnWidth * 0.5, statsY, String(recap.organizedCount), "Convoquées");
-  drawStat(context, margin + columnWidth * 1.5, statsY, String(recap.participatedCount), "Émargées");
-  drawStat(context, margin + columnWidth * 2.5, statsY, String(recap.fellowCount), "Blazes croisés");
+  drawStat(context, margin + columnWidth * 0.5, statsY, String(recap.organizedCount), "Créés");
+  drawStat(context, margin + columnWidth * 1.5, statsY, String(recap.participatedCount), "Rejoints");
+  drawStat(context, margin + columnWidth * 2.5, statsY, String(recap.fellowCount), "Convives");
   y += panelHeight + 92;
 
   for (const block of lineBlocks) {
     y = drawLine(context, margin, y, block.label, block.value);
   }
-
-  context.textAlign = "left";
-  context.fillStyle = CANVAS_COLORS.muted;
-  context.font = `600 26px ${CANVAS_FONT}`;
-  context.fillText("Le registre fait foi. Le reste est légende.", margin, height - 52);
 
   return new Promise((resolve) => {
     canvas.toBlob((blob) => resolve(blob), "image/png");

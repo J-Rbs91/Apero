@@ -71,16 +71,14 @@ export function AlternativeOptionForm({
     // pas en concurrence avec la secousse (DECISIONS.md D6).
     if (!date || !time || !trimmedLocation) {
       hapticError();
-      setFeedback(
-        "Quitte à imposer cette contradiction, il s’agirait au moins d’avoir l’élégance d’être précis : un jour, une heure et un lieu, histoire que cette proposition ait meilleure mine que la tienne.",
-      );
+      setFeedback("Jour, heure et lieu requis.");
       shake(SLOT_NODE_ID);
       return;
     }
 
     if (!trimmedName) {
       hapticError();
-      setFeedback("Indique ton blaze, qu’on sache au moins l’intitulé du fauteur de troubles.");
+      setFeedback("Nom requis.");
       shake(NAME_NODE_ID);
       return;
     }
@@ -108,7 +106,7 @@ export function AlternativeOptionForm({
       setFeedback(
         submitError instanceof Error && submitError.message
           ? submitError.message
-          : "La contre-proposition n’est pas arrivée au registre. Ta saisie reste là, réessaie.",
+          : "Envoi échoué. Réessayer.",
       );
       // Aucun champ n'est en faute ici : c'est le message qu'il faut lire.
       bringIntoView(FEEDBACK_NODE_ID);
@@ -129,28 +127,27 @@ export function AlternativeOptionForm({
   return (
     <FormSheet
       isOpen={isOpen}
-      title="Proposer un autre créneau"
-      lead="Jour, heure et troquet, puis ton blaze. Le créneau rejoindra la liste, et toute la tablée pourra voter dessus."
+      title="Nouveau créneau"
       onClose={onClose}
       onSubmit={handleSubmit}
       footer={
         <ActionBar
           status={
             feedback
-              ? "L’envoi a été refusé. L’explication est juste au-dessus."
+              ? "Envoi refusé."
               : isReady
-                ? "Prêt à rejoindre la liste des créneaux."
-                : "Jour, heure et troquet sont obligatoires."
+                ? "Créneau complet."
+                : "Jour, heure et lieu requis."
           }
           tone={feedback ? "blocked" : isReady ? "ready" : hasTriedSubmit ? "blocked" : "neutral"}
           secondary={
             <button type="button" className="ghost-link" onClick={onClose}>
-              Laisser tomber
+              Annuler
             </button>
           }
         >
           <button className="button button--primary" disabled={isSaving} type="submit">
-            {isSaving ? "Envoi…" : "Proposer ce créneau"}
+            {isSaving ? "Envoi…" : "Proposer"}
           </button>
         </ActionBar>
       }
@@ -165,21 +162,19 @@ export function AlternativeOptionForm({
           label="Jour"
           type="date"
           value={date}
-          error={hasTriedSubmit && !date ? "Choisis un jour." : undefined}
+          error={hasTriedSubmit && !date ? "Jour requis." : undefined}
           onChange={setDate}
         />
         <TextField
           label="Heure"
           type="time"
           value={time}
-          error={hasTriedSubmit && !time ? "Choisis une heure." : undefined}
+          error={hasTriedSubmit && !time ? "Heure requise." : undefined}
           onChange={setTime}
         />
         <LocationField
-          label="Le troquet"
-          placeholder="Le Bar du Coin"
-          hint="Tape deux lettres, la liste te propose les rades du coin."
-          error={hasTriedSubmit && !trimmedLocation ? "Indique où on se retrouve." : undefined}
+          label="Lieu"
+          error={hasTriedSubmit && !trimmedLocation ? "Lieu requis." : undefined}
           value={locationValue}
           onChange={setLocationValue}
         />
@@ -190,13 +185,11 @@ export function AlternativeOptionForm({
         ref={registerNode(NAME_NODE_ID)}
       >
         <TextField
-          label="Proposé par"
+          label="Nom"
           requirement="required"
-          hint="Pour que la tablée sache qui a bousculé le programme."
           value={createdByName}
           maxLength={80}
-          placeholder="Nadine Diabolo, Jean-Mi Pastaga…"
-          error={hasTriedSubmit && !trimmedName ? "Indique ton blaze." : undefined}
+          error={hasTriedSubmit && !trimmedName ? "Nom requis." : undefined}
           onChange={(value) => {
             nameEditedRef.current = true;
             setCreatedByName(value);

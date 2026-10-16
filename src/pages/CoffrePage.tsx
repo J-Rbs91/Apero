@@ -36,7 +36,7 @@ export function CoffrePage() {
     if (exportPassphrase.length < MIN_PASSPHRASE_LENGTH) {
       setExportFeedback({
         tone: "error",
-        text: `Il faut une phrase de passe d’au moins ${MIN_PASSPHRASE_LENGTH} caractères : c’est elle qui garde le coffre.`,
+        text: `Mot de passe : ${MIN_PASSPHRASE_LENGTH} caractères minimum.`,
       });
       return;
     }
@@ -48,7 +48,7 @@ export function CoffrePage() {
       if (payload.aperos.length === 0 && !payload.comptoirName) {
         setExportFeedback({
           tone: "error",
-          text: "Le coffre serait vide : rien à emporter sur cet appareil pour l’instant.",
+          text: "Rien à exporter.",
         });
         return;
       }
@@ -60,7 +60,7 @@ export function CoffrePage() {
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = "coffre-confrerie.json";
+      anchor.download = "sauvegarde-confrerie.json";
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();
@@ -69,12 +69,12 @@ export function CoffrePage() {
       setExportPassphrase("");
       setExportFeedback({
         tone: "ok",
-        text: `Coffre scellé et téléchargé : ${payload.aperos.length} apéro${payload.aperos.length > 1 ? "s" : ""} et ton blaze. Garde la phrase de passe précieusement, personne ne pourra la retrouver.`,
+        text: "Sauvegarde exportée.",
       });
     } catch {
       setExportFeedback({
         tone: "error",
-        text: "Le coffre a refusé de se sceller. Réessaie dans un instant.",
+        text: "Export impossible. Réessayer.",
       });
     } finally {
       setIsExporting(false);
@@ -86,11 +86,11 @@ export function CoffrePage() {
     const file = fileInputRef.current?.files?.[0];
 
     if (!file) {
-      setImportFeedback({ tone: "error", text: "Choisis d’abord le fichier de coffre à ouvrir." });
+      setImportFeedback({ tone: "error", text: "Fichier requis." });
       return;
     }
     if (!importPassphrase) {
-      setImportFeedback({ tone: "error", text: "Il faut la phrase de passe qui a scellé ce coffre." });
+      setImportFeedback({ tone: "error", text: "Mot de passe requis." });
       return;
     }
 
@@ -99,7 +99,7 @@ export function CoffrePage() {
     if (file.size > 5 * 1024 * 1024) {
       setImportFeedback({
         tone: "error",
-        text: "Ce fichier est bien trop lourd pour être un coffre de la Confrérie.",
+        text: "Fichier trop lourd, 5 Mo maximum.",
       });
       return;
     }
@@ -111,7 +111,7 @@ export function CoffrePage() {
       try {
         parsed = JSON.parse(rawText);
       } catch {
-        throw new VaultError("INVALID_FILE", "Ce fichier n’est pas un coffre de la Confrérie.");
+        throw new VaultError("INVALID_FILE", "Fichier invalide.");
       }
 
       const payload = await decryptVault(parsed, importPassphrase);
@@ -124,9 +124,8 @@ export function CoffrePage() {
       setImportFeedback({
         tone: "ok",
         text:
-          `Coffre ouvert : ${result.importedAperoCount} apéro${result.importedAperoCount > 1 ? "s" : ""} rapatrié${result.importedAperoCount > 1 ? "s" : ""} sur cet appareil` +
-          (result.importedComptoirName ? `, blaze « ${result.importedComptoirName} » adopté` : "") +
-          ". Tu retrouveras tout dans l’ardoise.",
+          `${result.importedAperoCount} apéro${result.importedAperoCount > 1 ? "s" : ""} importé${result.importedAperoCount > 1 ? "s" : ""}.` +
+          (result.importedComptoirName ? " Nom importé." : ""),
       });
     } catch (importError) {
       setImportFeedback({
@@ -134,7 +133,7 @@ export function CoffrePage() {
         text:
           importError instanceof VaultError
             ? importError.message
-            : "Le coffre n’a pas voulu s’ouvrir. Réessaie dans un instant.",
+            : "Import impossible. Réessayer.",
       });
     } finally {
       setIsImporting(false);
@@ -144,24 +143,19 @@ export function CoffrePage() {
   return (
     <MobilePage
       className="agenda-mobile"
-      header={<MobileHeader eyebrow="Le Coffre de la Confrérie" />}
+      header={<MobileHeader eyebrow="La Confrérie" />}
       hero={
         <div className="page-hero">
-          <h1 className="h1 h1--sm">Ton registre, sous clé</h1>
-          <p className="lede">
-            Ton blaze, tes apéros et leurs clés vivent uniquement sur cet appareil. Le Coffre
-            les emballe dans un fichier chiffré par ta phrase de passe : change de téléphone,
-            ouvre le coffre, et la Confrérie te reconnaît comme si de rien n’était.
-          </p>
+          <h1 className="h1 h1--sm">Sauvegarde</h1>
         </div>
       }
     >
       <section className="sheet">
-        <p className="eyebrow">Sceller un coffre</p>
+        <p className="eyebrow">Exporter</p>
         <Field
-          label="Phrase de passe"
+          label="Mot de passe"
           requirement="required"
-          hint="Garde-la précieusement : sans elle, le coffre ne se rouvre pas."
+          hint="Irrécupérable si oublié."
         >
           {(control) => (
             <input
@@ -169,7 +163,6 @@ export function CoffrePage() {
               type="password"
               value={exportPassphrase}
               onChange={(eventChange) => setExportPassphrase(eventChange.target.value)}
-              placeholder="Une phrase que toi seul connais"
               autoComplete="new-password"
             />
           )}
@@ -180,7 +173,7 @@ export function CoffrePage() {
           onClick={handleExport}
           disabled={isExporting}
         >
-          {isExporting ? "On scelle le coffre…" : "Sceller et télécharger le coffre"}
+          {isExporting ? "Export en cours" : "Exporter"}
         </button>
         {exportFeedback && (
           <p
@@ -193,24 +186,20 @@ export function CoffrePage() {
       </section>
 
       <section className="sheet">
-        <p className="eyebrow">Ouvrir un coffre</p>
-        <p className="hint">
-          Sur le nouvel appareil : choisis le fichier, saisis la phrase de passe, et tout
-          fusionne avec l’existant. Un apéro déjà connu ici garde son rôle d’organisateur.
-        </p>
-        <Field label="Fichier de coffre" requirement="required">
+        <p className="eyebrow">Importer</p>
+        <p className="hint">Fusion avec les données existantes.</p>
+        <Field label="Fichier" requirement="required">
           {(control) => (
             <input {...control} ref={fileInputRef} type="file" accept="application/json,.json" />
           )}
         </Field>
-        <Field label="Phrase de passe" requirement="required">
+        <Field label="Mot de passe" requirement="required">
           {(control) => (
             <input
               {...control}
               type="password"
               value={importPassphrase}
               onChange={(eventChange) => setImportPassphrase(eventChange.target.value)}
-              placeholder="Celle qui a scellé le coffre"
               autoComplete="off"
             />
           )}
@@ -221,7 +210,7 @@ export function CoffrePage() {
           onClick={handleImport}
           disabled={isImporting}
         >
-          {isImporting ? "On force la serrure… non, on déchiffre." : "Ouvrir le coffre sur cet appareil"}
+          {isImporting ? "Import en cours" : "Importer"}
         </button>
         {importFeedback && (
           <p

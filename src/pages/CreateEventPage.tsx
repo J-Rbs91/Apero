@@ -56,10 +56,10 @@ const FEEDBACK_NODE_ID = "feedback";
 const DRAFT_SAVE_DEBOUNCE_MS = 400;
 
 const recurrenceChoices: ChoiceOption<RecurrenceChoice>[] = [
-  { value: "once", label: "Une seule fois", description: "On verra bien après." },
-  { value: "weekly", label: "Chaque semaine", description: "Le rituel hebdomadaire." },
-  { value: "biweekly", label: "Une semaine sur deux" },
-  { value: "monthly", label: "Chaque mois" },
+  { value: "once", label: "Une fois" },
+  { value: "weekly", label: "Hebdomadaire" },
+  { value: "biweekly", label: "Bimensuel" },
+  { value: "monthly", label: "Mensuel" },
 ];
 
 function createEmptyOption(): AperitifOption {
@@ -177,6 +177,7 @@ export function CreateEventPage() {
   const completeOptions = options.filter((option) => missingFieldsOf(option).length === 0);
   const incompleteCount = options.length - completeOptions.length;
   const isReady = completeOptions.length > 0 && incompleteCount === 0;
+  const firstIncompleteIndex = options.findIndex((option) => missingFieldsOf(option).length > 0);
 
   // La barre du bas parle toujours de la prochaine chose à faire, jamais en
   // langage de validation.
@@ -185,14 +186,14 @@ export function CreateEventPage() {
   // sous les yeux, elle ne peut pas continuer d'annoncer que tout est prêt.
   // Elle renvoie au message, qui vient d'être ramené dans le champ de vision.
   const actionStatus = feedback
-    ? "L’envoi a été refusé. L’explication est juste au-dessus."
+    ? "Envoi refusé."
     : isReady
       ? completeOptions.length > 1
-        ? `${completeOptions.length} créneaux prêts. La tablée tranchera.`
-        : "Le créneau est prêt. La tablée n’a plus qu’à répondre."
-      : incompleteCount === options.length
-        ? "Remplis jour, heure et troquet du créneau 1."
-        : `Encore ${incompleteCount} créneau${incompleteCount > 1 ? "x" : ""} à compléter (ou à retirer).`;
+        ? `${completeOptions.length} créneaux prêts.`
+        : "Prêt."
+      : incompleteCount === 1
+        ? `Créneau ${firstIncompleteIndex + 1} incomplet.`
+        : `${incompleteCount} créneaux incomplets.`;
 
   async function handleSubmit(formEvent: React.FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
@@ -235,9 +236,7 @@ export function CreateEventPage() {
       // Aucun champ n'est fautif — les créneaux sont complets, ils sont juste
       // passés. Le bloc à montrer est donc le message, pas un champ.
       hapticError();
-      setFeedback(
-        "Tous tes créneaux sont déjà passés. Joli exploit temporel, zéro convive. La machine à remonter le temps est en réparation : vise l’avenir.",
-      );
+      setFeedback("Date passée.");
       bringIntoView(FEEDBACK_NODE_ID);
       return;
     }
@@ -254,9 +253,7 @@ export function CreateEventPage() {
 
       if (trimmedCeremonialName && storageMode !== "api-vps" && isCeremonialNameTaken(trimmedCeremonialName, activeEvents)) {
         hapticError();
-        setFeedback(
-          "Ce nom d’apéro est déjà pris par un événement en cours. Trouve-en un autre, ou laisse le champ vide pour un tirage au sort.",
-        );
+        setFeedback("Nom déjà pris.");
         bringIntoView(FEEDBACK_NODE_ID);
         return;
       }
@@ -371,16 +368,16 @@ export function CreateEventPage() {
       hapticError();
       setFeedback(
         error instanceof AperoApiError && error.code === "API_NOT_CONFIGURED"
-          ? "Le comptoir numérique n’est pas encore raccordé (API non configurée) : impossible de créer l’apéro dans ce mode. Repasse en mode classique ou configure VITE_APERO_API_BASE_URL."
+          ? "Service non configuré."
           : error instanceof AperoApiError && error.code === "NETWORK_ERROR"
-            ? "Impossible de joindre le comptoir numérique. Vérifie la connexion (ou que l’API tourne bien) et réessaie."
+            ? "Réseau indisponible. Réessayer."
             : error instanceof Error && error.message === "NO_CEREMONIAL_NAME_AVAILABLE"
-              ? "La Confrérie est complète, archi-complète même : trop d’apéros tournent déjà en coulisses dans une magouille généralisée que plus personne ne maîtrise vraiment. Clôture un apéro avant d’en lancer un nouveau, sinon c’est le chaos total."
+              ? "Aucun nom libre. Saisir un nom."
               : error instanceof AperoValidationError
-                ? `Le registre refuse cette saisie (${error.message}). Corrige le champ concerné et réessaie.`
+                ? "Saisie invalide. Vérifier les champs."
                 : error instanceof Error
                   ? error.message
-                  : "Le service a fait une bêtise. On ne veut pas savoir laquelle. Deux secondes, ça se répare tout seul.",
+                  : "Création impossible. Réessayer.",
       );
       bringIntoView(FEEDBACK_NODE_ID);
     } finally {
@@ -392,14 +389,10 @@ export function CreateEventPage() {
   return (
     <MobilePage
       className="create-mobile"
-      header={<MobileHeader eyebrow="Nouvelle assemblée" />}
+      header={<MobileHeader eyebrow="Apéro" />}
       hero={
         <div className="page-hero">
-          <h1 className="h1 h1--sm">Organiser un apéro</h1>
-          <p className="lede">
-            Une seule chose est obligatoire : au moins un créneau complet. Tout le reste
-            se règle après, ou jamais.
-          </p>
+          <h1 className="h1 h1--sm">Nouvel apéro</h1>
         </div>
       }
     >
@@ -411,20 +404,16 @@ export function CreateEventPage() {
           // s'oublie. Il ne s'affiche que sur un brouillon réellement relu,
           // jamais sur la foi d'une sauvegarde supposée.
           <div className="draft-resume" role="status">
-            <p className="feedback feedback--info">
-              Ta saisie précédente a été retrouvée sur cet appareil. Reprends où tu en
-              étais.
-            </p>
+            <p className="feedback feedback--info">Brouillon restauré.</p>
             <button type="button" className="ghost-link" onClick={startFromScratch}>
-              Repartir de zéro
+              Recommencer
             </button>
           </div>
         )}
 
         <FormSection
           step={1}
-          title="Les créneaux"
-          lead="Propose plusieurs créneaux, la tablée tranchera."
+          title="Créneaux"
           status={`${completeOptions.length}/${options.length}`}
           isDone={isReady}
         >
@@ -451,13 +440,14 @@ export function CreateEventPage() {
                       <span
                         className={`slot__state slot__state--${missing.length === 0 ? "done" : "todo"}`}
                       >
-                        {missing.length === 0 ? "Complet" : "À compléter"}
+                        {missing.length === 0 ? "Complet" : "Incomplet"}
                       </span>
                     </span>
                     {options.length > 1 && (
                       <button
                         type="button"
                         className="slot__x"
+                        aria-label={`Retirer le créneau ${index + 1}`}
                         onClick={() => removeOption(option.id)}
                       >
                         Retirer
@@ -465,31 +455,26 @@ export function CreateEventPage() {
                     )}
                   </div>
                   <div className="slot__fields">
-                    {/* Pas de pastille « Obligatoire » sur chacun des trois :
+                    {/* Pas de pastille « Requis » sur chacun des trois :
                         le bloc le dit une fois, la carte porte son état, et
                         l'erreur tombe sous le champ concerné à l'envoi. */}
                     <TextField
-                      label="Jour"
+                      label="Date"
                       type="date"
                       value={option.date}
-                      error={showErrors && missing.includes("date") ? "Choisis un jour." : undefined}
+                      error={showErrors && missing.includes("date") ? "Date requise." : undefined}
                       onChange={(value) => updateOption(option.id, { date: value })}
                     />
                     <TextField
                       label="Heure"
                       type="time"
                       value={option.time}
-                      error={showErrors && missing.includes("time") ? "Choisis une heure." : undefined}
+                      error={showErrors && missing.includes("time") ? "Heure requise." : undefined}
                       onChange={(value) => updateOption(option.id, { time: value })}
                     />
                     <LocationField
-                      label="Le troquet"
-                      hint="Tape deux lettres, la liste te propose les rades du coin."
-                      error={
-                        showErrors && missing.includes("location")
-                          ? "Indique où on se retrouve."
-                          : undefined
-                      }
+                      label="Lieu"
+                      error={showErrors && missing.includes("location") ? "Lieu requis." : undefined}
                       value={{
                         location: option.location,
                         locationAddress: option.locationAddress,
@@ -510,62 +495,43 @@ export function CreateEventPage() {
             className="addline"
             onClick={() => setOptions((currentOptions) => [...currentOptions, createEmptyOption()])}
           >
-            + Ajouter un créneau
+            + Créneau
           </button>
         </FormSection>
 
-        <FormSection
-          step={2}
-          title="La carte de visite"
-          lead="Rien d’obligatoire ici : sans nom, la Confrérie en tire un au sort."
-        >
+        <FormSection step={2} title="Détails">
           <TextField
-            label="Nom de l’apéro"
+            label="Nom"
             requirement="optional"
             value={ceremonialNameInput}
             maxLength={160}
-            placeholder="La Grande Tablée des Olives"
             onChange={setCeremonialNameInput}
           />
           <TextField
-            label="Le prétexte"
+            label="Objet"
             requirement="optional"
-            hint="La raison officielle du rassemblement, si tant est qu’il en faille une."
             value={title}
             maxLength={160}
-            placeholder="Apéro fin de chantier"
             onChange={setTitle}
           />
         </FormSection>
 
-        <Disclosure
-          title="Réglages de l’assemblée"
-          summary="Politique mioches et cadence. Modifiables plus tard."
-        >
+        <Disclosure title="Réglages" summary="Enfants, récurrence">
           <SwitchRow
-            title="Les mioches sont-ils conviés ?"
+            title="Enfants"
             state={childrenAllowed ? "Oui" : "Non"}
-            aside={childrenAllowed ? "Marmaille admise" : "Ce soir c’est sans les mômes"}
             checked={childrenAllowed}
             onChange={setChildrenAllowed}
           />
 
           <ChoiceGroup
             name="recurrence"
-            legend="Ça se reproduit ?"
+            legend="Récurrence"
             requirement="optional"
             options={recurrenceChoices}
             value={recurrence}
             onChange={setRecurrence}
           />
-
-          {recurrence !== "once" && (
-            <p className="field__hint">
-              Une assemblée qui se répète devient un rituel : une fois celle-ci passée, la
-              Confrérie proposera de convoquer la suivante dans la foulée, mêmes lieu et
-              heure, date décalée d’autant.
-            </p>
-          )}
         </Disclosure>
 
         {feedback && (
@@ -583,7 +549,7 @@ export function CreateEventPage() {
           tone={feedback ? "blocked" : isReady ? "ready" : hasTriedSubmit ? "blocked" : "neutral"}
         >
           <button className="button button--primary" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Création de l’apéro…" : "Créer l’apéro"}
+            {isSubmitting ? "Création" : "Créer"}
           </button>
         </ActionBar>
       </form>

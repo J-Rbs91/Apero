@@ -27,7 +27,7 @@ function getInitials(name: string): string {
 }
 
 function describeCompanions(count: number): string {
-  return count > 1 ? `+${count} pièces rapportées` : "+1 pièce rapportée";
+  return `+${count}`;
 }
 
 function ParticipantRow({ participant }: { participant: ParticipantResponse }) {
@@ -71,22 +71,20 @@ export function ParticipantList({ participants }: ParticipantListProps) {
 
   const summary =
     participants.length === 0
-      ? "Personne n’a encore émargé."
+      ? "Aucune réponse."
       : [
-          `${comingParticipants.length} confirmé${comingParticipants.length > 1 ? "s" : ""}`,
-          `${waveringParticipants.length} qui hésite${waveringParticipants.length > 1 ? "nt" : ""}`,
-          `${decliningParticipants.length} sans nous`,
+          `${comingParticipants.length} oui`,
+          `${waveringParticipants.length} peut-être`,
+          `${decliningParticipants.length} non`,
         ].join(" · ");
 
   return (
-    <Disclosure title="Qui vient ?" summary={summary} badge={participants.length}>
-      {participants.length === 0 ? (
-        <p className="lede">Personne n’a encore répondu. Sois le premier, ou la première.</p>
-      ) : (
+    <Disclosure title="Réponses" summary={summary} badge={participants.length}>
+      {participants.length === 0 ? null : (
         <>
           {comingParticipants.length > 0 && (
             <>
-              <p className="lbl">Ils y seront</p>
+              <p className="lbl">Oui</p>
               <div className="people">
                 {comingParticipants.map((participant) => (
                   <ParticipantRow key={participant.id} participant={participant} />
@@ -96,7 +94,7 @@ export function ParticipantList({ participants }: ParticipantListProps) {
           )}
           {waveringParticipants.length > 0 && (
             <>
-              <p className="lbl">Le cul entre deux chaises</p>
+              <p className="lbl">Peut-être</p>
               <div className="people">
                 {waveringParticipants.map((participant) => (
                   <ParticipantRow key={participant.id} participant={participant} />
@@ -106,7 +104,7 @@ export function ParticipantList({ participants }: ParticipantListProps) {
           )}
           {decliningParticipants.length > 0 && (
             <>
-              <p className="lbl">Les déserteurs</p>
+              <p className="lbl">Non</p>
               <div className="people">
                 {decliningParticipants.map((participant) => (
                   <ParticipantRow key={participant.id} participant={participant} />

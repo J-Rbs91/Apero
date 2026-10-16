@@ -146,7 +146,7 @@ export function useAperoInvite(aperoId: string | undefined) {
         if (cachedEvent) {
           setState({ status: "ready", event: cachedEvent });
           setLoadWarning(
-            "Impossible de rafraîchir cet apéro pour le moment : voici sa dernière version connue sur cet appareil.",
+            "Réseau indisponible. Version locale affichée.",
           );
           return;
         }
@@ -154,7 +154,7 @@ export function useAperoInvite(aperoId: string | undefined) {
         if (!initialEvent) {
           setState({
             status: "error",
-            message: "Impossible de récupérer cet apéro pour le moment. Réessaie dans un instant.",
+            message: "Réseau indisponible. Réessayer.",
           });
         }
       }

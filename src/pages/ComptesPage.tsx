@@ -73,10 +73,10 @@ export function ComptesPage() {
     return (
       <MobilePage
         className="agenda-mobile"
-        header={<MobileHeader eyebrow="La Rétrospective du Comptoir" />}
-        hero={<h1 className="h1 h1--sm">Ta rétrospective {year}</h1>}
+        header={<MobileHeader eyebrow="La Confrérie" />}
+        hero={<h1 className="h1 h1--sm">Bilan {year}</h1>}
       >
-        <LoadingScreen title="On épluche les registres" subtitle="La Confrérie compte les tournées de l’année…" />
+        <LoadingScreen />
       </MobilePage>
     );
   }
@@ -84,14 +84,10 @@ export function ComptesPage() {
   return (
     <MobilePage
       className="agenda-mobile comptes-page"
-      header={<MobileHeader eyebrow="La Rétrospective du Comptoir" />}
+      header={<MobileHeader eyebrow="La Confrérie" />}
       hero={
         <div className="page-hero">
-          <h1 className="h1 h1--sm">Ta rétrospective {year}</h1>
-          <p className="lede">
-            Le bilan comptable de tes activités de comptoir, dressé sur cet appareil et
-            nulle part ailleurs. Le registre fait foi, le reste est légende.
-          </p>
+          <h1 className="h1 h1--sm">Bilan {year}</h1>
           <div className="button-row">
             <button
               type="button"
@@ -113,19 +109,13 @@ export function ComptesPage() {
     >
       {!comptoirName.trim() ? (
         <section className="sheet">
-          <p className="lede">
-            Sans blaze, pas de comptes : choisis d’abord ton nom de comptoir depuis le
-            menu de la Confrérie.
-          </p>
+          <p className="lede">Nom requis, depuis le menu.</p>
         </section>
       ) : !hasActivity ? (
         <section className="sheet">
-          <p className="lede">
-            Aucune trace de toi dans les registres de {year} sur cet appareil. Soit une
-            année sobre, soit une année ailleurs : dans les deux cas, ça se rattrape.
-          </p>
+          <p className="lede">Aucun apéro en {year}.</p>
           <AppLink className="button button--primary button--block" to="/create">
-            Lancer l’année {currentYear}
+            Nouvel apéro
           </AppLink>
         </section>
       ) : (
@@ -134,29 +124,29 @@ export function ComptesPage() {
             <div className="counts">
               <div className="cnt">
                 <b>{recap.organizedCount}</b>
-                <span>Convoquées</span>
+                <span>Créés</span>
               </div>
               <div className="cnt">
                 <b>{recap.participatedCount}</b>
-                <span>Émargées</span>
+                <span>Rejoints</span>
               </div>
               <div className="cnt">
                 <b>{recap.fellowCount}</b>
-                <span>Blazes croisés</span>
+                <span>Convives</span>
               </div>
             </div>
             <div className="counts">
               <div className="cnt">
                 <b>{recap.yesCount}</b>
-                <span>Présences</span>
+                <span>Oui</span>
               </div>
               <div className="cnt">
                 <b>{recap.maybeCount}</b>
-                <span>Hésitations</span>
+                <span>Peut-être</span>
               </div>
               <div className="cnt">
                 <b>{recap.noCount}</b>
-                <span>Désertions</span>
+                <span>Non</span>
               </div>
             </div>
           </section>
@@ -164,32 +154,29 @@ export function ComptesPage() {
           <section className="sheet">
             {recap.favoriteLocation && (
               <>
-                <p className="lbl">Quartier général</p>
+                <p className="lbl">Lieu</p>
                 <p className="lede">{recap.favoriteLocation}</p>
               </>
             )}
             {recap.biggestTableName && (
               <>
-                <p className="lbl">La plus grande tablée</p>
+                <p className="lbl">Plus grand apéro</p>
                 <p className="lede">
-                  {recap.biggestTableName} : {recap.biggestTableSize} convives au registre.
+                  {recap.biggestTableName}, {recap.biggestTableSize} convive
+                  {recap.biggestTableSize > 1 ? "s" : ""}
                 </p>
               </>
             )}
-            <p className="lbl">Traquenard-O-mètre personnel</p>
+            <p className="lbl">Intensité moyenne</p>
             <p className="lede">
               {recap.averageTraquenard != null
-                ? `${recap.averageTraquenard.toFixed(1)} / 10 de pronostic moyen. On sait à quoi s’en tenir.`
-                : "Aucun pronostic déposé cette année. Prudence de sioux, ou négligence coupable."}
+                ? `${recap.averageTraquenard.toFixed(1)} / 10`
+                : "Aucune"}
             </p>
           </section>
 
           <section className="sheet">
-            <p className="eyebrow">Faire circuler</p>
-            <p className="lede">
-              La rétrospective se partage en image : les chiffres, ton blaze, rien d’autre.
-              Ni lien, ni clé : ta comptabilité reste la tienne.
-            </p>
+            <p className="hint">Image : chiffres et nom, sans lien.</p>
             <button
               type="button"
               className="button button--primary button--block"
@@ -197,18 +184,18 @@ export function ComptesPage() {
                 setShareFeedback("");
                 const outcome = await shareOrDownloadRecapImage(
                   { recap, memberName: comptoirName },
-                  `retrospective-du-comptoir-${year}.png`,
+                  `bilan-${year}.png`,
                 );
                 setShareFeedback(
                   outcome === "failed"
-                    ? "L’image n’a pas voulu sortir du cadre. Réessaie dans un instant."
+                    ? "Image indisponible. Réessayer."
                     : outcome === "downloaded"
-                      ? "Bilan téléchargé : il n’attend plus que la conversation."
+                      ? "Image téléchargée."
                       : "",
                 );
               }}
             >
-              Partager mes Comptes {year}
+              Partager
             </button>
             {shareFeedback && (
               <p className="meta" role="status">

@@ -77,7 +77,7 @@ export function EventPage() {
           setError(
             loadError instanceof Error
               ? loadError.message
-              : "Impossible de récupérer cet apéro pour le moment. Réessaie dans un instant.",
+              : "Réseau indisponible. Réessayer.",
           );
         }
       } finally {
@@ -108,12 +108,12 @@ export function EventPage() {
       setSuccess("");
       const updatedEvent = await eventStorage.saveParticipantResponse(eventId, response);
       setEvent(updatedEvent);
-      setSuccess("Réponse bien reçue, merci !");
+      setSuccess("Réponse enregistrée.");
     } catch (saveError) {
       setError(
         saveError instanceof Error
           ? saveError.message
-          : "Le comptoir est débordé. Réessaie dans deux secondes, ça devrait passer.",
+          : "Réseau indisponible. Réessayer.",
       );
     } finally {
       setIsSaving(false);
@@ -131,12 +131,12 @@ export function EventPage() {
       setSuccess("");
       const updatedEvent = await eventStorage.addEventOption(eventId, option);
       setEvent(updatedEvent);
-      setSuccess("Nouvelle date proposée, elle apparaît maintenant dans la liste.");
+      setSuccess("Créneau ajouté.");
     } catch (saveError) {
       setError(
         saveError instanceof Error
           ? saveError.message
-          : "Impossible d’ajouter cette proposition pour le moment. Réessaie dans un instant.",
+          : "Réseau indisponible. Réessayer.",
       );
     } finally {
       setIsAddingOption(false);
@@ -159,7 +159,7 @@ export function EventPage() {
       setError(
         deleteError instanceof Error
           ? deleteError.message
-          : "Impossible de supprimer cet apéro pour le moment. Réessaie dans un instant.",
+          : "Réseau indisponible. Réessayer.",
       );
       setIsDeleting(false);
     }
@@ -167,7 +167,7 @@ export function EventPage() {
 
   if (isLoading) {
     return (
-      <MobilePage className="event-mobile" header={<MobileHeader eyebrow="Ton apéro" />}>
+      <MobilePage className="event-mobile" header={<MobileHeader eyebrow="Apéro" />}>
         <LoadingScreen heading="h1" />
       </MobilePage>
     );
@@ -177,17 +177,12 @@ export function EventPage() {
     return (
       <MobilePage
         className="event-mobile"
-        header={<MobileHeader eyebrow="Apéro archivé" />}
-        hero={<h1 className="h1 h1--sm">Cet apéro est terminé</h1>}
+        header={<MobileHeader eyebrow="Apéro" />}
+        hero={<h1 className="h1 h1--sm">Apéro passé</h1>}
       >
         <section className="sheet">
-          <p className="lede">
-            La soirée est passée, cette page a été nettoyée, mais rassure-toi : les hauts faits
-            de la tablée, eux, restent gravés dans la Confrérie pour l’éternité, ou en tout cas
-            jusqu’à la prochaine purge.
-          </p>
           <AppLink className="button button--primary button--block" to="/">
-            Retourner à l’accueil
+            Accueil
           </AppLink>
         </section>
       </MobilePage>
@@ -198,24 +193,20 @@ export function EventPage() {
     return (
       <MobilePage
         className="event-mobile"
-        header={<MobileHeader eyebrow="Apéro introuvable" />}
-        hero={<h1 className="h1 h1--sm">Cet apéro n’existe pas</h1>}
+        header={<MobileHeader eyebrow="Apéro" />}
+        hero={<h1 className="h1 h1--sm">Apéro introuvable</h1>}
       >
         <section className="sheet">
-          <p className="lede">
-            Soit le lien est complètement moisi, soit le troquet a purement et simplement fermé
-            boutique, et dans les deux cas, on ne peut plus rien pour toi ici.
-          </p>
           {error && <p className="feedback">{error}</p>}
           <AppLink className="button button--primary button--block" to="/">
-            Retour à la Confrérie
+            Accueil
           </AppLink>
         </section>
       </MobilePage>
     );
   }
 
-  const metaText = `par ${event.organizerName} · ${event.options.length} créneau${event.options.length > 1 ? "x" : ""} · ${event.participants.length} réponse${event.participants.length > 1 ? "s" : ""}`;
+  const metaText = `Hôte : ${event.organizerName} · ${event.options.length} créneau${event.options.length > 1 ? "x" : ""} · ${event.participants.length} réponse${event.participants.length > 1 ? "s" : ""}`;
   const isOrganizer =
     Boolean(comptoirName) &&
     normalizeMemberName(comptoirName) === normalizeMemberName(event.organizerName);
@@ -223,12 +214,12 @@ export function EventPage() {
   return (
     <MobilePage
       className="event-mobile invite-page"
-      header={<MobileHeader eyebrow="Ton apéro" />}
+      header={<MobileHeader eyebrow="Apéro" />}
       hero={
         <div className="page-hero">
           <h1 className="h1 h1--sm">{event.ceremonialName}</h1>
           <p className="meta">{metaText}</p>
-          {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
+          {event.title && <p className="lede">{event.title}</p>}
         </div>
       }
     >
@@ -276,7 +267,7 @@ export function EventPage() {
               className="ghost-link ghost-link--danger"
               onClick={() => setShowDeleteConfirm(true)}
             >
-              Supprimer cet apéro
+              Supprimer l’apéro
             </button>
           )}
         </div>
@@ -284,11 +275,10 @@ export function EventPage() {
 
       <ConfirmDialog
         isOpen={showDeleteConfirm}
-        eyebrow="Suppression"
-        title="Supprimer cet apéro ?"
-        body="Ça efface tout, pour de bon : créneaux, réponses, propositions, tout y passe. Pas de retour en arrière possible."
-        cancelLabel="Non, je le garde"
-        confirmLabel="Oui, supprimer"
+        title="Supprimer ?"
+        body="Irréversible."
+        cancelLabel="Annuler"
+        confirmLabel="Supprimer"
         busyLabel="Suppression…"
         isBusy={isDeleting}
         error={error || undefined}

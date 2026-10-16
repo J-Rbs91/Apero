@@ -24,6 +24,6 @@ describe("slotDateLabel", () => {
   });
 
   it("garde la formule de repli quand la date manque", () => {
-    expect(slotDateLabel({ date: "" })).toBe("Date mystère");
+    expect(slotDateLabel({ date: "" })).toBe("Sans date");
   });
 });

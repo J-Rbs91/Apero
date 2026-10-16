@@ -263,12 +263,12 @@ async function newPersonaContext({ blaze, throughOnboarding = false } = {}) {
 }
 
 async function passOnboarding(page, blaze) {
-  await page.getByPlaceholder("Jean-Michel Pastaga, Gisèle Perrier…").fill(blaze);
-  await page.getByRole("button", { name: "Valider mon blaze" }).click();
-  await page.getByRole("button", { name: "Oui, grave ça dans le zinc" }).click();
+  await page.getByRole("textbox", { name: /^Nom/ }).fill(blaze);
+  await page.getByRole("button", { name: "Valider", exact: true }).click();
+  await page.getByRole("button", { name: "Confirmer", exact: true }).click();
   // L'écran d'autorisation des notifications suit immédiatement (Chromium
   // supporte l'API Notification) : on choisit le badge interne seul.
-  const skipButton = page.getByRole("button", { name: "Plus tard, garder juste le badge" });
+  const skipButton = page.getByRole("button", { name: "Plus tard", exact: true });
   await skipButton.waitFor({ state: "visible", timeout: 10_000 });
   await skipButton.click();
 }
@@ -304,17 +304,17 @@ async function fillCreateSlot(page, index, { date, time, location }) {
 
 async function createApero(page, { name, description, slots }) {
   await page.goto(`${APP_URL}/#/create`);
-  await page.getByPlaceholder("La Grande Tablée des Olives").fill(name);
+  await page.getByRole("textbox", { name: /^Nom/ }).fill(name);
   if (description) {
-    await page.getByPlaceholder("Apéro fin de chantier").fill(description);
+    await page.getByRole("textbox", { name: /^Objet/ }).fill(description);
   }
   for (let index = 0; index < slots.length; index += 1) {
     if (index > 0) {
-      await page.getByRole("button", { name: "+ Ajouter un créneau" }).click();
+      await page.getByRole("button", { name: "+ Créneau", exact: true }).click();
     }
     await fillCreateSlot(page, index, slots[index]);
   }
-  await page.getByRole("button", { name: "Créer l’apéro" }).click();
+  await page.getByRole("button", { name: "Créer", exact: true }).click();
   await page.waitForURL(/#\/invite\/apero_/, { timeout: 20_000 });
   return parseInviteUrl(page.url());
 }
@@ -332,8 +332,8 @@ async function waitForSnapshot(page, aperoId) {
 }
 
 async function reopenVoteFormIfCollapsed(page, timeout = 15_000) {
-  const editButton = page.getByRole("button", { name: "Modifier ma réponse" });
-  const nameInput = page.getByPlaceholder("Jojo, Nadine, Éminence Chips…");
+  const editButton = page.getByRole("button", { name: "Modifier", exact: true });
+  const nameInput = page.locator(".vote-form").getByRole("textbox", { name: /^Nom/ });
   await Promise.race([
     editButton.waitFor({ state: "visible", timeout }).catch(() => {}),
     nameInput.waitFor({ state: "visible", timeout }).catch(() => {}),
@@ -357,7 +357,7 @@ async function voteOnInvite(page, inviteUrl, { blaze, votes, comment }) {
   // Réponse déjà au registre : le formulaire est replié en chip récapitulative,
   // « Modifier ma réponse » le rouvre.
   await reopenVoteFormIfCollapsed(page);
-  const nameInput = page.getByPlaceholder("Jojo, Nadine, Éminence Chips…");
+  const nameInput = page.locator(".vote-form").getByRole("textbox", { name: /^Nom/ });
   await nameInput.waitFor({ state: "visible", timeout: 15_000 });
   if (blaze) {
     await nameInput.fill(blaze);
@@ -367,17 +367,17 @@ async function voteOnInvite(page, inviteUrl, { blaze, votes, comment }) {
     await cards.nth(index).getByRole("radio", { name: votes[index] }).check();
   }
   if (comment) {
-    await openDisclosure(page, "Ajouter des détails");
+    await openDisclosure(page, "Détails");
     await page
-      .getByPlaceholder("Je viendrai si le monde ne s’est pas arrêté de tourner d’ici là.")
+      .getByRole("textbox", { name: /^Commentaire/ })
       .fill(comment);
   }
-  await page.getByRole("button", { name: /^(Envoyer|Enregistrer) ma réponse$/ }).click();
+  await page.getByRole("button", { name: /^(Envoyer|Enregistrer)$/ }).click();
 }
 
-const VOTE_YES = "J’y serai";
-const VOTE_MAYBE = "J’me tâte";
-const VOTE_NO = "Sans moi";
+const VOTE_YES = "Oui";
+const VOTE_MAYBE = "Peut-être";
+const VOTE_NO = "Non";
 
 // ---------------------------------------------------------------------------
 // Personas
@@ -422,7 +422,7 @@ await scenario("1. Création d'un apéro (onboarding complet, mono-créneau)", a
     "L'accueil s'affiche après l'onboarding (blaze + notifications)",
   );
 
-  await page.getByRole("link", { name: "Organiser un apéro" }).click();
+  await page.getByRole("link", { name: "Nouvel apéro" }).click();
   invite1 = await createApero(page, {
     name: APERO_1_NAME,
     description: "Apéro test fonctionnel",
@@ -431,8 +431,8 @@ await scenario("1. Création d'un apéro (onboarding complet, mono-créneau)", a
 
   check("La création redirige vers un lien d'invitation avec clés", Boolean(invite1?.encryptionKey && invite1?.writeKey));
   await waitVisible(page, page.getByRole("heading", { name: APERO_1_NAME }), "Le nom cérémoniel saisi est affiché");
-  await waitVisible(page, page.getByText("Ton assemblée"), "L'organisateur est identifié sur la page");
-  await openDisclosure(page, "Qui vient ?");
+  await waitVisible(page, page.getByText("Gestion", { exact: true }), "L'organisateur est identifié sur la page");
+  await openDisclosure(page, "Réponses");
   await waitVisible(
     page,
     page.locator(".person__name", { hasText: ORGANIZER }),
@@ -494,10 +494,10 @@ await scenario("3. Vote d'un invité, puis modification de son vote", async () =
   });
   await waitVisible(
     page,
-    page.getByText("C’est émargé. Le registre te remercie."),
+    page.getByText("Réponse enregistrée."),
     "La première réponse de l'invité est enregistrée",
   );
-  await openDisclosure(page, "Qui vient ?");
+  await openDisclosure(page, "Réponses");
   await waitVisible(
     page,
     page.locator(".person__name", { hasText: GUEST_BOB }),
@@ -509,13 +509,13 @@ await scenario("3. Vote d'un invité, puis modification de son vote", async () =
   await page.reload();
   await waitVisible(
     page,
-    page.getByText("Ta réponse est au registre"),
+    page.getByText("Réponse", { exact: true }),
     "Au retour, la réponse existante est retrouvée via le blaze",
   );
   await reopenVoteFormIfCollapsed(page);
   await page.locator(".vote-form .slot").nth(1).getByRole("radio", { name: VOTE_YES }).check();
-  await page.getByRole("button", { name: /^(Envoyer|Enregistrer) ma réponse$/ }).click();
-  await waitVisible(page, page.getByText("Le registre est corrigé. On ne dira rien."), "La modification du vote est enregistrée");
+  await page.getByRole("button", { name: /^(Envoyer|Enregistrer)$/ }).click();
+  await waitVisible(page, page.getByText("Réponse modifiée."), "La modification du vote est enregistrée");
 
   const bobRows = await page.locator(".person__name", { hasText: GUEST_BOB }).count();
   check("Le même blaze ne crée pas de doublon au registre", bobRows === 1, `trouvé : ${bobRows}`);
@@ -524,13 +524,13 @@ await scenario("3. Vote d'un invité, puis modification de son vote", async () =
 
 await scenario("4. Contre-proposition : un invité ajoute un créneau", async () => {
   const page = pageBob;
-  await page.getByRole("button", { name: "Proposer un autre créneau" }).click();
-  const form = page.getByRole("dialog", { name: "Proposer un autre créneau" });
+  await page.getByRole("button", { name: "Proposer un créneau" }).click();
+  const form = page.getByRole("dialog", { name: "Nouveau créneau" });
   await form.locator('input[type="date"]').fill(futureDate(6));
   await form.locator('input[type="time"]').fill("21:00");
   await form.locator(".field--wide input").fill("La Buvette Clandestine");
   await closeLocationSearchIfOpen(page);
-  await form.getByRole("button", { name: "Proposer ce créneau" }).click();
+  await form.getByRole("button", { name: "Proposer", exact: true }).click();
 
   // Le formulaire se referme sans message depuis que le bouton déclencheur vit
   // dans la barre d'action : la preuve d'acceptation, c'est le créneau qui
@@ -545,7 +545,7 @@ await scenario("4. Contre-proposition : un invité ajoute un créneau", async ()
   check("Le nouveau créneau s'ajoute aux 3 existants", slotCount === 4, `trouvé : ${slotCount}`);
   await waitVisible(
     page,
-    page.getByText(`proposé par ${GUEST_BOB}`),
+    page.getByText(`par ${GUEST_BOB}`),
     "Le créneau affiche le nom de son auteur",
   );
   await snap(page, "contre-proposition");
@@ -558,10 +558,10 @@ await scenario("5. Vote d'un second invité sur tous les créneaux (dont le nouv
   });
   await waitVisible(
     page,
-    page.getByText("C’est émargé. Le registre te remercie."),
+    page.getByText("Réponse enregistrée."),
     "Le second invité vote, y compris sur le créneau contre-proposé",
   );
-  await openDisclosure(page, "Qui vient ?");
+  await openDisclosure(page, "Réponses");
   await waitVisible(
     page,
     page.locator(".person__name", { hasText: GUEST_CHANTAL }),
@@ -583,13 +583,13 @@ await scenario("6. Notifications : badge et carnet du créateur, silence côté 
   );
 
   await page.locator(".notif-bell").first().click();
-  await waitVisible(page, page.getByRole("heading", { name: "Ce que le zinc a noté" }), "Le carnet de notifications s'ouvre");
+  await waitVisible(page, page.getByRole("heading", { name: "Notifications", exact: true }), "Le carnet de notifications s'ouvre");
   const pageText = await page.locator(".notif-list").innerText();
   check("Le créateur est notifié de la réponse de Bob", pageText.includes(GUEST_BOB));
   check("Le créateur est notifié de la réponse de Chantal", pageText.includes(GUEST_CHANTAL));
   check(
     "Le créateur est notifié de la contre-proposition de créneau",
-    pageText.includes("Nouvelle proposition de créneau"),
+    pageText.includes("Nouveau créneau"),
   );
   check(
     "Le créateur n'est jamais notifié de ses propres actions",
@@ -619,7 +619,7 @@ await scenario("7. Isolation : seuls l'organisateur et les invités voient l'ap�
   await page.goto(`${APP_URL}/#/agenda`);
   await waitVisible(
     page,
-    page.getByText("L’ardoise est vide", { exact: false }),
+    page.getByText("Aucun apéro.", { exact: false }),
     "L'agenda d'un inconnu est vide (registre local uniquement)",
   );
 
@@ -627,7 +627,7 @@ await scenario("7. Isolation : seuls l'organisateur et les invités voient l'ap�
   await page.goto(`${APP_URL}/#/invite/${invite2.aperoId}`);
   await waitVisible(
     page,
-    page.getByText("Ce lien d’invitation est incomplet", { exact: false }),
+    page.getByText("Lien incomplet", { exact: false }),
     "Sans clé de lecture, l'apéro reste illisible",
   );
 
@@ -636,7 +636,7 @@ await scenario("7. Isolation : seuls l'organisateur et les invités voient l'ap�
   await page.goto(`${APP_URL}/#/invite/${invite2.aperoId}?k=${wrongKey}`);
   await waitVisible(
     page,
-    page.getByText("Cette clé n’ouvre pas cet apéro", { exact: false }),
+    page.getByText("Lien invalide", { exact: false }),
     "Une clé erronée est rejetée (AES-GCM authentifié)",
   );
 
@@ -644,7 +644,7 @@ await scenario("7. Isolation : seuls l'organisateur et les invités voient l'ap�
   await page.goto(`${APP_URL}/#/invite/${invite2.aperoId}?k=${invite2.encryptionKey}`);
   await waitVisible(
     page,
-    page.getByText("Ce lien permet de consulter l’apéro, mais pas d’y répondre", { exact: false }),
+    page.getByText("Lecture seule.", { exact: false }),
     "La clé de lecture seule permet de consulter sans répondre",
   );
   const voteFormCount = await page.locator(".vote-form").count();
@@ -724,9 +724,9 @@ await scenario("8. Suppression définitive par l'organisateur", async () => {
   // Bob et Chantal rejoignent d'abord l'apéro 1 : on vérifiera qu'il
   // disparaît aussi chez eux, avec un message d'annulation.
   await voteOnInvite(pageBob, invite1.fullUrl, { votes: [VOTE_YES] });
-  await pageBob.getByText("C’est émargé. Le registre te remercie.").waitFor({ state: "visible" });
+  await pageBob.getByText("Réponse enregistrée.").waitFor({ state: "visible" });
   await voteOnInvite(pageChantal, invite1.fullUrl, { votes: [VOTE_YES] });
-  await pageChantal.getByText("C’est émargé. Le registre te remercie.").waitFor({ state: "visible" });
+  await pageChantal.getByText("Réponse enregistrée.").waitFor({ state: "visible" });
   await pageBob.goto(`${APP_URL}/#/agenda`);
   await waitVisible(
     pageBob,
@@ -736,8 +736,8 @@ await scenario("8. Suppression définitive par l'organisateur", async () => {
 
   const page = pageOrganizer;
   await page.goto(invite1.fullUrl);
-  await openDisclosure(page, "Coulisses de l’organisation");
-  const deleteButton = page.getByRole("button", { name: "Annuler l’apéro" });
+  await openDisclosure(page, "Gestion");
+  const deleteButton = page.getByRole("button", { name: "Supprimer l’apéro" });
   await waitVisible(page, deleteButton, "Le bouton de suppression n'apparaît que chez l'organisateur");
 
   // Contre-épreuve : l'invité Bob ne voit pas ce bouton sur l'apéro 2.
@@ -745,12 +745,12 @@ await scenario("8. Suppression définitive par l'organisateur", async () => {
   // le helper attend la page prête quel que soit l'état du formulaire.
   await pageBob.goto(invite2.fullUrl);
   await reopenVoteFormIfCollapsed(pageBob);
-  const bobDeleteCount = await pageBob.getByRole("button", { name: "Annuler l’apéro" }).count();
+  const bobDeleteCount = await pageBob.getByRole("button", { name: "Supprimer l’apéro" }).count();
   check("Un invité ne voit pas le bouton de suppression", bobDeleteCount === 0, `trouvé : ${bobDeleteCount}`);
 
   await deleteButton.click();
-  await waitVisible(page, page.getByText("On raye tout, vraiment ?"), "La confirmation est demandée");
-  await page.getByRole("button", { name: "Oui, tout rayer" }).click();
+  await waitVisible(page, page.getByText("Supprimer ?"), "La confirmation est demandée");
+  await page.getByRole("button", { name: "Supprimer", exact: true }).click();
   await page.waitForURL(/#\/agenda/, { timeout: 15_000 });
   check("Après suppression, retour à l'agenda", true);
 
@@ -773,7 +773,7 @@ await scenario("8. Suppression définitive par l'organisateur", async () => {
   await pageStranger.goto(invite1.fullUrl);
   await waitVisible(
     pageStranger,
-    pageStranger.getByText("Cet apéro reste introuvable", { exact: false }),
+    pageStranger.getByText("Apéro introuvable", { exact: false }),
     "Le lien d'un apéro supprimé aboutit sur « introuvable »",
   );
 
@@ -805,10 +805,10 @@ await scenario("8. Suppression définitive par l'organisateur", async () => {
   const bobNotifText = await pageBob.locator(".notif-list").innerText();
   check(
     "Le carnet de l'invité explique que l'organisateur a annulé l'apéro",
-    bobNotifText.includes("Apéro annulé") &&
+    bobNotifText.includes("Apéro supprimé") &&
       bobNotifText.includes(APERO_1_NAME) &&
       // Apostrophe typographique : c'est celle du texte réel de l'app.
-      bobNotifText.includes("L’organisateur a rangé le zinc"),
+      bobNotifText.includes("supprimé par l’hôte"),
     bobNotifText,
   );
   await snap(pageBob, "notification-apero-annule");
@@ -821,12 +821,12 @@ await scenario("8. Suppression définitive par l'organisateur", async () => {
   await pageChantal.reload();
   await waitVisible(
     pageChantal,
-    pageChantal.getByRole("heading", { name: "Apéro annulé" }),
+    pageChantal.getByRole("heading", { name: "Apéro supprimé" }),
     "La page d'invitation d'un apéro supprimé annonce l'annulation à l'invité",
   );
   await waitVisible(
     pageChantal,
-    pageChantal.getByText("annulé par la personne qui l’organisait", { exact: false }),
+    pageChantal.getByText("Retiré de cet appareil.", { exact: false }),
     "Le message précise que c'est l'organisateur qui a annulé",
   );
   const chantalRegistryPurged = await pageChantal.evaluate(

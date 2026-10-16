@@ -34,11 +34,11 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 export function describeRecurrence(recurrence: AperoRecurrence): string {
   switch (recurrence) {
     case "weekly":
-      return "chaque semaine";
+      return "hebdomadaire";
     case "biweekly":
-      return "toutes les deux semaines";
+      return "bimensuel";
     case "monthly":
-      return "chaque mois";
+      return "mensuel";
   }
 }
 

@@ -50,12 +50,10 @@ export function TableeAttachSection({ aperoId, keys, event, comptoirName }: Tabl
         addedBy: comptoirName.trim() || undefined,
       });
       hapticSuccess();
-      setFeedback(
-        `C’est gravé : cet apéro rejoint les annales de « ${tableeEntry.name ?? "la tablée"} ».`,
-      );
+      setFeedback("Apéro ajouté.");
     } catch {
       hapticError();
-      setFeedback("Le rattachement a capoté. Réessaie dans un instant.");
+      setFeedback("Ajout échoué. Réessayer.");
     } finally {
       setIsAttaching(false);
     }
@@ -63,22 +61,18 @@ export function TableeAttachSection({ aperoId, keys, event, comptoirName }: Tabl
 
   return (
     <Disclosure
-      title="Rattacher à une tablée"
+      title="Groupes"
       summary={
         localTablees.length > 0
-          ? `${localTablees.length} tablée${localTablees.length > 1 ? "s" : ""} sur cet appareil.`
-          : "Fonder une bande avec les convives de ce registre."
+          ? `${localTablees.length} groupe${localTablees.length > 1 ? "s" : ""}`
+          : "Aucun groupe."
       }
     >
       {localTablees.length > 0 ? (
         <>
-          <p className="lede">
-            Rattache cet apéro aux annales d’une de tes tablées : la bande le
-            retrouvera avec le reste de son histoire.
-          </p>
           <ChoiceGroup
             name="tablee-attach"
-            legend="À quelle tablée ?"
+            legend="Groupe"
             requirement="required"
             options={localTablees.map((entry) => ({
               value: entry.tableeId,
@@ -93,15 +87,11 @@ export function TableeAttachSection({ aperoId, keys, event, comptoirName }: Tabl
             onClick={handleAttach}
             disabled={!selectedTableeId || isAttaching}
           >
-            {isAttaching ? "On grave aux annales…" : "Rattacher à cette tablée"}
+            {isAttaching ? "Ajout…" : "Ajouter"}
           </button>
         </>
       ) : (
         <>
-          <p className="lede">
-            Cette bande mérite mieux qu’un apéro sans lendemain : fonde une tablée,
-            la troupe du registre sera attablée d’office.
-          </p>
           <button
             type="button"
             className="button button--ghost button--block"
@@ -121,7 +111,7 @@ export function TableeAttachSection({ aperoId, keys, event, comptoirName }: Tabl
               })
             }
           >
-            Fonder une tablée avec cette bande
+            Créer un groupe
           </button>
         </>
       )}

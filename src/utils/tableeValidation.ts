@@ -138,7 +138,7 @@ export function sanitizeTablee(rawTablee: unknown, expectedId?: string): Tablee 
   }
 
   if (rawTablee.kind !== "tablee") {
-    fail("tablee.kind", "ce fichier n’est pas une tablée");
+    fail("tablee.kind", "ce fichier n’est pas un groupe");
   }
 
   const id = cleanText(rawTablee.id, "tablee.id", 80, { required: true }) as string;
