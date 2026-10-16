@@ -36,6 +36,8 @@ type Options = {
    * vote reçu).
    */
   dataKey: string;
+  /** Appelé une fois, quand la figure atteint son état final. */
+  onComplete?: () => void;
 };
 
 function readPalette(element: Element): FieldPalette {
@@ -57,10 +59,13 @@ function prefersReducedMotion(): boolean {
   );
 }
 
-export function useFieldCanvas(draw: FieldDraw, { duration, dataKey }: Options) {
+export function useFieldCanvas(draw: FieldDraw, { duration, dataKey, onComplete }: Options) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const drawRef = useRef(draw);
   drawRef.current = draw;
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+  const completedRef = useRef(false);
   // L'avancement survit aux changements de données : une figure déjà
   // révélée reste révélée.
   const progressRef = useRef(prefersReducedMotion() ? 1 : 0);
@@ -97,6 +102,10 @@ export function useFieldCanvas(draw: FieldDraw, { duration, dataKey }: Options) 
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
       context.clearRect(0, 0, width, height);
       drawRef.current(context, { width, height }, progressRef.current, readPalette(canvas));
+      if (progressRef.current >= 1 && !completedRef.current) {
+        completedRef.current = true;
+        onCompleteRef.current?.();
+      }
     }
 
     function tick(now: number) {

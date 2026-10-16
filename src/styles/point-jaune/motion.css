@@ -160,19 +160,6 @@
   animation-delay: calc(400ms + var(--i) * 40ms);
 }
 
-.splash__glass {
-  animation: pj-fade var(--d-slow) var(--ease-out) 500ms backwards;
-}
-
-.splash__eyebrow {
-  animation: pj-fade var(--d-base) var(--ease-out) 600ms backwards;
-}
-
-.splash__tagline,
-.splash__aside {
-  animation: pj-fade var(--d-slow) var(--ease-out) 1000ms backwards;
-}
-
 /* Bloc refusé à l'envoi : le formulaire remonte sur le bloc fautif, le passe
    au rouge et le secoue une fois (useShakeInvalid). */
 .is-shaking {

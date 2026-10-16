@@ -163,18 +163,6 @@ export function RegistreLegalPage() {
             Open Font License 1.1.
           </li>
           <li>
-            Animation du verre : <strong>Noto Animated Emoji</strong> (Google),
-            licence{" "}
-            <a
-              href="https://creativecommons.org/licenses/by/4.0/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              CC BY 4.0
-            </a>
-            , modifiée (2 calques retirés).
-          </li>
-          <li>
             Code source : licence MIT,{" "}
             <a
               href="https://github.com/J-Rbs91/Apero"

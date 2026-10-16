@@ -41,10 +41,11 @@ maîtrisé), **la déclaration** (le nom de l'assemblée, le verdict, sont procl
 - **Nom** : « La Confrérie du Petit Jaune », court « La Confrérie » (inchangés).
 - **Marque** : le **point jaune** (un disque plein, `--jaune`), seul ou suivant « La Confrérie »
   comme un point final. Il remplace le verre animé dans les en-têtes (`BrandMenu`,
-  onboarding). Le verre Lottie **reste dans l'écran d'ouverture** : c'est l'unique objet
-  figuratif de l'univers, et la plaisanterie de l'ouverture (« Le rouge, le jaune… la
-  cohérence de la charte graphique a le cul entre deux chaises ») devient encore plus
-  vraie face à un système strictement noir, ivoire et jaune. Aucun texte n'est modifié.
+  onboarding).
+- **Le verre de l'ouverture** (révision du 16/10/2026, à la demande du propriétaire) :
+  l'emoji animé de Google est remplacé par un verre **dessiné en trame de points**
+  (`GlassField`), dans la même grammaire que le champ des votes ; il se remplit du
+  Petit Jaune. `lottie-web` et l'animation Noto sont retirés du dépôt.
 - **Signature d'assemblée** : chaque apéro et chaque tablée reçoit une bande binaire
   déterministe calculée à partir de son **identifiant public** (jamais des clés `k`/`w`).
   Même identifiant, même signature, sur tous les écrans.
@@ -171,7 +172,7 @@ Fragment Mono latin + latin-ext) ; Manrope et Abril Fatface retirées. Canvas : 
 animé à la fois par écran, `requestAnimationFrame` suspendu hors champ
 (`IntersectionObserver`) et onglet masqué, animation finie (pas de boucle infinie hors
 écran d'ouverture), rendu `devicePixelRatio` plafonné à 2. CSS livré : objectif ≤ 74 ko
-(référence `main` : 73,96 ko). `lottie-web` reste (écran d'ouverture uniquement, chunk
+(référence `main` : 73,96 ko). `lottie-web` reste dans un premier temps (écran d'ouverture uniquement, chunk
 paresseux inchangé). Illustrations `Le-zinc.jpg` et `mur-vert.jpg` **conservées dans le
 dépôt** (actifs du propriétaire) mais plus importées : absentes du site publié ;
 `CREDITS.md` le signale.
