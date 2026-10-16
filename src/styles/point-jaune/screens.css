@@ -1,0 +1,259 @@
+/* ==========================================================================
+   Point Jaune — 9. Écrans (archétypes : UXER_REDESIGN_CONTRACT.md §10)
+   ========================================================================== */
+
+/* --- Accueil : Manifesto Frame + Data Field ---------------------------- */
+
+.home-mobile .facade__hero {
+  padding-top: var(--s-5);
+  padding-bottom: 0;
+}
+
+.sign {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-7);
+}
+
+.sign__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-5);
+}
+
+.sign__text > .eyebrow + .h1 {
+  margin-top: calc(-1 * var(--s-2));
+}
+
+.sign__text .button {
+  align-self: stretch;
+}
+
+/* Sans apéro en cours, le récipient vide passe devant le manifeste. */
+.sign__field {
+  margin-inline: calc(-1 * var(--s-2));
+}
+
+/* L'apéro en cours passe devant : une rangée de registre, une action pleine. */
+.nextapero {
+  gap: var(--s-3);
+  padding-top: var(--s-4);
+  border-top: var(--hair) solid var(--text);
+}
+
+.nextapero .h2 {
+  max-width: 18ch;
+}
+
+.home-mobile .page__body {
+  padding-top: var(--s-7);
+}
+
+/* --- Pages intérieures : l'en-tête est une déclaration ---------------- */
+
+.facade__hero .page-hero {
+  padding-top: var(--s-5);
+}
+
+/* Silent Frame : les écrans sans tâche urgente commencent par du vide. */
+.onboarding-screen .facade__hero,
+.palmares-mobile .facade__hero,
+.legal-page .facade__hero {
+  padding-top: var(--ma-1);
+}
+
+.invite-page .page-hero .signature,
+.agenda-mobile .page-hero .signature {
+  margin-top: var(--s-1);
+}
+
+/* --- Apéro : le flux principal puis le flux secondaire ---------------- */
+
+/* Écran de tâche : le titre se déclare sans repousser la réponse. */
+.event-mobile .facade__hero {
+  padding-top: var(--s-3);
+}
+
+
+.invite-grid,
+.invite-main,
+.invite-aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  min-width: 0;
+}
+
+.invite-aside {
+  gap: 0;
+}
+
+.invite-aside > .disclose:first-child {
+  border-top: var(--hair) solid var(--line);
+}
+
+.invite-aside > .sheet {
+  margin-top: var(--s-7);
+}
+
+/* --- Organiser : formulaire dense ------------------------------------- */
+
+.create-mobile form.sheet {
+  gap: var(--s-8);
+}
+
+/* --- Listes d'apéros, de tablées, de palmarès ------------------------- */
+
+.event-stack {
+  gap: var(--s-8);
+}
+
+.event-stack > .sheet {
+  padding-top: var(--s-4);
+  border-top: var(--hair) solid var(--text);
+}
+
+.event-stack > .sheet > .eyebrow:first-child {
+  padding-bottom: 0 !important;
+  border-bottom: 0 !important;
+}
+
+.sheet--past {
+  opacity: 1;
+}
+
+.sheet--past .h2 {
+  color: var(--text-2);
+}
+
+/* --- Rétrospective : les chiffres de l'année sont la déclaration ------- */
+
+.comptes-page .counts {
+  gap: var(--s-4) 0;
+  border-top: 0;
+}
+
+.comptes-page .cnt {
+  padding-top: var(--s-4);
+  border-top: var(--hair) solid var(--text);
+}
+
+.comptes-page .cnt b {
+  font-family: var(--font-sans);
+  font-size: clamp(3.5rem, 15vw, 8rem);
+  font-stretch: var(--w-manifest);
+  font-weight: 800;
+  line-height: 0.85;
+  letter-spacing: -0.035em;
+}
+
+/* --- Registre légal : le document en inversion ivoire ------------------ */
+
+.legal-page.screen,
+.legal-page .screen {
+  background: var(--paper);
+}
+
+.legal-page .page__body {
+  gap: var(--s-7);
+}
+
+.legal-page .lede {
+  font-size: var(--t-body);
+  hyphens: auto;
+}
+
+.legal-page .bk,
+.legal-page .notif-bell {
+  border-color: var(--paper-control);
+}
+
+.legal-page .notif-badge {
+  outline-color: var(--paper);
+}
+
+.legal-page .button--primary {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* --- Écran d'ouverture : Signal Emergence ------------------------------ */
+
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  padding: var(--margin) var(--margin) calc(var(--s-7) + env(safe-area-inset-bottom));
+  background: var(--void);
+  color: var(--ivory);
+  transition: opacity var(--d-base) var(--ease-in);
+}
+
+.splash--leaving {
+  opacity: 0;
+}
+
+.signalfield {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.splash__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-4);
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+}
+
+.splash__glass {
+  display: block;
+  margin-bottom: var(--s-2);
+}
+
+.splash__eyebrow {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--ash);
+}
+
+.splash__name {
+  max-width: 11ch;
+  margin: 0;
+  font-size: var(--t-manifest);
+  font-stretch: var(--w-manifest);
+  font-weight: 800;
+  line-height: 0.86;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.splash__tagline {
+  max-width: 26rem;
+  margin: var(--s-2) 0 0;
+  font-size: var(--t-lede);
+  line-height: 1.4;
+  color: var(--ash);
+}
+
+.splash__aside {
+  max-width: 26rem;
+  margin: var(--s-2) 0 0;
+  padding-top: var(--s-3);
+  border-top: var(--hair) solid var(--rule);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  line-height: 1.5;
+  color: var(--ash-2);
+}

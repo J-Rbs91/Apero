@@ -3,6 +3,7 @@ import { AppLink } from "../components/AppLink";
 import { useAppNavigation } from "../routes/useAppNavigation";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
+import { Signature } from "../components/field/Signature";
 import { MobilePage } from "../components/MobilePage";
 import { SlotHead } from "../components/SlotHead";
 import { TraquenardGauge } from "../components/TraquenardGauge";
@@ -178,6 +179,7 @@ export function AgendaPage() {
                 {event.participants.length} réponse{event.participants.length > 1 ? "s" : ""}
               </p>
               <h2 className="h2">{event.ceremonialName}</h2>
+              <Signature seed={event.id} />
               {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
               <p className="meta">par {event.organizerName}</p>
 

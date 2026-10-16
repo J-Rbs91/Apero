@@ -75,8 +75,8 @@ export function FormSheet({
               <path
                 d="M6 6l12 12M18 6L6 18"
                 stroke="currentColor"
-                strokeWidth="2.4"
-                strokeLinecap="round"
+                strokeWidth="1.5"
+                strokeLinecap="square"
               />
             </svg>
           </button>

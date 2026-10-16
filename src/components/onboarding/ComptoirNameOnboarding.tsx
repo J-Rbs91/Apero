@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useModalDialog } from "../../hooks/useModalDialog";
 import { MobilePage } from "../MobilePage";
-import { WineGlassMark } from "../WineGlassMark";
+import { PointMark } from "../field/PointMark";
 import { Field } from "../ui";
 import { validateComptoirName } from "../../utils/memberName";
 
@@ -47,7 +47,7 @@ export function ComptoirNameOnboarding({
       className="onboarding-screen"
       header={
         <div className="brandpill">
-          <WineGlassMark size={26} /> La Confrérie
+          <PointMark /> La Confrérie
         </div>
       }
       hero={

@@ -8,26 +8,26 @@ les obligations d'attribution correspondantes.
 
 ---
 
-## Police de caractères
+## Polices de caractères
 
-### Manrope
+### Archivo
 
-- **Fichiers** : `src/assets/fonts/manrope-latin.woff2`, `src/assets/fonts/manrope-latin-ext.woff2`
-- **Auteurs** : Copyright 2018 The Manrope Project Authors — <https://github.com/sharanda/manrope>
-- **Licence** : SIL Open Font License 1.1 — texte intégral dans `src/assets/fonts/OFL.txt`
-- **Modifications** : aucune. Les fichiers sont les sous-ensembles `latin` et `latin-ext`
-  distribués par Google Fonts, repris tels quels.
+- **Fichiers** : `src/assets/fonts/archivo-latin.woff2`, `src/assets/fonts/archivo-latin-ext.woff2`
+- **Auteurs** : Copyright 2020 The Archivo Project Authors — <https://github.com/Omnibus-Type/Archivo>
+- **Licence** : SIL Open Font License 1.1 — texte intégral dans `src/assets/fonts/OFL-Archivo.txt`
+- **Modifications** : aucune. Fonte variable (axes `wght` 100-900 et `wdth` 62-125 %),
+  sous-ensembles `latin` et `latin-ext` distribués par Google Fonts, repris tels quels.
+  Seule famille de texte de l'interface (voir `docs/uxer/manifesto-void/UXER_DESIGN_SYSTEM.md` §2).
 
-### Abril Fatface
+### Fragment Mono
 
-- **Fichiers** : `src/assets/fonts/abril-fatface-latin.woff2`, `src/assets/fonts/abril-fatface-latin-ext.woff2`
-- **Auteurs** : Copyright (c) 2011, TypeTogether — <https://www.type-together.com>
-- **Licence** : SIL Open Font License 1.1 — texte intégral dans `src/assets/fonts/OFL-AbrilFatface.txt`
-- **Modifications** : aucune. Sous-ensembles `latin` et `latin-ext` distribués par Google Fonts,
-  repris tels quels. Employée uniquement pour les titres et chiffres d'affiche (voir
-  `docs/uxer/design-system.md` §2).
+- **Fichiers** : `src/assets/fonts/fragment-mono-latin.woff2`, `src/assets/fonts/fragment-mono-latin-ext.woff2`
+- **Auteurs** : Copyright 2022 The Fragment-Mono Project Authors — <https://github.com/weiweihuanghuang/fragment-mono>
+- **Licence** : SIL Open Font License 1.1 — texte intégral dans `src/assets/fonts/OFL-FragmentMono.txt`
+- **Modifications** : aucune. Sous-ensembles `latin` et `latin-ext` distribués par Google
+  Fonts, repris tels quels. Employée pour les données (heures, compteurs, légendes).
 
-Les deux polices sont **auto-hébergées** et non chargées depuis le CDN Google. Ce choix est
+Les deux familles sont **auto-hébergées** et non chargées depuis le CDN Google. Ce choix est
 délibéré : servir une police depuis `fonts.googleapis.com` transmet l'adresse IP de
 chaque visiteur à Google aux États-Unis sans base légale ni consentement, ce qu'un
 tribunal allemand a jugé contraire au RGPD (LG München I, 20 janvier 2022, 3 O 17493/20).
@@ -56,6 +56,10 @@ les deux mentions ci-dessus sont la condition de conformité. Ne pas les supprim
 ## Images d'ambiance
 
 ### `src/assets/art/Le-zinc.jpg` et `src/assets/art/mur-vert.jpg`
+
+> Conservées dans le dépôt mais **plus affichées** depuis la direction « Point Jaune »
+> (aucun import dans `src/`, donc absentes du site publié).
+
 
 - **Origine** : images générées par l'IA générative de Google (Gemini).
   L'original PNG portait des métadonnées de provenance C2PA signées par Google

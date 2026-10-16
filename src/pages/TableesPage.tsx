@@ -4,6 +4,7 @@ import { AppLink } from "../components/AppLink";
 import { useAppNavigation } from "../routes/useAppNavigation";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
+import { Signature } from "../components/field/Signature";
 import { MobilePage } from "../components/MobilePage";
 import { TextField } from "../components/ui";
 import { useComptoirName } from "../hooks/useComptoirName";
@@ -197,6 +198,7 @@ export function TableesPage() {
                 {tablee!.aperoRefs.length} apéro{tablee!.aperoRefs.length > 1 ? "s" : ""}
               </p>
               <h2 className="h2">{tablee!.name}</h2>
+              <Signature seed={entry.tableeId} />
               {tablee!.motto && <p className="lede">{"« "}{tablee!.motto}{" »"}</p>}
               <p className="meta">fondée par {tablee!.founderName}</p>
               <AppLink

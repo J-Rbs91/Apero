@@ -1,0 +1,550 @@
+/* ==========================================================================
+   Point Jaune — 6. Verdict, champ des votes, compteurs, jauge, cartes
+   Le verdict est la déclaration de l'écran d'apéro : la date se proclame en
+   chiffres monumentaux, le Petit Jaune la ponctue, la tablée se matérialise
+   en champ de signes exacts (Data Field).
+   ========================================================================== */
+
+/* Bande de signal : 24 traits (12 sur mobile). Une impulsion la parcourt
+   une fois quand un créneau l'emporte ; éteinte en attente. */
+.bulbs {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-2);
+  height: 14px;
+}
+
+.bulbs i {
+  flex: 0 0 auto;
+  width: 1px;
+  height: 100%;
+  background: var(--text);
+}
+
+.bulbs i:nth-child(3n + 1) {
+  height: 60%;
+  align-self: flex-end;
+}
+
+.bulbs i:nth-child(n + 13) {
+  display: none;
+}
+
+.bulbs--off i {
+  background: var(--line);
+}
+
+.verdict {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+  min-width: 0;
+}
+
+.verdict__main,
+.verdict__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  min-width: 0;
+}
+
+.verdict__side {
+  gap: var(--s-6);
+}
+
+.verdict__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  color: var(--text-2);
+}
+
+.verdict__title {
+  margin: var(--s-2) 0 0;
+}
+
+.verdict__title--text {
+  max-width: 24ch;
+  font-size: var(--t-section);
+  font-stretch: var(--w-head);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+
+/* La date : chiffres monumentaux, ponctués du Petit Jaune. */
+.verdict__date {
+  display: block;
+  font-size: var(--t-monument);
+  font-stretch: var(--w-manifest);
+  font-weight: 800;
+  line-height: 0.82;
+  letter-spacing: -0.035em;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.verdict__date::after {
+  display: inline-block;
+  width: 0.14em;
+  height: 0.14em;
+  margin-left: 0.05em;
+  background: var(--signal);
+  content: "";
+}
+
+.verdict__time {
+  display: block;
+  margin-top: var(--s-3);
+  font-family: var(--font-mono);
+  font-size: clamp(1.75rem, 1.2rem + 3vw, 3.5rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--text);
+}
+
+.verdict__place {
+  margin: var(--s-2) 0 0;
+  font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+/* Apéro passé : servi, éteint, tamponné sobrement. */
+.verdict--past .verdict__date,
+.verdict--past .verdict__time,
+.verdict--past .verdict__title--text {
+  color: var(--text-3);
+}
+
+.verdict--past .verdict__date::after {
+  background: var(--text-3);
+}
+
+.verdict__stamp {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 3px var(--s-2);
+  border: var(--hair) solid var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--text);
+}
+
+.verdict--past > .verdict__main > .eyebrow {
+  padding-right: 5rem;
+}
+
+/* --- Champ des votes : la matrice créneaux × convives ------------------ */
+
+.votefield {
+  --vf-row: 28px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--s-3);
+  align-items: start;
+}
+
+.votefield__labels {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.votefield__labels li {
+  display: flex;
+  align-items: center;
+  height: var(--vf-row);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.votefield__labels li.is-lead {
+  color: var(--signal);
+}
+
+.votefield__canvas {
+  display: block;
+  width: 100%;
+  height: calc(var(--vf-rows, 1) * var(--vf-row));
+}
+
+@media (min-width: 768px) {
+  .votefield {
+    --vf-row: 40px;
+  }
+}
+
+/* --- Compteurs : la légende du champ, en chiffres --------------------- */
+
+.counts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  border-top: var(--hair) solid var(--line);
+}
+
+.cnt {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-1);
+  min-width: 0;
+  padding: var(--s-3) var(--s-3) 0 0;
+}
+
+.cnt + .cnt {
+  padding-left: var(--s-3);
+  border-left: var(--hair) solid var(--line);
+}
+
+.cnt b {
+  font-family: var(--font-mono);
+  font-size: 2.25rem;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--text);
+}
+
+.cnt span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+/* Dans le verdict, chaque compteur porte la marque de sa colonne du champ. */
+.verdict .cnt span::before {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border: 1.25px solid currentColor;
+  background: currentColor;
+  content: "";
+}
+
+.verdict .cnt:nth-child(2) span::before {
+  background: repeating-linear-gradient(180deg, currentColor 0 1.25px, transparent 1.25px 3px);
+}
+
+.verdict .cnt:nth-child(3) span::before {
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - 0.75px),
+    currentColor calc(50% - 0.75px) calc(50% + 0.75px),
+    transparent calc(50% + 0.75px)
+  );
+}
+
+/* --- Mini-carte : le fond de plan passe en monochrome nocturne ---------- */
+
+.minimap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+/* isolation : enferme l'échelle de plans de Leaflet dans le cadre de la carte,
+   sans quoi elle se compare à nos propres calques et peut se peindre dessus. */
+.minimap__canvas {
+  position: relative;
+  isolation: isolate;
+  height: 160px;
+  border: var(--hair) solid var(--control-border);
+  background: var(--void-2);
+  overflow: hidden;
+}
+
+.minimap__canvas--expanded {
+  height: min(56vh, 460px);
+}
+
+.minimap__canvas .leaflet-tile-pane,
+.locpicker__canvas .leaflet-tile-pane {
+  filter: grayscale(1) invert(1) brightness(0.82) contrast(0.92);
+}
+
+.minimap__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.minimap__address {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--t-small);
+}
+
+.minimap__address .maplinks__trigger {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.minimap__expand {
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--s-3);
+  border: var(--hair) solid var(--control-border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+}
+
+.minimap__expand:hover {
+  border-color: var(--text);
+  background: var(--hover);
+}
+
+.minimap__expanded-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.minimap__close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border: var(--hair) solid var(--text);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+}
+
+.minimap__close:hover {
+  background: var(--hover);
+}
+
+.locpicker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.locpicker__canvas {
+  position: relative;
+  isolation: isolate;
+  height: 220px;
+  border: var(--hair) solid var(--control-border);
+  background: var(--void-2);
+  overflow: hidden;
+}
+
+/* Les contrôles de Leaflet suivent le système (pas de pastilles blanches). */
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: var(--void-2);
+}
+
+.leaflet-bar a,
+.leaflet-bar a:hover {
+  border-bottom-color: var(--rule);
+  border-radius: 0 !important;
+  background: var(--void-2);
+  color: var(--ivory);
+}
+
+.leaflet-bar {
+  border: var(--hair) solid var(--control) !important;
+  border-radius: 0 !important;
+}
+
+.leaflet-control-attribution {
+  background: rgb(9 11 13 / 0.78) !important;
+  color: var(--ash) !important;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.leaflet-control-attribution a {
+  color: var(--ivory) !important;
+}
+
+/* --- Ouvrir dans une appli GPS ----------------------------------------- */
+
+.maplinks {
+  display: inline-flex;
+  min-width: 0;
+}
+
+.maplinks__trigger {
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  font-size: var(--t-small);
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.maplinks__trigger:hover {
+  color: var(--text);
+}
+
+.slot__maplink .maplinks__trigger {
+  margin-block: -8px;
+}
+
+.maplinks__panel {
+  position: fixed;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+  padding: var(--s-2) 0;
+  border: var(--hair) solid var(--control-border);
+  border-radius: 0;
+  background: var(--void-2);
+  color: var(--ivory);
+}
+
+.maplinks__eyebrow {
+  margin: var(--s-1) var(--s-4) var(--s-2);
+}
+
+.maplinks__item {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--s-3) var(--s-4);
+  border: 0;
+  background: transparent;
+  color: var(--ivory);
+  font-size: var(--t-small);
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+}
+
+.maplinks__item:hover {
+  background: var(--void-3);
+}
+
+/* --- Traquenard-O-mètre : dix barres de niveau croissantes ------------- */
+
+.traq {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  width: 100%;
+}
+
+.traq__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-1) var(--s-3);
+}
+
+.traq__title {
+  margin: 0;
+  font-size: var(--t-small);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.traq__value {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--text);
+}
+
+.traq__value--empty {
+  color: var(--text-3);
+}
+
+.traq__gauge {
+  position: relative;
+  padding: var(--s-1) 0;
+}
+
+/* Le niveau monte comme un signal : la hauteur dit l'intensité, la
+   couleur ne porte jamais le sens seule (la valeur est écrite). */
+.traq__bulbs {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  align-items: end;
+  gap: 4px;
+  max-width: 420px;
+  height: 36px;
+}
+
+.traq__bulb {
+  height: calc(18% + var(--i, 0) * 9%);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line);
+  transition: background-color var(--d-instant) var(--ease-std);
+}
+
+.traq__bulb.is-lit {
+  background: var(--text);
+  box-shadow: none;
+  transition-delay: calc(var(--i, 0) * 24ms);
+}
+
+/* Curseur pas encore touché : la jauge s'efface, l'invitation à glisser se
+   lit en creux. */
+.traq--untouched .traq__bulb.is-lit {
+  background: var(--text-3);
+}
+
+.traq--interactive .traq__gauge {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+}
+
+.traq--interactive .traq__bulbs {
+  width: 100%;
+}
+
+.traq__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 44px;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.traq__gauge:has(.traq__input:focus-visible) {
+  outline: var(--ring) solid var(--focus);
+  outline-offset: 4px;
+}
+
+/* --- Constellation de l'accueil ---------------------------------------- */
+
+.constellation {
+  display: block;
+  width: 100%;
+  height: clamp(140px, 34vw, 220px);
+}

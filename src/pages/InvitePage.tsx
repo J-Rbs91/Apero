@@ -9,6 +9,7 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
 import { SlotHead } from "../components/SlotHead";
+import { Signature } from "../components/field/Signature";
 import { MobilePage } from "../components/MobilePage";
 import { MobileResultsPanel } from "../components/MobileResultsPanel";
 import { MobileShareBox } from "../components/MobileShareBox";
@@ -528,13 +529,14 @@ export function InvitePage() {
       </Disclosure>
     ) : null;
 
-  // Tête de page, peinte sur la façade : le nom de l'assemblée et son état.
+  // Tête de page : le nom de l'assemblée proclamé, sa signature, son état.
   const heroBlock = (
     <div className="page-hero">
       <p className="eyebrow">
         {isOrganizer ? "Ton assemblée" : `Une invitation de ${event.organizerName}`}
       </p>
       <h1 className="h1 h1--sm">{event.ceremonialName}</h1>
+      <Signature seed={event.id} />
       {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
       <p className="factline">
         <span>

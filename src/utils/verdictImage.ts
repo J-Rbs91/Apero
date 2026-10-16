@@ -15,20 +15,22 @@ const WIDTH = 1080;
 // jamais faire chevaucher la jauge et le pied de page.
 const MIN_HEIGHT = 1350;
 
-// Palette miroir de src/styles/global.css, partagée avec le bilan annuel.
+// Palette miroir des jetons « Point Jaune » (src/styles/point-jaune/tokens.css),
+// partagée avec le bilan annuel. Le fond est un aplat : les deux arrêts du
+// dégradé sont égaux, sans changer le code de dessin.
 export const CANVAS_COLORS = {
-  backgroundTop: "#11342a",
-  backgroundBottom: "#0a241b",
-  pastis: "#f4c542",
-  pastisSoft: "#ffe39a",
-  cream: "#fff7e6",
-  muted: "rgba(255, 247, 230, 0.62)",
-  barRed: "#b8322b",
-  panel: "rgba(255, 247, 230, 0.07)",
-  panelBorder: "rgba(255, 247, 230, 0.2)",
+  backgroundTop: "#090b0d",
+  backgroundBottom: "#090b0d",
+  pastis: "#d7ab42",
+  pastisSoft: "#aaa9a4",
+  cream: "#f3f1ea",
+  muted: "rgba(243, 241, 234, 0.62)",
+  barRed: "#ff7a6b",
+  panel: "rgba(243, 241, 234, 0.05)",
+  panelBorder: "rgba(243, 241, 234, 0.18)",
 };
 
-export const CANVAS_FONT = '"Manrope", system-ui, "Segoe UI", Arial, sans-serif';
+export const CANVAS_FONT = '"Archivo", "Helvetica Neue", Arial, system-ui, sans-serif';
 const FONT = CANVAS_FONT;
 
 // Découpe un texte en lignes qui tiennent dans maxWidth (mesure canvas).

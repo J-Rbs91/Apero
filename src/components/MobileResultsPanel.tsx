@@ -1,6 +1,7 @@
 import type { AperitifEvent, AperitifOption, ResultState } from "../types/apero";
 import { calculateAverageTraquenardLevel } from "../utils/calculateResults";
 import { Bulbs } from "./Bulbs";
+import { VoteField, type VoteFieldRow } from "./field/VoteField";
 import { MiniMap } from "./MiniMap";
 import { TraquenardGauge } from "./TraquenardGauge";
 
@@ -26,6 +27,16 @@ function splitWinner(option: AperitifOption): { date: string; time: string } {
     : "Date mystère";
 
   return { date, time: option.time || "heure mystère" };
+}
+
+// Repère court d'une rangée du champ des votes (« lun. 19 »).
+function rowLabel(option: AperitifOption): string {
+  if (!option.date) {
+    return "?";
+  }
+  return new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric" }).format(
+    new Date(`${option.date}T00:00:00`),
+  );
 }
 
 function describeEyebrow(result: ResultState): string {
@@ -81,8 +92,20 @@ export function MobileResultsPanel({
 
   const winner = !awaitingGuests && highlightedOption ? splitWinner(highlightedOption) : null;
 
-  // Le panneau de verdict : le seul endroit où le produit « crie » — ampoules,
-  // date en chiffres d'affiche, compteurs à arche (docs/uxer/design-system.md §5).
+  // La matrice réelle du registre : une rangée par créneau, une case par
+  // convive. Seul ce qui est au registre est dessiné.
+  const fieldRows: VoteFieldRow[] = event.options.map((option) => ({
+    id: option.id,
+    label: rowLabel(option),
+    cells: event.participants.map((participant) => participant.votes[option.id] ?? null),
+  }));
+  const leadIndex = highlightedId
+    ? event.options.findIndex((option) => option.id === highlightedId)
+    : -1;
+
+  // Le verdict : la déclaration de l'écran (date monumentale ponctuée du Petit
+  // Jaune) et le champ des votes, la tablée matérialisée en signes exacts
+  // (docs/uxer/manifesto-void/UXER_DESIGN_SYSTEM.md §8).
   return (
     <div className={`verdict${isPast ? " verdict--past" : ""}`}>
       <Bulbs chase={!isPast && !awaitingGuests && result.type === "winner"} off={isPast || !winner} />
@@ -114,6 +137,9 @@ export function MobileResultsPanel({
         )}
       </div>
       <div className="verdict__side">
+        {event.options.length > 0 && (
+          <VoteField rows={fieldRows} leadIndex={leadIndex} seed={event.id} />
+        )}
         {!awaitingGuests && highlightedResult && (
           <div className="counts">
             <div className="cnt">

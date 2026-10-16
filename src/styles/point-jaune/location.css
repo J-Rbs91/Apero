@@ -1,0 +1,258 @@
+/* ==========================================================================
+   Point Jaune — 8. Recherche de lieu (champ, suggestions, overlay plein écran)
+   ========================================================================== */
+
+.locfield {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 0;
+}
+
+/* La loupe est posée dans le champ : une propriété du contrôle. */
+.locfield__control {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.locfield__glyph {
+  position: absolute;
+  top: 50%;
+  left: 13px;
+  color: var(--text-2);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.locfield__control input {
+  padding-left: 40px;
+}
+
+.field--invalid .locfield__glyph {
+  color: var(--danger);
+}
+
+.locfield__picked {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--text-3);
+}
+
+.locfield__option {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  min-height: 52px;
+  padding: var(--s-2) var(--s-3);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.locfield__option:hover,
+.locfield__option:focus-visible {
+  background: var(--hover);
+}
+
+.locfield__name {
+  font-weight: 600;
+}
+
+.locfield__addr {
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--text-3);
+}
+
+.locfield__pin-toggle,
+.locfield__nearby-toggle {
+  align-self: flex-start;
+}
+
+.locfield__nearby-toggle:disabled {
+  cursor: wait;
+}
+
+.locfield__nearby-note {
+  margin: 0;
+  font-size: var(--t-small);
+  color: var(--text-3);
+}
+
+.locfield__nearby-prime {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-3);
+  border: var(--hair) dashed var(--control-border);
+}
+
+.locfield__nearby-prime-text {
+  margin: 0;
+  font-size: var(--t-small);
+  color: var(--text-2);
+}
+
+.locfield__nearby-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-height: 240px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  border: var(--hair) solid var(--control-border);
+  background: var(--layer);
+}
+
+.locfield__nearby-credit {
+  list-style: none;
+}
+
+/* Mention de source ODbL sous les listes issues d'OpenStreetMap : discrète
+   mais jamais masquée, c'est la condition d'usage de la donnée. */
+.osm-credit {
+  margin: var(--s-2) 2px 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--text-3);
+}
+
+.osm-credit a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--text-2);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* --- Overlay plein écran : le champ remonte au-dessus du clavier -------- */
+
+.locsearch {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+}
+
+.locsearch__scrim {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: rgb(9 11 13 / 0.9);
+  cursor: pointer;
+}
+
+.locsearch__panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 36rem);
+  min-height: 0;
+  max-height: 100dvh;
+  margin: 0 auto;
+  padding: calc(env(safe-area-inset-top, 0px) + var(--s-3)) var(--s-3) var(--s-3);
+  border: var(--hair) solid var(--control-border);
+  border-top: 0;
+  background: var(--layer);
+  color: var(--text);
+}
+
+.locsearch__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.locsearch__back,
+.locsearch__clear {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+}
+
+.locsearch__back {
+  border: var(--hair) solid var(--control-border);
+}
+
+.locsearch__back:hover,
+.locsearch__back:focus-visible,
+.locsearch__clear:hover,
+.locsearch__clear:focus-visible {
+  background: var(--hover);
+}
+
+.locsearch__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 var(--s-3);
+}
+
+.locsearch__results {
+  min-height: 0;
+  margin-top: var(--s-3);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.locsearch__hint {
+  margin: var(--s-2) var(--s-1);
+  font-size: var(--t-small);
+  color: var(--text-3);
+}
+
+.locsearch__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.locsearch__list > li + li {
+  border-top: var(--hair) solid var(--line);
+}
+
+.locsearch__skel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--s-3);
+}
+
+.locsearch__skel-line {
+  display: block;
+  height: 12px;
+  background: linear-gradient(90deg, var(--void-3) 0 40%, var(--rule) 50%, var(--void-3) 60% 100%);
+  background-size: 400% 100%;
+  animation: locsearch-shimmer 1.3s linear infinite;
+}
+
+.locsearch__skel-line--name {
+  width: 62%;
+  height: 14px;
+}
+
+.locsearch__skel-line--addr {
+  width: 84%;
+}

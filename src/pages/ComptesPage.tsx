@@ -83,7 +83,7 @@ export function ComptesPage() {
 
   return (
     <MobilePage
-      className="agenda-mobile"
+      className="agenda-mobile comptes-page"
       header={<MobileHeader eyebrow="La Rétrospective du Comptoir" />}
       hero={
         <div className="page-hero">

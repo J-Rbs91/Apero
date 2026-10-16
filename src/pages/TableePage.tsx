@@ -4,6 +4,7 @@ import { AppLink } from "../components/AppLink";
 import { useAppNavigation } from "../routes/useAppNavigation";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
+import { Signature } from "../components/field/Signature";
 import { MobilePage } from "../components/MobilePage";
 import { MobileShareBox } from "../components/MobileShareBox";
 import { useComptoirName } from "../hooks/useComptoirName";
@@ -217,6 +218,7 @@ export function TableePage() {
             {tablee.founderName}
           </p>
           <h1 className="h1 h1--sm">{tablee.name}</h1>
+          {tableeId && <Signature seed={tableeId} />}
           {tablee.motto && <p className="lede">{"« "}{tablee.motto}{" »"}</p>}
           <p className="meta">
             Attablés : {tablee.members.map((member) => member.name).join(", ")}

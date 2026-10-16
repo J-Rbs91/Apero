@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useAppNavigation } from "../routes/useAppNavigation";
 import { ConfrerieMenuPanel } from "./ConfrerieMenuPanel";
 import { NotificationBell } from "./NotificationBell";
-import { WineGlassMark } from "./WineGlassMark";
+import { PointMark } from "./field/PointMark";
 
 /* Le menu est une COUCHE posée sur l'écran, pas un écran : son ouverture empile
    une entrée d'historique, et le geste retour du téléphone la referme au lieu de
@@ -51,29 +51,29 @@ export function BrandMenu() {
         aria-label="Menu de la Confrérie"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <WineGlassMark size={26} />
+        <PointMark />
         <span>Menu de la Confrérie</span>
         <svg className="brandpill__menu-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
           <path
             className="brandpill__menu-line brandpill__menu-line--top"
             d="M4 7h16"
             stroke="currentColor"
-            strokeWidth="2.3"
-            strokeLinecap="round"
+            strokeWidth="1.5"
+            strokeLinecap="square"
           />
           <path
             className="brandpill__menu-line brandpill__menu-line--mid"
             d="M4 12h16"
             stroke="currentColor"
-            strokeWidth="2.3"
-            strokeLinecap="round"
+            strokeWidth="1.5"
+            strokeLinecap="square"
           />
           <path
             className="brandpill__menu-line brandpill__menu-line--bottom"
             d="M4 17h16"
             stroke="currentColor"
-            strokeWidth="2.3"
-            strokeLinecap="round"
+            strokeWidth="1.5"
+            strokeLinecap="square"
           />
         </svg>
       </button>

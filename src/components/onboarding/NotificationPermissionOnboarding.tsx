@@ -1,5 +1,5 @@
 import { MobilePage } from "../MobilePage";
-import { WineGlassMark } from "../WineGlassMark";
+import { PointMark } from "../field/PointMark";
 
 // Écran d'onboarding : demande l'autorisation d'envoyer des notifications
 // système, en expliquant clairement pourquoi (section 6). Refuser n'empêche
@@ -28,7 +28,7 @@ export function NotificationPermissionOnboarding({
       className="onboarding-screen"
       header={
         <div className="brandpill">
-          <WineGlassMark size={26} /> La Confrérie
+          <PointMark /> La Confrérie
         </div>
       }
       hero={

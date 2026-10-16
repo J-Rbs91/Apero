@@ -35,9 +35,9 @@ export function FormSection({
                 <path
                   d="M5 12.5l4.2 4.3L19 7.5"
                   stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  strokeLinecap="square"
+                  strokeLinejoin="miter"
                 />
               </svg>
             ) : (

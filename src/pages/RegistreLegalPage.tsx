@@ -12,6 +12,7 @@ import { MobilePage } from "../components/MobilePage";
 export function RegistreLegalPage() {
   return (
     <MobilePage
+      className="legal-page"
       header={<MobileHeader eyebrow="La Confrérie" />}
       hero={<h1 className="h1 h1--sm">Le registre légal</h1>}
     >
@@ -168,8 +169,9 @@ export function RegistreLegalPage() {
         <h2 className="h2">Crédits</h2>
         <ul className="legal-list">
           <li>
-            Police <strong>Manrope</strong> : The Manrope Project Authors, SIL Open
-            Font License 1.1.
+            Polices <strong>Archivo</strong> (The Archivo Project Authors) et{" "}
+            <strong>Fragment Mono</strong> (The Fragment-Mono Project Authors), SIL
+            Open Font License 1.1.
           </li>
           <li>
             Animation du verre : <strong>Noto Animated Emoji</strong> (Google),
@@ -182,9 +184,6 @@ export function RegistreLegalPage() {
               CC BY 4.0
             </a>
             , modifiée (deux calques retirés).
-          </li>
-          <li>
-            Images d’ambiance du comptoir : générées par IA (Google Gemini).
           </li>
           <li>
             Code source sous licence MIT, ouvert sur{" "}

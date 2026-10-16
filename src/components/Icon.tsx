@@ -1,5 +1,5 @@
-// Jeu de pictogrammes du design system (docs/uxer/design-system.md §4.1) :
-// SVG monochromes en ligne, trait de 2,25, extrémités rondes, currentColor.
+// Jeu de pictogrammes du design system (docs/uxer/manifesto-void/UXER_DESIGN_SYSTEM.md §5.1) :
+// SVG monochromes en ligne, trait de 1,5, extrémités carrées, currentColor.
 // Aucun emoji, aucun fichier tiers.
 
 import type { ReactElement } from "react";
@@ -85,9 +85,9 @@ export function Icon({ name, size = 20, className }: IconProps) {
       height={size}
       fill="none"
       stroke="currentColor"
-      strokeWidth="2.25"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      strokeWidth="1.5"
+      strokeLinecap="square"
+      strokeLinejoin="miter"
       aria-hidden="true"
       focusable="false"
     >
