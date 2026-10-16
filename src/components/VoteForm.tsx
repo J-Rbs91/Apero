@@ -46,9 +46,9 @@ type VoteFormProps = {
 };
 
 const voteLabel: Record<VoteStatus, string> = {
-  yes: "J’y serai",
-  maybe: "J’me tâte",
-  no: "Sans moi",
+  yes: "Oui",
+  maybe: "Peut-être",
+  no: "Non",
 };
 
 function formatSlotShort(date: string | undefined, time: string | undefined): string {
@@ -58,9 +58,9 @@ function formatSlotShort(date: string | undefined, time: string | undefined): st
         day: "numeric",
         month: "short",
       }).format(new Date(`${date}T00:00:00`))
-    : "Date mystère";
+    : "Sans date";
 
-  return `${dateLabel} · ${time || "heure mystère"}`;
+  return `${dateLabel} · ${time || "Sans heure"}`;
 }
 
 /**
@@ -176,7 +176,7 @@ export function VoteForm({
       justSubmittedRef.current = false;
     } else {
       setFeedbackTone("info");
-      setFeedback("Le registre se souvient de toi. Retouche, si le cœur t’en dit.");
+      setFeedback("Réponse retrouvée.");
     }
   }, [emptyVotes, existingParticipant]);
 
@@ -201,14 +201,12 @@ export function VoteForm({
   // Ce que dit la barre d'action : jamais « erreur », toujours « il manque
   // ceci ». Le convive sait quoi faire sans avoir à deviner.
   const actionStatus = hasErrorFeedback
-    ? "L’envoi a échoué. L’explication est juste au-dessus."
+    ? "Envoi échoué."
     : isNameMissing
-      ? "Il manque ton blaze en haut du formulaire."
+      ? "Nom requis."
       : missingSlots.length > 0
-        ? `Encore ${missingSlots.length} créneau${missingSlots.length > 1 ? "x" : ""} à trancher.`
-        : existingParticipant
-          ? "Tout est rempli. Plus qu’à corriger le registre."
-          : "Tout est rempli. Plus qu’à émarger.";
+        ? `${missingSlots.length} créneau${missingSlots.length > 1 ? "x" : ""} sans réponse.`
+        : "Réponse complète.";
 
   async function handleSubmit(formEvent: React.FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
@@ -247,11 +245,7 @@ export function VoteForm({
       await onSubmit(response);
       hapticSuccess();
       setFeedbackTone("ok");
-      setFeedback(
-        existingParticipant
-          ? "Le registre est corrigé. On ne dira rien."
-          : "C’est émargé. Le registre te remercie.",
-      );
+      setFeedback(existingParticipant ? "Réponse modifiée." : "Réponse enregistrée.");
       // Le geste est accompli : le formulaire se replie, le récapitulatif prend
       // le relais.
       setHasTriedSubmit(false);
@@ -265,7 +259,7 @@ export function VoteForm({
       setFeedback(
         submitError instanceof Error && submitError.message
           ? submitError.message
-          : "L’envoi a raté. Ta réponse reste sous le coude, réessaie.",
+          : "Envoi échoué. Réessayer.",
       );
       // Le formulaire ne se replie pas sur un échec : le message reste donc au
       // pied d'une liste de créneaux plus longue que l'écran. On l'y amène.
@@ -278,14 +272,14 @@ export function VoteForm({
   if (existingParticipant && !isEditing) {
     const votesByOption = existingParticipant.votes ?? {};
     const overall = Object.values(votesByOption).some((vote) => vote === "yes")
-      ? "J’y serai"
+      ? "Oui"
       : Object.values(votesByOption).some((vote) => vote === "maybe")
-        ? "J’me tâte"
-        : "Sans moi";
+        ? "Peut-être"
+        : "Non";
 
     return (
       <section className="sheet">
-        <p className="eyebrow">Ta réponse est au registre</p>
+        <p className="eyebrow">Réponse</p>
 
         <div className="recap">
           <div className="recap__head">
@@ -305,7 +299,7 @@ export function VoteForm({
               <div className="recap__vote">
                 {overall}
                 {existingParticipant.companions
-                  ? ` · ${existingParticipant.companions} renfort${existingParticipant.companions > 1 ? "s" : ""}`
+                  ? ` · ${existingParticipant.companions} accompagnant${existingParticipant.companions > 1 ? "s" : ""}`
                   : ""}
               </div>
             </div>
@@ -321,7 +315,7 @@ export function VoteForm({
                       {formatSlotShort(option.date, option.time)}
                     </span>
                     <span className={`recap__answer${vote ? ` recap__answer--${vote}` : ""}`}>
-                      {vote ? voteLabel[vote] : "Pas de réponse"}
+                      {vote ? voteLabel[vote] : "Sans réponse"}
                     </span>
                   </div>
                 );
@@ -338,12 +332,17 @@ export function VoteForm({
             setIsEditing(true);
           }}
         >
-          Modifier ma réponse
+          Modifier
         </button>
 
         {onProposeSlot && (
-          <button type="button" className="addline" onClick={onProposeSlot}>
-            + Proposer un autre créneau
+          <button
+            type="button"
+            className="addline"
+            onClick={onProposeSlot}
+            aria-label="Proposer un créneau"
+          >
+            + Créneau
           </button>
         )}
 
@@ -364,18 +363,16 @@ export function VoteForm({
       <form className="vote-form" onSubmit={handleSubmit}>
         <FormSection
           step={1}
-          title="Qui répond ?"
-          lead="Le blaze qui apparaîtra au registre de la tablée."
+          title="Convive"
           isDone={!isNameMissing}
         >
           <div ref={registerNode("name")} className={shakingId === "name" ? "is-shaking" : ""}>
             <TextField
-              label="Ton prénom (ou blaze)"
+              label="Nom"
               requirement="required"
               value={participantName}
               maxLength={80}
-              placeholder="Jojo, Nadine, Éminence Chips…"
-              error={hasTriedSubmit && isNameMissing ? "Indique un blaze pour émarger." : undefined}
+              error={hasTriedSubmit && isNameMissing ? "Nom requis." : undefined}
               onChange={(value) => {
                 nameEditedRef.current = true;
                 setParticipantName(value);
@@ -386,8 +383,7 @@ export function VoteForm({
 
         <FormSection
           step={2}
-          title={event.options.length > 1 ? "Tranche chaque créneau" : "Tranche le créneau"}
-          lead="Une réponse par créneau proposé, même un « Sans moi »."
+          title={event.options.length > 1 ? "Créneaux" : "Créneau"}
           status={`${event.options.length - missingSlots.length}/${event.options.length}`}
           isDone={missingSlots.length === 0}
         >
@@ -400,7 +396,7 @@ export function VoteForm({
                 onChange={(status) => updateVote(option.id, status)}
                 error={
                   hasTriedSubmit && !votes[option.id]
-                    ? "Ce créneau attend encore ta réponse."
+                    ? "Réponse requise."
                     : undefined
                 }
                 containerRef={registerNode(option.id)}
@@ -414,15 +410,20 @@ export function VoteForm({
           </div>
 
           {onProposeSlot && (
-            <button type="button" className="addline" onClick={onProposeSlot}>
-              + Aucun ne va : proposer un autre créneau
+            <button
+              type="button"
+              className="addline"
+              onClick={onProposeSlot}
+              aria-label="Proposer un créneau"
+            >
+              + Créneau
             </button>
           )}
         </FormSection>
 
         <Disclosure
-          title="Ajouter des détails"
-          summary="Renforts, pronostic, petit mot. Rien d’obligatoire."
+          title="Détails"
+          summary="Facultatif"
         >
           <CompanionsField
             companions={companions}
@@ -433,12 +434,11 @@ export function VoteForm({
           {extraFields}
 
           <TextAreaField
-            label="Un petit mot pour la troupe"
+            label="Commentaire"
             requirement="optional"
             value={comment}
             maxLength={500}
             rows={3}
-            placeholder="Je viendrai si le monde ne s’est pas arrêté de tourner d’ici là."
             onChange={setComment}
           />
         </Disclosure>
@@ -475,17 +475,13 @@ export function VoteForm({
                   setIsEditing(false);
                 }}
               >
-                Laisser ma réponse telle quelle
+                Annuler
               </button>
             ) : undefined
           }
         >
           <button className="button button--primary" type="submit" disabled={isSaving}>
-            {isSaving
-              ? "On émarge…"
-              : existingParticipant
-                ? "Enregistrer ma réponse"
-                : "Envoyer ma réponse"}
+            {isSaving ? "Envoi…" : existingParticipant ? "Enregistrer" : "Envoyer"}
           </button>
         </ActionBar>
       </form>

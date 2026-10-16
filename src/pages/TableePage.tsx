@@ -139,7 +139,7 @@ export function TableePage() {
       const updated = await joinTablee(tableeId, keys.writeKey, keys.encryptionKey, memberName);
       setState({ status: "ready", tablee: updated });
     } catch {
-      setError("Impossible de t’attabler pour le moment. Réessaie dans un instant.");
+      setError("Ajout impossible. Réessayer.");
     } finally {
       setIsJoining(false);
     }
@@ -147,8 +147,8 @@ export function TableePage() {
 
   if (state.status === "loading") {
     return (
-      <MobilePage className="agenda-mobile" header={<MobileHeader eyebrow="La Tablée" />}>
-        <LoadingScreen heading="h1" title="On pousse les tables" subtitle="On déchiffre le registre de la tablée…" />
+      <MobilePage className="agenda-mobile" header={<MobileHeader eyebrow="Groupe" />}>
+        <LoadingScreen heading="h1" />
       </MobilePage>
     );
   }
@@ -156,27 +156,27 @@ export function TableePage() {
   if (state.status !== "ready") {
     const message =
       state.status === "invalid-id"
-        ? "Ce lien de tablée est mal formé : on ne reconnaît pas cet identifiant."
+        ? "Lien invalide."
         : state.status === "missing-key"
-          ? "Ce lien de tablée est incomplet : il lui manque sa clé de lecture. Demande le lien complet à la bande."
+          ? "Lien incomplet. Demander le lien complet."
           : state.status === "not-found"
-            ? "Cette tablée reste introuvable : soit le lien ne mène nulle part, soit la tablée a été dissoute."
+            ? "Groupe introuvable."
             : state.status === "bad-key"
-              ? "Cette clé n’ouvre pas cette tablée : lien tronqué ou périmé."
+              ? "Clé invalide."
               : state.status === "not-a-tablee"
-                ? "Ce lien mène à autre chose qu’une tablée. Vérifie qu’il ne s’agit pas d’un lien d’apéro."
-                : "Impossible de récupérer cette tablée pour le moment. Réessaie dans un instant.";
+                ? "Lien d’apéro, pas de groupe."
+                : "Chargement impossible. Réessayer.";
 
     return (
       <MobilePage
         className="agenda-mobile"
-        header={<MobileHeader eyebrow="La Tablée" />}
-        hero={<h1 className="h1 h1--sm">Aïe, ce lien coince</h1>}
+        header={<MobileHeader eyebrow="Groupe" />}
+        hero={<h1 className="h1 h1--sm">Groupe indisponible</h1>}
       >
         <section className="sheet">
           <p className="lede">{message}</p>
           <AppLink className="button button--ghost button--block" to="/tablees">
-            Voir mes tablées
+            Groupes
           </AppLink>
         </section>
       </MobilePage>
@@ -210,18 +210,15 @@ export function TableePage() {
   return (
     <MobilePage
       className="agenda-mobile"
-      header={<MobileHeader eyebrow="La Tablée" />}
+      header={<MobileHeader eyebrow="Groupe" />}
       hero={
         <div className="page-hero">
-          <p className="eyebrow">
-            {tablee.members.length} attablé{tablee.members.length > 1 ? "s" : ""}, fondée par{" "}
-            {tablee.founderName}
-          </p>
+          <p className="eyebrow">Créé par {tablee.founderName}</p>
           <h1 className="h1 h1--sm">{tablee.name}</h1>
           {tableeId && <Signature seed={tableeId} />}
-          {tablee.motto && <p className="lede">{"« "}{tablee.motto}{" »"}</p>}
+          {tablee.motto && <p className="lede">{tablee.motto}</p>}
           <p className="meta">
-            Attablés : {tablee.members.map((member) => member.name).join(", ")}
+            Membres : {tablee.members.map((member) => member.name).join(", ")}
           </p>
           {!isMember && keys.writeKey && (
             <button
@@ -230,11 +227,11 @@ export function TableePage() {
               onClick={handleJoin}
               disabled={isJoining || !comptoirName.trim()}
             >
-              {isJoining ? "On te fait une place…" : "M’attabler"}
+              {isJoining ? "Ajout en cours" : "Rejoindre"}
             </button>
           )}
           {!isMember && keys.writeKey && !comptoirName.trim() && (
-            <p className="hint">Choisis d’abord ton blaze (menu de la Confrérie) pour t’attabler.</p>
+            <p className="hint">Nom de membre requis, voir menu.</p>
           )}
         </div>
       }
@@ -246,14 +243,6 @@ export function TableePage() {
       )}
 
       <section className="sheet">
-        <p className="eyebrow">La prochaine tournée</p>
-        <p className="lede">
-          {aperoItems === null
-            ? "On relit les annales de la tablée…"
-            : upcoming.length > 0
-              ? "Une assemblée est déjà en route, mais rien n’interdit d’en convoquer une autre."
-              : "Rien d’attablé à l’horizon. La tablée n’attend qu’une convocation."}
-        </p>
         <button
           type="button"
           className="button button--primary button--block"
@@ -271,13 +260,13 @@ export function TableePage() {
             })
           }
         >
-          Convoquer la tablée
+          Nouvel apéro
         </button>
       </section>
 
       {(upcoming.length > 0 || past.length > 0) && (
         <section className="sheet">
-          <p className="eyebrow">Les annales de la tablée</p>
+          <p className="eyebrow">Historique</p>
           <div className="slot-stack">
             {[...upcoming, ...past].map((item) => (
               <div className="slot" key={item.ref.aperoId}>
@@ -288,8 +277,8 @@ export function TableePage() {
                       {item.event
                         ? `${formatAperoDate(item)} · ${item.event.participants.length} réponse${item.event.participants.length > 1 ? "s" : ""}`
                         : item.failed
-                          ? "Impossible de récupérer cet apéro pour le moment"
-                          : "Disparu du registre (annulé ou purgé)"}
+                          ? "Chargement impossible"
+                          : "Apéro supprimé"}
                     </div>
                   </div>
                   {item.event && !isEventExpired(item.event, now) && (
@@ -304,7 +293,7 @@ export function TableePage() {
                       writeKey: item.ref.writeKey,
                     })}
                   >
-                    Ouvrir l’apéro
+                    Ouvrir
                   </AppLink>
                 )}
               </div>
@@ -315,7 +304,7 @@ export function TableePage() {
 
       {titles.length > 0 && (
         <section className="sheet">
-          <p className="eyebrow">Le palmarès de la tablée</p>
+          <p className="eyebrow">Palmarès</p>
           <div className="wall-list">
             {titles.map((title) => (
               <div className="wall-item" key={title.id}>

@@ -58,7 +58,7 @@ export type StoredVaultFile = {
 
 function getSubtle(): SubtleCrypto {
   if (typeof globalThis.crypto === "undefined" || !globalThis.crypto.subtle) {
-    throw new VaultError("CRYPTO_UNAVAILABLE", "Web Crypto API indisponible.");
+    throw new VaultError("CRYPTO_UNAVAILABLE", "Chiffrement indisponible.");
   }
   return globalThis.crypto.subtle;
 }
@@ -141,7 +141,7 @@ export async function decryptVault(
     file.kdf.iterations < 1 ||
     file.kdf.iterations > 5_000_000
   ) {
-    throw new VaultError("INVALID_FILE", "Ce fichier n’est pas un coffre de la Confrérie.");
+    throw new VaultError("INVALID_FILE", "Fichier invalide.");
   }
 
   let salt: Uint8Array<ArrayBuffer>;
@@ -153,7 +153,7 @@ export async function decryptVault(
     iv = fromBase64Url(file.encryption.iv);
     ciphertext = fromBase64Url(file.encryption.ciphertext);
   } catch {
-    throw new VaultError("INVALID_FILE", "Coffre illisible.");
+    throw new VaultError("INVALID_FILE", "Fichier illisible.");
   }
 
   const key = await deriveVaultKey(passphrase, salt, file.kdf.iterations, ["decrypt"]);
@@ -162,7 +162,7 @@ export async function decryptVault(
   try {
     plaintext = await getSubtle().decrypt({ name: "AES-GCM", iv }, key, ciphertext);
   } catch {
-    throw new VaultError("BAD_PASSPHRASE", "Cette phrase de passe n’ouvre pas ce coffre.");
+    throw new VaultError("BAD_PASSPHRASE", "Mot de passe incorrect.");
   }
 
   try {
@@ -176,7 +176,7 @@ export async function decryptVault(
           : undefined,
     };
   } catch {
-    throw new VaultError("INVALID_FILE", "Contenu de coffre illisible.");
+    throw new VaultError("INVALID_FILE", "Contenu illisible.");
   }
 }
 

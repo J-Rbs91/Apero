@@ -29,20 +29,20 @@ export function ConfrerieMenuPanel({
     <div className={className} role="menu">
       {withComptoirLink && (
         <AppLink className="brand-menu__item" role="menuitem" to="/">
-          Le Comptoir
+          Accueil
         </AppLink>
       )}
       <AppLink className="brand-menu__item" role="menuitem" to="/agenda">
-        Au programme
+        À venir
       </AppLink>
       <AppLink className="brand-menu__item" role="menuitem" to="/tablees">
-        Tablées
+        Groupes
       </AppLink>
       <AppLink className="brand-menu__item" role="menuitem" to="/palmares">
         Palmarès
       </AppLink>
       <AppLink className="brand-menu__item" role="menuitem" to="/comptes">
-        Rétrospective
+        Bilan
       </AppLink>
 
       <div className="brand-menu__group">
@@ -83,14 +83,14 @@ export function ConfrerieMenuPanel({
                 requestComptoirNameEdit();
               }}
             >
-              Changer de blaze
+              Changer de nom
             </button>
             <AppLink
               className="brand-menu__item brand-menu__item--sub"
               role="menuitem"
               to="/registre-legal"
             >
-              Le registre légal
+              Mentions légales
             </AppLink>
           </div>
         )}

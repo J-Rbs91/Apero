@@ -1,26 +1,18 @@
 import type { AperitifEvent } from "../types/apero";
 
 export const APERO_CEREMONIAL_NAMES = [
-  "La Grande Tablée des Olives",
-  "Le Concile du Saucisson",
-  "Le Sommet des Glaçons",
-  "La Bande à Zinc",
-  "La Sainte Tournée",
-  "Le Banquet des Gobelets",
-  "Le Cercle du Petit Jaune",
-  "La Réunion des Verres Qui Collent",
-  "La Fine Équipe de la Chips",
-  "Le Club des Tire-Bouchons",
-  "La Tablée du Comptoir",
-  "Le Grand Ordre du Sauciflard",
-  "La Sortie Improvisée du Bar-Tabac",
-  "La Table Ronde des Coudes Posés",
-  "L’Académie du Dernier Pour la Route",
-  "La Bande des Glaçons Fondus",
-  "La Loge des Cacahuètes Salées",
-  "La Fête des Chaises en Plastique",
-  "La Brigade d’Honneur du Saucisson",
-  "Le Symposium des Olives Molles",
+  "Assemblée",
+  "Réunion",
+  "Tournée",
+  "Séance",
+  "Cercle",
+  "Conseil",
+  "Comité",
+  "Rencontre",
+  "Soirée",
+  "Table",
+  "Session",
+  "Rendez-vous",
 ];
 
 function isActiveEvent(event: AperitifEvent): boolean {
@@ -28,8 +20,7 @@ function isActiveEvent(event: AperitifEvent): boolean {
 }
 
 // Même clé de comparaison pour la disponibilité et l'unicité : sans elle, un
-// apéro nommé « le concile du saucisson » ne retirerait pas « Le Concile du
-// Saucisson » du tirage, et l'app générerait un nom qu'elle juge déjà pris.
+// apéro nommé « séance » ne retirerait pas « Séance » du tirage, et l'app générerait un nom qu'elle juge déjà pris.
 function normalizeCeremonialName(name: string): string {
   return name.trim().toLowerCase();
 }

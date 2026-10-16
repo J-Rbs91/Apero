@@ -52,23 +52,16 @@ export function ComptoirNameOnboarding({
       }
       hero={
         <div className="page-hero" role="group" aria-labelledby="comptoir-title">
-          <p className="eyebrow">{"Entrée dans la Confrérie"}</p>
           <h1 className="h1 h1--sm" id="comptoir-title">
-            Il te faut un nom de comptoir
+            Nom
           </h1>
-          <p className="lede">
-            {
-              "C’est sous ce blaze que le zinc se souviendra de toi, pour le meilleur et surtout pour le pire. La tablée ne juge pas ce que tu bois, elle grave juste les noms, et ça, ça reste pour toujours."
-            }
-          </p>
         </div>
       }
     >
       <form className="vote-form" onSubmit={handleSubmit}>
         <Field
-          label="Nom de comptoir"
+          label="Nom"
           requirement="required"
-          hint="Un prénom, un surnom, ce que tu veux : c’est ce que la tablée verra."
           error={error || undefined}
         >
           {(control) => (
@@ -78,12 +71,11 @@ export function ComptoirNameOnboarding({
               maxLength={48}
               value={draftName}
               onChange={(eventChange) => setDraftName(eventChange.target.value)}
-              placeholder="Jean-Michel Pastaga, Gisèle Perrier…"
             />
           )}
         </Field>
         <button className="button button--primary button--block" type="submit">
-          Valider mon blaze
+          Valider
         </button>
       </form>
 
@@ -93,29 +85,27 @@ export function ComptoirNameOnboarding({
             ref={confirmDialogRef}
             tabIndex={-1}
             aria-labelledby="comptoir-confirm-title"
+            aria-describedby="comptoir-confirm-name"
             aria-modal="true"
             className="sheet modal-sheet"
             role="dialog"
           >
-            <p className="eyebrow">On confirme ?</p>
             <h2 className="h1 h1--sm" id="comptoir-confirm-title">
-              {"Sérieux, c’est ça ton blaze ?"}
+              Confirmer ?
             </h2>
-            <span className="blaze">
-              {"« "}
+            <span className="blaze" id="comptoir-confirm-name">
               {confirmedName}
-              {" »"}
             </span>
             <div className="button-row">
               <button className="button button--primary" type="button" onClick={handleConfirm}>
-                {"Oui, grave ça dans le zinc"}
+                Confirmer
               </button>
               <button
                 className="button button--ghost"
                 type="button"
                 onClick={() => setConfirmedName("")}
               >
-                Non, je change de blaze
+                Modifier
               </button>
             </div>
           </section>

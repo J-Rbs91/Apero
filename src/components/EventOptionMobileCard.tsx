@@ -27,13 +27,13 @@ type EventOptionMobileCardProps = {
 // Chaque talon a son glyphe (✓ / ? / ✕) : le choix n'est jamais porté par la
 // couleur seule.
 const voteChoices: ChoiceOption<VoteStatus>[] = [
-  { value: "yes", label: "J’y serai", tone: "accent", icon: "check" },
-  { value: "maybe", label: "J’me tâte", tone: "warn", icon: "maybe" },
-  { value: "no", label: "Sans moi", tone: "danger", icon: "close" },
+  { value: "yes", label: "Oui", tone: "accent", icon: "check" },
+  { value: "maybe", label: "Peut-être", tone: "warn", icon: "maybe" },
+  { value: "no", label: "Non", tone: "danger", icon: "close" },
 ];
 
 function formatCheerCount(count: number): string {
-  return `${count} verre${count > 1 ? "s" : ""} levé${count > 1 ? "s" : ""}`;
+  return `${count} soutien${count > 1 ? "s" : ""}`;
 }
 
 /**
@@ -54,10 +54,10 @@ export function EventOptionMobileCard({
   isCheerSaving,
 }: EventOptionMobileCardProps) {
   const cheerCount = option.cheers?.length ?? 0;
-  const slotLabel = `${slotDateLabel(option)} · ${option.time || "heure mystère"}, ${option.location || "lieu mystère"}`;
+  const slotLabel = `${slotDateLabel(option)} · ${option.time || "Sans heure"}, ${option.location || "Sans lieu"}`;
   const subtitle =
     option.createdByRole === "participant" && option.createdByName
-      ? `${option.location} · proposé par ${option.createdByName}`
+      ? `${option.location} · par ${option.createdByName}`
       : option.location;
 
   return (
@@ -78,7 +78,7 @@ export function EventOptionMobileCard({
             <span className="agenda-lead">En tête</span>
           ) : (
             <span className={`slot__state slot__state--${value ? "done" : "todo"}`}>
-              {value ? "Répondu" : "À voter"}
+              {value ? "Répondu" : "Sans réponse"}
             </span>
           )
         }
@@ -98,7 +98,7 @@ export function EventOptionMobileCard({
 
       <ChoiceGroup
         name={`vote-${option.id}`}
-        legend="Ta réponse"
+        legend="Réponse"
         legendDetail={slotLabel}
         layout="row"
         options={voteChoices}
@@ -116,8 +116,10 @@ export function EventOptionMobileCard({
               onClick={onToggleCheer}
               disabled={isCheerSaving}
               title={option.cheers?.join(", ")}
+              aria-label="Soutenir ce créneau"
+              aria-pressed={Boolean(hasCheered)}
             >
-              {hasCheered ? "Verre levé" : "Trinquer à ce créneau"}
+              +1
             </button>
           )}
           {cheerCount > 0 && <span className="cheer-count">{formatCheerCount(cheerCount)}</span>}

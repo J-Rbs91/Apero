@@ -112,8 +112,8 @@ export function buildTableeTitles(stats: TableeMemberStats[]): TableeTitle[] {
   if (pilier) {
     titles.push({
       id: "pilier",
-      title: "Pilier de la Tablée",
-      description: "Présence la plus assidue au registre. Le tabouret porte son nom.",
+      title: "Assidu",
+      description: "Le plus de présences.",
       memberName: pilier.displayName,
       score: pilier.presentCount,
     });
@@ -123,8 +123,8 @@ export function buildTableeTitles(stats: TableeMemberStats[]): TableeTitle[] {
   if (convocateur) {
     titles.push({
       id: "convocateur",
-      title: "Grand Convocateur",
-      description: "A convoqué le plus d’assemblées. La bande lui doit ses meilleures excuses du lendemain.",
+      title: "Hôte",
+      description: "Le plus d’apéros créés.",
       memberName: convocateur.displayName,
       score: convocateur.organizedCount,
     });
@@ -134,8 +134,8 @@ export function buildTableeTitles(stats: TableeMemberStats[]): TableeTitle[] {
   if (ministre) {
     titles.push({
       id: "ministre",
-      title: "Ministre du Peut-être",
-      description: "Champion du « J’me tâte ». Un jour il tranchera, mais pas aujourd’hui.",
+      title: "Hésitant",
+      description: "Le plus de Peut-être.",
       memberName: ministre.displayName,
       score: ministre.maybeCount,
     });
@@ -145,8 +145,8 @@ export function buildTableeTitles(stats: TableeMemberStats[]): TableeTitle[] {
   if (plume) {
     titles.push({
       id: "plume",
-      title: "Plume du Comptoir",
-      description: "Le mur du comptoir lui doit ses plus belles lignes.",
+      title: "Auteur",
+      description: "Le plus de messages.",
       memberName: plume.displayName,
       score: plume.messageCount,
     });

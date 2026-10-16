@@ -16,7 +16,7 @@ const BASE64URL_ALPHABET =
 
 function getCrypto(): Crypto {
   if (typeof globalThis.crypto === "undefined" || !globalThis.crypto.getRandomValues) {
-    throw new Error("Web Crypto API indisponible dans cet environnement.");
+    throw new Error("Navigateur incompatible.");
   }
   return globalThis.crypto;
 }

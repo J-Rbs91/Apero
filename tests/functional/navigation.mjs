@@ -129,7 +129,9 @@ async function retour() {
 }
 
 async function ouvrirLeMenu() {
-  await page.click('[aria-label="Menu de la Confrérie"]');
+  // Le menu s'ouvre par son bouton (« La Confrérie, menu » à l'accueil,
+  // « Menu » ailleurs) : on le désigne par son rôle, pas par son libellé.
+  await page.click('[aria-haspopup="menu"]');
   await attendre(350);
 }
 
@@ -152,7 +154,7 @@ try {
 
   // 1. Descendre coûte une entrée, et une seule.
   await ouvrirLeMenu();
-  await page.click("text=Au programme");
+  await page.click(".brand-menu__panel >> text=À venir");
   await attendre(700);
   verifier("le programme est atteint", (await route()) === "#/agenda", await route());
   verifier(
@@ -163,13 +165,13 @@ try {
 
   // 2. Les pas de côté ne consomment aucune profondeur.
   for (const [libelle, attendu] of [
-    ["Tablées", "#/tablees"],
+    ["Groupes", "#/tablees"],
     ["Palmarès", "#/palmares"],
-    ["Rétrospective", "#/comptes"],
-    ["Au programme", "#/agenda"],
+    ["Bilan", "#/comptes"],
+    ["À venir", "#/agenda"],
   ]) {
     await ouvrirLeMenu();
-    await page.click(`text=${libelle}`);
+    await page.click(`.brand-menu__panel >> text=${libelle}`);
     await attendre(700);
     verifier(`pas de côté vers ${libelle}`, (await route()) === attendu, await route());
   }
@@ -185,14 +187,14 @@ try {
 
   // 5. Les deux retours aboutissent au même écran.
   await ouvrirLeMenu();
-  await page.click("text=Tablées");
+  await page.click(".brand-menu__panel >> text=Groupes");
   await attendre(700);
   await page.click('.bk[aria-label="Retour"]');
   await attendre(700);
   const parInterface = await route();
 
   await ouvrirLeMenu();
-  await page.click("text=Tablées");
+  await page.click(".brand-menu__panel >> text=Groupes");
   await attendre(700);
   await retour();
   const parSysteme = await route();
@@ -206,7 +208,7 @@ try {
 
   // 4. Un tunnel descend, et le retour ramène d'où l'on venait.
   await ouvrirLeMenu();
-  await page.click("text=Au programme");
+  await page.click(".brand-menu__panel >> text=À venir");
   await attendre(700);
   const avantTunnel = await index();
 

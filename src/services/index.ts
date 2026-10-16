@@ -13,7 +13,7 @@ function createEmptyLedger(): RewardsLedger {
 
 function rejectLegacyWrite(): never {
   throw new Error(
-    "Le stockage GitHub direct depuis le navigateur est desactive : utilise le lien d'invitation du nouveau flux API VPS.",
+    "Ancien format désactivé.",
   );
 }
 

@@ -4,8 +4,8 @@ import { calculateAverageTraquenardLevel } from "../utils/calculateResults";
 import { downloadAperoIcs } from "../utils/calendarExport";
 import { shareOrDownloadVerdictImage } from "../utils/verdictImage";
 
-// « Graver au registre » : export calendrier (.ics) et partage du tableau de
-// chasse une fois le verdict tombé. Section autonome extraite d'InvitePage.
+// « Exporter » : export calendrier (.ics) et partage de l'image du résultat
+// une fois le créneau retenu. Section autonome extraite d'InvitePage.
 
 type VerdictExportSectionProps = {
   event: AperitifEvent;
@@ -25,10 +25,7 @@ export function VerdictExportSection({
 
   return (
     <section className="sheet">
-      <p className="eyebrow">Graver au registre</p>
-      <p className="lede">
-        Le verdict est tombé : grave-le avant qu’il ne s’évapore entre deux tournées.
-      </p>
+      <p className="eyebrow">Exporter</p>
       <button
         type="button"
         className="button button--ghost button--block"
@@ -40,7 +37,7 @@ export function VerdictExportSection({
           })
         }
       >
-        Graver dans mon calendrier
+        Calendrier
       </button>
       <button
         type="button"
@@ -61,18 +58,18 @@ export function VerdictExportSection({
               },
               traquenardAverage: calculateAverageTraquenardLevel(event),
             },
-            "tableau-de-chasse.png",
+            "apero.png",
           );
           setShareFeedback(
             outcome === "failed"
-              ? "L’image n’a pas voulu sortir du cadre. Réessaie dans un instant."
+              ? "Image indisponible. Réessayer."
               : outcome === "downloaded"
-                ? "Tableau de chasse téléchargé : il n’attend plus que la conversation."
+                ? "Image téléchargée."
                 : "",
           );
         }}
       >
-        Partager le tableau de chasse
+        Image
       </button>
       {shareFeedback && (
         <p className="meta" role="status">

@@ -22,7 +22,7 @@ export function slotDateParts(option: Pick<AperitifOption, "date">) {
 
 export function slotDateLabel(option: Pick<AperitifOption, "date">): string {
   const parts = slotDateParts(option);
-  return parts ? `${parts.weekday} ${parts.day} ${parts.month}` : "Date mystère";
+  return parts ? `${parts.weekday} ${parts.day} ${parts.month}` : "Sans date";
 }
 
 export function SlotLeaf({ option }: { option: Pick<AperitifOption, "date"> }) {
@@ -30,9 +30,9 @@ export function SlotLeaf({ option }: { option: Pick<AperitifOption, "date"> }) {
 
   return (
     <div className="leaf" aria-hidden="true">
-      <span className="leaf__wd">{parts ? parts.weekday : "Date"}</span>
+      {parts && <span className="leaf__wd">{parts.weekday}</span>}
       <span className="leaf__day">{parts ? parts.day : "?"}</span>
-      <span className="leaf__mo">{parts ? parts.month : "mystère"}</span>
+      {parts && <span className="leaf__mo">{parts.month}</span>}
     </div>
   );
 }

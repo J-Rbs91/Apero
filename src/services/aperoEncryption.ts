@@ -26,7 +26,7 @@ function getSubtle(): SubtleCrypto {
   if (typeof globalThis.crypto === "undefined" || !globalThis.crypto.subtle) {
     throw new AperoCryptoError(
       "DECRYPT_FAILED",
-      "Web Crypto API indisponible dans cet environnement.",
+      "Navigateur incompatible.",
     );
   }
   return globalThis.crypto.subtle;

@@ -20,22 +20,22 @@ function baseEvent(overrides: Partial<AperitifEvent> = {}): AperitifEvent {
 }
 
 describe("buildShareText", () => {
-  it("annonce que les mioches sont conviés", () => {
+  it("annonce que les enfants sont conviés", () => {
     const text = buildShareText(baseEvent({ childrenAllowed: true }));
-    expect(text).toContain("Les chiards sont de la partie");
-    expect(text).not.toContain("Pas de mioches");
+    expect(text).toContain("Enfants bienvenus");
+    expect(text).not.toContain("Sans enfants");
   });
 
-  it("annonce que les mioches restent au bercail", () => {
+  it("annonce que les enfants ne sont pas conviés", () => {
     const text = buildShareText(baseEvent({ childrenAllowed: false }));
-    expect(text).toContain("Pas de mioches ce coup-ci");
-    expect(text).not.toContain("Les chiards sont de la partie");
+    expect(text).toContain("Sans enfants");
+    expect(text).not.toContain("Enfants bienvenus");
   });
 
-  it("n’évoque pas les mioches quand la politique n’est pas définie", () => {
+  it("n’évoque pas les enfants quand la politique n’est pas définie", () => {
     const text = buildShareText(baseEvent());
-    expect(text).not.toContain("mioches");
-    expect(text).not.toContain("chiards");
+    expect(text).not.toContain("Enfants bienvenus");
+    expect(text).not.toContain("Sans enfants");
   });
 });
 
@@ -68,11 +68,11 @@ describe("buildReminderText", () => {
     });
 
     const text = buildReminderText(event);
-    expect(text).toContain("Jojo sonne le rappel pour « Le Concile du Saucisson » !");
-    expect(text).toContain("1 présence, 1 hésitation, 1 désertion.");
-    expect(text).toContain("Créneau en tête :");
+    expect(text).toContain("Relance : Le Concile du Saucisson");
+    expect(text).toContain("1 oui, 1 peut-être, 1 non.");
+    expect(text).toContain("En tête :");
     expect(text).toContain("Bar des Sports");
-    expect(text).toContain("Réponds ici :");
+    expect(text).toContain("Répondre :");
   });
 
   it("accorde les pluriels et se passe de créneau en tête sans vainqueur", () => {
@@ -100,8 +100,8 @@ describe("buildReminderText", () => {
     });
 
     const text = buildReminderText(event);
-    expect(text).toContain("2 présences, 0 hésitation, 0 désertion.");
+    expect(text).toContain("2 oui, 0 peut-être, 0 non.");
     // Égalité parfaite entre les deux créneaux : pas de vainqueur à annoncer.
-    expect(text).not.toContain("Créneau en tête :");
+    expect(text).not.toContain("En tête :");
   });
 });

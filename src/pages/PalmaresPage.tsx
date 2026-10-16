@@ -99,9 +99,7 @@ export function PalmaresPage() {
         }
       } catch {
         if (isMounted) {
-          setError(
-            "Le grand livre du palmarès est resté coincé sous le comptoir, entre deux ronds de bière. Réessaie dans un instant.",
-          );
+          setError("Chargement impossible. Réessayer.");
         }
       } finally {
         if (isMounted) {
@@ -162,8 +160,7 @@ export function PalmaresPage() {
 
   const hero = (
     <div className="page-hero">
-      <h1 className="h1 h1--sm">Le Palmarès de la Confrérie</h1>
-      <p className="lede">Qui a décroché quoi, à la force du coude et parfois du foie.</p>
+      <h1 className="h1 h1--sm">Palmarès</h1>
     </div>
   );
 
@@ -171,10 +168,10 @@ export function PalmaresPage() {
     return (
       <MobilePage
         className="palmares-mobile"
-        header={<MobileHeader eyebrow="Tableau d’honneur" />}
+        header={<MobileHeader eyebrow="La Confrérie" />}
         hero={hero}
       >
-        <LoadingScreen title="On compte les breloques" subtitle="La Confrérie ouvre le grand livre…" />
+        <LoadingScreen />
       </MobilePage>
     );
   }
@@ -182,7 +179,7 @@ export function PalmaresPage() {
   return (
     <MobilePage
       className="palmares-mobile"
-      header={<MobileHeader eyebrow="Tableau d’honneur" />}
+      header={<MobileHeader eyebrow="La Confrérie" />}
       hero={hero}
     >
       {error ? (
@@ -191,10 +188,7 @@ export function PalmaresPage() {
         </section>
       ) : shownMembers.length === 0 ? (
         <section className="sheet">
-          <p className="lede">
-            Le tableau est encore vierge, d’une blancheur presque suspecte. Organise, réponds,
-            ramène surtout ta bobine : les breloques, elles, suivront. Elles suivent toujours.
-          </p>
+          <p className="lede">Aucun badge.</p>
         </section>
       ) : (
         <div className="event-stack event-stack--grid">
@@ -205,23 +199,17 @@ export function PalmaresPage() {
                 <div className="palmares-head__body">
                   <div className="person__name">
                     {member.displayName}
-                    {member.key === myKey && <span className="palmares-tag">Toi</span>}
+                    {member.key === myKey && <span className="palmares-tag">Moi</span>}
                   </div>
                   <div className="person__sub">
                     {member.badges.length === 0
-                      ? "Pas encore de breloque"
-                      : `${member.badges.length} breloque${member.badges.length > 1 ? "s" : ""}`}
+                      ? "Aucun badge"
+                      : `${member.badges.length} badge${member.badges.length > 1 ? "s" : ""}`}
                   </div>
                 </div>
               </div>
 
-              {member.badges.length === 0 ? (
-                <p className="hint">
-                  {member.key === myKey
-                    ? "Ton tableau est vide. Le zinc attend tes exploits avec une patience qui commence, il faut le dire, à s’éroder."
-                    : "Rien encore au tableau."}
-                </p>
-              ) : (
+              {member.badges.length > 0 && (
                 <div className="badge-list">
                   {member.badges.map((badge) => (
                     <BadgeMedal badge={badge} key={badge.id} />
@@ -234,7 +222,7 @@ export function PalmaresPage() {
           {emptyOthers > 0 && (
             <p className="meta meta--center">
               {emptyOthers} autre{emptyOthers > 1 ? "s" : ""} convive
-              {emptyOthers > 1 ? "s" : ""} sans breloque pour l’instant.
+              {emptyOthers > 1 ? "s" : ""} sans badge.
             </p>
           )}
         </div>

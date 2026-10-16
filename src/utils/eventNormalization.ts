@@ -53,7 +53,7 @@ export function normalizeEvent(rawEvent: unknown, expectedId?: string): Aperitif
       : [];
   const title = typeof event.title === "string" ? event.title.trim() || undefined : undefined;
   const createdAt = event.createdAt ?? now;
-  const organizerName = event.organizerName ?? event.createdBy ?? "Quelqu\u2019un du comptoir";
+  const organizerName = event.organizerName ?? event.createdBy ?? "H\u00f4te";
   const rawOptions = Array.isArray(event.options) ? event.options : undefined;
   const rawSlots = Array.isArray(event.slots) ? event.slots : undefined;
   const options =
@@ -64,7 +64,7 @@ export function normalizeEvent(rawEvent: unknown, expectedId?: string): Aperitif
           id: slot.id,
           date: typeof slot.dateTime === "string" ? slot.dateTime.slice(0, 10) : "",
           time: typeof slot.dateTime === "string" ? slot.dateTime.slice(11, 16) : "",
-          location: event.location ?? "\u00c9tablissement \u00e0 confirmer",
+          location: event.location ?? "Lieu \u00e0 confirmer",
           note: slot.label,
         },
         organizerName,
@@ -76,7 +76,7 @@ export function normalizeEvent(rawEvent: unknown, expectedId?: string): Aperitif
   return sanitizeAperoEvent(
     {
       id: event.id ?? "apero_inconnu",
-      ceremonialName: event.ceremonialName ?? title ?? "Ap\u00e9ro sans nom",
+      ceremonialName: event.ceremonialName ?? title ?? "Sans nom",
       title,
       organizerName,
       description: event.description || undefined,
@@ -88,7 +88,7 @@ export function normalizeEvent(rawEvent: unknown, expectedId?: string): Aperitif
       options,
       participants: rawParticipants.map((participant) => ({
         ...participant,
-        participantName: participant?.participantName ?? participant?.name ?? "Convive anonyme",
+        participantName: participant?.participantName ?? participant?.name ?? "Anonyme",
         createdAt: participant?.createdAt ?? participant?.updatedAt ?? now,
         updatedAt: participant?.updatedAt ?? now,
       })),

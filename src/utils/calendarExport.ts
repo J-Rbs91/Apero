@@ -85,11 +85,9 @@ export function buildAperoIcs({ event, option, inviteUrl, now }: BuildAperoIcsIn
   const stamp = now ?? new Date();
 
   const summary = `Apéro : ${event.ceremonialName}`;
-  const descriptionParts = [
-    `Convocation de ${event.organizerName} pour « ${event.ceremonialName} ».`,
-  ];
+  const descriptionParts = [`Hôte : ${event.organizerName}`];
   if (event.title) {
-    descriptionParts.push(`Au programme : ${event.title}`);
+    descriptionParts.push(event.title);
   }
   if (inviteUrl) {
     descriptionParts.push(`Invitation : ${inviteUrl}`);

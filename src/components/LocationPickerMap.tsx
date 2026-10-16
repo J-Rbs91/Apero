@@ -50,7 +50,7 @@ export function LocationPickerMap({ lat, lng, onPick }: LocationPickerMapProps) 
       });
 
       mapRef.current = map;
-      // La carte apparaît au dépliage du bloc « pointe-le toi-même » : sa
+      // La carte apparaît au dépliage du bouton « Placer sur la carte » : sa
       // taille se stabilise après le montage. Tant que Leaflet ne le sait pas,
       // le clic tombe à côté du pixel visé — l'inverse de ce qu'on promet.
       unwatchSize = watchMapSize(map, container);
@@ -102,7 +102,7 @@ export function LocationPickerMap({ lat, lng, onPick }: LocationPickerMapProps) 
       ref={containerRef}
       className="locpicker__canvas"
       role="img"
-      aria-label="Carte pour pointer un lieu à la main"
+      aria-label="Carte du lieu"
     />
   );
 }

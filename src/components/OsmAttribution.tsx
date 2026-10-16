@@ -12,13 +12,13 @@
 export function OsmAttribution() {
   return (
     <p className="osm-credit">
-      Lieux et adresses ©{" "}
+      ©{" "}
       <a
         href="https://www.openstreetmap.org/copyright"
         target="_blank"
         rel="noreferrer"
       >
-        les contributeurs OpenStreetMap
+        contributeurs OpenStreetMap
       </a>
     </p>
   );

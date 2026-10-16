@@ -1,6 +1,6 @@
 import { TRAQUENARD_LEVEL_MAX } from "./calculateResults";
 
-// Échelle partagée du Traquenard-O-mètre : une même valeur (0 → 10) doit
+// Échelle partagée de l'intensité : une même valeur (0 → 10) doit
 // produire partout la même couleur et le même intitulé, que la jauge soit
 // interactive (carte de réponse) ou récapitulative (cartes de synthèse).
 
@@ -34,18 +34,18 @@ export function traquenardColor(ratio: number): string {
 
 export function describeTraquenardLevel(level: number): string {
   if (level >= 8) {
-    return "Traquenard total";
+    return "extrême";
   }
 
   if (level >= 5) {
-    return "Ça sent le traquenard";
+    return "forte";
   }
 
   if (level >= 2) {
-    return "Ambiance correcte";
+    return "modérée";
   }
 
-  return "Petite soirée sage";
+  return "calme";
 }
 
 export function traquenardRatioFromLevel(level: number): number {

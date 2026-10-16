@@ -86,9 +86,9 @@ export function OpenInMapsButton({ label, address, lat, lng, className }: OpenIn
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(displayText);
-      setCopyFeedback("Copié.");
+      setCopyFeedback("Adresse copiée.");
     } catch {
-      setCopyFeedback("Copie impossible ici.");
+      setCopyFeedback("Copie impossible.");
     }
     window.setTimeout(() => setCopyFeedback(""), 2000);
   }
@@ -115,7 +115,7 @@ export function OpenInMapsButton({ label, address, lat, lng, className }: OpenIn
             ref={panelRef}
             style={{ top: panelPosition.top, left: panelPosition.left }}
           >
-            <p className="maplinks__eyebrow">Direction le troquet</p>
+            <p className="maplinks__eyebrow">Itinéraire</p>
             {links.map((link) => (
               <a
                 key={link.key}
@@ -135,7 +135,7 @@ export function OpenInMapsButton({ label, address, lat, lng, className }: OpenIn
               role="menuitem"
               onClick={handleCopy}
             >
-              {copyFeedback || "Copier l’adresse"}
+              {copyFeedback || "Copier"}
             </button>
           </div>,
           document.body,

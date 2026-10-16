@@ -20,7 +20,7 @@ export function SlotHead({ option, children, badge }: SlotHeadProps) {
       <div className="slot__body">
         <div className="slot__d">
           <span className="sr-only">{slotDateLabel(option)} · </span>
-          {option.time || "heure mystère"}
+          {option.time || "Sans heure"}
         </div>
         {children}
       </div>

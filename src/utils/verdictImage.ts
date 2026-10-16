@@ -67,7 +67,7 @@ export type VerdictImageInput = {
 
 function formatVerdictDate(option: AperitifOption): string {
   if (!option.date) {
-    return "Date mystère";
+    return "Sans date";
   }
   const label = new Intl.DateTimeFormat("fr-FR", {
     weekday: "long",
@@ -165,7 +165,7 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
   y += 46;
   context.fillStyle = CANVAS_COLORS.muted;
   context.font = `600 28px ${FONT}`;
-  context.fillText("Tableau de chasse : le registre fait foi", margin, y);
+  context.fillText("Résultat", margin, y);
   y += 96;
 
   // Nom cérémoniel.
@@ -193,14 +193,14 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
   // Le verdict.
   context.fillStyle = CANVAS_COLORS.pastis;
   context.font = `800 30px ${FONT}`;
-  context.fillText("LE VERDICT", margin, y);
+  context.fillText("RETENU", margin, y);
   y += 62;
   context.fillStyle = CANVAS_COLORS.cream;
   context.font = `800 52px ${FONT}`;
   context.fillText(formatVerdictDate(input.option), margin, y);
   y += 66;
   context.font = `700 44px ${FONT}`;
-  context.fillText(`${input.option.time || "Heure mystère"}, ${input.option.location}`, margin, y);
+  context.fillText(`${input.option.time || "Sans heure"}, ${input.option.location}`, margin, y);
   y += 54;
   if (addressLines.length > 0) {
     context.fillStyle = CANVAS_COLORS.muted;
@@ -223,16 +223,16 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
 
   const columnWidth = (WIDTH - margin * 2) / 3;
   const countsY = y + 118;
-  drawCount(context, margin + columnWidth * 0.5, countsY, input.counts.yes, "Présences");
-  drawCount(context, margin + columnWidth * 1.5, countsY, input.counts.maybe, "Hésitations");
-  drawCount(context, margin + columnWidth * 2.5, countsY, input.counts.no, "Désertions");
+  drawCount(context, margin + columnWidth * 0.5, countsY, input.counts.yes, "Oui");
+  drawCount(context, margin + columnWidth * 1.5, countsY, input.counts.maybe, "Peut-être");
+  drawCount(context, margin + columnWidth * 2.5, countsY, input.counts.no, "Non");
   y += panelHeight + 92;
 
-  // Traquenard-O-mètre.
+  // Intensité.
   context.textAlign = "left";
   context.fillStyle = CANVAS_COLORS.pastis;
   context.font = `800 30px ${FONT}`;
-  context.fillText("TRAQUENARD-O-MÈTRE", margin, y);
+  context.fillText("INTENSITÉ", margin, y);
   y += 44;
 
   const gaugeWidth = WIDTH - margin * 2;
@@ -253,20 +253,17 @@ export async function renderVerdictImage(input: VerdictImageInput): Promise<Blob
   context.font = `600 30px ${FONT}`;
   context.fillText(
     input.traquenardAverage != null
-      ? `Pronostic de la tablée : ${input.traquenardAverage.toFixed(1)} / 10`
-      : "Pronostic de la tablée : aucun avis, méfiance.",
+      ? `${input.traquenardAverage.toFixed(1)} / 10`
+      : "Aucun avis.",
     margin,
     y,
   );
 
-  // Pied : l'organisateur signe, ancré au bas d'un canvas désormais taillé
-  // pour que le flux ne l'atteigne jamais.
+  // Pied : l'hôte signe, ancré au bas d'un canvas désormais taillé pour que
+  // le flux ne l'atteigne jamais.
   context.fillStyle = CANVAS_COLORS.cream;
   context.font = `700 32px ${FONT}`;
-  context.fillText(`Assemblée convoquée par ${input.event.organizerName}`, margin, height - 96);
-  context.fillStyle = CANVAS_COLORS.muted;
-  context.font = `600 26px ${FONT}`;
-  context.fillText("Chacun s’abreuve selon sa conscience et sa constitution.", margin, height - 52);
+  context.fillText(`Hôte : ${input.event.organizerName}`, margin, height - 72);
 
   return new Promise((resolve) => {
     canvas.toBlob((blob) => resolve(blob), "image/png");

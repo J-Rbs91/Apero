@@ -8,7 +8,7 @@ const ID_RANDOM_LENGTH = 10;
 // on échoue franchement plutôt que de retomber sur une source non sûre.
 export function createId(prefix = "apero"): string {
   if (typeof crypto === "undefined" || !crypto.getRandomValues) {
-    throw new Error("Web Crypto API indisponible : impossible de générer un identifiant sûr.");
+    throw new Error("Navigateur incompatible.");
   }
 
   const bytes = new Uint8Array(ID_RANDOM_LENGTH);

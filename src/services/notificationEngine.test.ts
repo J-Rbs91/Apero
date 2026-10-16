@@ -275,7 +275,7 @@ describe("coup de coude post-apéro", () => {
     const result = computeNextRoundNudge(target, yesGuest, snap, msAfterStart(13));
     expect(result.drafts).toHaveLength(1);
     expect(result.drafts[0].type).toBe("next-round-nudge");
-    expect(result.drafts[0].body).toContain("À qui le tour");
+    expect(result.drafts[0].body).toContain("Refaire");
     expect(result.firedNextRoundNudge).toBe(true);
   });
 
@@ -284,7 +284,7 @@ describe("coup de coude post-apéro", () => {
     const snap = snapshotApero(target);
     const result = computeNextRoundNudge(target, creator, snap, msAfterStart(13));
     expect(result.drafts).toHaveLength(1);
-    expect(result.drafts[0].body).toContain("se répète");
+    expect(result.drafts[0].body).toContain("Récurrent");
   });
 
   it("attend la fin de l'apéro avant de souffler quoi que ce soit", () => {
@@ -381,7 +381,7 @@ describe("réglages retouchés par l'organisateur", () => {
     const result = diffAperoNotifications(after, before, yesGuest, Date.parse(NOW_ISO), makeId, NOW_ISO);
 
     expect(result.notifications.map((n) => n.type)).toEqual(["important-change"]);
-    expect(result.notifications[0].body).toContain("sans les mioches");
+    expect(result.notifications[0].body).toContain("Enfants non acceptés");
   });
 
   it("annonce le nouveau nom d'un apéro rebaptisé", () => {

@@ -2,6 +2,9 @@ import { type CSSProperties } from "react";
 import { TRAQUENARD_LEVEL_MAX } from "../utils/calculateResults";
 import { describeTraquenardLevel } from "../utils/traquenardScale";
 
+// Borne haute de l'échelle, sous un nom neutre pour les textes affichés.
+const LEVEL_MAX = TRAQUENARD_LEVEL_MAX;
+
 // Dix ampoules, trois zones (froid / tiède / chaud) comme un testeur de force
 // de foire (docs/uxer/design-system.md §5). Le niveau est toujours dit en
 // toutes lettres : ni la couleur ni le nombre d'ampoules allumées ne portent
@@ -34,15 +37,15 @@ export function TraquenardGauge({ level, voteCount }: TraquenardGaugeProps) {
   return (
     <div className="traq traq--summary">
       <div className="traq__head">
-        {/* « Pronostic de la tablée » : la synthèse se distingue du curseur
-            interactif (« Ton pronostic ») d'un coup d'œil. */}
-        <p className="traq__title">Pronostic de la tablée</p>
+        {/* « Intensité moyenne » : la synthèse se distingue du curseur
+            interactif (« Intensité ») d'un coup d'œil. */}
+        <p className="traq__title">Intensité moyenne</p>
         <p className={`traq__value${hasLevel ? "" : " traq__value--empty"}`}>
           {hasLevel
-            ? `${level.toFixed(1)}/${TRAQUENARD_LEVEL_MAX} · ${describeTraquenardLevel(level)}`
+            ? `${level.toFixed(1)}/${LEVEL_MAX} · ${describeTraquenardLevel(level)}`
             : voteCount === 0
-              ? "Aucun pronostic déposé"
-              : "En attente de pronostics"}
+              ? "Aucun avis."
+              : "En attente."}
         </p>
       </div>
       <div
@@ -50,8 +53,8 @@ export function TraquenardGauge({ level, voteCount }: TraquenardGaugeProps) {
         role="img"
         aria-label={
           hasLevel
-            ? `Pronostic de la tablée : ${level.toFixed(1)} sur ${TRAQUENARD_LEVEL_MAX}, ${describeTraquenardLevel(level)}`
-            : "Pronostic de la tablée : rien de déposé pour l’instant"
+            ? `Intensité moyenne : ${level.toFixed(1)} sur ${LEVEL_MAX}, ${describeTraquenardLevel(level)}`
+            : "Intensité moyenne : aucun avis"
         }
       >
         <GaugeBulbs lit={lit} />
@@ -75,11 +78,11 @@ export function TraquenardSlider({ value, onChange }: TraquenardSliderProps) {
   return (
     <div className={`traq traq--interactive${value == null ? " traq--untouched" : ""}`}>
       <div className="traq__head">
-        <p className="traq__title">Ton pronostic</p>
+        <p className="traq__title">Intensité</p>
         <p className={`traq__value${value == null ? " traq__value--empty" : ""}`}>
           {value == null
-            ? "Glisse pour te mouiller (optionnel)"
-            : `${value}/${TRAQUENARD_LEVEL_MAX} · ${describeTraquenardLevel(value)}`}
+            ? "Facultatif"
+            : `${value}/${LEVEL_MAX} · ${describeTraquenardLevel(value)}`}
         </p>
       </div>
       <div className="traq__gauge">
@@ -92,11 +95,11 @@ export function TraquenardSlider({ value, onChange }: TraquenardSliderProps) {
           step={1}
           value={displayValue}
           onChange={(event) => onChange(Number(event.target.value))}
-          aria-label="Traquenard-O-mètre : ton pronostic"
+          aria-label="Intensité"
           aria-valuetext={
             value == null
-              ? "aucun pronostic déposé"
-              : `${value} sur ${TRAQUENARD_LEVEL_MAX}, ${describeTraquenardLevel(value)}`
+              ? "aucun avis"
+              : `${value} sur ${LEVEL_MAX}, ${describeTraquenardLevel(value)}`
           }
         />
       </div>

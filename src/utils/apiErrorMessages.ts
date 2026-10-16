@@ -11,40 +11,40 @@ export function describeApiError(error: unknown): string {
   // se raconte pas comme un « souci technique » indéfini.
   if (error instanceof EncryptedAperoError) {
     return error.code === "NOT_FOUND"
-      ? "Cet apéro n’existe plus au registre : il a été annulé entre-temps."
-      : "Impossible de relire cet apéro pour le moment (comptoir injoignable) : rien n’a été modifié. Réessaie dans un instant.";
+      ? "Apéro supprimé."
+      : "Réseau indisponible. Réessayer.";
   }
 
   if (error instanceof AperoApiError) {
     switch (error.code) {
       case "API_NOT_CONFIGURED":
-        return "Le comptoir numérique n’est pas encore raccordé (API non configurée). Ta réponse est notée sur cet appareil, elle partira dès que le service sera rétabli.";
+        return "Service non configuré.";
       case "NETWORK_ERROR":
-        return "Impossible de joindre le comptoir numérique. Vérifie la connexion et réessaie. Ta réponse reste notée sur cet appareil.";
+        return "Réseau indisponible. Réessayer.";
       case "CONFLICT":
-        return "Quelqu’un a répondu en même temps que toi. Recharge la page et réessaie, ça passe presque toujours du deuxième coup.";
+        return "Conflit. Recharger.";
       case "WRITE_FORBIDDEN":
         if (error.serverCode === "LEGACY_DELETE_DISABLED") {
-          return "Cette ancienne convocation n’a pas encore de clé d’annulation sécurisée. Active temporairement ALLOW_LEGACY_WRITE_KEY_DELETE côté API pour la supprimer, puis remets la variable à false.";
+          return "Ancien apéro. Suppression désactivée.";
         }
-        return "Ce lien ne permet pas de répondre ici. Vérifie qu’il est complet.";
+        return "Lien incomplet.";
       case "NOT_FOUND":
         if (error.serverCode === "DELETE_ENDPOINT_MISSING") {
-          return "La suppression n’est pas encore disponible côté serveur : l’API du VPS doit être mise à jour. Rien n’a été supprimé.";
+          return "Suppression indisponible. Serveur obsolète.";
         }
-        return "Un souci technique est survenu, réessaie dans un instant.";
+        return "Erreur serveur. Réessayer.";
       case "RATE_LIMITED":
-        return "Le comptoir sature, doucement sur la cadence. Réessaie dans une minute.";
+        return "Trop de requêtes. Réessayer dans 1 min.";
       default:
-        return "Un souci technique est survenu, réessaie dans un instant.";
+        return "Erreur serveur. Réessayer.";
     }
   }
 
   // Saisie refusée par le registre (champ trop long, donnée invalide…) :
   // le dire, sinon le convive croit à une panne et réessaie en boucle.
   if (error instanceof AperoValidationError) {
-    return `Le registre refuse cette saisie (${error.message}). Corrige le champ concerné et réessaie.`;
+    return `Saisie invalide (${error.message}).`;
   }
 
-  return "Un souci technique est survenu, réessaie dans un instant.";
+  return "Erreur inattendue. Réessayer.";
 }

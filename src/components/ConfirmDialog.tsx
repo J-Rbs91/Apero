@@ -6,12 +6,13 @@ import { useModalDialog } from "../hooks/useModalDialog";
 
 type ConfirmDialogProps = {
   isOpen: boolean;
-  eyebrow: string;
+  /** Surtitre facultatif : absent, rien n'est rendu au-dessus du titre. */
+  eyebrow?: string;
   title: string;
   body: string;
   cancelLabel: string;
   confirmLabel: string;
-  /** Libellé du bouton de confirmation pendant l'action (« On raye… »). */
+  /** Libellé du bouton de confirmation pendant l'action (« Suppression… »). */
   busyLabel: string;
   isBusy: boolean;
   error?: string;
@@ -52,7 +53,7 @@ export function ConfirmDialog({
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
       >
-        <p className="eyebrow">{eyebrow}</p>
+        {eyebrow && <p className="eyebrow">{eyebrow}</p>}
         <h2 className="h1 h1--sm" id="confirm-dialog-title">
           {title}
         </h2>

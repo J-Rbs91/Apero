@@ -126,7 +126,7 @@ export function HomePage() {
           {nextApero && (
             <section className="sheet sheet--hero nextapero">
               <p className="eyebrow">
-                {nextApero.isDecided ? "Prochain rendez-vous" : "Ça vote au comptoir"}
+                {nextApero.isDecided ? "Prochain" : "En cours"}
               </p>
               <h2 className="h2">{nextApero.event.ceremonialName}</h2>
               <Signature seed={nextApero.aperoId} />
@@ -134,11 +134,11 @@ export function HomePage() {
                 <span>{formatNextDate(nextApero.startMs)}</span>
                 <span>
                   <b>{nextApero.event.participants.length}</b> réponse
-                  {nextApero.event.participants.length > 1 ? "s" : ""} au registre
+                  {nextApero.event.participants.length > 1 ? "s" : ""}
                 </span>
               </p>
               <AppLink className="button button--primary button--block" to={nextApero.path}>
-                Ouvrir l’apéro
+                Ouvrir
               </AppLink>
             </section>
           )}
@@ -150,29 +150,18 @@ export function HomePage() {
           </div>
 
           <div className="sign__text">
-            <p className="eyebrow">Institution officieuse du comptoir</p>
             <h1 className="h1">
               La Confrérie du <span className="h1__pop">Petit Jaune</span>
             </h1>
-            <p className="lede">
-              Le zinc décide, pour toute la tablée. Tu proposes des créneaux, tu partages un lien,
-              la tablée tranche.
-            </p>
             <AppLink
               className={`button ${nextApero ? "button--ghost" : "button--primary"} button--block`}
               to="/create"
             >
-              Organiser un apéro
+              Nouvel apéro
             </AppLink>
           </div>
         </div>
       }
-    >
-      <p className="hint">
-        Nous ne saurions présumer de ce que tu porteras à tes lèvres, ni sous quelle toiture, ou
-        pas, tu le porteras. Ces détails demeurent ta souveraine affaire. En revanche, nul ne
-        saurait se dérober à la question qui vient, ça, jamais.
-      </p>
-    </MobilePage>
+    />
   );
 }

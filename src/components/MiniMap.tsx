@@ -113,7 +113,7 @@ export function MiniMap({ lat, lng, label, address }: MiniMapProps) {
       <div className="minimap__row">
         <OpenInMapsButton
           className="minimap__address"
-          label={label ?? "ce troquet"}
+          label={label ?? "Lieu"}
           address={address}
           lat={lat}
           lng={lng}
@@ -122,8 +122,9 @@ export function MiniMap({ lat, lng, label, address }: MiniMapProps) {
           type="button"
           className="minimap__expand"
           onClick={() => setIsExpanded(true)}
+          aria-label="Agrandir la carte"
         >
-          Agrandir la carte
+          Agrandir
         </button>
       </div>
 
@@ -138,7 +139,7 @@ export function MiniMap({ lat, lng, label, address }: MiniMapProps) {
             aria-label={label ? `Carte agrandie : ${label}` : "Carte agrandie"}
           >
             <div className="minimap__expanded-head">
-              <p className="eyebrow">{label ?? "Le repère"}</p>
+              <p className="eyebrow">{label ?? "Lieu"}</p>
               <button
                 type="button"
                 className="minimap__close"
@@ -149,7 +150,7 @@ export function MiniMap({ lat, lng, label, address }: MiniMapProps) {
               </button>
             </div>
             <div ref={expandedContainerRef} className="minimap__canvas minimap__canvas--expanded" />
-            <OpenInMapsButton label={label ?? "ce troquet"} address={address} lat={lat} lng={lng} />
+            <OpenInMapsButton label={label ?? "Lieu"} address={address} lat={lat} lng={lng} />
           </section>
         </div>
       )}

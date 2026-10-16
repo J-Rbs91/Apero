@@ -98,11 +98,11 @@ export async function fetchEncryptedAperoFromApi(
   try {
     body = (await response.json()) as { ok?: boolean; file?: unknown; sha?: string };
   } catch {
-    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse illisible de l’API apéro.");
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse serveur illisible. Réessayer.");
   }
 
   if (body?.ok !== true || typeof body.sha !== "string" || body.file == null) {
-    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse inattendue de l’API apéro.");
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse serveur invalide. Réessayer.");
   }
 
   return { status: "ok", file: body.file, sha: body.sha };
@@ -209,7 +209,7 @@ export async function createOrUpdateEncryptedApero(
     const { serverCode, message } = await readErrorBody(response);
     throw new AperoApiError(
       mapStatusToErrorCode(response.status),
-      message ?? `L'API apero a refuse l'ecriture (HTTP ${response.status}).`,
+      message ?? `Écriture refusée (HTTP ${response.status}).`,
       response.status,
       serverCode,
     );
@@ -220,11 +220,11 @@ export async function createOrUpdateEncryptedApero(
   try {
     result = (await response.json()) as CreateOrUpdateEncryptedAperoResult;
   } catch {
-    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse illisible de l’API apéro.");
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse serveur illisible. Réessayer.");
   }
 
   if (result?.ok !== true || typeof result.sha !== "string") {
-    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse inattendue de l’API apéro.");
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse serveur invalide. Réessayer.");
   }
 
   return result;
@@ -307,11 +307,11 @@ export async function deleteEncryptedApero(
   try {
     result = (await response.json()) as DeleteEncryptedAperoResult;
   } catch {
-    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse illisible de l’API apéro.");
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse serveur illisible. Réessayer.");
   }
 
   if (result?.ok !== true) {
-    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse inattendue de l’API apéro.");
+    throw new AperoApiError("UNEXPECTED_RESPONSE", "Réponse serveur invalide. Réessayer.");
   }
 
   return result;

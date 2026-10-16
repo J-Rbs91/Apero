@@ -59,25 +59,21 @@ export function ComptoirWall({ messages, authorName, onPost, isSaving }: Comptoi
       setDraft("");
     } catch {
       hapticError();
-      setFeedback("Le mot n’est pas arrivé jusqu’au mur. Réessaie dans un instant.");
+      setFeedback("Envoi échoué. Réessayer.");
     }
   }
 
   return (
     <Disclosure
-      title="Le mur du comptoir"
+      title="Messages"
       summary={
         messages.length === 0
-          ? "Personne n’a encore rien lâché."
-          : `Dernier mot ${formatWhen(messages[messages.length - 1].createdAt)}.`
+          ? "Aucun message."
+          : `Dernier message ${formatWhen(messages[messages.length - 1].createdAt)}.`
       }
       badge={messages.length}
     >
-      {messages.length === 0 ? (
-        <p className="lede">
-          Le premier mot donne toujours le ton de la soirée. À toi de voir lequel.
-        </p>
-      ) : (
+      {messages.length === 0 ? null : (
         <div className="wall-list">
           {messages.map((message) => (
             <div className="wall-item" key={message.id}>
@@ -94,17 +90,12 @@ export function ComptoirWall({ messages, authorName, onPost, isSaving }: Comptoi
       {onPost && (
         <form className="wall-form" onSubmit={handleSubmit}>
           <TextAreaField
-            label={trimmedAuthor ? `Lâcher un mot (signé ${trimmedAuthor})` : "Lâcher un mot"}
+            label="Message"
             requirement="optional"
-            hint={
-              trimmedAuthor
-                ? undefined
-                : "Choisis d’abord ton blaze (menu de la Confrérie) pour signer tes mots."
-            }
+            hint={trimmedAuthor ? undefined : "Nom requis, via le menu."}
             value={draft}
             rows={2}
             maxLength={500}
-            placeholder="J’amène les olives, quelqu’un gère la glace ?"
             onChange={setDraft}
           />
           <button
@@ -112,7 +103,7 @@ export function ComptoirWall({ messages, authorName, onPost, isSaving }: Comptoi
             type="submit"
             disabled={!canPost || isSaving || !draft.trim()}
           >
-            {isSaving ? "On grave le mot…" : "Poser ça sur le mur"}
+            {isSaving ? "Envoi…" : "Publier"}
           </button>
           {feedback && (
             <p className="feedback" role="alert">

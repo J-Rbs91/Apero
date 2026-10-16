@@ -168,28 +168,28 @@ function describeSettingsChange(
 
   if (previous.childrenAllowed !== next.childrenAllowed) {
     if (next.childrenAllowed === true) {
-      return `« ${name} » : les mioches sont finalement conviés. Compte-les dans tes renforts.`;
+      return `${name} · Enfants acceptés.`;
     }
     if (next.childrenAllowed === false) {
-      return `« ${name} » : ce sera finalement sans les mioches. Prévois la garde, et revois tes renforts.`;
+      return `${name} · Enfants non acceptés.`;
     }
-    return `« ${name} » : la politique mioches n’est plus tranchée. Demande à l’organisateur.`;
+    return `${name} · Enfants : non précisé.`;
   }
 
   if (previous.ceremonialName !== next.ceremonialName) {
-    return `« ${previous.ceremonialName} » s’appelle désormais « ${name} ». Même tablée, nouvelle enseigne.`;
+    return `${previous.ceremonialName} · Nouveau nom : ${name}`;
   }
 
   if (previous.title !== next.title) {
     return next.title
-      ? `Le prétexte de « ${name} » a changé : ${next.title}.`
-      : `« ${name} » n’a plus de prétexte affiché. On trinque, c’est déjà un motif.`;
+      ? `${name} · Prétexte : ${next.title}`
+      : `${name} · Prétexte supprimé.`;
   }
 
   if (previous.recurrence !== next.recurrence) {
     return next.recurrence
-      ? `« ${name} » devient une assemblée récurrente. Le rituel prend la cadence.`
-      : `« ${name} » ne se répète plus : ce sera une assemblée d’un soir.`;
+      ? `${name} · Récurrence ajoutée.`
+      : `${name} · Récurrence supprimée.`;
   }
 
   return null;
@@ -232,15 +232,15 @@ function buildNotifications(
       if (previousSignature === undefined) {
         drafts.push({
           type: "guest-responded",
-          title: "Nouvelle réponse au registre",
-          body: `${participant.participantName} vient d’émarger à « ${event.ceremonialName} ».`,
+          title: "Nouvelle réponse",
+          body: `${participant.participantName} · ${event.ceremonialName}`,
           dedupeKey: `${event.id}:responded:${key}`,
         });
       } else if (previousSignature !== signature) {
         drafts.push({
           type: "guest-changed-response",
-          title: "Un convive a changé d’avis",
-          body: `${participant.participantName} a modifié sa réponse à « ${event.ceremonialName} ».`,
+          title: "Réponse modifiée",
+          body: `${participant.participantName} · ${event.ceremonialName}`,
           // La signature entre dans la clé : chaque modification distincte
           // produit sa propre notification.
           dedupeKey: `${event.id}:changed:${key}:${signature}`,
@@ -263,8 +263,8 @@ function buildNotifications(
         // Le créateur est prévenu qu'un invité a proposé un créneau.
         drafts.push({
           type: "guest-proposed-option",
-          title: "Nouvelle proposition de créneau",
-          body: `${option.createdByName ?? "Un convive"} propose un créneau pour « ${event.ceremonialName} ».`,
+          title: "Nouveau créneau",
+          body: `${option.createdByName ?? "Convive"} · ${event.ceremonialName}`,
           dedupeKey: `${event.id}:proposed:${option.id}`,
         });
       }
@@ -272,8 +272,8 @@ function buildNotifications(
         // Les invités engagés sont prévenus des nouvelles propositions.
         drafts.push({
           type: "new-option",
-          title: "Nouvelle proposition de créneau",
-          body: `Un nouveau créneau a été proposé pour « ${event.ceremonialName} ».`,
+          title: "Nouveau créneau",
+          body: event.ceremonialName,
           dedupeKey: `${event.id}:new-option:${option.id}`,
         });
       }
@@ -282,8 +282,8 @@ function buildNotifications(
       if (!isCreator && guestFollowsUpdates(viewer.vote)) {
         drafts.push({
           type: "option-modified",
-          title: "Un créneau a bougé",
-          body: `Un créneau de « ${event.ceremonialName} » a bougé. Va voir lequel.`,
+          title: "Créneau modifié",
+          body: event.ceremonialName,
           dedupeKey: `${event.id}:option-modified:${option.id}:${signature}`,
         });
       }
@@ -304,8 +304,8 @@ function buildNotifications(
       const excerpt = truncateExcerpt(message.body, 90);
       drafts.push({
         type: "new-message",
-        title: "Un mot au comptoir",
-        body: `${message.authorName}, à propos de « ${event.ceremonialName} » : ${excerpt}`,
+        title: "Nouveau message",
+        body: `${message.authorName} · ${event.ceremonialName} : ${excerpt}`,
         dedupeKey: `${event.id}:message:${message.id}`,
       });
     }
@@ -322,10 +322,10 @@ function buildNotifications(
     const wasAlreadySet = Boolean(previous.selectedOptionId);
     drafts.push({
       type: wasAlreadySet ? "important-change" : "final-confirmation",
-      title: wasAlreadySet ? "Changement important" : "C’est confirmé !",
+      title: wasAlreadySet ? "Créneau retenu modifié" : "Créneau retenu",
       body: selected
-        ? `« ${event.ceremonialName} » est calé : ${selected.date} à ${selected.time}, ${selected.location}.`
-        : `Le créneau retenu de « ${event.ceremonialName} » a changé.`,
+        ? `${event.ceremonialName} · ${selected.date} ${selected.time} · ${selected.location}`
+        : event.ceremonialName,
       // La provenance entre dans la clé : revenir à un créneau déjà confirmé
       // par le passé (A → B → A) reste un changement important à annoncer.
       dedupeKey: `${event.id}:confirmed:${event.selectedOptionId}:from:${previous.selectedOptionId ?? "none"}`,
@@ -342,7 +342,7 @@ function buildNotifications(
     if (change) {
       drafts.push({
         type: "important-change",
-        title: "L’apéro a été retouché",
+        title: "Apéro modifié",
         body: change,
         // Provenance et destination dans la clé, comme pour la confirmation
         // de créneau : revenir à un réglage déjà connu reste une nouvelle.
@@ -429,8 +429,8 @@ export function computeReminders(
 
   const draft: DraftNotification = {
     type: mostUrgent.type,
-    title: "Tu te tâtes encore ?",
-    body: `« ${event.ceremonialName} » approche : plus que ${mostUrgent.id} pour trancher. Le registre attend.`,
+    title: "Réponse à confirmer",
+    body: `${event.ceremonialName} · Dans ${mostUrgent.hours} h`,
     dedupeKey: `${event.id}:reminder:${mostUrgent.id}`,
   };
 
@@ -492,14 +492,14 @@ export function computeNextRoundNudge(
   const draft: DraftNotification = event.recurrence
     ? {
         type: "next-round-nudge",
-        title: "La tournée suivante attend",
-        body: `« ${event.ceremonialName} » est passé, et cette assemblée se répète. Convoque la prochaine tournée, le zinc garde la cadence.`,
+        title: "Prochain apéro",
+        body: `${event.ceremonialName} · Récurrent. Créer le suivant.`,
         dedupeKey: `${event.id}:next-round`,
       }
     : {
         type: "next-round-nudge",
-        title: "L’assemblée est levée",
-        body: `« ${event.ceremonialName} » est derrière nous. À qui le tour de convoquer ? Un lien, deux créneaux, et ça repart.`,
+        title: "Apéro passé",
+        body: `${event.ceremonialName} · Refaire ?`,
         dedupeKey: `${event.id}:next-round`,
       };
 

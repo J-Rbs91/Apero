@@ -269,7 +269,7 @@ export function InvitePage() {
     const legacyWriteKey = !adminKey && localEntry?.role === "creator" ? keys.writeKey : undefined;
 
     if (!adminKey && !legacyWriteKey) {
-      setError("Cette annulation n’est disponible que depuis l’appareil qui a créé l’apéro.");
+      setError("Suppression réservée à l’appareil créateur.");
       return;
     }
 
@@ -297,39 +297,39 @@ export function InvitePage() {
   if (state.status === "loading") {
     return (
       <MobilePage className="event-mobile" header={<MobileHeader eyebrow="Invitation" />}>
-        <LoadingScreen heading="h1" title="On ouvre l’invitation" subtitle="On déchiffre les détails de l’apéro…" />
+        <LoadingScreen heading="h1" title="Chargement" />
       </MobilePage>
     );
   }
 
   if (state.status !== "ready") {
-    const message =
-      state.status === "invalid-id"
-        ? "Ce lien d’invitation est mal formé : on ne reconnaît pas cet identifiant."
+    const heading =
+      state.status === "invalid-id" || state.status === "bad-key"
+        ? "Lien invalide"
         : state.status === "missing-key"
-          ? "Ce lien d’invitation est incomplet : il lui manque sa clé de lecture. Demande le lien complet à la personne qui t’a invité·e."
+          ? "Lien incomplet"
           : state.status === "not-found"
-            ? "Cet apéro reste introuvable : soit ce lien ne mène nulle part, soit l’apéro a déjà eu lieu."
+            ? "Apéro introuvable"
             : state.status === "deleted"
-              ? "Cet apéro a été annulé par la personne qui l’organisait : créneaux, votes et registre, tout a été effacé. Il a aussi été retiré de ton ardoise sur cet appareil."
-              : state.status === "bad-key"
-                ? "Cette clé n’ouvre pas cet apéro : lien tronqué ou périmé. Demande une invitation fraîche."
-                : state.message;
+              ? "Apéro supprimé"
+              : "Erreur";
+    const message =
+      state.status === "deleted"
+        ? "Retiré de cet appareil."
+        : state.status === "error"
+          ? state.message
+          : "";
 
     return (
       <MobilePage
         className="event-mobile"
         header={<MobileHeader eyebrow="Invitation" />}
-        hero={
-          <h1 className="h1 h1--sm">
-            {state.status === "deleted" ? "Apéro annulé" : "Aïe, ce lien coince"}
-          </h1>
-        }
+        hero={<h1 className="h1 h1--sm">{heading}</h1>}
       >
         <section className="sheet">
-          <p className="lede">{message}</p>
+          {message && <p className="lede">{message}</p>}
           <AppLink className="button button--ghost button--block" to="/">
-            Retour au comptoir
+            Accueil
           </AppLink>
         </section>
       </MobilePage>
@@ -397,15 +397,10 @@ export function InvitePage() {
       title={buildShareTitle(event)}
       text={buildShareText(event)}
       isPrimary={shareFirst}
-      lead={
-        shareFirst
-          ? "Personne n’a encore répondu. Envoie le lien, c’est la seule porte d’entrée."
-          : undefined
-      }
       reminder={
         isOrganizer
           ? {
-              label: "Sonner le rappel",
+              label: "Relancer",
               title: buildShareTitle(event),
               text: buildReminderText(event),
             }
@@ -446,7 +441,7 @@ export function InvitePage() {
     </>
   ) : (
     <section className="sheet">
-      <h2 className="h2">{event.options.length > 1 ? "Toutes les dates proposées" : "Le créneau proposé"}</h2>
+      <h2 className="h2">{event.options.length > 1 ? "Créneaux" : "Créneau"}</h2>
       <div className="slot-stack">
         {event.options.map((option) => (
           <div className="slot slot--compact" key={option.id}>
@@ -468,17 +463,13 @@ export function InvitePage() {
             </SlotHead>
             {(option.cheers?.length ?? 0) > 0 && (
               <span className="cheer-count">
-                {option.cheers?.length} verre{(option.cheers?.length ?? 0) > 1 ? "s" : ""} levé
-                {(option.cheers?.length ?? 0) > 1 ? "s" : ""}
+                {option.cheers?.length} soutien{(option.cheers?.length ?? 0) > 1 ? "s" : ""}
               </span>
             )}
           </div>
         ))}
       </div>
-      <p className="lede">
-        Ce lien permet de consulter l’apéro, mais pas d’y répondre : il manque la clé
-        d’écriture. Demande le lien complet à la personne qui t’a invité·e.
-      </p>
+      <p className="lede">Lecture seule. Demander le lien complet.</p>
     </section>
   );
 
@@ -499,10 +490,7 @@ export function InvitePage() {
   // ne se disputent plus l'écran avec le geste attendu du convive.
   const organizerTools =
     isOrganizer && keys.writeKey ? (
-      <Disclosure
-        title="Coulisses de l’organisation"
-        summary="Retoucher les réglages, ou tout annuler."
-      >
+      <Disclosure title="Gestion">
         {canEditSettings && (
           <button
             type="button"
@@ -512,19 +500,15 @@ export function InvitePage() {
               setIsEditingSettings(true);
             }}
           >
-            Retoucher l’apéro
+            Réglages
           </button>
         )}
-        <p className="field__hint">
-          Annuler efface créneaux, réponses et contre-propositions pour toute la tablée.
-          C’est sans retour.
-        </p>
         <button
           type="button"
           className="button button--danger button--block"
           onClick={() => setShowDeleteConfirm(true)}
         >
-          Annuler l’apéro
+          Supprimer l’apéro
         </button>
       </Disclosure>
     ) : null;
@@ -532,30 +516,26 @@ export function InvitePage() {
   // Tête de page : le nom de l'assemblée proclamé, sa signature, son état.
   const heroBlock = (
     <div className="page-hero">
-      <p className="eyebrow">
-        {isOrganizer ? "Ton assemblée" : `Une invitation de ${event.organizerName}`}
-      </p>
+      <p className="eyebrow">{`Hôte : ${event.organizerName}`}</p>
       <h1 className="h1 h1--sm">{event.ceremonialName}</h1>
       <Signature seed={event.id} />
-      {event.title && <p className="lede">{"« "}{event.title}{" »"}</p>}
+      {event.title && <p className="lede">{event.title}</p>}
       <p className="factline">
         <span>
-          <b>{event.options.length}</b> créneau{event.options.length > 1 ? "x" : ""} proposé
-          {event.options.length > 1 ? "s" : ""}
+          <b>{event.options.length}</b> créneau{event.options.length > 1 ? "x" : ""}
         </span>
         <span>
-          <b>{event.participants.length}</b> réponse{event.participants.length > 1 ? "s" : ""} au
-          registre
+          <b>{event.participants.length}</b> réponse{event.participants.length > 1 ? "s" : ""}
         </span>
       </p>
       <div className="tagrow">
         {event.childrenAllowed != null && (
           <span className={`tag ${event.childrenAllowed ? "tag--yes" : "tag--no"}`}>
-            {event.childrenAllowed ? "Marmaille admise" : "Sans les mioches"}
+            {event.childrenAllowed ? "Enfants bienvenus" : "Sans enfants"}
           </span>
         )}
         {event.recurrence && <span className="tag">{describeRecurrence(event.recurrence)}</span>}
-        {hasLocalEntry && !isPastEvent && <span className="tag">Sur ton ardoise</span>}
+        {hasLocalEntry && !isPastEvent && <span className="tag">Sur cet appareil</span>}
       </div>
     </div>
   );
@@ -563,7 +543,7 @@ export function InvitePage() {
   return (
     <MobilePage
       className="event-mobile invite-page"
-      header={<MobileHeader eyebrow={isOrganizer ? "Ta convocation" : "Invitation"} />}
+      header={<MobileHeader eyebrow={isOrganizer ? "Apéro" : "Invitation"} />}
       hero={heroBlock}
     >
       {(error || loadWarning) && (
@@ -598,17 +578,6 @@ export function InvitePage() {
               {verdictPanel}
 
               <section className="sheet">
-                <p className="eyebrow">{event.recurrence ? "La tournée suivante" : "Remettre ça"}</p>
-                <h2 className="h2">
-                  {event.recurrence
-                    ? "Cette assemblée se répète, le rituel n’attend pas."
-                    : "Cet apéro est derrière nous."}
-                </h2>
-                <p className="lede">
-                  {event.recurrence
-                    ? `La cadence est gravée : ${describeRecurrence(event.recurrence)}. Le rituel n’attend que ta convocation.`
-                    : "Les verres sont secs, le zinc est rangé. La suite logique : la même chose un peu plus tard, et n’importe quel membre de la tablée peut convoquer la prochaine."}
-                </p>
                 <button
                   type="button"
                   className="button button--primary button--block"
@@ -616,7 +585,7 @@ export function InvitePage() {
                     aller("/create", { state: { prefill: buildNextRoundPrefill(event) } })
                   }
                 >
-                  {event.recurrence ? "Convoquer la prochaine tournée" : "Remettre ça"}
+                  Refaire
                 </button>
               </section>
             </div>
@@ -679,13 +648,8 @@ export function InvitePage() {
 
               {hasJustVoted && !isOrganizer && (
                 <section className="sheet">
-                  <p className="eyebrow">À ton tour</p>
-                  <p className="lede">
-                    Une assemblée, deux créneaux, un lien : tu sais tout. La Confrérie
-                    n’attend plus que ta convocation.
-                  </p>
                   <AppLink className="button button--ghost button--block" to="/create">
-                    Organiser mon propre apéro
+                    Nouvel apéro
                   </AppLink>
                 </section>
               )}
@@ -698,12 +662,11 @@ export function InvitePage() {
 
       <ConfirmDialog
         isOpen={showDeleteConfirm}
-        eyebrow="Annuler l’apéro"
-        title="On raye tout, vraiment ?"
-        body="Créneaux, réponses, votes et contre-propositions : tout part au vide-cave, et le vide-cave ne rend rien."
-        cancelLabel="Non, je le garde"
-        confirmLabel="Oui, tout rayer"
-        busyLabel="On raye…"
+        title="Supprimer ?"
+        body="Irréversible."
+        cancelLabel="Annuler"
+        confirmLabel="Supprimer"
+        busyLabel="Suppression…"
         isBusy={isDeleting}
         error={error || undefined}
         onCancel={() => setShowDeleteConfirm(false)}
