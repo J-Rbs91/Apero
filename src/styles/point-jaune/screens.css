@@ -73,6 +73,15 @@
 /* Écran de tâche : le titre se déclare sans repousser la réponse. */
 .event-mobile .facade__hero {
   padding-top: var(--s-3);
+  padding-bottom: var(--s-4);
+}
+
+.event-mobile .page-hero {
+  gap: var(--s-3);
+}
+
+.event-mobile .page__body {
+  padding-top: var(--s-4);
 }
 
 /* Un en-tête réduit à son titre (erreur, lien qui coince, chargement d'une

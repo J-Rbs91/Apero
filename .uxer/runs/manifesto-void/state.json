@@ -1,24 +1,27 @@
 {
   "schema_version": "1.0",
   "run_id": "manifesto-void",
-  "status": "in_progress",
+  "status": "completed",
   "execution_profile": "standard",
-  "current_phase": "implementation",
-  "current_unit": "qualification",
+  "current_phase": "review",
+  "current_unit": "",
   "completed_phases": [
     "audit",
     "concept",
     "contract",
-    "design-system"
+    "design-system",
+    "implementation",
+    "qualification"
   ],
   "completed_units": [
     "foundations",
-    "screens"
+    "screens",
+    "qualification"
   ],
-  "last_safe_checkpoint": "2026-10-16T21:16:01+00:00",
+  "last_safe_checkpoint": "2026-10-16T22:05:51+00:00",
   "session_name": "uxer-manifesto-void",
   "branch": "feat/uxer-manifesto-void",
-  "commit_sha": "64bce60",
+  "commit_sha": "ee1d167",
   "files_changed": [
     "docs/uxer/manifesto-void/UXER_BASELINE_AUDIT.md",
     "docs/uxer/manifesto-void/UXER_CONCEPT_EXPLORATION.md",
@@ -26,14 +29,19 @@
     "docs/uxer/manifesto-void/UXER_DESIGN_SYSTEM.md",
     "docs/uxer/manifesto-void/UXER_MOTION_SYSTEM.md",
     "src/styles/point-jaune",
-    "src/components/field"
+    "src/components/field",
+    "docs/uxer/manifesto-void/UXER_QUALIFICATION_REPORT.md",
+    "docs/uxer/manifesto-void/evidence"
   ],
   "validations_passed": [
     "baseline: unit 240/240, functional 71/71, nav 23/23, ton N=25, build ok",
-    "post-refonte r2: unit 248/248, functional 71/71, nav 23/23, ton N=25, build ok"
+    "post-refonte r2: unit 248/248, functional 71/71, nav 23/23, ton N=25, build ok",
+    "final: unit 248/248, build ok, functional 71/71, nav 23/23, ton N=25",
+    "visual: 245 rendus 7 largeurs + 70 reduced + 27 zoom200, 0 overflow, 0 console error",
+    "a11y: contrast 0 fail (13 écrans), focus 0 fail, reduced motion 0 running"
   ],
   "validations_failed": [],
-  "next_action": "Qualification visuelle multi-largeurs, mouvement réduit, contrastes, cibles",
+  "next_action": "Revue de direction artistique par le propriétaire ; aucune fusion ni déploiement sans autorisation",
   "blocking_issue": null,
   "pause_reason": null,
   "resume_required": false
