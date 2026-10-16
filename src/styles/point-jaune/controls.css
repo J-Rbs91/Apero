@@ -246,6 +246,16 @@ input[type="time"] {
   font-size: var(--t-small);
 }
 
+/* Chromium ne fait correspondre ni :focus-visible ni :focus sur l'hôte quand
+   le focus est sur l'icône interne (calendrier, horloge) d'un champ de date
+   ou d'heure : l'anneau se pose sur :focus-within, qui couvre tous les cas. */
+input[type="date"]:focus-within,
+input[type="time"]:focus-within {
+  border-color: var(--text);
+  outline: var(--ring) solid var(--focus);
+  outline-offset: 2px;
+}
+
 input::placeholder,
 textarea::placeholder {
   color: var(--text-3);

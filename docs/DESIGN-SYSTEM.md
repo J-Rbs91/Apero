@@ -1,6 +1,8 @@
 # Le kit d'interface de la Confrérie
 
-> **Mise à jour (15/10/2026).** Les **quatre règles** ci-dessous (champ, sélection, action épinglée, un seul bouton plein) restent en vigueur. L'**habillage** (couleurs, typographie, jetons de style, textures, ombres) est désormais défini par `docs/uxer/design-system.md` : le bouton plein est **rouge sur le papier et jaune pastis sur la façade**, plus uniquement jaune pastis ; les jetons de `global.css` ont changé de noms et de valeurs.
+> **Mise à jour (16/10/2026).** L'habillage est désormais celui de **Point Jaune** (`docs/uxer/manifesto-void/UXER_DESIGN_SYSTEM.md`) : le bouton plein est le seul aplat jaune de l'écran, les jetons vivent dans `src/styles/point-jaune/tokens.css`. Les quatre règles ci-dessous restent en vigueur.
+>
+> *Mise à jour précédente (15/10/2026), historique :* Les **quatre règles** ci-dessous (champ, sélection, action épinglée, un seul bouton plein) restent en vigueur. L'**habillage** (couleurs, typographie, jetons de style, textures, ombres) est désormais défini par `docs/uxer/design-system.md` : le bouton plein est **rouge sur le papier et jaune pastis sur la façade**, plus uniquement jaune pastis ; les jetons de `global.css` ont changé de noms et de valeurs.
 
 Ce document décrit les règles de l'interface après la refonte. Elles ne sont pas
 des préférences esthétiques : chacune répond à un reproche précis fait à

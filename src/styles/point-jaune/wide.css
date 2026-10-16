@@ -129,6 +129,11 @@
     margin-top: var(--s-4);
   }
 
+  .page__body > .sheet:has(> .h2:first-child) > :nth-child(2),
+  .page__body > .sheet:has(> .eyebrow:first-child) > :nth-child(2) {
+    margin-top: 0;
+  }
+
   /* Formulaires : la colonne de fonction, plus étroite. */
   .create-mobile .page__body > *,
   .onboarding-screen .page__body > * {

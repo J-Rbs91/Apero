@@ -133,7 +133,9 @@
   background: var(--hover);
 }
 
-/* Badge de non-lus : le seul chiffre qui réclame, donc en jaune. */
+/* Badge de non-lus : rouge, comme l'annoncent les textes de l'app (« le
+   badge rouge reste là ») et la convention des téléphones. Il signale une
+   attente, pas un choix : ce n'est pas un rôle du Petit Jaune. */
 .notif-badge {
   position: absolute;
   top: -7px;
@@ -146,7 +148,7 @@
   padding: 0 5px;
   border-radius: 10px;
   outline: 2px solid var(--bg);
-  background: var(--jaune);
+  background: var(--err);
   color: var(--void);
   font-family: var(--font-mono);
   font-size: var(--t-micro);

@@ -1,5 +1,10 @@
 # Contrat de refonte UXER — La Confrérie du Petit Jaune (Apéro)
 
+> **Document historique (16/10/2026).** Contrat de refonte « Fairground Baroque » remplacé par la direction **Point Jaune**
+> (mission UXER `manifesto-void`) : voir `docs/uxer/manifesto-void/`. Ses invariants
+> **fonctionnels** restent opposables ; ses choix esthétiques (auvent, ampoules, tickets,
+> didone d'affiche, thème clair) ne le sont plus.
+
 Protocole appliqué : `references/full-redesign-contract.md` d'UXER.
 Branche : `feat/uxer-redesign` (jamais fusionnée ni déployée par cette mission).
 Signataire : l'agent de refonte, sur carte blanche du propriétaire. Cette signature ne vaut **aucune approbation humaine** ; le contrat est opposable à l'implémentation, pas au propriétaire.

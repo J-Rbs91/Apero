@@ -75,6 +75,13 @@
   padding-top: var(--s-3);
 }
 
+/* Un en-tête réduit à son titre (erreur, lien qui coince, chargement d'une
+   page) est un Silent Frame : le vide précède la phrase. */
+.facade__hero:has(> .h1),
+.event-mobile .facade__hero:has(> .h1) {
+  padding-top: var(--ma-2);
+}
+
 
 .invite-grid,
 .invite-main,

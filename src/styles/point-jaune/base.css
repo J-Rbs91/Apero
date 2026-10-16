@@ -95,6 +95,17 @@ a {
   hyphens: manual;
 }
 
+/* Aux tailles par défaut, aucun mot monumental ne se coupe. Quand la
+   personne agrandit le texte (200 %), le mot se coupe plutôt que de sortir
+   de l'écran : rien n'est masqué, rien ne défile de côté. */
+.h1,
+.splash__name,
+.verdict__date,
+.blaze,
+.comptes-page .cnt b {
+  overflow-wrap: anywhere;
+}
+
 /* Manifeste : la déclaration. Chasse la plus étroite, graisse noire. */
 .h1 {
   max-width: 12ch;
@@ -114,10 +125,6 @@ a {
   font-weight: 780;
   line-height: 0.9;
   letter-spacing: -0.025em;
-}
-
-.h1__pop {
-  white-space: nowrap;
 }
 
 /* Le Petit Jaune ponctue le manifeste : un point final plein. */

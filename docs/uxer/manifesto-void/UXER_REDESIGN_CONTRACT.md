@@ -172,8 +172,14 @@ animé à la fois par écran, `requestAnimationFrame` suspendu hors champ
 (`IntersectionObserver`) et onglet masqué, animation finie (pas de boucle infinie hors
 écran d'ouverture), rendu `devicePixelRatio` plafonné à 2. CSS livré : objectif ≤ 74 ko
 (référence `main` : 73,96 ko). `lottie-web` reste (écran d'ouverture uniquement, chunk
-paresseux inchangé). Illustrations `Le-zinc.jpg` et `mur-vert.jpg` supprimées du dépôt
-(plus aucune référence) ; leurs crédits retirés de `CREDITS.md`.
+paresseux inchangé). Illustrations `Le-zinc.jpg` et `mur-vert.jpg` **conservées dans le
+dépôt** (actifs du propriétaire) mais plus importées : absentes du site publié ;
+`CREDITS.md` le signale.
+
+**Seul texte d'interface modifié** : la liste des crédits du registre légal, pour rester
+exacte (polices Archivo et Fragment Mono à la place de Manrope ; ligne des images
+d'ambiance retirée puisqu'elles ne sont plus affichées). C'est une correction
+d'exactitude juridique, pas une réécriture de voix.
 
 ## 15. Critères de validation
 

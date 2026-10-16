@@ -17,6 +17,8 @@ type VoteFieldProps = {
   leadIndex: number;
   /** Graine publique : l'identifiant de l'apéro. */
   seed: string;
+  /** Apéro passé : la rangée retenue reste marquée, mais s'éteint. */
+  quiet?: boolean;
 };
 
 const DURATION = 1400;
@@ -28,9 +30,9 @@ const DURATION = 1400;
 // chaque signe est une réponse au registre ; la trame de fond est l'espace du
 // registre, vide tant que personne n'émarge. Les chiffres restent dits en
 // texte à côté (compteurs du verdict) : la figure est aria-hidden.
-export function VoteField({ rows, leadIndex, seed }: VoteFieldProps) {
+export function VoteField({ rows, leadIndex, seed, quiet = false }: VoteFieldProps) {
   const columns = rows.reduce((max, row) => Math.max(max, row.cells.length), 0);
-  const dataKey = `${seed}:${leadIndex}:${rows.map((row) => row.cells.map((cell) => cell?.[0] ?? "-").join("")).join("|")}`;
+  const dataKey = `${seed}:${leadIndex}:${quiet ? 1 : 0}:${rows.map((row) => row.cells.map((cell) => cell?.[0] ?? "-").join("")).join("|")}`;
 
   const draw = useCallback<FieldDraw>(
     (context, { width, height }, progress, palette) => {
@@ -66,7 +68,7 @@ export function VoteField({ rows, leadIndex, seed }: VoteFieldProps) {
           const y = startY + (targetY - startY) * eased;
           const isLead = rowIndex === leadIndex;
           context.globalAlpha = 0.25 + 0.75 * eased;
-          const color = isLead && lit > 0.5 ? palette.signal : palette.ink;
+          const color = isLead && lit > 0.5 && !quiet ? palette.signal : palette.ink;
           context.fillStyle = color;
           context.strokeStyle = color;
           context.lineWidth = 1.25;
@@ -90,13 +92,13 @@ export function VoteField({ rows, leadIndex, seed }: VoteFieldProps) {
       });
       context.globalAlpha = 1;
     },
-    [columns, leadIndex, rows, seed],
+    [columns, leadIndex, quiet, rows, seed],
   );
 
   const canvasRef = useFieldCanvas(draw, { duration: DURATION, dataKey });
 
   return (
-    <div className="votefield" aria-hidden="true">
+    <div className={quiet ? "votefield votefield--quiet" : "votefield"} aria-hidden="true">
       <ol className="votefield__labels">
         {rows.map((row, index) => (
           <li key={row.id} className={index === leadIndex ? "is-lead" : undefined}>

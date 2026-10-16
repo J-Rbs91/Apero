@@ -1,5 +1,10 @@
 # Design system — « La Baraque du Petit Jaune »
 
+> **Document historique (16/10/2026).** Design system « La Baraque du Petit Jaune » remplacé par la direction **Point Jaune**
+> (mission UXER `manifesto-void`) : voir `docs/uxer/manifesto-void/`. Ses invariants
+> **fonctionnels** restent opposables ; ses choix esthétiques (auvent, ampoules, tickets,
+> didone d'affiche, thème clair) ne le sont plus.
+
 Direction : **Fairground Baroque** (arts forains, Belle Époque) comme grammaire de façade, avec la règle de **couleur isolée** de la *Polish Poster School* comme grammaire secondaire. Le pourquoi est dans [`refonte-contract.md`](refonte-contract.md) ; ce document dit **comment** : assez précisément pour qu'un autre agent produise la même intention.
 
 Fichier d'implémentation unique : `src/styles/global.css` (ordre : tokens → base → mise en page → composants → écrans → mouvement → thèmes). Aucun second système, aucun CSS de recouvrement. Composants React : `src/components/`.

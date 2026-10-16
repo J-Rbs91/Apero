@@ -138,7 +138,7 @@ export function MobileResultsPanel({
       </div>
       <div className="verdict__side">
         {event.options.length > 0 && (
-          <VoteField rows={fieldRows} leadIndex={leadIndex} seed={event.id} />
+          <VoteField rows={fieldRows} leadIndex={leadIndex} seed={event.id} quiet={isPast} />
         )}
         {!awaitingGuests && highlightedResult && (
           <div className="counts">
