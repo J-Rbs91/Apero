@@ -1,0 +1,234 @@
+/* ==========================================================================
+   Point Jaune — 2. Base et rôles typographiques (UXER_DESIGN_SYSTEM.md §2)
+   ========================================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--bg);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  font-family: var(--font-sans);
+  font-size: var(--t-body);
+  font-stretch: var(--w-text);
+  font-weight: 420;
+  line-height: 1.55;
+  font-synthesis: none;
+  font-optical-sizing: auto;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  color: var(--text);
+  background: var(--bg);
+}
+
+::selection {
+  background: var(--jaune);
+  color: var(--void);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  letter-spacing: 0;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: var(--ring) solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* Libellé réservé aux lecteurs d'écran (légende d'un groupe déjà titré). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.icon {
+  flex: 0 0 auto;
+  display: block;
+}
+
+/* --- Rôles typographiques --------------------------------------------- */
+
+.h1,
+.h2,
+.h3 {
+  margin: 0;
+  color: var(--text);
+  overflow-wrap: break-word;
+  hyphens: manual;
+}
+
+/* Aux tailles par défaut, aucun mot monumental ne se coupe. Quand la
+   personne agrandit le texte (200 %), le mot se coupe plutôt que de sortir
+   de l'écran : rien n'est masqué, rien ne défile de côté. */
+.h1,
+.splash__name,
+.verdict__date,
+.blaze,
+.comptes-page .cnt b {
+  overflow-wrap: anywhere;
+}
+
+/* Manifeste : la déclaration. Chasse la plus étroite, graisse noire. */
+.h1 {
+  max-width: 12ch;
+  font-size: var(--t-manifest);
+  font-stretch: var(--w-manifest);
+  font-weight: 800;
+  line-height: 0.86;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+/* Titre d'écran : le nom de l'assemblée, le nom de la page. */
+.h1--sm {
+  max-width: 14ch;
+  font-size: var(--t-screen);
+  font-stretch: var(--w-display);
+  font-weight: 780;
+  line-height: 0.9;
+  letter-spacing: -0.025em;
+}
+
+/* Le Petit Jaune ponctue le manifeste : un point final plein. */
+.h1__pop::after {
+  display: inline-block;
+  width: 0.17em;
+  height: 0.17em;
+  margin-left: 0.06em;
+  border-radius: 50%;
+  background: var(--signal);
+  content: "";
+  vertical-align: baseline;
+}
+
+.h2 {
+  font-size: var(--t-section);
+  font-stretch: var(--w-head);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.h3 {
+  margin-top: var(--s-4);
+  font-size: var(--t-sub);
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+/* Légende de données : monospace 12 px, casse de phrase, jamais de capitales
+   espacées. Elle dit où l'on est, elle ne crie pas. */
+.eyebrow,
+.lbl,
+.meta {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  color: var(--text-3);
+}
+
+.eyebrow {
+  color: var(--text-2);
+}
+
+.lbl {
+  color: var(--text-2);
+}
+
+.meta--center {
+  text-align: center;
+}
+
+.lede {
+  margin: 0;
+  max-width: 34rem;
+  font-size: var(--t-lede);
+  line-height: 1.45;
+  color: var(--text-2);
+  text-wrap: pretty;
+}
+
+.hint {
+  margin: 0;
+  max-width: 62ch;
+  font-size: var(--t-small);
+  line-height: 1.55;
+  color: var(--text-3);
+}
+
+/* Ligne de repères chiffrés : des données, donc en monospace. */
+.factline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1) var(--s-4);
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--text-2);
+}
+
+.factline b {
+  font-weight: 400;
+  color: var(--text);
+}
+
+/* La signature d'une assemblée : bande binaire calculée depuis son identifiant. */
+.signature {
+  display: block;
+  width: min(100%, 22rem);
+  height: 10px;
+  fill: var(--text);
+  opacity: 0.9;
+}
+
+/* La marque : le Petit Jaune. */
+.point-mark {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--jaune);
+}

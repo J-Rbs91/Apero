@@ -1,0 +1,944 @@
+/* ==========================================================================
+   Point Jaune — 4. Contrôles : boutons, champs, choix, volets, barre
+   d'action, feuilles (UXER_DESIGN_SYSTEM.md §5)
+   Angles vifs, trait de 1 px, 44 px minimum, un seul aplat jaune par écran.
+   ========================================================================== */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  min-height: 48px;
+  padding: 0 var(--s-5);
+  border: var(--hair) solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: var(--t-body);
+  font-stretch: var(--w-text);
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  transition:
+    background-color var(--d-instant) var(--ease-std),
+    border-color var(--d-instant) var(--ease-std),
+    color var(--d-instant) var(--ease-std),
+    transform var(--d-instant) var(--ease-std);
+}
+
+.button--block {
+  display: flex;
+  width: 100%;
+}
+
+/* L'action qui enregistre : le seul aplat jaune de l'écran. */
+.button--primary {
+  min-height: 52px;
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+
+.button--primary:hover:not(:disabled) {
+  border-color: var(--jaune-hover);
+  background: var(--jaune-hover);
+}
+
+.button--primary:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.button--primary:disabled {
+  border-color: var(--hover);
+  background: var(--hover);
+  color: var(--text-3);
+}
+
+.button--ghost {
+  border-color: var(--text);
+  color: var(--text);
+}
+
+.button--ghost:hover:not(:disabled) {
+  background: var(--hover);
+}
+
+.button--ghost:active:not(:disabled) {
+  background: var(--layer);
+}
+
+.button--ghost:disabled {
+  border-color: var(--line);
+  color: var(--text-3);
+}
+
+/* Action de service (copier, rappel) : discrète, soulignée. */
+.button--quiet {
+  min-height: 44px;
+  padding: 0;
+  color: var(--text-2);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.button--quiet:hover:not(:disabled) {
+  color: var(--text);
+  text-decoration-thickness: 2px;
+}
+
+.button--danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.button--danger:hover:not(:disabled) {
+  background: rgb(255 122 107 / 0.12);
+}
+
+.button--danger:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.ghost-link {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  font-size: var(--t-small);
+  font-weight: 500;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.ghost-link:hover {
+  color: var(--text);
+  text-decoration-thickness: 2px;
+}
+
+.ghost-link--danger {
+  color: var(--danger);
+}
+
+/* --- Field : libellé au-dessus, mention, aide, erreur sous le champ ---- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 0;
+}
+
+.field__label,
+.field > span {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-1) var(--s-3);
+}
+
+.field__name {
+  flex: 1 1 auto;
+  font-size: var(--t-body);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.field__req {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  font-weight: 400;
+  color: var(--text-3);
+}
+
+.field__req--required {
+  color: var(--text-2);
+}
+
+.field__req--required::before {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+  vertical-align: 1px;
+}
+
+.field__hint {
+  margin: 0;
+  font-size: var(--t-small);
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
+.field__error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  margin: 0;
+  font-size: var(--t-small);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--danger);
+}
+
+.field__error::before {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  background: var(--danger);
+  color: var(--bg);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  content: "!";
+}
+
+/* :where() garde la spécificité au plus bas : un composant (loupe du champ
+   lieu, recherche plein écran) ajuste son champ sans surenchère. */
+:where(input:not([type="range"], [type="radio"], [type="checkbox"])),
+:where(textarea, select) {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 11px var(--s-3);
+  border: var(--hair) solid var(--control-border);
+  border-radius: 0;
+  background: var(--layer);
+  color: var(--text);
+  font-size: var(--t-body);
+  font-weight: 450;
+  transition: border-color var(--d-instant) var(--ease-std);
+}
+
+textarea {
+  min-height: 104px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+select {
+  appearance: none;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f3f1ea' stroke-width='1.5' stroke-linecap='square'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  background-size: 18px 18px;
+}
+
+input[type="date"],
+input[type="time"] {
+  font-family: var(--font-mono);
+  font-size: var(--t-small);
+}
+
+/* Chromium ne fait correspondre ni :focus-visible ni :focus sur l'hôte quand
+   le focus est sur l'icône interne (calendrier, horloge) d'un champ de date
+   ou d'heure : l'anneau se pose sur :focus-within, qui couvre tous les cas. */
+input[type="date"]:focus-within,
+input[type="time"]:focus-within {
+  border-color: var(--text);
+  outline: var(--ring) solid var(--focus);
+  outline-offset: 2px;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-3);
+  opacity: 1;
+}
+
+input:where(:not([type="range"])):hover,
+:where(textarea, select):hover {
+  border-color: var(--text);
+}
+
+input:where(:not([type="range"])):focus-visible,
+:where(textarea, select):focus-visible {
+  border-color: var(--text);
+  outline-offset: 2px;
+}
+
+/* Champ en faute : le contour parle avant même de lire le message. */
+input[aria-invalid="true"],
+textarea[aria-invalid="true"],
+select[aria-invalid="true"],
+.field--invalid input,
+.field--invalid textarea,
+.field--invalid select {
+  border-width: 2px;
+  border-color: var(--danger);
+}
+
+input:disabled,
+textarea:disabled {
+  border-color: var(--line);
+  background: transparent;
+  color: var(--text-3);
+}
+
+input[type="range"] {
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  accent-color: var(--jaune);
+}
+
+/* --- Groupe de choix : ce qui se sélectionne ressemble à un sélectionnable */
+
+.choicegroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choicegroup__legend {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  width: 100%;
+  margin-bottom: var(--s-1);
+  padding: 0;
+}
+
+.choices {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.choices--stack {
+  grid-template-columns: 1fr;
+}
+
+.choices--row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.choice {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-height: 52px;
+  padding: var(--s-2) var(--s-4);
+  border: var(--hair) solid var(--control-border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    background-color var(--d-instant) var(--ease-std),
+    border-color var(--d-instant) var(--ease-std),
+    color var(--d-instant) var(--ease-std);
+}
+
+.choice:hover {
+  border-color: var(--text);
+  background: var(--hover);
+}
+
+.choice:focus-within {
+  outline: var(--ring) solid var(--focus);
+  outline-offset: 2px;
+}
+
+.choice input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* La marque : un carré vide annonce « il y a un choix à faire ici ». Retenu,
+   il se remplit selon le code de densité du système : plein (oui), hachuré
+   (peut-être), barré (non) — le même que le champ des votes du verdict. */
+.choice__mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid currentColor;
+}
+
+.choice__mark > svg {
+  display: none;
+}
+
+.choice__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.choice__label {
+  font-size: var(--t-body);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.choice__desc {
+  font-size: var(--t-small);
+  line-height: 1.4;
+  color: var(--text-3);
+}
+
+/* Choix retenu : inversion ivoire, impossible à rater. */
+.choice--on,
+.choice--on:hover {
+  border-color: var(--select-bg);
+  background: var(--select-bg);
+  color: var(--select-ink);
+}
+
+.choice--on .choice__desc {
+  color: inherit;
+  opacity: 0.78;
+}
+
+.choice--on .choice__mark::after {
+  position: absolute;
+  inset: 2px;
+  background: currentColor;
+  content: "";
+}
+
+.choice--warn.choice--on .choice__mark::after {
+  inset: 2px;
+  background: repeating-linear-gradient(
+    180deg,
+    currentColor 0 1.5px,
+    transparent 1.5px 3.5px
+  );
+}
+
+.choice--danger.choice--on .choice__mark::after {
+  inset: -1px;
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - 0.9px),
+    currentColor calc(50% - 0.9px) calc(50% + 0.9px),
+    transparent calc(50% + 0.9px)
+  );
+}
+
+/* Les trois réponses d'un créneau : marque au-dessus du libellé. */
+.choices--row .choice {
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--s-2);
+  min-height: 64px;
+  padding: var(--s-2) var(--s-1);
+  text-align: center;
+}
+
+.choices--row .choice__body {
+  align-items: center;
+}
+
+.choices--row .choice__label {
+  font-size: var(--t-small);
+}
+
+.choicegroup--invalid .choice {
+  border-color: var(--danger);
+}
+
+/* --- Bloc de formulaire numéroté --------------------------------------- */
+
+.formsec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+
+.formsec__head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--s-3);
+  padding-top: var(--s-4);
+  border-top: var(--hair) solid var(--text);
+}
+
+.formsec__step {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  min-width: 28px;
+  height: 28px;
+  border: var(--hair) solid var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--text);
+}
+
+.formsec--done .formsec__step {
+  border-color: var(--success);
+  background: var(--success);
+  color: var(--void);
+}
+
+.formsec__titles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  min-width: 0;
+}
+
+.formsec__title {
+  margin: 0;
+  font-size: var(--t-section);
+  font-stretch: var(--w-head);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+}
+
+.formsec__lead {
+  margin: 0;
+  font-size: var(--t-small);
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
+.formsec__status {
+  flex: 0 0 auto;
+  padding-top: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.formsec--done .formsec__status {
+  color: var(--success);
+}
+
+.formsec__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+
+/* --- Volet repliable : titre, résumé, compte ----------------------------- */
+
+.disclose {
+  flex: 0 0 auto;
+  border-bottom: var(--hair) solid var(--line);
+}
+
+.disclose__head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-height: 64px;
+  padding: var(--s-4) 0;
+  cursor: pointer;
+  list-style: none;
+}
+
+.disclose__head::-webkit-details-marker {
+  display: none;
+}
+
+.disclose__head:hover .disclose__title {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.disclose__text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--s-1);
+  min-width: 0;
+}
+
+.disclose__title {
+  font-size: var(--t-sub);
+  font-weight: 650;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.disclose__summary {
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  line-height: 1.45;
+  color: var(--text-3);
+}
+
+.disclose__badge {
+  flex: 0 0 auto;
+  min-width: 28px;
+  padding: 2px var(--s-2);
+  border: var(--hair) solid var(--control-border);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  text-align: center;
+  color: var(--text);
+}
+
+.disclose__chevron {
+  flex: 0 0 auto;
+  transition: transform var(--d-fast) var(--ease-out);
+}
+
+.disclose[open] > .disclose__head .disclose__chevron {
+  transform: rotate(180deg);
+}
+
+.disclose__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+  padding: var(--s-2) 0 var(--s-6);
+}
+
+/* --- Réglage oui / non : toute la ligne est le bouton ------------------- */
+
+.setting {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.switchrow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.switchrow__button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  width: 100%;
+  min-height: 60px;
+  padding: var(--s-2) 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+}
+
+.switchrow__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.switchrow__title {
+  font-weight: 600;
+}
+
+.switchrow__state {
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--text-3);
+}
+
+.switchrow__button--on .switchrow__state {
+  color: var(--text);
+}
+
+.switchrow__aside {
+  margin: 0;
+  font-size: var(--t-small);
+  color: var(--text-3);
+}
+
+.switch {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  width: 52px;
+  height: 28px;
+  min-height: 0;
+  padding: 0;
+  border: var(--hair) solid var(--control-border);
+  border-radius: 0;
+  background: transparent;
+  transition:
+    background-color var(--d-instant) var(--ease-std),
+    border-color var(--d-instant) var(--ease-std);
+}
+
+.switch__knob {
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: var(--text-2);
+  transform: translateY(-50%);
+  transition:
+    transform var(--d-fast) var(--ease-out),
+    background-color var(--d-instant) var(--ease-std);
+}
+
+.switchrow__button--on .switch {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.switchrow__button--on .switch__knob {
+  background: var(--on-accent);
+  transform: translate(24px, -50%);
+}
+
+.switchrow__button:focus-visible {
+  outline: none;
+}
+
+.switchrow__button:focus-visible .switch {
+  outline: var(--ring) solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* --- Compteur de renforts (+ / −) --------------------------------------- */
+
+.companions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.stepper__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: var(--hair) solid var(--control-border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--t-sub);
+}
+
+.stepper__btn:hover:not(:disabled) {
+  border-color: var(--text);
+  background: var(--hover);
+}
+
+.stepper__btn:disabled {
+  opacity: 0.4;
+}
+
+.stepper__val {
+  min-width: 34px;
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.stepper__unit {
+  margin-left: 2px;
+  font-size: var(--t-small);
+  color: var(--text-3);
+}
+
+/* --- Barre d'action : le bouton qui enregistre reste sous le pouce ------ */
+
+.actionbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-inline: calc(-1 * var(--margin));
+  padding: var(--s-3) var(--margin) calc(var(--s-3) + env(safe-area-inset-bottom));
+  border-top: var(--hair) solid var(--text);
+  background: var(--layer);
+}
+
+.actionbar__status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  line-height: 1.4;
+  text-align: center;
+  color: var(--text-2);
+}
+
+.actionbar__status--blocked {
+  color: var(--danger);
+}
+
+.actionbar__status--ready {
+  color: var(--text);
+}
+
+/* Prêt : le Petit Jaune s'allume devant le statut. */
+.actionbar__status--ready::before {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--signal);
+  content: "";
+}
+
+.actionbar__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.actionbar__main .button {
+  width: 100%;
+}
+
+.actionbar__secondary {
+  display: flex;
+  justify-content: center;
+}
+
+/* --- Feuille de saisie plein écran (contre-proposition, réglages) ------- */
+
+.formsheet {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.formsheet__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgb(9 11 13 / 0.86);
+}
+
+.formsheet__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 34rem);
+  max-height: 96dvh;
+  overflow: hidden;
+  border: var(--hair) solid var(--control-border);
+  border-bottom: 0;
+  border-radius: 0;
+  background: var(--layer);
+  color: var(--text);
+}
+
+.formsheet__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  padding: var(--s-5) var(--s-5) var(--s-4);
+  border-bottom: var(--hair) solid var(--line);
+}
+
+.formsheet__titles {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 0;
+}
+
+.formsheet__title {
+  margin: 0;
+  font-size: var(--t-section);
+  font-stretch: var(--w-display);
+  font-weight: 780;
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+}
+
+.formsheet__lead {
+  margin: 0;
+  font-size: var(--t-small);
+  color: var(--text-3);
+}
+
+.formsheet__close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border: var(--hair) solid var(--control-border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+}
+
+.formsheet__close:hover {
+  border-color: var(--text);
+  background: var(--hover);
+}
+
+.formsheet__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--s-5);
+  min-height: 0;
+  padding: var(--s-5);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.formsheet__foot {
+  flex: 0 0 auto;
+  padding: var(--s-3) var(--s-5) calc(var(--s-4) + env(safe-area-inset-bottom));
+  border-top: var(--hair) solid var(--line);
+}
+
+.formsheet__foot .actionbar {
+  position: static;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}

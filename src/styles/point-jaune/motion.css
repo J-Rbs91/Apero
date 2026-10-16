@@ -1,0 +1,189 @@
+/* ==========================================================================
+   Point Jaune — 10. Mouvement (UXER_MOTION_SYSTEM.md)
+   transform, opacity, clip-path uniquement. Aucune courbe ne dépasse 1.
+   ========================================================================== */
+
+@keyframes pj-reveal {
+  from {
+    clip-path: inset(100% 0 0 0);
+    transform: translateY(0.12em);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: none;
+  }
+}
+
+@keyframes pj-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@keyframes pj-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes pj-slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+
+@keyframes pj-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+@keyframes pj-fill {
+  from {
+    transform: scale(0.4);
+  }
+}
+
+@keyframes pj-pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes pj-scan {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.15;
+  }
+}
+
+@keyframes locsearch-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@keyframes slot-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  12% {
+    transform: translateX(-8px);
+  }
+  28% {
+    transform: translateX(7px);
+  }
+  44% {
+    transform: translateX(-5px);
+  }
+  60% {
+    transform: translateX(4px);
+  }
+  78% {
+    transform: translateX(-2px);
+  }
+}
+
+/* Typographic Reveal : le titre d'écran se démasque, il domine l'entrée. */
+.facade__hero .h1,
+.facade__hero .verdict__date,
+.splash__name {
+  animation: pj-reveal var(--d-slow) var(--ease-out) backwards;
+}
+
+.splash__name {
+  animation-delay: 700ms;
+}
+
+/* Spatial Transition : le corps arrive après le titre. Remplissage
+   « backwards », jamais « both » : un transform qui reste appliqué ferait de
+   la page le bloc conteneur des modales en position fixe. */
+.page__body {
+  animation: pj-rise var(--d-base) var(--ease-out) 80ms backwards;
+}
+
+.brand-menu__panel {
+  animation: pj-slide-left var(--d-fast) var(--ease-out);
+}
+
+.brand-menu__overlay,
+.modal-backdrop,
+.maplinks__panel,
+.formsheet__scrim {
+  animation: pj-fade var(--d-fast) var(--ease-std);
+}
+
+.formsheet__panel {
+  animation: pj-slide-up var(--d-fast) var(--ease-out);
+}
+
+.wall-item {
+  animation: pj-rise var(--d-base) var(--ease-out) backwards;
+}
+
+/* Quiet Feedback : la marque se remplit depuis son centre. */
+.choice--on .choice__mark::after,
+.cheer-btn--on {
+  animation: pj-fill var(--d-instant) var(--ease-out);
+}
+
+/* Density Shift : trois points en déphasage, pendant un chargement seulement. */
+.loading-bulbs i {
+  animation: pj-pulse 900ms var(--ease-std) infinite;
+}
+
+.loading-bulbs i:nth-child(2) {
+  animation-delay: 150ms;
+}
+
+.loading-bulbs i:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+/* Bande de signal : une impulsion la parcourt une fois. */
+.bulbs--chase i {
+  animation: pj-scan 600ms var(--ease-std) 1 backwards;
+  animation-delay: calc(400ms + var(--i) * 40ms);
+}
+
+.splash__glass {
+  animation: pj-fade var(--d-slow) var(--ease-out) 500ms backwards;
+}
+
+.splash__eyebrow {
+  animation: pj-fade var(--d-base) var(--ease-out) 600ms backwards;
+}
+
+.splash__tagline,
+.splash__aside {
+  animation: pj-fade var(--d-slow) var(--ease-out) 1000ms backwards;
+}
+
+/* Bloc refusé à l'envoi : le formulaire remonte sur le bloc fautif, le passe
+   au rouge et le secoue une fois (useShakeInvalid). */
+.is-shaking {
+  animation: slot-shake 560ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

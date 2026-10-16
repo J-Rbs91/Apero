@@ -1,0 +1,192 @@
+/* ==========================================================================
+   Point Jaune — 1. Polices et jetons
+   Spécification : docs/uxer/manifesto-void/UXER_DESIGN_SYSTEM.md §1-4
+   Mouvement :     docs/uxer/manifesto-void/UXER_MOTION_SYSTEM.md §1
+   ========================================================================== */
+
+/* Polices auto-hébergées, jamais depuis un CDN : servir une police depuis
+   fonts.googleapis.com transmettrait l'adresse IP de chaque visiteur à un
+   tiers (CREDITS.md). Licences SIL OFL 1.1 : src/assets/fonts/OFL-*.txt.
+   Archivo est variable : graisse 100-900, chasse 62-125 %. */
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url("../../assets/fonts/archivo-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url("../../assets/fonts/archivo-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
+    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
+    U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Fragment Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../../assets/fonts/fragment-mono-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Fragment Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../../assets/fonts/fragment-mono-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
+    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
+    U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root {
+  color-scheme: dark;
+
+  /* --- Primitives (§1.1) --- */
+  --void: #090b0d;
+  --void-2: #151719;
+  --void-3: #232629;
+  --ivory: #f3f1ea;
+  --ash: #aaa9a4;
+  --ash-2: #8e8d88;
+  --rule: #3a3d40;
+  --control: #7a7d81;
+  --paper: #eae6dc;
+  --ink: #090b0d;
+  --ink-2: #4a4843;
+  --ink-3: #5e5b55;
+  --paper-control: #6e7175;
+  --jaune: #d7ab42;
+  --jaune-hover: #e2ba58;
+  --jaune-ink: #8a6510;
+  --ok: #7fcb9c;
+  --err: #ff7a6b;
+  --warn: #f0955a;
+
+  /* --- Rôles (§1.2) : redéfinis par le contexte ivoire --- */
+  --bg: var(--void);
+  --layer: var(--void-2);
+  --hover: var(--void-3);
+  --text: var(--ivory);
+  --text-2: var(--ash);
+  --text-3: var(--ash-2);
+  --line: var(--rule);
+  --control-border: var(--control);
+  --focus: var(--jaune);
+  --accent: var(--jaune);
+  --on-accent: var(--void);
+  --select-bg: var(--ivory);
+  --select-ink: var(--void);
+  --success: var(--ok);
+  --danger: var(--err);
+  --warning: var(--warn);
+  --signal: var(--jaune);
+
+  /* --- Typographie (§2) --- */
+  --font-sans: "Archivo", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-mono: "Fragment Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --w-manifest: 62%;
+  --w-display: 66%;
+  --w-head: 82%;
+  --w-text: 100%;
+  --t-micro: 0.75rem;
+  --t-small: 0.875rem;
+  --t-body: 1rem;
+  --t-sub: 1.125rem;
+  --t-lede: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+  --t-section: clamp(1.5rem, 1.2rem + 1.4vw, 2.25rem);
+  --t-screen: clamp(2.75rem, 11vw, 7.5rem);
+  --t-manifest: clamp(3.5rem, 15vw, 11.5rem);
+  --t-monument: clamp(4rem, 19vw, 13rem);
+
+  /* --- Espacements (§4) --- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --ma-1: clamp(64px, 9vh, 112px);
+  --ma-2: clamp(96px, 16vh, 176px);
+  --ma-3: clamp(128px, 24vh, 224px);
+
+  /* --- Grille (§3) --- */
+  --margin: 16px;
+  --gutter: 12px;
+  --page-max: 1600px;
+  --measure: 40rem;
+
+  /* --- Traits --- */
+  --hair: 1px;
+  --ring: 3px;
+
+  /* --- Mouvement (UXER_MOTION_SYSTEM.md §1) --- */
+  --d-instant: 120ms;
+  --d-fast: 200ms;
+  --d-base: 320ms;
+  --d-slow: 640ms;
+  --d-ritual: 1400ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-std: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+}
+
+@media (min-width: 400px) {
+  :root {
+    --margin: 20px;
+    --gutter: 16px;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --margin: 40px;
+    --gutter: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --margin: clamp(40px, 5vw, 96px);
+  }
+}
+
+/* Contexte ivoire : rituels (confirmation solennelle) et document long. Les
+   composants relisent leurs rôles ; ils n'ont rien à savoir du fond. */
+.modal-sheet,
+.legal-page {
+  --bg: var(--paper);
+  --layer: var(--paper);
+  --hover: #ddd8cc;
+  --text: var(--ink);
+  --text-2: var(--ink-2);
+  --text-3: var(--ink-3);
+  --line: #c9c3b5;
+  --control-border: var(--paper-control);
+  --focus: var(--ink);
+  --select-bg: var(--ink);
+  --select-ink: var(--paper);
+  --signal: var(--jaune-ink);
+  --success: #1f6b44;
+  --danger: #b3261e;
+  --warning: #8a4b12;
+  color-scheme: light;
+  color: var(--text);
+}

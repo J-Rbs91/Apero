@@ -170,13 +170,14 @@ L’interface a été refondue autour de quatre règles, décrites en détail da
 3. **le bouton qui enregistre reste sous le pouce** : barre d’action épinglée
    (`ActionBar`) qui annonce la prochaine chose à faire, et feuille plein écran
    (`FormSheet`) pour les saisies secondaires ;
-4. **un seul bouton plein par écran** : réservé à l’action qui enregistre (rouge sur
-   le papier, jaune pastis sur la façade).
+4. **un seul bouton plein par écran** : réservé à l’action qui enregistre (le seul
+   aplat jaune de l’écran).
 
 Les composants partagés vivent dans [`src/components/ui/`](src/components/ui/)
 (`Field`, `ChoiceGroup`, `SwitchRow`, `FormSection`, `Disclosure`, `ActionBar`,
-`FormSheet`). Les jetons de style (accent unique, échelle d’arrondis, échelle
-typographique) sont en tête de `src/styles/global.css`.
+`FormSheet`). Les jetons de style (couleurs, typographie, espacements,
+mouvement) sont dans `src/styles/point-jaune/tokens.css`, importé en tête de
+`src/styles/global.css` avec les autres feuilles du système.
 
 Les guides de conception qui ont servi de référence sont embarqués dans le repo,
 sous [`.claude/skills/`](.claude/skills/) — notamment
@@ -306,13 +307,18 @@ Conséquence pour les notifications système : on fait du **best-effort** via l�
 
 ## Direction artistique
 
-L’identité visuelle est « La Baraque du Petit Jaune » (style *Fairground Baroque*, arts forains).
-Elle est décrite et opposable :
+L’identité visuelle est **« Point Jaune »** : *Japanese Ma × Typographic Manifesto × Data
+Sublime*. Un espace noir mesuré, une typographie qui proclame, les réponses de la tablée
+matérialisées en signes exacts, et un seul point jaune pour désigner ce qui compte.
+Elle est décrite et opposable dans [`docs/uxer/manifesto-void/`](docs/uxer/manifesto-void/) :
 
-- [`docs/uxer/refonte-contract.md`](docs/uxer/refonte-contract.md) : exploration du produit, choix du style, contrat fonctionnel, journal de convergence, preuves et limites ;
-- [`docs/uxer/design-system.md`](docs/uxer/design-system.md) : jetons, typographie, mise en page, composants, grammaire d’animation.
+- `UXER_BASELINE_AUDIT.md` : état de départ, protection de l’existant, invariants ;
+- `UXER_CONCEPT_EXPLORATION.md` : références consultées, trois interprétations, choix ;
+- `UXER_REDESIGN_CONTRACT.md` : contrat de refonte (principes, interdits, critères) ;
+- `UXER_DESIGN_SYSTEM.md` et `UXER_MOTION_SYSTEM.md` : valeurs, composants, mouvement ;
+- `UXER_QUALIFICATION_REPORT.md` : preuves, limites, statut.
 
-Les règles de **saisie et de navigation** (`docs/DESIGN-SYSTEM.md`, `docs/NAVIGATION.md`) restent en vigueur : seule l’identité visuelle a changé. Les documents `docs/refonte-visuelle/` décrivent l’identité précédente (« registre de zinc ») et sont conservés à titre historique.
+Les règles de **saisie et de navigation** (`docs/DESIGN-SYSTEM.md`, `docs/NAVIGATION.md`) restent en vigueur : seule l’identité visuelle a changé. Les identités précédentes (« registre de zinc » dans `docs/refonte-visuelle/`, *Fairground Baroque* dans `docs/uxer/refonte-contract.md` et `docs/uxer/design-system.md`) sont conservées à titre historique.
 
 ## Direction iconographique
 

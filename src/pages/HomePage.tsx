@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import zincIllustration from "../assets/art/Le-zinc.jpg";
 import { AppLink } from "../components/AppLink";
 import { BrandMenu } from "../components/BrandMenu";
+import { ComptoirField, type ConstellationPoint } from "../components/field/ComptoirField";
+import { Signature } from "../components/field/Signature";
 import { MobilePage } from "../components/MobilePage";
 import { eventStorage } from "../services";
 import { getCachedAperoEvent } from "../services/encryptedAperoRepository";
@@ -14,6 +15,7 @@ import { calculateBestOptions } from "../utils/calculateResults";
 // venir, l'accueil le montre en premier — l'habitué reprend sa partie en un
 // tap, sans passer par le menu. Tout vient du cache local : rendu instantané.
 type NextApero = {
+  aperoId: string;
   event: AperitifEvent;
   path: string;
   startMs: number;
@@ -46,6 +48,7 @@ function findNextApero(): NextApero | null {
     if (!next || upcoming[0] < next.startMs) {
       const result = calculateBestOptions(event);
       next = {
+        aperoId: entry.aperoId,
         event,
         path: buildInvitePath(entry.aperoId, {
           encryptionKey: entry.encryptionKey,
@@ -58,6 +61,35 @@ function findNextApero(): NextApero | null {
   }
 
   return next;
+}
+
+// La constellation de l'accueil : un point par apéro que l'appareil connaît
+// (premier créneau, nombre de réponses), le prochain rendez-vous en jaune.
+// Rien d'autre n'est lu ; sans apéro, la figure garde un seul point jaune.
+function collectConstellation(nextId: string | undefined): ConstellationPoint[] {
+  const points: ConstellationPoint[] = [];
+  for (const entry of getLocalAperos()) {
+    const event = getCachedAperoEvent(entry.aperoId);
+    if (!event || event.status !== "active") {
+      continue;
+    }
+    const first = event.options
+      .map((option) =>
+        option.date ? new Date(`${option.date}T${option.time || "00:00"}:00`).getTime() : Number.NaN,
+      )
+      .filter((ms) => !Number.isNaN(ms))
+      .sort((a, b) => a - b)[0];
+    if (first === undefined) {
+      continue;
+    }
+    points.push({
+      id: entry.aperoId,
+      at: first,
+      responses: event.participants.length,
+      isNext: entry.aperoId === nextId,
+    });
+  }
+  return points;
 }
 
 function formatNextDate(startMs: number): string {
@@ -74,6 +106,8 @@ function formatNextDate(startMs: number): string {
 export function HomePage() {
   // Lecture synchrone du cache local : l'écran est complet au premier paint.
   const [nextApero] = useState(findNextApero);
+  const [now] = useState(() => Date.now());
+  const [constellation] = useState(() => collectConstellation(nextApero?.aperoId));
 
   useEffect(() => {
     eventStorage.purgeExpiredEvents().catch(() => {
@@ -95,6 +129,7 @@ export function HomePage() {
                 {nextApero.isDecided ? "Prochain rendez-vous" : "Ça vote au comptoir"}
               </p>
               <h2 className="h2">{nextApero.event.ceremonialName}</h2>
+              <Signature seed={nextApero.aperoId} />
               <p className="factline">
                 <span>{formatNextDate(nextApero.startMs)}</span>
                 <span>
@@ -107,6 +142,12 @@ export function HomePage() {
               </AppLink>
             </section>
           )}
+
+          {/* La constellation : les apéros de cet appareil, ou le récipient
+              vide qui attend d'être rempli. */}
+          <div className="sign__field">
+            <ComptoirField points={constellation} now={now} />
+          </div>
 
           <div className="sign__text">
             <p className="eyebrow">Institution officieuse du comptoir</p>
@@ -123,10 +164,6 @@ export function HomePage() {
             >
               Organiser un apéro
             </AppLink>
-          </div>
-
-          <div className="window" aria-hidden="true">
-            <img src={zincIllustration} alt="" width="1376" height="782" />
           </div>
         </div>
       }

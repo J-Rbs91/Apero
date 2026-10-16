@@ -1,7 +1,7 @@
-// Rangée d'ampoules de baraque foraine : purement décorative (aria-hidden).
-// 24 ampoules ; sous 960 px seules les 12 premières sont affichées (CSS).
-// `chase` déclenche la chasse du verdict gagnant (5 cycles puis fixe, voir
-// design-system.md §6.1) ; sans `chase` ou en mouvement réduit, tout est allumé.
+// Bande de signal du verdict : purement décorative (aria-hidden).
+// 24 traits ; sous 640 px seuls les 12 premiers sont affichés (CSS).
+// `chase` lance une impulsion unique quand un créneau l’emporte (voir
+// UXER_MOTION_SYSTEM.md §2) ; sans `chase` ou en mouvement réduit, tout est fixe.
 
 import type { CSSProperties } from "react";
 

@@ -19,9 +19,9 @@ export const TILE_LAYER_OPTIONS = {
 
 export const MARKER_STYLE = {
   radius: 9,
-  color: "#f4c94c",
+  color: "#d7ab42",
   weight: 3,
-  fillColor: "#11342a",
+  fillColor: "#090b0d",
   fillOpacity: 1,
 };
 

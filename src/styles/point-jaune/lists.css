@@ -1,0 +1,484 @@
+/* ==========================================================================
+   Point Jaune — 7. Listes, partage, retours, modales, chargement
+   ========================================================================== */
+
+/* --- Partage : le lien masqué, en monospace ---------------------------- */
+
+.share-box {
+  gap: var(--s-3);
+}
+
+.share {
+  display: flex;
+  align-items: stretch;
+  border: var(--hair) solid var(--control-border);
+}
+
+.share code {
+  flex: 1;
+  min-width: 0;
+  padding: var(--s-3);
+  overflow: hidden;
+  background: var(--layer);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  line-height: 1.6;
+  color: var(--text-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.share .cp {
+  min-height: 44px;
+  padding: 0 var(--s-4);
+  border: 0;
+  border-left: var(--hair) solid var(--control-border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: var(--t-small);
+  font-weight: 600;
+}
+
+.share .cp:hover {
+  background: var(--hover);
+}
+
+/* --- Le registre : qui vient ------------------------------------------ */
+
+.people {
+  display: flex;
+  flex-direction: column;
+}
+
+.person {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: var(--s-3);
+  padding: var(--s-3) 0;
+  border-top: var(--hair) solid var(--line);
+}
+
+.person:first-child {
+  border-top: 0;
+}
+
+.person > i,
+.palmares-avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: var(--hair) solid var(--control-border);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  font-style: normal;
+  color: var(--text);
+}
+
+.person__body {
+  min-width: 0;
+  align-self: center;
+}
+
+.person__name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.person__sub {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--text-3);
+}
+
+.person__sub--quote {
+  font-family: var(--font-sans);
+  font-size: var(--t-small);
+  font-style: italic;
+  color: var(--text-2);
+}
+
+.person__tag {
+  display: inline-block;
+  margin-left: var(--s-2);
+  padding: 0 var(--s-2);
+  border: var(--hair) solid var(--control-border);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  font-weight: 400;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+/* --- Le mur du comptoir ------------------------------------------------ */
+
+.wall-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.wall-item {
+  padding-left: var(--s-4);
+  border-left: var(--hair) solid var(--text);
+}
+
+.wall-item__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
+
+.wall-item__author {
+  font-weight: 650;
+}
+
+.wall-item__when {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--text-3);
+}
+
+.wall-item__body {
+  margin: var(--s-1) 0 0;
+  color: var(--text-2);
+  overflow-wrap: anywhere;
+}
+
+.wall-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  margin-top: var(--s-3);
+}
+
+/* --- Retours d'information : un trait à gauche, le texte dit l'essentiel */
+
+.feedback,
+.page-message {
+  margin: 0;
+  padding: var(--s-2) 0 var(--s-2) var(--s-4);
+  border-left: 2px solid var(--danger);
+  font-size: var(--t-small);
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.feedback--ok,
+.page-message--success {
+  border-left-color: var(--success);
+}
+
+.feedback--info {
+  border-left-color: var(--control-border);
+  color: var(--text-2);
+}
+
+.page-message--error {
+  border-left-color: var(--danger);
+}
+
+.draft-resume {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding-left: var(--s-4);
+  border-left: 2px solid var(--control-border);
+}
+
+.draft-resume .feedback {
+  padding: 0;
+  border: 0;
+}
+
+/* --- Le sceau du blaze : un rituel, donc monumental --------------------- */
+
+.blaze {
+  display: block;
+  padding: var(--s-4) 0;
+  border-block: var(--hair) solid var(--text);
+  font-size: clamp(2.25rem, 9vw, 4rem);
+  font-stretch: var(--w-display);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+/* --- Modales : l'inversion ivoire, un moment de rituel ----------------- */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: var(--s-4);
+  overflow-y: auto;
+  background: rgb(9 11 13 / 0.88);
+}
+
+.modal-sheet {
+  width: min(100%, 30rem);
+  padding: var(--s-6) var(--s-5) var(--s-5);
+  border: 0;
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.modal-sheet--map {
+  width: min(100%, 40rem);
+}
+
+.modal-sheet .button-row {
+  grid-template-columns: 1fr;
+}
+
+.modal-sheet .h1--sm {
+  font-size: clamp(2rem, 8vw, 3.25rem);
+}
+
+/* --- Chargement : trois points en déphasage (Density Shift) ------------ */
+
+.loading-screen {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  min-height: 50dvh;
+  padding: var(--s-6) 0;
+}
+
+.loading-sheet {
+  align-items: flex-start;
+  width: min(100%, 28rem);
+  gap: var(--s-5);
+}
+
+.loading-bulbs {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.loading-bulbs i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text);
+}
+
+.loading-bulbs i:first-child {
+  background: var(--jaune);
+}
+
+.facade .loading-screen {
+  min-height: 0;
+  padding: var(--s-5) 0 var(--s-6);
+  place-items: start;
+}
+
+/* --- Notifications : le carnet ---------------------------------------- */
+
+.notif-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.notif-item {
+  display: block;
+  width: 100%;
+  padding: var(--s-4) var(--s-2) var(--s-4) 0;
+  border: 0;
+  border-top: var(--hair) solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-2);
+  text-align: left;
+  transition: background-color var(--d-instant) var(--ease-std);
+}
+
+.notif-item:last-child {
+  border-bottom: var(--hair) solid var(--line);
+}
+
+.notif-item:hover {
+  background: var(--layer);
+}
+
+.notif-item--unread {
+  color: var(--text);
+}
+
+.notif-item__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.notif-item__title {
+  font-weight: 500;
+}
+
+.notif-item--unread .notif-item__title {
+  font-weight: 700;
+}
+
+/* Non lue : le Petit Jaune attend. */
+.notif-item__dot {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--signal);
+}
+
+.notif-item__body {
+  margin: var(--s-1) 0;
+  font-size: var(--t-small);
+  color: inherit;
+}
+
+.notif-reasons {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notif-reasons__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  padding: var(--s-3) 0;
+  border-top: var(--hair) solid var(--line);
+  color: var(--text-2);
+}
+
+.notif-reasons__mark {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  margin-top: 9px;
+  background: var(--text);
+}
+
+/* --- Palmarès : glyphes géométriques par rareté ------------------------- */
+
+.palmares-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.palmares-head__body {
+  min-width: 0;
+}
+
+.palmares-tag {
+  display: inline-block;
+  margin-left: var(--s-2);
+  padding: 0 var(--s-2);
+  border: var(--hair) solid var(--signal);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--signal);
+  vertical-align: 1px;
+}
+
+.badge-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.badge-medal {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: var(--s-3);
+  align-items: start;
+  color: var(--text);
+}
+
+.badge-medal__disc {
+  display: block;
+  width: 28px;
+  height: 28px;
+  margin-top: 2px;
+}
+
+.badge-medal--legendary .badge-medal__disc {
+  color: var(--signal);
+}
+
+.badge-medal--shame .badge-medal__disc {
+  color: var(--danger);
+}
+
+.badge-medal__body {
+  min-width: 0;
+}
+
+.badge-medal__name {
+  font-weight: 650;
+}
+
+.badge-medal__rarity {
+  margin-left: var(--s-2);
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  font-weight: 400;
+  color: var(--text-3);
+}
+
+.badge-medal__desc {
+  margin: var(--s-1) 0 0;
+  font-size: var(--t-small);
+  color: var(--text-2);
+}
+
+/* --- Le registre légal : un document, en inversion ivoire --------------- */
+
+.legal-list {
+  display: grid;
+  gap: var(--s-3);
+  margin: var(--s-2) 0 0;
+  padding-left: var(--s-5);
+  line-height: 1.55;
+}
+
+.legal-list li::marker {
+  font-family: var(--font-mono);
+  color: var(--text-3);
+}
+
+.legal-list strong {
+  font-weight: 650;
+}
+
+.legal-list a,
+.legal-sobriety a {
+  color: var(--text);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.legal-list code {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
+.legal-sobriety {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  color: var(--text-3);
+}

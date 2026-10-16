@@ -11,20 +11,19 @@ const RARITY_LABEL: Record<BadgeDefinition["rarity"], string> = {
   shame: "Honteuse",
 };
 
-// Rosette de tombola : disque + deux rubans. La rareté est écrite en toutes
-// lettres (pas seulement portée par la couleur).
+// Glyphe de breloque : un carré dont le remplissage croît avec la rareté
+// (vide, cœur plein, plein ; barré pour la honte). La rareté est écrite en
+// toutes lettres : ni la forme ni la couleur ne portent le sens seules.
 export function BadgeMedal({ badge }: BadgeMedalProps) {
   return (
     <div className={`badge-medal badge-medal--${badge.rarity}`}>
-      <svg className="badge-medal__disc" viewBox="0 0 56 64" aria-hidden="true">
-        <path d="M17 38l-7 22 12-6 6 8 6-26z" fill="currentColor" opacity="0.72" />
-        <path d="M39 38l7 22-12-6-6 8-6-26z" fill="currentColor" opacity="0.72" />
-        <circle cx="28" cy="26" r="20" fill="currentColor" />
-        <circle cx="28" cy="26" r="14.5" fill="none" stroke="var(--rosette-ink)" strokeWidth="2" opacity="0.55" />
-        <path
-          d="M28 14.5l3.3 7.1 7.7.8-5.8 5.3 1.8 7.6-7-4.4-7 4.4 1.8-7.6-5.8-5.3 7.7-.8z"
-          fill="var(--rosette-ink)"
-        />
+      <svg className="badge-medal__disc" viewBox="0 0 28 28" aria-hidden="true">
+        <rect x="4.75" y="4.75" width="18.5" height="18.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+        {badge.rarity === "rare" && <rect x="9" y="9" width="10" height="10" fill="currentColor" />}
+        {badge.rarity === "legendary" && <rect x="4" y="4" width="20" height="20" fill="currentColor" />}
+        {badge.rarity === "shame" && (
+          <path d="M5 23L23 5" stroke="currentColor" strokeWidth="1.5" />
+        )}
       </svg>
       <div className="badge-medal__body">
         <div className="badge-medal__name">

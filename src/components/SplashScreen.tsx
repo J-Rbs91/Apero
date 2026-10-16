@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { SignalField } from "./field/SignalField";
 import { WineGlassMark } from "./WineGlassMark";
 
 type SplashScreenProps = {
@@ -18,14 +19,15 @@ const TAGLINE = "Nul n’est tenu d’avoir soif pour venir perdre son temps ave
 // Le clin d'œil excédé : oui, le verre est rouge et le nom parle de jaune.
 const ASIDE = "Le rouge, le jaune… oui, la cohérence de la charte graphique a le cul entre deux chaises.";
 
-// Taille du verre : ~1/5 de la longueur de l'écran (le grand côté), bornée
-// pour rester élégante sur les très petits comme sur les très grands écrans.
+// Taille du verre : ~1/9 de la longueur de l'écran (le grand côté), bornée.
+// Le verre est l'unique objet figuratif de l'univers « Point Jaune » : il se
+// pose dans le vide, à l'échelle d'un objet, pas d'une affiche.
 function glassSize(): number {
   if (typeof window === "undefined") {
-    return 160;
+    return 96;
   }
   const longSide = Math.max(window.innerWidth, window.innerHeight);
-  return Math.round(Math.min(Math.max(longSide / 5, 120), 220));
+  return Math.round(Math.min(Math.max(longSide / 9, 80), 132));
 }
 
 export function SplashScreen({ onDone }: SplashScreenProps) {
@@ -62,7 +64,7 @@ export function SplashScreen({ onDone }: SplashScreenProps) {
       role="presentation"
       onClick={dismiss}
     >
-      <div className="canopy" aria-hidden="true" />
+      <SignalField />
       <div className="splash__inner">
         <span className="splash__glass">
           <WineGlassMark size={size} onLoopComplete={handleLoopComplete} />
