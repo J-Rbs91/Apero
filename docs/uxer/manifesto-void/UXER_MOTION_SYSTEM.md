@@ -45,6 +45,13 @@ aucun pour `--ease-out` ; c'est ce qui justifie de réserver `--ease-in` aux sor
    `position: fixed` (rappel d'un défaut déjà rencontré : un `transform` résiduel enferme
    les modales dans la page).
 
+5. **Verrerie** (contrat §17) : aucun mouvement propre. Elle apparaît avec l'écran,
+   défile avec la page, ne se révèle pas et ne réagit à rien. Sur les écrans
+   `.has-verrerie`, l'entrée `pj-rise` de `.page__body` est supprimée et la révélation
+   typographique passe de `.h1` à `.h1__ink` et `.h1__point` : une animation sur un ancêtre
+   isolerait l'encre inversée et ferait disparaître le titre sur la silhouette pendant
+   l'animation (design system §10.3).
+
 ## 4. Coûts mesurés (budget)
 
 | Matière | Coût par image | Durée | Hors écran |

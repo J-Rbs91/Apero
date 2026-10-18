@@ -207,3 +207,172 @@ capitales systématiques, titres coupés arbitrairement, hero centré titre + so
 deux boutons, jaune en aplat de section, plus d'un motif computationnel animé par écran.
 
 Checkpoint : **CONTRACT_LOCKED**.
+
+---
+
+## 17. Avenant du 18/10/2026 — « La Verrerie » et l'encre inversée
+
+Mission `verrerie` (`.uxer/runs/verrerie/`). Deux demandes du propriétaire, avec un
+croquis : une bouteille de vin, géante et inclinée, qui traverse le manifeste et le
+bouton de l'accueil.
+
+1. Garnir le fond de **silhouettes de verrerie** (bouteille de vin, verre à pied, flûte,
+   pinte nonic) et garder le texte lisible par **inversion de couleur** du texte
+   (*difference blending*, *inverted typography*, *adaptive contrast typography*).
+2. Supprimer l'**écart de taille perçu** entre un texte sur fond foncé et le même texte
+   sur fond clair.
+
+Cet avenant est opposable comme le reste du contrat. Il est signé par l'agent sur la
+demande du propriétaire. Statut de preuve : `RENDER_INSPECTED` sur spécimen
+(`specimens/verrerie.html`, captures `evidence/verrerie-*.jpg`),
+`VISUAL_UNVERIFIED` dans l'application, qui n'est pas encore modifiée.
+Valeurs implémentables : design system §10 et §2.4.
+
+### 17.1 Intention
+
+> **Le comptoir projette ses verres dans le silence. Là où une silhouette passe, la
+> déclaration s'inverse.**
+
+La Verrerie n'ajoute ni couleur, ni matière, ni texture. Elle étend à l'échelle de
+l'écran une opération que Point Jaune possède déjà : **l'inversion ivoire** (la
+sélection, les rituels). Deux valeurs seulement, `--void` et `--ivory`. Un texte qui
+traverse une silhouette passe d'ivoire sur noir à noir sur ivoire, au pixel près
+(mesuré : `#F3F1EA` sur `#090B0D` → `#090B0D` sur `#F3F1EA`, 17,4 : 1 des deux côtés).
+
+**Place dans le budget d'expression.** L'écart principal reste typographique (la chasse).
+La Verrerie est une composante expressive **subordonnée** : sa seule relation avec le
+reste du système est l'inversion du titre monumental qu'elle traverse. Régime éditorial
+sur les écrans d'identité, régime contenu partout ailleurs (§17.4). Épreuve de
+soustraction : sans Verrerie, Point Jaune reste entier ; avec, le manifeste gagne un
+second plan. Elle ne porte donc rien d'indispensable, et c'est voulu.
+
+**Meilleur argument contre.** Le figuratif contredit le *ma* et P3, et glisse vers le
+bar à thème. Réponse tenue par les règles : silhouettes plates et géométriques, sans
+détail (§17.6), monumentales et rognées par l'écran, donc lues comme des formes
+d'architecture avant d'être lues comme des objets ; absentes des écrans de tâche.
+
+**Alternatives écartées.**
+
+| Option | Motif du rejet |
+|---|---|
+| Photographies ou illustrations détaillées | Luminance continue : le texte inversé passe par tous les gris, contraste non garanti (décision UXER 20) |
+| Silhouettes au trait, comme le croquis | Chaque trait coupe les mots deux fois, pour peu de surface inversée. Le croquis est lu comme un contour à remplir. Réversible si le propriétaire tient au trait (épaisseur ≥ 24 px alors) |
+| Silhouettes jaunes | L'inversion d'un texte ivoire sur jaune donne du bleu `#1C46A8` : interdit (P1, §16) |
+| Un calque `difference` posé **au-dessus** de tout | Inverse aussi le jaune (→ bleu) et les états (erreur → bleu-vert). Vu sur spécimen |
+| Silhouette semi-transparente | Fond gris moyen : le texte inversé tombe aussi au gris moyen, contraste < 3 : 1 |
+| Verrerie fixe au défilement | Relation titre / silhouette incontrôlée, recomposition à chaque image de défilement |
+
+### 17.2 Principes ajoutés
+
+| # | Principe | Vérification |
+|---|---|---|
+| P8 | **Deux valeurs.** Une silhouette est un aplat `--ivory` opaque. Aucun dégradé, contour, texture, ombre, transparence, flou ni filtre | échantillonnage des pixels sous silhouette : une seule couleur hors bord anticrénelé |
+| P9 | **L'encre s'inverse, jamais la couleur.** Seuls les éléments neutres (textes `--text`, `--text-2`, `--text-3`, contours au trait, filets) portent l'encre inversée. Un élément chromatique (jaune, états) n'est jamais inversé : il est opaque (bouton plein) ou porte une **réserve** `--void` (point, focus) | aucune teinte hors palette sur les captures ; recherche de bleu et de violet = 0 |
+| P10 | **Contraste invariant.** Hors silhouette, le rendu est identique au pixel au rendu sans Verrerie. Sous silhouette, chaque paire texte / fond est l'inverse exacte | capture avec et sans Verrerie : différence nulle hors silhouettes ; ratios §10.4 du design system |
+| P11 | **La tâche n'en reçoit pas.** Aucune silhouette sous un champ, une liste dense, le vote, un Data Field, une couche (menu, modale, feuille, barre d'action), ni dans le registre légal | revue des écrans §17.4 |
+| P12 | **Toujours reconnaissable.** Une silhouette montre sa partie caractéristique : col et goulot de la bouteille, pied du verre, fût de la flûte, renflement de la nonic. Un fragment non identifiable est une tache : interdit | lecture des captures à 390 et 1440 px |
+
+Principes existants amendés :
+
+- **P2.** La Verrerie n'est pas un fond de section : c'est une forme posée dans le vide,
+  qui ne sépare rien.
+- **P3.** Exception nommée : la Verrerie est figurative et ne représente aucune donnée.
+  Sur un apéro ou une tablée, sa composition est **tirée de l'identifiant public**
+  (même hachage que `Signature`) : elle est propre à l'assemblée sans prétendre être une
+  mesure. `aria-hidden`, aucune information portée.
+- **P7.** Inchangé : aucun texte d'interface n'est ajouté ni modifié.
+
+### 17.3 Mécanisme retenu : l'encre inversée par élément
+
+Le texte neutre porte `mix-blend-mode: difference` ; la silhouette reste en mode normal,
+**sous** le texte. Deux conditions sont nécessaires, et chacune casse en silence :
+
+1. **Couleur source compensée.** Avec `difference`, un texte ivoire sur `--void` rendrait
+   `|ivoire − void|`, légèrement plus sombre que l'ivoire. La source vaut donc
+   **jeton + void** (`--inv-text: #FCFCF7` pour `--ivory`), si bien que
+   `|source − void|` redonne le jeton exact, et `|source − ivoire|` donne `--void` exact.
+2. **Même contexte d'empilement.** Un élément ne se mélange qu'avec ce qui est peint sous
+   lui **dans son contexte d'empilement**. Tout ancêtre isolant (`z-index` positionné,
+   `transform`, `opacity` < 1, `filter`, `will-change`, `isolation`, `contain: paint`)
+   placé entre le texte et la Verrerie annule l'inversion : le texte ivoire disparaît
+   sur la silhouette ivoire. Dans le code actuel, trois points l'enfreignent :
+   `.facade { z-index: 30 }` isole l'en-tête et le titre de l'accueil, l'entrée `pj-rise`
+   isole `.page__body` pendant 320 ms, et la révélation `pj-reveal` isole le contenu de
+   `.h1` pendant 640 ms. L'implémentation les lève (design system §10.3).
+
+Le **focus** fait sortir de l'inversion : l'élément focalisé repasse en mode normal sur
+une réserve `--void`, si bien que l'anneau jaune reste à 9,2 : 1 partout.
+
+### 17.4 Où la Verrerie apparaît
+
+| Écran | Verrerie | Composition |
+|---|---|---|
+| Accueil | oui | **La bouteille du croquis**, fixe : inclinée, elle traverse le manifeste et passe sous le bouton plein. Au plus un second objet, plus petit, en bas d'écran |
+| Onboarding (blaze, notifications) | oui, une silhouette | verre à pied |
+| Apéro `/invite`, `/event` | **en-tête seulement** (nom de l'assemblée), arrêtée avant le verdict et le vote | tirée de `aperoId` |
+| Tablée | en-tête seulement | tirée de `tableeId` |
+| Rétrospective | oui | traverse un chiffre monumental |
+| Erreurs, lien cassé | oui, une silhouette | bouteille couchée (seule exception d'angle, ±80°), posée sous le texte : elle n'en traverse aucun |
+| Organiser, vote, au programme, notifications, palmarès, tablées, sauvegarde | non sur mobile ; sur bureau, colonne d'expression de l'Editorial Split uniquement | fixe par écran |
+| Écran d'ouverture | non : `GlassField` y est déjà le verre | — |
+| Registre légal, modales, menu, feuilles, barre d'action | non | — |
+
+### 17.5 Bornes de composition
+
+- **Nombre** : 1 à 2 silhouettes par écran ; une seule traverse le titre.
+- **Surface** : 12 % à 35 % du premier écran mobile (390 × 844). En dessous, l'effet ne
+  se voit pas ; au-dessus, le vide cesse de dominer.
+- **Échelle** : la silhouette principale mesure au moins 80 % de la hauteur du premier
+  écran et sort d'au moins un bord. Monumentale, jamais vignette.
+- **Angle** : de −35° à +35° (exception : bouteille couchée des erreurs). Un bord qui
+  traverse une ligne de texte fait au moins 15° avec la ligne de base : un bord presque
+  horizontal couperait chaque lettre en deux moitiés.
+- **Croisements** : une ligne de texte est traversée par au plus deux bords.
+- **Tirage** (apéro, tablée) : FNV-1a de l'identifiant public → objet, angle (pas de 5°),
+  ancre parmi trois. Même identifiant, même verrerie, sur tous les appareils.
+
+### 17.6 Interdictions propres à la Verrerie
+
+Liquide, mousse, bulles, reflets, ombre portée, étiquette, logo ou forme reconnaissable
+d'une marque de boisson, verres qui trinquent, verre brisé, emoji, silhouette animée,
+silhouette sous un contrôle de saisie, deux silhouettes du même objet sur un écran,
+silhouette jaune ou colorée, image bitmap.
+
+### 17.7 Compensation optique entre fond foncé et fond clair
+
+**Cause.** Un texte clair sur fond foncé paraît plus gros et plus gras que le même texte
+foncé sur fond clair. Deux effets s'additionnent : l'**irradiation** (la lumière des
+lettres claires déborde dans l'œil et sur l'écran) et le **rendu** lui-même. Mesuré sur
+Chromium : à réglage identique, le texte foncé sur clair porte 2 à 6 % d'encre en moins
+(jusqu'à 8,6 % en monospace 12 px sur écran de densité 1).
+
+**Conséquence dans Point Jaune.** Le même mot change de taille apparente quand il passe du
+noir à l'ivoire : bouton plein, choix sélectionné, modales, registre légal, et désormais
+encre inversée sous une silhouette.
+
+**Règle.** La référence est le texte clair sur fond foncé (le défaut du produit). Les
+contextes clairs **compensent par la graisse**, jamais par la taille : la taille,
+la chasse et l'interlignage ne bougent pas, aucune mise en page ne se décale. Valeurs :
+design system §2.4. Un glyphe à cheval sur un bord de silhouette ne peut pas porter deux
+graisses : il garde la graisse de référence, et ce résidu est accepté (il est le plus
+faible sur les titres monumentaux, seuls traversés par composition).
+
+**Preuve attendue.** La mesure de pixels ne capte que la part « rendu ». La part
+« irradiation » se vérifie par un **test à choix forcé** : cinq personnes, six paires
+(même mot, fond foncé / fond clair, côte à côte), question « lequel paraît plus gros ? ».
+Objectif : aucun côté choisi plus de 4 fois sur 6 en moyenne. Sans ce test, la
+compensation reste `VISUAL_UNVERIFIED`.
+
+### 17.8 Critères de validation ajoutés
+
+| # | Critère | Méthode |
+|---|---|---|
+| V11 | Contraste invariant (P10) | capture avec / sans Verrerie : diff hors silhouettes = 0 ; sous silhouette, pixels pleins des glyphes = `--void` |
+| V12 | Aucune teinte inversée (P9) | recherche de pixels hors palette (bleu, violet, bleu-vert) sur toutes les captures = 0 |
+| V13 | Focus intact sur silhouette | navigation clavier sur l'accueil : anneau jaune sur réserve noire à chaque arrêt |
+| V14 | Reconnaissance (P12) et bornes (§17.5) | captures 320, 390, 768, 1440 inspectées ; surface couverte mesurée |
+| V15 | Compensation optique | mesure d'encre (écart ≤ ±3 % à densité 3, ≤ ±5 % à densité 1) puis test à choix forcé §17.7 |
+| V16 | Coût | Verrerie en SVG inline ≤ 2 ko par écran ; aucune recomposition au défilement mesurée (`Performance` : pas de *paint* répété sur les calques inversés) |
+
+Checkpoint : **CONTRACT_AMENDED — VERRERIE**.
+

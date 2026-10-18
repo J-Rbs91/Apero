@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr"><meta charset="utf-8">
+<title>Spécimen Verrerie</title>
+<!-- Spécimen de l'avenant Verrerie (UXER_REDESIGN_CONTRACT.md §17, UXER_DESIGN_SYSTEM.md §2.4 et §10).
+     Ouvrir depuis le dépôt : les polices sont lues dans src/assets/fonts. Aucune dépendance.
+     Ce n'est pas l'application : c'est la preuve que les règles tiennent au rendu. -->
+<style>
+@font-face{font-family:"Archivo";font-weight:100 900;font-stretch:62% 125%;src:url("../../../../src/assets/fonts/archivo-latin.woff2") format("woff2")}
+@font-face{font-family:"Fragment Mono";font-weight:400;src:url("../../../../src/assets/fonts/fragment-mono-latin.woff2") format("woff2")}
+:root{--void:#090b0d;--void-2:#151719;--ivory:#f3f1ea;--ash:#aaa9a4;--ash-2:#8e8d88;--paper:#eae6dc;--jaune:#d7ab42;--control:#7a7d81;
+ /* encre inversée : source = jeton + void, pour que |source - void| = jeton au pixel près */
+ --inv-text:#fcfcf7;--inv-text-2:#b3b4b1;--inv-text-3:#979895;--silhouette:var(--ivory)}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--void);color:var(--ivory);font-family:Archivo,sans-serif;font-weight:420;-webkit-font-smoothing:antialiased}
+.screen{position:relative;isolation:isolate;width:390px;height:844px;overflow:hidden;background:var(--void)}
+.verrerie{position:absolute;inset:0;z-index:-1;pointer-events:none}
+.verrerie svg{position:absolute;fill:var(--silhouette);overflow:visible}
+.inv{mix-blend-mode:difference}
+.inv,.inv .t1{color:var(--inv-text)} .inv.t2{color:var(--inv-text-2)} .inv.t3{color:var(--inv-text-3)}
+.top{display:flex;align-items:center;gap:12px;padding:16px 16px 0;min-height:64px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--jaune);box-shadow:0 0 0 4px var(--void)}
+.bell{margin-left:auto;width:44px;height:44px;border:1px solid var(--inv-text);display:grid;place-items:center;font:12px "Fragment Mono"}
+.hero{padding:48px 16px 24px;display:flex;flex-direction:column;gap:24px}
+.eyebrow{font:12px/1.45 "Fragment Mono";letter-spacing:.01em}
+.h1{margin:0;font-size:58.5px;font-stretch:62%;font-weight:800;line-height:.86;letter-spacing:-.03em;max-width:12ch}
+.pop::after{content:"";display:inline-block;width:.17em;height:.17em;margin-left:.06em;border-radius:50%;background:var(--jaune);box-shadow:0 0 0 .07em var(--void)}
+.btn{display:flex;align-items:center;justify-content:center;min-height:52px;background:var(--jaune);color:var(--void);font-weight:700;font-size:16px}
+.ghost{display:flex;align-items:center;justify-content:center;min-height:48px;border:1px solid var(--inv-text);font-weight:600}
+.rows{padding:0 16px}
+.row{display:flex;gap:16px;align-items:baseline;padding:12px 0;border-top:1px solid #43484d}
+.row b{font-size:44px;font-stretch:62%;font-weight:800;line-height:1}
+.lede{font-size:17px;line-height:1.5;margin:0;max-width:34ch}
+
+
+.pair{display:flex;width:780px}.cell{width:390px;padding:10px 16px;white-space:nowrap}
+.d{background:var(--void);color:var(--ivory);-webkit-font-smoothing:antialiased}
+.l{background:var(--ivory);color:var(--void)}
+.cap{font:11px "Fragment Mono";color:#999;padding:6px 16px;background:#222}
+.b{font-size:16px}.m{font:12px "Fragment Mono"}.u{font-size:16px;font-weight:600}
+
+body{background:#222;padding:24px;display:flex;flex-direction:column;gap:24px}
+.screens{display:flex;gap:24px;flex-wrap:wrap}
+</style>
+<body>
+<div class="screens"><div class="screen">
+<div class="top"><div class="dot"></div><div class="brand inv">La Confrérie ≡</div><div class="bell inv"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15z M10 21h4"/></svg></div></div>
+<div class="hero"><p class="eyebrow inv t3" style="margin:0">sans verrerie (référence)</p>
+<h1 class="h1"><span class="inv">La Confrérie du Petit Jaune</span><span class="pop"></span></h1>
+<div class="btn">Nouvel apéro</div><div class="ghost inv">Rejoindre une tablée</div></div>
+<div class="rows"><div class="row"><b class="inv">24</b><span class="inv">Tournée · Le zinc</span><span class="eyebrow inv t3" style="margin-left:auto">19:00</span></div>
+<div class="row"><b class="inv">31</b><span class="inv">Séance · Trottoir</span><span class="eyebrow inv t3" style="margin-left:auto">18:30</span></div></div></div><div class="screen"><div class="verrerie"><svg viewBox="0 0 100 400" style="height:820px;left:20px;top:150px;transform:rotate(-27deg);transform-origin:50% 0" aria-hidden="true"><path d="M10 400 L10 165 C10 122 38 118 38 92 L38 22 L34 22 L34 0 L66 0 L66 22 L62 22 L62 92 C62 118 90 122 90 165 L90 400 Z"/></svg><svg viewBox="0 0 56 250" style="height:420px;left:285px;top:470px;transform:rotate(14deg)" aria-hidden="true"><path d="M10 0 L46 0 C49 62 45 112 31 128 L31 228 L50 240 L50 250 L6 250 L6 240 L25 228 L25 128 C11 112 7 62 10 0 Z"/></svg></div>
+<div class="top"><div class="dot"></div><div class="brand inv">La Confrérie ≡</div><div class="bell inv"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15z M10 21h4"/></svg></div></div>
+<div class="hero"><p class="eyebrow inv t3" style="margin:0">bouteille ok · flûte = contre-exemple P12</p>
+<h1 class="h1"><span class="inv">La Confrérie du Petit Jaune</span><span class="pop"></span></h1>
+<div class="btn">Nouvel apéro</div><div class="ghost inv">Rejoindre une tablée</div></div>
+<div class="rows"><div class="row"><b class="inv">24</b><span class="inv">Tournée · Le zinc</span><span class="eyebrow inv t3" style="margin-left:auto">19:00</span></div>
+<div class="row"><b class="inv">31</b><span class="inv">Séance · Trottoir</span><span class="eyebrow inv t3" style="margin-left:auto">18:30</span></div></div></div><div class="screen"><div class="verrerie"><svg viewBox="0 0 100 170" style="height:360px;left:170px;top:120px;transform:rotate(9deg)" aria-hidden="true"><path d="M6 0 L94 0 L90 24 L97 40 L86 170 L14 170 L3 40 L10 24 Z"/></svg><svg viewBox="0 0 100 210" style="height:430px;left:-95px;top:470px;transform:rotate(-8deg)" aria-hidden="true"><path d="M14 0 L86 0 C90 46 80 90 53 99 L53 186 L82 200 L82 210 L18 210 L18 200 L47 186 L47 99 C20 90 10 46 14 0 Z"/></svg></div>
+<div class="top"><div class="dot"></div><div class="brand inv">La Confrérie ≡</div><div class="bell inv"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15z M10 21h4"/></svg></div></div>
+<div class="hero"><p class="eyebrow inv t3" style="margin:0">pinte nonic + verre à pied</p>
+<h1 class="h1"><span class="inv">La Confrérie du Petit Jaune</span><span class="pop"></span></h1>
+<div class="btn">Nouvel apéro</div><div class="ghost inv">Rejoindre une tablée</div></div>
+<div class="rows"><div class="row"><b class="inv">24</b><span class="inv">Tournée · Le zinc</span><span class="eyebrow inv t3" style="margin-left:auto">19:00</span></div>
+<div class="row"><b class="inv">31</b><span class="inv">Séance · Trottoir</span><span class="eyebrow inv t3" style="margin-left:auto">18:30</span></div></div></div></div>
+<section>
+<div class="cap">A — sans compensation : 16 px / 420 · 16 px / 600 · 12 px mono</div>
+<div class="pair" id="a"><div class="cell d"><div class="b">Tournée au zinc, 19 h</div><div class="u">Rejoindre une tablée</div><div class="m">3 convives · en tête</div></div><div class="cell l"><div class="b">Tournée au zinc, 19 h</div><div class="u">Rejoindre une tablée</div><div class="m">3 convives · en tête</div></div></div>
+<div class="cap">B — compensée sur fond clair : graisse +30, lissage auto ; mono : contour 0,05 px</div>
+<div class="pair" id="b"><div class="cell d"><div class="b">Tournée au zinc, 19 h</div><div class="u">Rejoindre une tablée</div><div class="m">3 convives · en tête</div></div><div class="cell l" style="-webkit-font-smoothing:auto"><div class="b" style="font-weight:450">Tournée au zinc, 19 h</div><div class="u" style="font-weight:630">Rejoindre une tablée</div><div class="m" style="-webkit-text-stroke:.05px currentColor">3 convives · en tête</div></div></div>
+</body>
+</section>
+</body></html>

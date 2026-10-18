@@ -108,6 +108,40 @@ légende monospace de 12 px collée dessous (rapport 10 : 1). Entre ces deux pô
 de lecture reste à 16 px. Les tailles intermédiaires (24-36 px) sont rares, réservées aux
 titres de section.
 
+### 2.4 Compensation optique (contrat §17.7)
+
+Un texte clair sur fond foncé paraît plus gros que le même texte foncé sur fond clair.
+La référence est le texte clair sur `--void` ; les **contextes clairs** compensent par la
+graisse, jamais par la taille, la chasse ou l'interlignage.
+
+| Jeton | Valeur | Appliqué à |
+|---|---|---|
+| `--fw-comp` | `0` sur fond foncé ; `30` en contexte clair | Archivo ≤ 24 px : `font-weight: calc(<graisse du rôle> + var(--fw-comp))` |
+| `--fw-comp-display` | `0` ; `15` en contexte clair | Archivo > 24 px (titres, chiffres) |
+| `--stroke-comp` | `0` ; `0.05px` en contexte clair | Fragment Mono (graisse unique) : `-webkit-text-stroke: var(--stroke-comp) currentColor` ; et toute **bascule d'état** |
+
+Contextes clairs : `.button--primary` (700 → 730), `.modal-sheet` et `.legal-page`
+(lecture 420 → 450, interface 600 → 630, titres +15), `.choice--on` et toute sélection
+inversée. Une bascule d'état (`.choice--on`) compense par `--stroke-comp` et non par la
+graisse : la graisse élargit l'avance des lettres (+0,5 % à 420 → 450, +1 % à 600 → 630)
+et pourrait renvoyer un libellé à la ligne au moment du clic ; le contour ne change
+aucune métrique. Lissage : `-webkit-font-smoothing: antialiased` sur fond foncé (déjà en
+place), `auto` en contexte clair (macOS seulement, sans effet ailleurs). L'encre inversée
+de la Verrerie ne compense pas (§10.5).
+
+Mesures (Chromium, rendu d'encre normalisé, texte foncé sur clair comparé à clair sur
+foncé ; spécimen `specimens/verrerie.html`) :
+
+| Texte | Sans compensation (densité 1 · 3) | Graisse +30 (1 · 3) | Contour 0,05 px (1 · 3) |
+|---|---|---|---|
+| Archivo 16 px / 420 | −6,3 % · −2,3 % | −1,9 % · +2,1 % | −1,9 % · +1,4 % |
+| Archivo 16 px / 600 | −5,0 % · −1,8 % | −1,5 % · +1,4 % | −1,0 % · +1,4 % |
+| Fragment Mono 12 px | −8,6 % · −3,4 % | — | −4,4 % · +2,5 % |
+
+Ces mesures couvrent la part « rendu ». La part « irradiation » (perceptive) se valide par
+le test à choix forcé du contrat §17.7 ; les valeurs ci-dessus sont des valeurs de départ
+jusqu'à ce test.
+
 ## 3. Grille et composition
 
 | Plage | Colonnes | Marge | Gouttière | Mesure de contenu |
@@ -206,7 +240,8 @@ haute à 184 px (manifeste) et 120 px (écran).
 | Bande de signal | verdict | créneau gagnant décidé | 24 traits (12 sur mobile) ; une impulsion les parcourt une fois | traits éteints |
 
 Aucune de ces matières n'affiche de chiffre inventé ; toutes sont `aria-hidden` et
-doublées par le texte existant.
+doublées par le texte existant. La Verrerie n'est pas une matière computationnelle : elle
+est figurative et ne représente aucune donnée (§10).
 
 ## 9. Règles d'implémentation
 
@@ -217,4 +252,111 @@ doublées par le texte existant.
 4. Un composant de présentation ne contient pas de logique métier : il reçoit des données
    déjà calculées.
 
-Checkpoint : **DESIGN_SYSTEM_READY**.
+## 10. Verrerie et encre inversée (contrat §17)
+
+### 10.1 Jetons
+
+| Jeton | Valeur | Rôle |
+|---|---|---|
+| `--silhouette` | `var(--ivory)` | Aplat unique de toute silhouette |
+| `--inv-text` | `#FCFCF7` | Source de l'encre inversée pour `--ivory` (`--ivory` + `--void`) |
+| `--inv-text-2` | `#B3B4B1` | Source pour `--ash` |
+| `--inv-text-3` | `#979895` | Source pour `--ash-2` |
+| `--inv-control` | `#83888E` | Source pour `--control` (contours au trait) |
+| `--inv-line` | `#43484D` | Source pour `--rule` (décor) |
+| `--inv-hover` | `#2C3136` | Source pour `--void-3` (survol d'un bouton au trait) |
+
+Règle de calcul, à refaire pour tout nouveau jeton : **source = jeton + `--void`**, canal
+par canal. Ainsi `|source − void|` redonne le jeton et `|source − ivoire|` en donne
+l'inverse. Un jeton chromatique (`--jaune`, `--ok`, `--err`, `--warn`) n'a **pas** de
+source inversée : il ne s'inverse jamais.
+
+### 10.2 Composant `Verrerie`
+
+Présentation pure, `aria-hidden`, sans logique métier. Props : `composition`
+(`"accueil" | "onboarding" | "erreur" | "retro" | "bureau-<écran>"`) ou `seed`
+(identifiant public d'un apéro ou d'une tablée). Rendu : un `<svg>` inline par silhouette,
+`fill: var(--silhouette)`, aucun contour, `shape-rendering: geometricPrecision`.
+
+| Silhouette | Dessin (géométrique : segments et arcs, sans détail) | Partie caractéristique (P12) |
+|---|---|---|
+| Bouteille de vin | corps droit, épaule en arc, col étroit, bague | col et goulot |
+| Verre à pied | coupe en arc, jambe fine, pied plat | jambe et pied |
+| Flûte | coupe haute et étroite, jambe, pied | coupe étroite |
+| Pinte nonic | fût conique, renflement sous le buvant | renflement |
+
+Dessins originaux, tracés dans `specimens/verrerie.html` (≈ 150 octets de tracé chacun).
+
+Tirage (`seed`) : FNV-1a 32 bits de l'identifiant public, comme `Signature` → objet
+principal (4), angle de −35° à +35° par pas de 5°, ancre (gauche, droite, centre bas),
+second objet présent si le bit de poids faible vaut 1. Bornes du contrat §17.5 appliquées
+après tirage : un tirage hors bornes est ramené à la borne, jamais rejoué.
+
+### 10.3 Structure et empilement
+
+```
+.screen.has-verrerie            position: relative ; isolation: isolate
+├── .verrerie                   position: absolute ; inset: 0 ; z-index: -1 ;
+│                               pointer-events: none ; overflow: hidden
+├── header.facade               SANS z-index sur ces écrans
+│   └── … éléments à encre inversée
+└── main.page > .page__body     SANS animation d'entrée sur ces écrans
+```
+
+- La Verrerie est peinte après le fond de `.screen` et avant tout son contenu.
+- **Aucun ancêtre isolant** entre un élément inversé et `.screen` : ni `z-index`
+  positionné, ni `transform`, `opacity` < 1, `filter`, `will-change`, `isolation`,
+  `contain: paint`, même pendant une animation. Trois points du code actuel l'enfreignent
+  et sont levés sur les écrans `.has-verrerie` : `.facade { z-index: 30 }` (le menu et la
+  cloche restent au-dessus par leur propre positionnement fixe ; `npm run test:nav` le
+  vérifie), l'entrée `pj-rise` de `.page__body`, et la révélation `pj-reveal` posée sur
+  `.h1` (déplacée sur ses enfants, §10.4).
+- La couche est rognée par `.screen` : aucun débordement horizontal (V5).
+
+### 10.4 Ce qui s'inverse, ce qui ne s'inverse pas
+
+| Classe d'élément | Exemples | Traitement sur `.has-verrerie` |
+|---|---|---|
+| **Neutre transparent** | `.h1__ink`, `.h1--sm`, `.h2`, `.h3`, `.lede`, `.eyebrow`, `.meta`, `.lbl`, `.factline`, `.verdict__date`, `.cnt b`, `.leaf__day`, `.button--ghost`, `.ghost-link`, boutons carrés au trait de l'en-tête, filets | `mix-blend-mode: difference` + couleur `--inv-*` correspondante |
+| **Opaque** | `.button--primary`, champs, `.actionbar`, menus, feuilles, modales, carte Leaflet | aucun mélange ; il masque la silhouette |
+| **Chromatique transparent** | point du manifeste, `PointMark`, légende « en tête », états colorés | jamais inversé ; **réserve** `--void` : anneau plein de 0,07 em (point) ou 4 px (`PointMark`), sans flou |
+| **Data Field** | `VoteField`, `ComptoirField`, `Signature` | la composition l'évite ; à défaut, fond `--bg` opaque |
+
+Un élément inversé ne contient **aucun** descendant chromatique : un groupe en
+`difference` inverse tout ce qu'il contient (vu sur spécimen : le point jaune du manifeste
+devenu bleu). D'où la seule modification de structure, sans changement de texte :
+
+```
+<h1 class="h1">
+  <span class="h1__ink">La Confrérie du Petit Jaune</span><span class="h1__point" aria-hidden="true"></span>
+</h1>
+```
+
+`.h1__ink` porte l'encre inversée **et** la révélation typographique ; `.h1__point` porte
+la même révélation et sa réserve. `.h1__pop` disparaît au profit de `.h1__point`.
+
+**Focus** : `.has-verrerie :focus-visible` repasse en `mix-blend-mode: normal`, couleur du
+jeton ordinaire, fond `--void`. L'anneau jaune reste à 9,2 : 1 sur toute silhouette.
+
+### 10.5 Contrastes de l'encre inversée (calcul sur les jetons, vérifié au pixel)
+
+| Jeton rendu | Sur `--void` | Sur silhouette | Usage |
+|---|---|---|---|
+| `--ivory` | 17,4 | 17,4 (`--void` sur ivoire) | tout texte |
+| `--ash` | 8,4 | 9,6 | texte secondaire |
+| `--ash-2` | 5,9 | 6,2 | méta 12 px |
+| `--control` | 4,8 | 4,8 | contours |
+| `--rule` | 1,8 | 2,1 | décor seulement |
+
+Pixels mesurés sur spécimen : glyphes pleins `#F3F1EA` hors silhouette, `#090B0D` sous
+silhouette, aucune autre valeur hors bords anticrénelés. Sans compensation de la source
+(jeton brut en `difference`), `--ash-2` tomberait à 5,1 et l'ivoire à 15,8 : la règle de
+calcul §10.1 n'est pas cosmétique.
+
+### 10.6 Coût
+
+SVG inline, ≤ 2 ko par écran, aucune requête, aucune dépendance. La Verrerie ne bouge pas
+et défile avec la page : les calques inversés ne sont repeints qu'au défilement de la page
+elle-même, comme sans Verrerie. Aucune image bitmap.
+
+Checkpoint : **DESIGN_SYSTEM_READY** ; avenant Verrerie : **DESIGN_SYSTEM_AMENDED**.

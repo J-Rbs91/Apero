@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "run_id": "verrerie",
+  "status": "paused",
+  "execution_profile": "standard",
+  "current_phase": "implementation",
+  "current_unit": "",
+  "completed_phases": [
+    "contract"
+  ],
+  "completed_units": [
+    "contract-amendment"
+  ],
+  "last_safe_checkpoint": "2026-10-18T18:12:50+00:00",
+  "session_name": "uxer-verrerie",
+  "branch": "ccr-3385a0bc-hats0e",
+  "commit_sha": "a2e04d0",
+  "files_changed": [
+    "docs/uxer/manifesto-void/UXER_REDESIGN_CONTRACT.md",
+    "docs/uxer/manifesto-void/UXER_DESIGN_SYSTEM.md",
+    "docs/uxer/manifesto-void/UXER_MOTION_SYSTEM.md",
+    "docs/uxer/manifesto-void/specimens/verrerie.html"
+  ],
+  "validations_passed": [
+    "spécimen : inversion exacte au pixel, 0 teinte inversée",
+    "compensation : écart d'encre ramené de −8,6/−1,8 % à −4,4/+2,5 %"
+  ],
+  "validations_failed": [],
+  "next_action": "Validation de l'avenant par le propriétaire, puis jetons --inv-* et --fw-comp",
+  "blocking_issue": null,
+  "pause_reason": "other",
+  "resume_required": true
+}
