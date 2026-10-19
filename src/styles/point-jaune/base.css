@@ -128,14 +128,13 @@ a {
 }
 
 /* Le Petit Jaune ponctue le manifeste : un point final plein. */
-.h1__pop::after {
+.h1__point {
   display: inline-block;
   width: 0.17em;
   height: 0.17em;
   margin-left: 0.06em;
   border-radius: 50%;
   background: var(--signal);
-  content: "";
   vertical-align: baseline;
 }
 
@@ -231,4 +230,27 @@ a {
   height: 10px;
   border-radius: 50%;
   background: var(--jaune);
+}
+
+/* --- Compensation optique (UXER_DESIGN_SYSTEM.md §2.4) ---------------- */
+
+/* Un texte foncé sur fond clair paraît plus petit que le même texte clair sur
+   fond foncé. Les contextes clairs l'épaississent d'un contour de 0,05 px
+   (mesuré : même effet qu'une graisse +30), sans changer aucune métrique :
+   un libellé qui s'inverse au clic ne revient pas à la ligne. */
+.modal-sheet,
+.legal-page,
+.button--primary,
+.choice--on {
+  -webkit-text-stroke: var(--stroke-comp) currentColor;
+  -webkit-font-smoothing: auto;
+}
+
+.button--primary,
+.choice--on {
+  --stroke-comp: 0.05px;
+}
+
+.button--primary:disabled {
+  --stroke-comp: 0px;
 }

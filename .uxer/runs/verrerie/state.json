@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "run_id": "verrerie",
-  "status": "paused",
+  "status": "in_progress",
   "execution_profile": "standard",
   "current_phase": "implementation",
   "current_unit": "",
@@ -9,7 +9,8 @@
     "contract"
   ],
   "completed_units": [
-    "contract-amendment"
+    "contract-amendment",
+    "accueil"
   ],
   "last_safe_checkpoint": "2026-10-18T18:12:50+00:00",
   "session_name": "uxer-verrerie",
@@ -19,15 +20,19 @@
     "docs/uxer/manifesto-void/UXER_REDESIGN_CONTRACT.md",
     "docs/uxer/manifesto-void/UXER_DESIGN_SYSTEM.md",
     "docs/uxer/manifesto-void/UXER_MOTION_SYSTEM.md",
-    "docs/uxer/manifesto-void/specimens/verrerie.html"
+    "docs/uxer/manifesto-void/specimens/verrerie.html",
+    "src/components/field/Verrerie.tsx",
+    "src/styles/point-jaune/verrerie.css",
+    "src/pages/HomePage.tsx"
   ],
   "validations_passed": [
     "spécimen : inversion exacte au pixel, 0 teinte inversée",
-    "compensation : écart d'encre ramené de −8,6/−1,8 % à −4,4/+2,5 %"
+    "compensation : écart d'encre ramené de −8,6/−1,8 % à −4,4/+2,5 %",
+    "accueil : unit 251/251, functional 71/71, nav 23/23, voix 0, rendus 320-1440 inspectés, 0 overflow, 0 teinte inversée"
   ],
   "validations_failed": [],
-  "next_action": "Validation de l'avenant par le propriétaire, puis jetons --inv-* et --fw-comp",
+  "next_action": "Étendre la Verrerie aux écrans §17.4 restants ; test à choix forcé de la compensation",
   "blocking_issue": null,
-  "pause_reason": "other",
-  "resume_required": true
+  "pause_reason": null,
+  "resume_required": false
 }

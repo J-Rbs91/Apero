@@ -97,6 +97,20 @@
   --warning: var(--warn);
   --signal: var(--jaune);
 
+  /* --- Verrerie et encre inversée (§10.1) : source = jeton + vide --- */
+  --silhouette: var(--ivory);
+  --inv-text: #fcfcf7;
+  --inv-text-2: #b3b4b1;
+  --inv-text-3: #979895;
+  --inv-control: #83888e;
+  --inv-line: #43484d;
+  --inv-hover: #2c3136;
+  /* La bouteille (300 mm) fait la hauteur du premier écran (§10.2). */
+  --verrerie-mm: calc(100svh / 300);
+
+  /* --- Compensation optique (§2.4) : 0 sur fond foncé --- */
+  --stroke-comp: 0px;
+
   /* --- Typographie (§2) --- */
   --font-sans: "Archivo", "Helvetica Neue", Arial, system-ui, sans-serif;
   --font-mono: "Fragment Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -187,6 +201,7 @@
   --success: #1f6b44;
   --danger: #b3261e;
   --warning: #8a4b12;
+  --stroke-comp: 0.05px;
   color-scheme: light;
   color: var(--text);
 }

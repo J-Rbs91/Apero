@@ -47,10 +47,10 @@ aucun pour `--ease-out` ; c'est ce qui justifie de réserver `--ease-in` aux sor
 
 5. **Verrerie** (contrat §17) : aucun mouvement propre. Elle apparaît avec l'écran,
    défile avec la page, ne se révèle pas et ne réagit à rien. Sur les écrans
-   `.has-verrerie`, l'entrée `pj-rise` de `.page__body` est supprimée et la révélation
-   typographique passe de `.h1` à `.h1__ink` et `.h1__point` : une animation sur un ancêtre
-   isolerait l'encre inversée et ferait disparaître le titre sur la silhouette pendant
-   l'animation (design system §10.3).
+   `.has-verrerie`, aucune animation ne porte sur un ancêtre de l'encre inversée : elle
+   l'isolerait et ferait disparaître le titre sur la silhouette pendant l'animation
+   (design system §10.3). Sur l'accueil, le titre est donc posé, pas révélé : c'est
+   l'écran le plus vu, la règle de fréquence va dans le même sens.
 
 ## 4. Coûts mesurés (budget)
 

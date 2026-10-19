@@ -381,5 +381,18 @@ compensation reste `VISUAL_UNVERIFIED`.
 | V15 | Compensation optique | mesure d'encre (écart ≤ ±3 % à densité 3, ≤ ±5 % à densité 1) puis test à choix forcé §17.7 |
 | V16 | Coût | Verrerie en SVG inline ≤ 2 ko par écran ; aucune recomposition au défilement mesurée (`Performance` : pas de *paint* répété sur les calques inversés) |
 
+### 17.9 État d'implémentation (19/10/2026)
+
+| Périmètre | État |
+|---|---|
+| Accueil : bouteille, encre inversée du titre et du bouton au trait, point en réserve | implémenté |
+| Compensation optique des contextes clairs (contour 0,05 px) | implémenté ; test à choix forcé à faire |
+| Onboarding, apéro, tablée, rétrospective, erreurs, bureau des écrans de tâche | à faire |
+
+Preuves : unitaires 251/251, fonctionnels 71/71, navigation 23/23, voix 0 écart ; rendus
+320, 390, 768, 1440 et mouvement réduit inspectés, 0 débordement, 0 erreur console,
+0 pixel de teinte inversée (`evidence/verrerie-app-*.jpg`). Non rendu : l'accueil avec un
+apéro en cours (bouton au trait sur la silhouette), couvert par la règle CSS seulement.
+
 Checkpoint : **CONTRACT_AMENDED — VERRERIE**.
 

@@ -1,0 +1,77 @@
+/* ==========================================================================
+   Point Jaune — 10. Verrerie et encre inversée
+   Contrat : UXER_REDESIGN_CONTRACT.md §17 · Spécification : UXER_DESIGN_SYSTEM.md §10
+   ========================================================================== */
+
+/* La silhouette déborde de son bloc : l'écran la rogne, sans créer de
+   défilement (overflow: clip ne fait pas de l'écran un conteneur défilant). */
+.has-verrerie {
+  overflow: clip;
+}
+
+/* Le bloc traversé est le contexte d'empilement de l'inversion : son fond
+   (le vide) est peint d'abord, la silhouette ensuite, le texte enfin. Le texte
+   inversé ne voit la silhouette que s'ils partagent ce contexte (§10.3). */
+.has-verrerie .verrerie-scope {
+  position: relative;
+  isolation: isolate;
+  background: var(--bg);
+}
+
+.verrerie {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.verrerie svg {
+  display: block;
+  width: auto;
+  fill: var(--silhouette);
+  shape-rendering: geometricPrecision;
+}
+
+/* Accueil : la bouteille du croquis. Son col part du manifeste, elle penche,
+   traverse le titre et passe sous le bouton. Position et angle seulement. */
+.verrerie--accueil {
+  top: -0.25rem;
+  left: clamp(24px, 9vw, 160px);
+  transform: rotate(-27deg);
+  transform-origin: 50% 0;
+}
+
+/* --- Encre inversée : texte neutre, source = jeton + vide (§10.1) -------- */
+
+.has-verrerie .verrerie-scope .h1__ink {
+  color: var(--inv-text);
+  mix-blend-mode: difference;
+}
+
+.has-verrerie .verrerie-scope .button--ghost {
+  border-color: var(--inv-text);
+  color: var(--inv-text);
+  mix-blend-mode: difference;
+}
+
+.has-verrerie .verrerie-scope .button--ghost:hover:not(:disabled) {
+  background: var(--inv-hover);
+}
+
+/* Le focus sort de l'inversion : réserve noire, anneau jaune intact. */
+.has-verrerie .verrerie-scope .button--ghost:focus-visible {
+  border-color: var(--text);
+  background: var(--bg);
+  color: var(--text);
+  mix-blend-mode: normal;
+}
+
+/* Le point jaune ne s'inverse jamais : il vit hors de l'encre, sur sa réserve. */
+.has-verrerie .h1__point {
+  box-shadow: 0 0 0 0.07em var(--bg);
+}
+
+/* Aucune animation sur un ancêtre de l'encre inversée : elle l'isolerait de
+   la silhouette (§10.3). Sur l'écran le plus vu, le titre est posé. */
+.has-verrerie .facade__hero .h1 {
+  animation: none;
+}

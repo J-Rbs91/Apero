@@ -3,6 +3,7 @@ import { AppLink } from "../components/AppLink";
 import { BrandMenu } from "../components/BrandMenu";
 import { ComptoirField, type ConstellationPoint } from "../components/field/ComptoirField";
 import { Signature } from "../components/field/Signature";
+import { Verrerie } from "../components/field/Verrerie";
 import { MobilePage } from "../components/MobilePage";
 import { eventStorage } from "../services";
 import { getCachedAperoEvent } from "../services/encryptedAperoRepository";
@@ -117,7 +118,7 @@ export function HomePage() {
 
   return (
     <MobilePage
-      className="home-mobile"
+      className="home-mobile has-verrerie"
       header={<BrandMenu />}
       hero={
         <div className="sign">
@@ -149,9 +150,13 @@ export function HomePage() {
             <ComptoirField points={constellation} now={now} />
           </div>
 
-          <div className="sign__text">
+          {/* La bouteille du croquis traverse le manifeste ; le texte qui
+              passe dessus s'inverse (UXER_REDESIGN_CONTRACT.md §17). */}
+          <div className="sign__text verrerie-scope">
+            <Verrerie objet="bouteille" className="verrerie--accueil" />
             <h1 className="h1">
-              La Confrérie du <span className="h1__pop">Petit Jaune</span>
+              <span className="h1__ink">La Confrérie du Petit Jaune</span>
+              <span className="h1__point" aria-hidden="true" />
             </h1>
             <AppLink
               className={`button ${nextApero ? "button--ghost" : "button--primary"} button--block`}

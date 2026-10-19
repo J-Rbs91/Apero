@@ -120,6 +120,12 @@ graisse, jamais par la taille, la chasse ou l'interlignage.
 | `--fw-comp-display` | `0` ; `15` en contexte clair | Archivo > 24 px (titres, chiffres) |
 | `--stroke-comp` | `0` ; `0.05px` en contexte clair | Fragment Mono (graisse unique) : `-webkit-text-stroke: var(--stroke-comp) currentColor` ; et toute **bascule d'état** |
 
+**Implémentation (19/10/2026)** : le contour `--stroke-comp` (0,05 px) est appliqué à
+**tous** les contextes clairs, Archivo compris (`base.css`). Mesuré, il produit le même
+écart que la graisse +30 (tableau ci-dessous) et ne change aucune métrique ; une seule
+règle remplace la réécriture des cinquante déclarations de graisse. `--fw-comp` reste
+la voie de repli si le test à choix forcé demande davantage.
+
 Contextes clairs : `.button--primary` (700 → 730), `.modal-sheet` et `.legal-page`
 (lecture 420 → 450, interface 600 → 630, titres +15), `.choice--on` et toute sélection
 inversée. Une bascule d'état (`.choice--on`) compense par `--stroke-comp` et non par la
@@ -299,6 +305,14 @@ rend **une seule silhouette** : sa prop est un objet, pas une liste. Bornes du c
 après tirage : un tirage hors bornes est ramené à la borne, jamais rejoué.
 
 ### 10.3 Structure et empilement
+
+**Implémenté sur l'accueil (19/10/2026)** : le contexte d'empilement est le bloc
+traversé, pas l'écran. `.sign__text.verrerie-scope` (`position: relative ; isolation:
+isolate ; background: var(--bg)`) contient la silhouette (`z-index: -1`), le titre et le
+bouton. `.facade` garde son `z-index` : la silhouette et le texte inversé sont tous deux
+à l'intérieur. `.has-verrerie { overflow: clip }` sur l'écran rogne la bouteille sans
+créer de défilement. Le titre de l'accueil n'est pas révélé (pas d'animation sur un
+ancêtre de l'encre). Schéma général, pour les écrans suivants :
 
 ```
 .screen.has-verrerie            position: relative ; isolation: isolate
