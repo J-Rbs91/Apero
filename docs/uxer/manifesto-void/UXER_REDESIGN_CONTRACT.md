@@ -307,7 +307,7 @@ une réserve `--void`, si bien que l'anneau jaune reste à 9,2 : 1 partout.
 
 | Écran | Verrerie | Composition |
 |---|---|---|
-| Accueil | oui | **La bouteille du croquis**, fixe : inclinée, elle traverse le manifeste et passe sous le bouton plein. Au plus un second objet, plus petit, en bas d'écran |
+| Accueil | oui | **La bouteille du croquis**, seule, fixe : inclinée, elle traverse le manifeste et passe sous le bouton plein |
 | Onboarding (blaze, notifications) | oui, une silhouette | verre à pied |
 | Apéro `/invite`, `/event` | **en-tête seulement** (nom de l'assemblée), arrêtée avant le verdict et le vote | tirée de `aperoId` |
 | Tablée | en-tête seulement | tirée de `tableeId` |
@@ -319,11 +319,13 @@ une réserve `--void`, si bien que l'anneau jaune reste à 9,2 : 1 partout.
 
 ### 17.5 Bornes de composition
 
-- **Nombre** : 1 à 2 silhouettes par écran ; une seule traverse le titre.
+- **Nombre** : **une seule silhouette par écran**, jamais deux (décision du propriétaire, 19/10/2026).
+  Un seul objet garde le vide dominant et donne une seule lecture : un écran, un verre.
 - **Surface** : 12 % à 35 % du premier écran mobile (390 × 844). En dessous, l'effet ne
   se voit pas ; au-dessus, le vide cesse de dominer.
-- **Échelle** : la silhouette principale mesure au moins 80 % de la hauteur du premier
-  écran et sort d'au moins un bord. Monumentale, jamais vignette.
+- **Échelle** : la silhouette mesure au moins 80 % de la hauteur du premier écran
+  (bouteille, verre à pied, flûte) et au moins 55 % pour la nonic, trapue, qui dépasserait
+  sinon la borne de surface. Elle sort d'au moins un bord. Monumentale, jamais vignette.
 - **Angle** : de −35° à +35° (exception : bouteille couchée des erreurs). Un bord qui
   traverse une ligne de texte fait au moins 15° avec la ligne de base : un bord presque
   horizontal couperait chaque lettre en deux moitiés.
@@ -335,7 +337,7 @@ une réserve `--void`, si bien que l'anneau jaune reste à 9,2 : 1 partout.
 
 Liquide, mousse, bulles, reflets, ombre portée, étiquette, logo ou forme reconnaissable
 d'une marque de boisson, verres qui trinquent, verre brisé, emoji, silhouette animée,
-silhouette sous un contrôle de saisie, deux silhouettes du même objet sur un écran,
+silhouette sous un contrôle de saisie, plus d'une silhouette sur un écran,
 silhouette jaune ou colorée, image bitmap.
 
 ### 17.7 Compensation optique entre fond foncé et fond clair
@@ -370,7 +372,7 @@ compensation reste `VISUAL_UNVERIFIED`.
 | V11 | Contraste invariant (P10) | capture avec / sans Verrerie : diff hors silhouettes = 0 ; sous silhouette, pixels pleins des glyphes = `--void` |
 | V12 | Aucune teinte inversée (P9) | recherche de pixels hors palette (bleu, violet, bleu-vert) sur toutes les captures = 0 |
 | V13 | Focus intact sur silhouette | navigation clavier sur l'accueil : anneau jaune sur réserve noire à chaque arrêt |
-| V14 | Reconnaissance (P12) et bornes (§17.5) | captures 320, 390, 768, 1440 inspectées ; surface couverte mesurée |
+| V14 | Une silhouette par écran, reconnaissance (P12) et bornes (§17.5) | captures 320, 390, 768, 1440 inspectées ; surface couverte mesurée |
 | V15 | Compensation optique | mesure d'encre (écart ≤ ±3 % à densité 3, ≤ ±5 % à densité 1) puis test à choix forcé §17.7 |
 | V16 | Coût | Verrerie en SVG inline ≤ 2 ko par écran ; aucune recomposition au défilement mesurée (`Performance` : pas de *paint* répété sur les calques inversés) |
 

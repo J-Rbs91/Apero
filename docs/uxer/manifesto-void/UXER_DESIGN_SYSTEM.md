@@ -288,8 +288,8 @@ Présentation pure, `aria-hidden`, sans logique métier. Props : `composition`
 Dessins originaux, tracés dans `specimens/verrerie.html` (≈ 150 octets de tracé chacun).
 
 Tirage (`seed`) : FNV-1a 32 bits de l'identifiant public, comme `Signature` → objet
-principal (4), angle de −35° à +35° par pas de 5°, ancre (gauche, droite, centre bas),
-second objet présent si le bit de poids faible vaut 1. Bornes du contrat §17.5 appliquées
+(4), angle de −35° à +35° par pas de 5°, ancre (gauche, droite, centre bas). Le composant
+rend **une seule silhouette** : sa prop est un objet, pas une liste. Bornes du contrat §17.5 appliquées
 après tirage : un tirage hors bornes est ramené à la borne, jamais rejoué.
 
 ### 10.3 Structure et empilement

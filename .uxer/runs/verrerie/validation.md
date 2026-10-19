@@ -14,7 +14,7 @@
 
 - Captures du spécimen inspectées : `evidence/verrerie-accueil.jpg`, `evidence/verrerie-compensation.jpg`.
 - Défaut trouvé et corrigé au rendu : point jaune du manifeste inversé en bleu quand il vit dans l'élément inversé.
-- Contre-exemple conservé : flûte réduite à sa jambe, non reconnaissable (P12).
+- 19/10 : spécimen refait à une silhouette par écran (bouteille, verre à pied, flûte, nonic) ; surfaces mesurées 14 à 29 % ; 0 pixel bleuté. La nonic à 700 px couvrait 61 % : ramenée à 480 px, borne d'échelle ajustée pour elle.
 
 ## Vérifications restantes
 
