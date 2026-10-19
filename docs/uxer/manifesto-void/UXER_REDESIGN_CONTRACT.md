@@ -321,11 +321,16 @@ une réserve `--void`, si bien que l'anneau jaune reste à 9,2 : 1 partout.
 
 - **Nombre** : **une seule silhouette par écran**, jamais deux (décision du propriétaire, 19/10/2026).
   Un seul objet garde le vide dominant et donne une seule lecture : un écran, un verre.
-- **Surface** : 12 % à 35 % du premier écran mobile (390 × 844). En dessous, l'effet ne
-  se voit pas ; au-dessus, le vide cesse de dominer.
-- **Échelle** : la silhouette mesure au moins 80 % de la hauteur du premier écran
-  (bouteille, verre à pied, flûte) et au moins 55 % pour la nonic, trapue, qui dépasserait
-  sinon la borne de surface. Elle sort d'au moins un bord. Monumentale, jamais vignette.
+- **Surface** : au plus 35 % du premier écran mobile (390 × 844), sinon le vide cesse de
+  dominer. Pas de minimum : l'échelle commune prime, et une nonic à l'échelle couvre
+  moins qu'une bouteille. Mesuré sur spécimen : 14 à 24 %.
+- **Échelle commune** (décision du propriétaire, 19/10/2026) : toute la verrerie est à la
+  **même échelle**, dans ses proportions réelles. La bouteille de vin (30 cm) fait la
+  hauteur du premier écran ; un verre à pied (21 cm) en fait donc 70 %, une flûte (23 cm)
+  77 %, une pinte nonic (15,5 cm) 52 %. Une silhouette n'est jamais agrandie ni réduite
+  pour remplir un vide ou tenir une borne : on change sa position ou son angle, jamais
+  sa taille. Le rognage par le bord de l'écran ne change pas l'échelle. Dimensions de
+  référence : design system §10.2.
 - **Angle** : de −35° à +35° (exception : bouteille couchée des erreurs). Un bord qui
   traverse une ligne de texte fait au moins 15° avec la ligne de base : un bord presque
   horizontal couperait chaque lettre en deux moitiés.
@@ -372,7 +377,7 @@ compensation reste `VISUAL_UNVERIFIED`.
 | V11 | Contraste invariant (P10) | capture avec / sans Verrerie : diff hors silhouettes = 0 ; sous silhouette, pixels pleins des glyphes = `--void` |
 | V12 | Aucune teinte inversée (P9) | recherche de pixels hors palette (bleu, violet, bleu-vert) sur toutes les captures = 0 |
 | V13 | Focus intact sur silhouette | navigation clavier sur l'accueil : anneau jaune sur réserve noire à chaque arrêt |
-| V14 | Une silhouette par écran, reconnaissance (P12) et bornes (§17.5) | captures 320, 390, 768, 1440 inspectées ; surface couverte mesurée |
+| V14 | Une silhouette par écran, échelle commune, reconnaissance (P12) et bornes (§17.5) | captures 320, 390, 768, 1440 inspectées ; surface couverte mesurée |
 | V15 | Compensation optique | mesure d'encre (écart ≤ ±3 % à densité 3, ≤ ±5 % à densité 1) puis test à choix forcé §17.7 |
 | V16 | Coût | Verrerie en SVG inline ≤ 2 ko par écran ; aucune recomposition au défilement mesurée (`Performance` : pas de *paint* répété sur les calques inversés) |
 

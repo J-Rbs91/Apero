@@ -16,6 +16,8 @@
 - Défaut trouvé et corrigé au rendu : point jaune du manifeste inversé en bleu quand il vit dans l'élément inversé.
 - 19/10 : spécimen refait à une silhouette par écran (bouteille, verre à pied, flûte, nonic) ; surfaces mesurées 14 à 29 % ; 0 pixel bleuté. La nonic à 700 px couvrait 61 % : ramenée à 480 px, borne d'échelle ajustée pour elle.
 
+- 19/10 : silhouettes redessinées en mm réels, une seule échelle (2,81 px/mm à 844 px) : bouteille 844, flûte 647, verre 591, nonic 436 px ; surfaces 14 à 24 % ; 0 pixel bleuté.
+
 ## Vérifications restantes
 
 - Test à choix forcé de la compensation (contrat §17.7), humain.

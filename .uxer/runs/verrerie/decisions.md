@@ -10,3 +10,4 @@
 | 2026-10-18 | Verrerie absente des écrans de tâche | Fréquence d'usage, décision UXER 20 | oui, écran par écran |
 | 2026-10-18 | Compensation optique par la graisse (+30), contour 0,05 px pour la mono et les bascules d'état | Taille et mise en page inchangées | oui, valeurs à calibrer |
 | 2026-10-19 | Une seule silhouette par écran | Demande du propriétaire : un objet, une lecture, le vide reste dominant | oui, sur demande du propriétaire |
+| 2026-10-19 | Échelle commune en proportions réelles ; bouteille = hauteur de l'écran | Demande du propriétaire : tout à l'échelle | oui, sur demande du propriétaire |

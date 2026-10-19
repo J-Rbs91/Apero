@@ -278,12 +278,18 @@ Présentation pure, `aria-hidden`, sans logique métier. Props : `composition`
 (identifiant public d'un apéro ou d'une tablée). Rendu : un `<svg>` inline par silhouette,
 `fill: var(--silhouette)`, aucun contour, `shape-rendering: geometricPrecision`.
 
-| Silhouette | Dessin (géométrique : segments et arcs, sans détail) | Partie caractéristique (P12) |
-|---|---|---|
-| Bouteille de vin | corps droit, épaule en arc, col étroit, bague | col et goulot |
-| Verre à pied | coupe en arc, jambe fine, pied plat | jambe et pied |
-| Flûte | coupe haute et étroite, jambe, pied | coupe étroite |
-| Pinte nonic | fût conique, renflement sous le buvant | renflement |
+| Silhouette | Dessin (géométrique : segments et arcs, sans détail) | Dimensions réelles (h × l) | Hauteur à l'échelle | Partie caractéristique (P12) |
+|---|---|---|---|---|
+| Bouteille de vin 75 cl | corps droit, épaule en arc, col étroit, bague | 300 × 75 mm | 100 % | col et goulot |
+| Verre à pied | coupe en arc, jambe fine, pied plat | 210 × 85 mm (pied 75) | 70 % | jambe et pied |
+| Flûte | coupe haute et étroite, jambe, pied | 230 × 60 mm (pied 70) | 77 % | coupe étroite |
+| Pinte nonic | fût conique, renflement sous le buvant | 155 × 90 mm | 52 % | renflement |
+
+**Échelle unique.** Les tracés sont dessinés en millimètres réels (`viewBox` en mm) et
+rendus avec un seul facteur : `--verrerie-mm: calc(100svh / 300)` (bouteille = hauteur du
+premier écran) ; la hauteur d'une silhouette vaut `calc(<hauteur en mm> * var(--verrerie-mm))`.
+Sur bureau, la même formule s'applique à la hauteur de la fenêtre. Aucune silhouette ne
+porte de taille propre : le tirage choisit l'objet, l'angle et l'ancre, jamais la taille.
 
 Dessins originaux, tracés dans `specimens/verrerie.html` (≈ 150 octets de tracé chacun).
 
