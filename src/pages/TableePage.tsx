@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { VERRERIE_ECRANS } from "../components/field/verrerieEcrans";
+import { composerVerrerie } from "../components/field/Verrerie";
 import { useLocation, useParams } from "react-router";
 import { AppLink } from "../components/AppLink";
 import { useAppNavigation } from "../routes/useAppNavigation";
@@ -170,6 +172,7 @@ export function TableePage() {
     return (
       <MobilePage
         className="agenda-mobile"
+        verrerie={VERRERIE_ECRANS.erreur}
         header={<MobileHeader eyebrow="Groupe" />}
         hero={<h1 className="h1 h1--sm">Groupe indisponible</h1>}
       >
@@ -210,6 +213,7 @@ export function TableePage() {
   return (
     <MobilePage
       className="agenda-mobile"
+      verrerie={composerVerrerie(tableeId ?? tablee.name)}
       header={<MobileHeader eyebrow="Groupe" />}
       hero={
         <div className="page-hero">

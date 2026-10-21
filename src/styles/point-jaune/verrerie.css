@@ -75,3 +75,98 @@
 .has-verrerie .facade__hero .h1 {
   animation: none;
 }
+
+/* --- Pages : la silhouette part de l'en-tête et passe derrière le contenu -- */
+
+/* L'écran devient le contexte d'empilement de l'inversion : son fond est peint
+   d'abord, la silhouette ensuite, l'en-tête et le contenu enfin. */
+.screen.has-verrerie {
+  position: relative;
+  isolation: isolate;
+}
+
+/* La façade ne doit pas isoler l'en-tête de la silhouette ; le menu et le
+   panneau restent au-dessus par leur propre positionnement fixe. */
+.has-verrerie .facade {
+  z-index: auto;
+}
+
+/* Placée juste après la rangée de navigation : elle ne passe jamais dessous. */
+.verrerie--page {
+  left: 0;
+  right: 0;
+  height: 100svh;
+}
+
+.verrerie--page svg {
+  position: absolute;
+  top: var(--s-6);
+  left: 50%;
+  transform: translateX(-50%) rotate(var(--verrerie-angle, 0deg));
+  transform-origin: 50% 0;
+}
+
+/* Verre retourné : le pied passe en haut, sans sortir de la couche. */
+.verrerie--page[data-retourne] svg {
+  transform: translateX(-50%) translateY(100%) rotate(var(--verrerie-angle, 180deg));
+}
+
+.verrerie--page[data-ancre="gauche"] svg {
+  left: 22%;
+}
+
+.verrerie--page[data-ancre="droite"] svg {
+  left: 74%;
+}
+
+/* L'en-tête de l'écran : texte neutre en encre inversée (§10.4). */
+.has-verrerie .facade__hero :is(.h1--sm, .eyebrow, .meta, .lede, .factline, .signature, .tag, .ghost-link, .button--ghost) {
+  --text: var(--inv-text);
+  --text-2: var(--inv-text-2);
+  --text-3: var(--inv-text-3);
+  --control-border: var(--inv-control);
+  --line: var(--inv-line);
+  --hover: var(--inv-hover);
+  mix-blend-mode: difference;
+}
+
+.has-verrerie .facade__hero :is(.ghost-link, .button--ghost):focus-visible {
+  --text: var(--ivory);
+  background: var(--bg);
+  mix-blend-mode: normal;
+}
+
+/* La tâche ne passe pas sur la silhouette (P11) : le contenu est une seule
+   bande opaque. Le verre passe derrière elle d'un bloc et réapparaît dessous ;
+   découper chaque bloc le hacherait en morceaux méconnaissables (P12). */
+.has-verrerie .page__body {
+  background: var(--bg);
+}
+
+/* Le contenu entre sans fondu : un bloc à moitié transparent laisserait voir
+   la silhouette en gris pendant l'entrée. Le glissement reste. */
+.has-verrerie .page__body {
+  animation-name: pj-rise-plein;
+}
+
+@keyframes pj-rise-plein {
+  from {
+    transform: translateY(12px);
+  }
+}
+
+/* Bureau : le titre occupe la moitié gauche ; les ancrages s'en rapprochent
+   pour que la silhouette le traverse toujours. */
+@media (min-width: 1024px) {
+  .verrerie--page[data-ancre="gauche"] svg {
+    left: 12%;
+  }
+
+  .verrerie--page svg {
+    left: 26%;
+  }
+
+  .verrerie--page[data-ancre="droite"] svg {
+    left: 38%;
+  }
+}

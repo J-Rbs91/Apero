@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { VERRERIE_ECRANS } from "../components/field/verrerieEcrans";
 import { useLocation } from "react-router";
 import { useAppNavigation } from "../routes/useAppNavigation";
 import { LocationField } from "../components/LocationField";
@@ -389,6 +390,7 @@ export function CreateEventPage() {
   return (
     <MobilePage
       className="create-mobile"
+      verrerie={VERRERIE_ECRANS.creer}
       header={<MobileHeader eyebrow="Apéro" />}
       hero={
         <div className="page-hero">

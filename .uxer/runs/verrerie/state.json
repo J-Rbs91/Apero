@@ -10,7 +10,8 @@
   ],
   "completed_units": [
     "contract-amendment",
-    "accueil"
+    "accueil",
+    "ecrans"
   ],
   "last_safe_checkpoint": "2026-10-18T18:12:50+00:00",
   "session_name": "uxer-verrerie",
@@ -23,15 +24,18 @@
     "docs/uxer/manifesto-void/specimens/verrerie.html",
     "src/components/field/Verrerie.tsx",
     "src/styles/point-jaune/verrerie.css",
-    "src/pages/HomePage.tsx"
+    "src/pages/HomePage.tsx",
+    "src/components/MobilePage.tsx",
+    "src/components/field/verrerieEcrans.ts"
   ],
   "validations_passed": [
     "spécimen : inversion exacte au pixel, 0 teinte inversée",
     "compensation : écart d'encre ramené de −8,6/−1,8 % à −4,4/+2,5 %",
-    "accueil : unit 251/251, functional 71/71, nav 23/23, voix 0, rendus 320-1440 inspectés, 0 overflow, 0 teinte inversée"
+    "accueil : unit 251/251, functional 71/71, nav 23/23, voix 0, rendus 320-1440 inspectés, 0 overflow, 0 teinte inversée",
+    "tous écrans : unit 251/251, functional 71/71, nav 23/23, rendus 390/768/1440 inspectés"
   ],
   "validations_failed": [],
-  "next_action": "Étendre la Verrerie aux écrans §17.4 restants ; test à choix forcé de la compensation",
+  "next_action": "Test à choix forcé de la compensation optique ; revue du propriétaire",
   "blocking_issue": null,
   "pause_reason": null,
   "resume_required": false

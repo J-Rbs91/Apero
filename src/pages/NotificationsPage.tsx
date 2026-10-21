@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { VERRERIE_ECRANS } from "../components/field/verrerieEcrans";
 import { AppLink } from "../components/AppLink";
 import { useAppNavigation } from "../routes/useAppNavigation";
 import { MobileHeader } from "../components/MobileHeader";
@@ -67,6 +68,7 @@ export function NotificationsPage() {
   return (
     <MobilePage
       className="agenda-mobile"
+      verrerie={VERRERIE_ECRANS.notifications}
       header={<MobileHeader eyebrow="Notifications" />}
       hero={
         <div className="page-hero">

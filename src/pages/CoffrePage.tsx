@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { VERRERIE_ECRANS } from "../components/field/verrerieEcrans";
 import { MobileHeader } from "../components/MobileHeader";
 import { MobilePage } from "../components/MobilePage";
 import { Field } from "../components/ui";
@@ -143,6 +144,7 @@ export function CoffrePage() {
   return (
     <MobilePage
       className="agenda-mobile"
+      verrerie={VERRERIE_ECRANS.sauvegarde}
       header={<MobileHeader eyebrow="La Confrérie" />}
       hero={
         <div className="page-hero">

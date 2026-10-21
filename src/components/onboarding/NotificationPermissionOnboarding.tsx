@@ -1,4 +1,5 @@
 import { MobilePage } from "../MobilePage";
+import { VERRERIE_ECRANS } from "../field/verrerieEcrans";
 import { PointMark } from "../field/PointMark";
 
 // Écran d'onboarding : demande l'autorisation d'envoyer des notifications
@@ -21,6 +22,7 @@ export function NotificationPermissionOnboarding({
   return (
     <MobilePage
       className="onboarding-screen"
+      verrerie={VERRERIE_ECRANS.notificationsAccueil}
       header={
         <div className="brandpill">
           <PointMark /> La Confrérie

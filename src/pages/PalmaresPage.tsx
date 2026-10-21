@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { VERRERIE_ECRANS } from "../components/field/verrerieEcrans";
 import { BadgeMedal } from "../components/BadgeMedal";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
@@ -168,6 +169,7 @@ export function PalmaresPage() {
     return (
       <MobilePage
         className="palmares-mobile"
+        verrerie={VERRERIE_ECRANS.palmares}
         header={<MobileHeader eyebrow="La Confrérie" />}
         hero={hero}
       >
@@ -179,6 +181,7 @@ export function PalmaresPage() {
   return (
     <MobilePage
       className="palmares-mobile"
+      verrerie={VERRERIE_ECRANS.palmares}
       header={<MobileHeader eyebrow="La Confrérie" />}
       hero={hero}
     >

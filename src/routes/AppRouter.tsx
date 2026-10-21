@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { VERRERIE_ECRANS } from "../components/field/verrerieEcrans";
 import { HashRouter, Route, Routes } from "react-router";
 import { AppLink } from "../components/AppLink";
 import { RelaisDeNavigation } from "./useAppNavigation";
@@ -59,6 +60,7 @@ function NotFoundRoute() {
     <MobilePage
       header={<MobileHeader eyebrow="La Confrérie" />}
       hero={<h1 className="h1 h1--sm">Lien invalide</h1>}
+      verrerie={VERRERIE_ECRANS.erreur}
     >
       <section className="sheet">
         <p className="lede">Demander le lien complet à l’hôte.</p>

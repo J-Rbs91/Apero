@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { VERRERIE_ECRANS } from "../components/field/verrerieEcrans";
 import { AppLink } from "../components/AppLink";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { MobileHeader } from "../components/MobileHeader";
@@ -73,6 +74,7 @@ export function ComptesPage() {
     return (
       <MobilePage
         className="agenda-mobile"
+        verrerie={VERRERIE_ECRANS.bilan}
         header={<MobileHeader eyebrow="La Confrérie" />}
         hero={<h1 className="h1 h1--sm">Bilan {year}</h1>}
       >
@@ -84,6 +86,7 @@ export function ComptesPage() {
   return (
     <MobilePage
       className="agenda-mobile comptes-page"
+      verrerie={VERRERIE_ECRANS.bilan}
       header={<MobileHeader eyebrow="La Confrérie" />}
       hero={
         <div className="page-hero">

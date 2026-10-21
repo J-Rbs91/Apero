@@ -333,6 +333,14 @@ ancêtre de l'encre). Schéma général, pour les écrans suivants :
   `.h1` (déplacée sur ses enfants, §10.4).
 - La couche est rognée par `.screen` : aucun débordement horizontal (V5).
 
+**Pages (21/10/2026)** : `MobilePage` reçoit `verrerie` (objet, angle, ancrage). La
+couche est rendue dans `.facade`, juste après la rangée de navigation (elle ne passe
+jamais dessous) ; `.screen.has-verrerie` est le contexte d'empilement (`isolation`),
+`.facade` y perd son `z-index`, `.page__body` y est opaque et entre sans fondu
+(`pj-rise-plein`). Ancrages : 22 %, 50 %, 74 % de la largeur ; 12 %, 26 %, 38 % au-delà
+de 1024 px, pour croiser le titre. Verre retourné (angle > 90°) :
+`translateY(100%) rotate(angle)`, pied en haut, sans sortir de la couche.
+
 ### 10.4 Ce qui s'inverse, ce qui ne s'inverse pas
 
 | Classe d'élément | Exemples | Traitement sur `.has-verrerie` |

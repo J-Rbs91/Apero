@@ -7,6 +7,9 @@
 // les autres objets suivent leurs proportions (--verrerie-mm, §10.2).
 // Purement visuelle : aria-hidden, aucune donnée, une seule silhouette.
 
+import type { CSSProperties } from "react";
+import { fnv1a } from "../../utils/signalMath";
+
 export type VerrerieObjet = "bouteille" | "verre" | "flute" | "nonic";
 
 type Silhouette = {
@@ -47,17 +50,51 @@ export const VERRERIE: Record<VerrerieObjet, Silhouette> = {
   },
 };
 
+export type VerrerieAncre = "gauche" | "centre" | "droite";
+
+/** Composition d'un écran : l'objet, son angle, son ancrage. Jamais sa taille. */
+export type VerrerieComposition = {
+  objet: VerrerieObjet;
+  /** Inclinaison en degrés : de −35 à +35, ou de 145 à 215 pour un verre à
+   *  pied retourné, pied en haut, comme sur un porte-verres (contrat §17.5). */
+  angle: number;
+  ancre: VerrerieAncre;
+};
+
+const OBJETS: VerrerieObjet[] = ["bouteille", "verre", "flute", "nonic"];
+const ANCRES: VerrerieAncre[] = ["gauche", "centre", "droite"];
+
+// Un apéro ou un groupe tire sa verrerie de son identifiant public, comme sa
+// signature : même identifiant, même verre, sur tous les appareils.
+export function composerVerrerie(seed: string): VerrerieComposition {
+  const hash = fnv1a(seed);
+  return {
+    objet: OBJETS[hash % OBJETS.length],
+    angle: -35 + 5 * ((hash >>> 2) % 15),
+    ancre: ANCRES[(hash >>> 6) % ANCRES.length],
+  };
+}
+
 type VerrerieProps = {
   objet: VerrerieObjet;
   /** Composition propre à l'écran : position et angle, jamais la taille. */
   className?: string;
+  angle?: number;
+  ancre?: VerrerieAncre;
 };
 
-export function Verrerie({ objet, className }: VerrerieProps) {
+export function Verrerie({ objet, className, angle, ancre }: VerrerieProps) {
   const { hauteurMm, viewBox, trace } = VERRERIE[objet];
+  const style = angle == null ? undefined : ({ "--verrerie-angle": `${angle}deg` } as CSSProperties);
 
   return (
-    <div className={className ? `verrerie ${className}` : "verrerie"} aria-hidden="true">
+    <div
+      className={className ? `verrerie ${className}` : "verrerie"}
+      data-ancre={ancre}
+      data-retourne={angle != null && Math.abs(angle) > 90 ? "" : undefined}
+      style={style}
+      aria-hidden="true"
+    >
       <svg
         className={`verrerie__${objet}`}
         viewBox={viewBox}

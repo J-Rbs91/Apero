@@ -51,6 +51,9 @@ aucun pour `--ease-out` ; c'est ce qui justifie de réserver `--ease-in` aux sor
    l'isolerait et ferait disparaître le titre sur la silhouette pendant l'animation
    (design system §10.3). Sur l'accueil, le titre est donc posé, pas révélé : c'est
    l'écran le plus vu, la règle de fréquence va dans le même sens.
+   Sur les autres écrans à Verrerie, le contenu entre en glissant sans fondu
+   (`pj-rise-plein`) : un contenu à moitié transparent laisserait voir la silhouette en
+   gris pendant l'entrée.
 
 ## 4. Coûts mesurés (budget)
 

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { VERRERIE_ECRANS } from "../components/field/verrerieEcrans";
 import { useLocation } from "react-router";
 import { AppLink } from "../components/AppLink";
 import { useAppNavigation } from "../routes/useAppNavigation";
@@ -146,6 +147,7 @@ export function TableesPage() {
     return (
       <MobilePage
         className="agenda-mobile"
+        verrerie={VERRERIE_ECRANS.groupes}
         header={<MobileHeader eyebrow="La Confrérie" />}
         hero={<h1 className="h1 h1--sm">Groupes</h1>}
       >
@@ -162,6 +164,7 @@ export function TableesPage() {
   return (
     <MobilePage
       className="agenda-mobile"
+      verrerie={VERRERIE_ECRANS.groupes}
       header={<MobileHeader eyebrow="La Confrérie" />}
       hero={
         <div className="page-hero">

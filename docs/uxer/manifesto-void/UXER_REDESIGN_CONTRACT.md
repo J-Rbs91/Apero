@@ -312,7 +312,7 @@ une réserve `--void`, si bien que l'anneau jaune reste à 9,2 : 1 partout.
 | Apéro `/invite`, `/event` | **en-tête seulement** (nom de l'assemblée), arrêtée avant le verdict et le vote | tirée de `aperoId` |
 | Tablée | en-tête seulement | tirée de `tableeId` |
 | Rétrospective | oui | traverse un chiffre monumental |
-| Erreurs, lien cassé | oui, une silhouette | bouteille couchée (seule exception d'angle, ±80°), posée sous le texte : elle n'en traverse aucun |
+| Erreurs, lien cassé | oui, une silhouette | bouteille inclinée (révision du 21/10, §17.9) |
 | Organiser, vote, au programme, notifications, palmarès, tablées, sauvegarde | non sur mobile ; sur bureau, colonne d'expression de l'Editorial Split uniquement | fixe par écran |
 | Écran d'ouverture | non : `GlassField` y est déjà le verre | — |
 | Registre légal, modales, menu, feuilles, barre d'action | non | — |
@@ -381,18 +381,55 @@ compensation reste `VISUAL_UNVERIFIED`.
 | V15 | Compensation optique | mesure d'encre (écart ≤ ±3 % à densité 3, ≤ ±5 % à densité 1) puis test à choix forcé §17.7 |
 | V16 | Coût | Verrerie en SVG inline ≤ 2 ko par écran ; aucune recomposition au défilement mesurée (`Performance` : pas de *paint* répété sur les calques inversés) |
 
-### 17.9 État d'implémentation (19/10/2026)
+### 17.9 Extension à tous les écrans (21/10/2026, demande du propriétaire)
+
+Le propriétaire demande la Verrerie sur le reste des écrans. Les écrans de tâche en
+reçoivent donc une, et P11 change de mécanisme sans changer de but : **la silhouette ne
+passe jamais sous un contrôle**, parce que le contenu de l'écran est une **seule bande
+opaque**. Le verre part de l'en-tête, croise le titre, passe derrière le contenu et
+réapparaît dessous quand le contenu est court. Rendre chaque bloc opaque a été essayé et
+écarté : le verre était haché en morceaux méconnaissables (P12).
+
+| Écran | Verrerie |
+|---|---|
+| Accueil | bouteille du croquis (inchangé) |
+| Nouvel apéro | flûte retournée, au centre |
+| Apéro (invitation, page apéro) | tirée de l'identifiant public |
+| Groupe | tirée de l'identifiant public |
+| À venir | nonic |
+| Notifications | flûte |
+| Palmarès | flûte |
+| Bilan | bouteille |
+| Sauvegarde | verre à pied retourné |
+| Groupes | verre à pied |
+| Onboarding : nom, notifications | verre à pied, flûte |
+| Erreurs (lien invalide, apéro introuvable, passé, supprimé, groupe indisponible) | bouteille |
+| Écran d'ouverture, registre légal, chargements | aucune |
+
+Compositions : `src/components/field/verrerieEcrans.ts` ; tirage : `composerVerrerie`.
+
+**Verre retourné** (exception d'angle, de 145° à 215°) : sur un écran long, seul le haut
+du verre serait visible, et un haut de verre seul se lit comme un trapèze. Retourné, pied
+en haut comme sur un porte-verres, le pied et la jambe tombent dans l'en-tête et le verre
+se reconnaît. La bouteille couchée des erreurs est abandonnée au profit de la bouteille
+inclinée, qui croise le titre comme ailleurs.
+
+**Ce qui s'inverse dans un en-tête** : titre d'écran, légende, méta, chapô, ligne de faits,
+signature, étiquettes, liens et boutons au trait. Le bouton plein reste opaque.
+
+### 17.10 État d'implémentation (21/10/2026)
 
 | Périmètre | État |
 |---|---|
-| Accueil : bouteille, encre inversée du titre et du bouton au trait, point en réserve | implémenté |
+| Tous les écrans du tableau §17.9 | implémenté |
 | Compensation optique des contextes clairs (contour 0,05 px) | implémenté ; test à choix forcé à faire |
-| Onboarding, apéro, tablée, rétrospective, erreurs, bureau des écrans de tâche | à faire |
 
-Preuves : unitaires 251/251, fonctionnels 71/71, navigation 23/23, voix 0 écart ; rendus
-320, 390, 768, 1440 et mouvement réduit inspectés, 0 débordement, 0 erreur console,
-0 pixel de teinte inversée (`evidence/verrerie-app-*.jpg`). Non rendu : l'accueil avec un
-apéro en cours (bouton au trait sur la silhouette), couvert par la règle CSS seulement.
+Preuves : unitaires 254/254, fonctionnels 71/71, navigation 23/23, voix 0 écart ; rendus
+390, 768 et 1440 inspectés sur dix écrans, pages d'apéro inspectées sur les captures des
+tests fonctionnels ; aucun débordement, aucune erreur console
+(`evidence/verrerie-ecrans-*.jpg`, `evidence/verrerie-apero-390.jpg`). Défaut résiduel
+connu : à 1440 px, sur « À venir » vide, le pied de la nonic dépasse de 2 px sous le
+contenu.
 
 Checkpoint : **CONTRACT_AMENDED — VERRERIE**.
 

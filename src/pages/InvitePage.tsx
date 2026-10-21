@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { VERRERIE_ECRANS } from "../components/field/verrerieEcrans";
+import { composerVerrerie } from "../components/field/Verrerie";
 import { useParams } from "react-router";
 import { AppLink } from "../components/AppLink";
 import { useAppNavigation } from "../routes/useAppNavigation";
@@ -323,6 +325,7 @@ export function InvitePage() {
     return (
       <MobilePage
         className="event-mobile"
+        verrerie={VERRERIE_ECRANS.erreur}
         header={<MobileHeader eyebrow="Invitation" />}
         hero={<h1 className="h1 h1--sm">{heading}</h1>}
       >
@@ -543,6 +546,7 @@ export function InvitePage() {
   return (
     <MobilePage
       className="event-mobile invite-page"
+      verrerie={composerVerrerie(event.id)}
       header={<MobileHeader eyebrow={isOrganizer ? "Apéro" : "Invitation"} />}
       hero={heroBlock}
     >

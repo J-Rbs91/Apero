@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { VERRERIE_ECRANS } from "../field/verrerieEcrans";
 import { useModalDialog } from "../../hooks/useModalDialog";
 import { MobilePage } from "../MobilePage";
 import { PointMark } from "../field/PointMark";
@@ -45,6 +46,7 @@ export function ComptoirNameOnboarding({
   return (
     <MobilePage
       className="onboarding-screen"
+      verrerie={VERRERIE_ECRANS.nom}
       header={
         <div className="brandpill">
           <PointMark /> La Confrérie
