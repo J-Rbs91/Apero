@@ -1,3 +1,5 @@
+![LA CONFRÉRIE, bannière graphique reprenant la palette du site](.github/readme-hero.svg)
+
 # La Confrérie du Petit Jaune
 
 **App en ligne : [https://j-rbs91.github.io/Apero/](https://j-rbs91.github.io/Apero/)**
